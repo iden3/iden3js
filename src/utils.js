@@ -1,3 +1,5 @@
+const ethUtil = require('ethereumjs-util');
+
 /**
  * Create a hash from a Buffer (a byte)
  *
@@ -30,9 +32,25 @@ var hexToBytes = function(hex) {
   }
   return Buffer.from(hex, 'hex');
 };
+/**
+ * @param  {String} mHex
+ * @param  {String} signatureHex
+ * @param  {String} addressHex
+ * @returns {Boolean}
+ */
+var verifySignature = function(mHex, signatureHex, addressHex) {
+  let m = hexToBytes(mHex);
+  let r = signatureHex.slice(0, 66);
+  let s = '0x' + signatureHex.slice(66, 130);
+  let v = '0x' + signatureHex.slice(130, 132);
+  let pub = ethUtil.ecrecover(m, v, r, s);
+  let addr = '0x' + ethUtil.pubToAddress(pub).toString('hex');
+  return addr == addressHex;
+};
 
 module.exports = {
   hashBytes,
   bytesToHex,
-  hexToBytes
+  hexToBytes,
+  verifySignature
 };

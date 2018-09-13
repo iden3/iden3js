@@ -31,6 +31,9 @@ describe('claimDefault', function() {
 
 describe('authorizeKSignClaim', function() {
   let claim = new iden3.claim.AuthorizeKSignClaim('iden3.io', '0x101d2fa51f8259df207115af9eaa73f3f4e52e60', 'appToAuthName', 'authz', 1535208350, 1535208350);
+  it('claim.bytes().length', function() {
+    expect(claim.bytes().length).to.be.equal(168);
+  });
   it('bytes()', function() {
     let b = iden3.utils.bytesToHex(claim.bytes());
     expect(b).to.be.equal('0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074353f867ef725411de05e3d4b0a01c37cf7ad24bcc213141a05ed7726d7932a1f00000000101d2fa51f8259df207115af9eaa73f3f4e52e602077bb3f0400dd62421c97220536fd6ed2be29228e8db1315e8c6d7525f4bdf4dad9966a2e7371f0a24b1929ed765c0e7a3f2b4665a76a19d58173308bb34062000000005b816b9e000000005b816b9e');

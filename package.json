@@ -12,6 +12,7 @@
     "axios": "^0.18.0",
     "chai": "^4.1.2",
     "ethereumjs-util": "^5.2.0",
+    "ethereumjs-wallet": "^0.6.2",
     "ethjs-util": "^0.1.6",
     "keccak": "^1.4.0",
     "keythereum": "^1.0.4",
