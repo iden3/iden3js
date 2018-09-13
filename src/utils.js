@@ -32,14 +32,19 @@ var hexToBytes = function(hex) {
   }
   return Buffer.from(hex, 'hex');
 };
-
+/**
+ * @param  {String} mHex
+ * @param  {String} signatureHex
+ * @param  {String} addressHex
+ * @returns {Boolean}
+ */
 var verifySignature = function(mHex, signatureHex, addressHex) {
   let m = hexToBytes(mHex);
-  var r = signatureHex.slice(0, 66);
-  var s = '0x' + signatureHex.slice(66, 130);
-  var v = '0x' + signatureHex.slice(130, 132);
-  var pub = ethUtil.ecrecover(m, v, r, s);
-  var addr = '0x' + ethUtil.pubToAddress(pub).toString('hex');
+  let r = signatureHex.slice(0, 66);
+  let s = '0x' + signatureHex.slice(66, 130);
+  let v = '0x' + signatureHex.slice(130, 132);
+  let pub = ethUtil.ecrecover(m, v, r, s);
+  let addr = '0x' + ethUtil.pubToAddress(pub).toString('hex');
   return addr == addressHex;
 };
 

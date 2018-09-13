@@ -36,6 +36,7 @@ var uint64ToEthBytes = function(u) { // compatible with Uint64ToEthBytes() go-id
 var ethBytesToUint64 = function(b) { // compatible with EthBytesToUint64() go-iden3 version
   return b.readUIntBE(0, 8);
 }
+
 /**
  * @param  {String} namespaceStr
  * @param  {String} typeStr
@@ -104,6 +105,7 @@ var parseClaimDefaultBytes = function(b) {
   };
   return c;
 }
+
 /**
  * @param  {String} namespaceStr
  * @param  {String} keyToAuthorize

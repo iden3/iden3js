@@ -1,7 +1,14 @@
 const ethWallet = require('ethereumjs-wallet');
 const ethUtil = require('ethereumjs-util');
 const utils = require('./utils');
-
+/**
+ * @param  {Buffer} msg
+ * @param  {Buffer} msgHash
+ * @param  {Buffer} v
+ * @param  {Buffer} r
+ * @param  {Buffer} s
+ * @returns {Object}
+ */
 function concatSignature(msg, msgHash, v, r, s) {
   var serialized = Buffer.from("");
   serialized = Buffer.concat([serialized, r]);
@@ -15,10 +22,12 @@ function concatSignature(msg, msgHash, v, r, s) {
     s: ethUtil.bufferToHex(s),
     signature: ethUtil.bufferToHex(serialized)
   };
-  let signature = ethUtil.bufferToHex(serialized);
   return signedMsg;
 }
 
+/**
+ * @param  {String} privK
+ */
 module.exports = class KeyContainer {
   constructor(privK) {
     if (privK != undefined) {
