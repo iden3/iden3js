@@ -9,6 +9,7 @@ const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489a
 const testPrivK = Buffer.from(testPrivKHex.replace('0x', ''), 'hex');
 const idaddr = ethUtil.privateToAddress(testPrivK);
 const idaddrHex = iden3.utils.bytesToHex(idaddr);
+
 describe('getRelayRoot()', function() {
   it('getRelayRoot()', function() {
     return iden3.relay.getRelayRoot()
@@ -29,16 +30,21 @@ describe('getIDRoot()', function() {
 
 describe('postClaim()', function() {
   it('postClaim()', function() {
-    let id = new iden3.Id(web3httpURL, testPrivKHex);
-    let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('iden3.io', id.address, 'appToAuthName', 'authz', 1535208350, 1535208350);
-    let signatureObj = id.sign(authorizeKSignClaim.hex());
+    let kc = new iden3.KeyContainer(testPrivKHex);
+    let id = new iden3.Id(kc);
+    let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('iden3.io', id.kc.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350);
+    let signatureObj = id.kc.sign(authorizeKSignClaim.hex());
+
     let bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
       signatureHex: signatureObj.signature
     };
-    let verified = id.verify(authorizeKSignClaim.hex(), bytesSignedMsg.signatureHex, id.address);
+
+    let verified = iden3.utils.verifySignature(signatureObj.messageHash, bytesSignedMsg.signatureHex, id.kc.addressHex());
     expect(verified).to.be.equal(true);
-    return iden3.relay.postClaim(id.address, bytesSignedMsg)
+
+
+    return iden3.relay.postClaim(id.kc.addressHex(), bytesSignedMsg)
     .then(res => {
       console.log("res.data", res.data);
       expect(res.status).to.be.equal(200);
