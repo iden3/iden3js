@@ -130,38 +130,96 @@ let verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex)
 ### Relay http
 Connectors to interact with the relay API REST.
 
+#### Create Relay object
+```js
+const relay = new iden3.Relay('http://127.0.0.1:5000');
+```
+
 #### GetRelayRoot
 ```js
-iden3.relay.getRelayRoot()
-    .then(res => {
-        console.log('res.data', res.data);
-    });
+relay.getRelayRoot()
+  .then(res => {
+    console.log('res.data', res.data);
+  });
+```
+
+Response:
+```js
+{
+  contractRoot: '0x6e4659fedd8ff00b14e487d6d5f537646f07bde944d935d51bd9de807d6fc1c9',
+  root: '0x0000000000000000000000000000000000000000000000000000000000000000'
+}
 ```
 
 #### GetIDRoot
 ```js
-iden3.relay.getIDRoot(id.kc.addressHex())
-    .then(res => {
-        console.log('res.data', res.data);
-    });
+relay.getIDRoot(id.kc.addressHex())
+  .then(res => {
+    console.log('res.data', res.data);
+  });
+```
+Response:
+```js
+{
+  idRoot: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  idRootProof: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  root: '0x0000000000000000000000000000000000000000000000000000000000000000'
+}
 ```
 
 #### PostClaim
 ```js
-iden3.relay.postClaim(id.kc.addressHex(), bytesSignedMsg)
-    .then(res => {
-      console.log("res.data", res.data);
-    });
+relay.postClaim(id.kc.addressHex(), bytesSignedMsg)
+  .then(res => {
+    console.log("res.data", res.data);
+  });
+```
+
+Response:
+```js
+{
+  claimProof: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  idRootProof: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  root: '0xfd89568c4dfe0b22be91c810421dcf02ac7ca42bc005461886a443fb6e0ead78'
+}
 ```
 
 #### GetClaimByHi
 ```js
-iden3.relay.getClaimByHi(id.kc.addressHex(), hi)
-    .then(res => {
-      console.log('res.data', res.data);
-    });
+relay.getClaimByHi(id.kc.addressHex(), hi)
+  .then(res => {
+    console.log('res.data', res.data);
+  });
 ```
-
+Response:
+```js
+{
+  claimProof: {
+    Leaf: '0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074353f867ef725411de05e3d4b0a01c37cf7ad24bcc213141a05ed7726d7932a1f00000000bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f2077bb3f0400dd62421c97220536fd6ed2be29228e8db1315e8c6d7525f4bdf4dad9966a2e7371f0a24b1929ed765c0e7a3f2b4665a76a19d58173308bb34062000000005b816b9e000000005b816b9e',
+    Hi: '0x438a26007910a723fedf030efd08fed2d374634eb8866ce595c139ea341daa43',
+    Proof: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    Root: '0xd1d3ebd84f46ec73767a2fe89930f33eef96ddf18c35e03faf03a98c8e6bf207'
+  },
+  setRootClaimProof: {
+    Leaf: '0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc6b6858214fe963e0e00000000bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9fd1d3ebd84f46ec73767a2fe89930f33eef96ddf18c35e03faf03a98c8e6bf207',
+    Hi: '0xbadb12c663dc83678de0709619fb8c67f939b7a2c5c658a6305fa4841e62e392',
+    Proof: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    Root: '0xfd89568c4dfe0b22be91c810421dcf02ac7ca42bc005461886a443fb6e0ead78'
+  },
+  claimNonRevocationProof: {
+    Leaf: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    Hi: '0x1d4221032dae2392d162cf09030f5ad9fb135380a49bb1e8caf549aaea42b53f',
+    Proof: '0x0000000000000000000000000000000000000000000000000000000000000004ce587b2d039c876de24e8b7fbdeb4cf6b84d542a60cdef47cf0ab29c631fba26',
+    Root: '0xd1d3ebd84f46ec73767a2fe89930f33eef96ddf18c35e03faf03a98c8e6bf207'
+  },
+  setRootClaimNonRevocationProof: {
+    Leaf: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    Hi: '0x28f5ee91e756ec1a3d1ea9ca2a68b5dde6ded3ea98effeadcefbff9a352aa434',
+    Proof: '0x0000000000000000000000000000000000000000000000000000000000000002b8193081f59feef7baab60cd827267371b2e6495cd2efab189370e0e2ea5819c',
+    Root: '0xfd89568c4dfe0b22be91c810421dcf02ac7ca42bc005461886a443fb6e0ead78'
+  }
+}
+```
 
 ## Tests
 To run all tests, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.

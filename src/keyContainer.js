@@ -28,7 +28,7 @@ function concatSignature(msg, msgHash, v, r, s) {
 /**
  * @param  {String} privK
  */
-module.exports = class KeyContainer {
+class KeyContainer {
   constructor(privK) {
     if (privK != undefined) {
       // import privK
@@ -52,3 +52,5 @@ module.exports = class KeyContainer {
     return utils.bytesToHex(this.address());
   }
 }
+
+module.exports = KeyContainer;

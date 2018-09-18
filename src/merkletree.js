@@ -48,13 +48,17 @@ var checkProof = function(rootHex, proofHex, hiHex, htHex, numLevels) {
     } else {
       sibling = EmptyNodeValue;
     }
+    let node = {};
     if (path[numLevels - level - 2]) {
       let n = [sibling, nodeHash];
-      let node = Buffer.concat(n);
-      nodeHash = utils.hashBytes(node);
+      node = Buffer.concat(n);
     } else {
       let n = [nodeHash, sibling];
-      let node = Buffer.concat(n);
+      node = Buffer.concat(n);
+    }
+    if ((Buffer.compare(nodeHash, EmptyNodeValue) === 0) && (Buffer.compare(sibling, EmptyNodeValue) === 0)) {
+      nodeHash = EmptyNodeValue;
+    } else {
       nodeHash = utils.hashBytes(node);
     }
   }

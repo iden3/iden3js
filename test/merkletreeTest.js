@@ -25,3 +25,13 @@ describe('checkProof()', function() {
     expect(verified).to.be.equal(true);
   });
 });
+describe('checkProof of Empty Leaf', function() {
+  it('checkProof', function() {
+    let rootHex = '0x8f021d00c39dcd768974ddfe0d21f5d13f7215bea28db1f1cb29842b111332e7';
+    let mpHex = '0x0000000000000000000000000000000000000000000000000000000000000004bf8e980d2ed328ae97f65c30c25520aeb53ff837579e392ea1464934c7c1feb9';
+    let hiHex = '0xa69792a4cff51f40b7a1f7ae596c6ded4aba241646a47538898f17f2a8dff647';
+    let htHex = '0x0000000000000000000000000000000000000000000000000000000000000000';
+    let verified = iden3.merkletree.checkProof(rootHex, mpHex, hiHex, htHex, 140);
+    expect(verified).to.be.equal(true);
+  });
+});

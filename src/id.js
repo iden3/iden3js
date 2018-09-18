@@ -2,8 +2,9 @@ const Web3 = require('web3');
 /**
  * @param  {Object} kc
  */
-module.exports = class Id {
+class Id {
   constructor(kc) {
     this.kc = kc;
   }
 }
+module.exports = Id;
