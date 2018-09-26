@@ -6,6 +6,40 @@ Javascript client library of the iden3 system.
 npm install iden3
 ```
 
+## Basic example
+```js
+// new key container
+let kc = new iden3.KeyContainer('teststorage');
+
+// import key into the key container
+let keyId = kc.importKey('x'); // keyId is the address that is used to identify the key
+
+// generate new keys
+let keyRecover = kc.generateKey();
+let keyRevoke = kc.generateKey();
+let keyOp = kc.generateKey();
+
+// create a new relay object
+const relay = new iden3.Relay('http://127.0.0.1:5000');
+
+// create a new id object
+let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
+
+// generate new key that will be the one authorized by the other key
+let keyToAuth = kc.generateKey();
+
+// create new ClaimDefault, sign it and send it to the Relay
+id.ClaimDefault(kc, key0id, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+  //
+});
+
+let unixtime = Math.round(+new Date()/1000);
+// create new AuthorizeKSignClaim, sign it, and send it to the Relay
+id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
+  //
+});
+```
+
 ## Usage
 
 ### Import
@@ -15,32 +49,47 @@ const iden3 = require('iden3');
 
 ### KeyContainer
 ```js
-// without privK
-let kc = new iden3.KeyContainer();
+// new key container
+let kc = new iden3.KeyContainer('teststorage');
 
-// with privK
-const privKey = 'x';
-let kc = new iden3.KeyContainer(privK);
+// import key
+let key0id = kc.importKey('x');
+// key0id is the address of the imported key, will be used as key identifier
+
+// generate key
+let key1id = kc.generateKey();
+// key1id is the address of the generated key, will be used as key identifier
+
+// sign using key0id
+let signature = kc.sign(key0id, 'test');
 ```
 
 ### Id
 ```js
+// new key container
 let kc = new iden3.KeyContainer();
-let id = new iden3.Id(kc);
+let key0id = kc.generateKey();
+// new relay
+const relay = new iden3.Relay('http://127.0.0.1:5000');
+// create key
+let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
+```
 
-// sign
-let signatureObj = id.kc.sign('test');
-/*
-signatureObj:
-{
-  message: '0x74657374',
-  messageHash: '0x4a5c5d454721bbbb25540c3317521e71c373ae36458f960d2ad46ef088110e95',
-  v: '0x1c',
-  r: '0x5413b44384531e9e92bdd80ff21cea7449441dcfff6f4ed0f90864583e3fcade',
-  s: '0x3d5c8857672b473f71d09355e034dba11bb2ca4aa73c55c534293fdca6894104',
-  signature: '0x5413b44384531e9e92bdd80ff21cea7449441dcfff6f4ed0f90864583e3fcade3d5c8857672b473f71d09355e034dba11bb2ca4aa73c55c534293fdca68941041c'
-}
-*/
+#### id.ClaimDefault
+```js
+// perform a new ClaimDefault, sign it, and post it to the Relay
+id.ClaimDefault(kc, key0id, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+  //
+});
+```
+
+#### id.AuthorizeKSignClaim
+```js
+// perform a new AuthorizeKSignClaim, sign it, and post it to the Relay
+let keyToAuth = kc.generateKey();
+id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+  //
+});
 ```
 
 ### Claims
@@ -54,12 +103,14 @@ claim:
 {
   baseIndex: {
     namespace: < Buffer 3 c fc 3 a 1 e db f6 91 31 6 f ec 9 b 75 97 0 f bf b2 b0 e8 d8 ed fc 6 e c7 62 8 d b7 7 c 49 69 40 30 74 > ,
-    type: < Buffer cf ee 7 c 08 a9 8 f 4 b 56 5 d 12 4 c 7 e 4 e 28 ac c5 2 e 1 b c7 80 e3 88 7 d b0 a0 2 a 7 d 2 d 5 b c6 67 28 > ,
-    version: < Buffer 00 00 00 00 >
+    type: < Buffer cf ee 7 c 08 a9 8 f 4 b 56 5 d 12 4 c 7 e 4 e 28 ac c5 2 e 1 b c7 80 e3 88 7 d b0 > ,
+    indexLength: 66,
+    version: 0
   },
   extraIndex: {
     data: < Buffer 63 31 >
-  }
+  },
+  data: < Buffer >
 }
 */
 // methods of the ClaimDefault
@@ -83,8 +134,9 @@ authorizeKSignClaim:
 {
   baseIndex: {
     namespace: < Buffer 3 c fc 3 a 1 e db f6 91 31 6 f ec 9 b 75 97 0 f bf b2 b0 e8 d8 ed fc 6 e c7 62 8 d b7 7 c 49 69 40 30 74 > ,
-    type: < Buffer 35 3 f 86 7 e f7 25 41 1 d e0 5 e 3 d 4 b 0 a 01 c3 7 c f7 ad 24 bc c2 13 14 1 a 05 ed 77 26 d7 93 2 a 1 f > ,
-    version: < Buffer 00 00 00 00 >
+    type: < Buffer 35 3 f 86 7 e f7 25 41 1 d e0 5 e 3 d 4 b 0 a 01 c3 7 c f7 ad 24 bc c2 13 14 1 a > ,
+    indexLength: 84,
+    version: 0
   },
   extraIndex: {
     keyToAuthorize: '0x101d2fa51f8259df207115af9eaa73f3f4e52e60'
@@ -135,7 +187,7 @@ Connectors to interact with the relay API REST.
 const relay = new iden3.Relay('http://127.0.0.1:5000');
 ```
 
-#### GetRelayRoot
+#### relay.getRelayRoot
 ```js
 relay.getRelayRoot()
   .then(res => {
@@ -151,7 +203,7 @@ Response:
 }
 ```
 
-#### GetIDRoot
+#### relay.getIDRoot
 ```js
 relay.getIDRoot(id.kc.addressHex())
   .then(res => {
@@ -167,9 +219,28 @@ Response:
 }
 ```
 
-#### PostClaim
+#### relay.ClaimDefault
+Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.postClaim(id.kc.addressHex(), bytesSignedMsg)
+relay.ClaimDefault(id.kc, 'iden3.io', 'default', 'data of the claim').then(res => {
+  // console.log("res.data", res.data);
+  expect(res.status).to.be.equal(200);
+});
+```
+
+#### relay.AuthorizeKSignClaim
+Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
+```js
+relay.AuthorizeKSignClaim(id.kc, 'iden3.io', kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+  // console.log("res.data", res.data);
+  expect(res.status).to.be.equal(200);
+});
+```
+
+#### relay.postClaim
+Sends to the Relay a signed Claim.
+```js
+relay.postClaim(idaddr, bytesSignedMsg)
   .then(res => {
     console.log("res.data", res.data);
   });
@@ -178,15 +249,15 @@ relay.postClaim(id.kc.addressHex(), bytesSignedMsg)
 Response:
 ```js
 {
-  claimProof: '0x0000000000000000000000000000000000000000000000000000000000000000',
-  idRootProof: '0x0000000000000000000000000000000000000000000000000000000000000000',
-  root: '0xfd89568c4dfe0b22be91c810421dcf02ac7ca42bc005461886a443fb6e0ead78'
+  claimProof: '0x0000000000000000000000000000000000000000000000000000000000000081dcc5d3d840663fc2e49825faaa9a48e215bb9a61ca566e55311567ad77374d53c50cd586a354cfe618bead4d3a65b1d8e391c74c9166b90ae0e6cb7d84ff277d',
+  idRootProof: '0x00000000000000000000000000000000000000000000000000000000000000129df0ca90b13d691cd747e040e527d906415117d8554eaf522637eb6733e2b304b8193081f59feef7baab60cd827267371b2e6495cd2efab189370e0e2ea5819c',
+  root: '0xca1c44c4996412f43730d8306ce9b1a9dbf2d94d6d44d239385c6b5decd5c23d'
 }
 ```
 
-#### GetClaimByHi
+#### relay.getClaimByHi
 ```js
-relay.getClaimByHi(id.kc.addressHex(), hi)
+relay.getClaimByHi(idaddr, hi)
   .then(res => {
     console.log('res.data', res.data);
   });

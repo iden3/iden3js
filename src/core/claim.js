@@ -44,12 +44,15 @@ var ethBytesToUint64 = function(b) { // compatible with EthBytesToUint64() go-id
  * @returns  {Object} claim
  */
 class ClaimDefault {
-  constructor(namespaceStr, typeStr, data) {
+  constructor(namespaceStr, typeStr, extraIndexData, data) {
     if (namespaceStr === undefined) {
       namespaceStr = '';
     }
     if (typeStr === undefined) {
       typeStr = '';
+    }
+    if (extraIndexData === undefined) {
+      extraIndexData = '';
     }
     if (data === undefined) {
       data = '';
@@ -57,12 +60,14 @@ class ClaimDefault {
     this.claim = {
       baseIndex: {
         namespace: utils.hashBytes(Buffer.from(namespaceStr)),
-        type: utils.hashBytes(Buffer.from(typeStr)),
-        version: Buffer.from([0x00, 0x00, 0x00, 0x00])
+        type: utils.hashBytes(Buffer.from(typeStr)).slice(0, 24),
+        indexLength: 64 + Buffer.from(extraIndexData).length,
+        version: 0
       },
       extraIndex: {
-        data: Buffer.from(data)
-      }
+        data: Buffer.from(extraIndexData)
+      },
+      data: Buffer.from(data)
     };
   }
   bytes() {
@@ -71,16 +76,21 @@ class ClaimDefault {
     b = Buffer.concat([b, this.claim.baseIndex.type]);
     b = Buffer.concat([
       b,
+      uint32ToEthBytes(this.claim.baseIndex.indexLength)
+    ]);
+    b = Buffer.concat([
+      b,
       uint32ToEthBytes(this.claim.baseIndex.version)
     ]);
     b = Buffer.concat([b, this.claim.extraIndex.data]);
+    b = Buffer.concat([b, this.claim.data]);
     return b;
   }
   hex() {
     return utils.bytesToHex(this.bytes());
   }
   hi() {
-    return utils.hashBytes(this.bytes());
+    return utils.hashBytes(this.bytes().slice(0, this.claim.baseIndex.indexLength));
   }
   ht() {
     return utils.hashBytes(this.bytes());
@@ -96,12 +106,14 @@ var parseClaimDefaultBytes = function(b) {
   c.claim = {
     baseIndex: {
       namespace: b.slice(0, 32),
-      type: b.slice(32, 64),
-      version: ethBytesToUint32(b.slice(64, 68))
+      type: b.slice(32, 56),
+      indexLength: ethBytesToUint32(b.slice(56, 60)),
+      version: ethBytesToUint32(b.slice(60, 64))
     },
     extraIndex: {
-      data: b.slice(68, b.length)
-    }
+      data: b.slice(64, ethBytesToUint32(b.slice(56, 60)))
+    },
+    data: b.slice(ethBytesToUint32(b.slice(56, 60)), b.length)
   };
   return c;
 }
@@ -138,8 +150,9 @@ class AuthorizeKSignClaim {
     this.claim = {
       baseIndex: {
         namespace: utils.hashBytes(Buffer.from(namespaceStr)),
-        type: utils.hashBytes(Buffer.from('authorizeksign')),
-        version: Buffer.from([0x00, 0x00, 0x00, 0x00])
+        type: utils.hashBytes(Buffer.from('authorizeksign')).slice(0, 24),
+        indexLength: 84,
+        version: 0
       },
       extraIndex: {
         keyToAuthorize: keyToAuthorize
@@ -154,8 +167,14 @@ class AuthorizeKSignClaim {
     var b = new Buffer([]);
     b = Buffer.concat([b, this.claim.baseIndex.namespace]);
     b = Buffer.concat([b, this.claim.baseIndex.type]);
-    let versionBuf = uint32ToEthBytes(this.claim.baseIndex.version);
-    b = Buffer.concat([b, versionBuf]);
+    b = Buffer.concat([
+      b,
+      uint32ToEthBytes(this.claim.baseIndex.indexLength)
+    ]);
+    b = Buffer.concat([
+      b,
+      uint32ToEthBytes(this.claim.baseIndex.version)
+    ]);
     b = Buffer.concat([
       b,
       utils.hexToBytes(this.claim.extraIndex.keyToAuthorize)
@@ -172,18 +191,7 @@ class AuthorizeKSignClaim {
     return utils.bytesToHex(this.bytes());
   }
   hi() {
-    var b = new Buffer([]);
-    b = Buffer.concat([b, this.claim.baseIndex.namespace]);
-    b = Buffer.concat([b, this.claim.baseIndex.type]);
-    b = Buffer.concat([
-      b,
-      uint32ToEthBytes(this.claim.baseIndex.version)
-    ]);
-    b = Buffer.concat([
-      b,
-      utils.hexToBytes(this.claim.extraIndex.keyToAuthorize)
-    ]);
-    return utils.hashBytes(b);
+    return utils.hashBytes(this.bytes().slice(0, this.claim.baseIndex.indexLength));
   }
   ht() {
     return utils.hashBytes(this.bytes());
@@ -195,22 +203,23 @@ class AuthorizeKSignClaim {
  * @returns {Object} claim
  */
 var parseAuthorizeKSignClaim = function(b) {
-  let validFromBytes = b.slice(152, 160);
+  let validFromBytes = b.slice(148, 156);
   let validFrom = ethBytesToUint64(validFromBytes);
-  let validUntilBytes = b.slice(160, 168);
+  let validUntilBytes = b.slice(156, 164);
   let validUntil = ethBytesToUint64(validUntilBytes);
   let c = new AuthorizeKSignClaim();
   c.claim = {
     baseIndex: {
       namespace: b.slice(0, 32),
-      type: b.slice(32, 64),
-      version: ethBytesToUint32(b.slice(64, 68))
+      type: b.slice(32, 56),
+      indexLength: ethBytesToUint32(b.slice(56, 60)),
+      version: ethBytesToUint32(b.slice(60, 64))
     },
     extraIndex: {
-      keyToAuthorize: utils.bytesToHex(b.slice(68, 88))
+      keyToAuthorize: utils.bytesToHex(b.slice(64, 84))
     },
-    application: b.slice(88, 120),
-    applicationAuthz: b.slice(120, 152),
+    application: b.slice(84, 116),
+    applicationAuthz: b.slice(116, 148),
     validFrom: validFrom,
     validUntil: validUntil
   };

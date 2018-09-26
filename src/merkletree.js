@@ -2,11 +2,21 @@ const utils = require('./utils');
 
 const EmptyNodeValue = new Buffer(32);
 
+/**
+ * @param  {Buffer} b
+ * @param  {Number} bit
+ * @returns {Boolean}
+ */
 var getBit = function(b, bit) {
   const v = b.readUInt8(b.length - Math.floor(bit / 8) - 1);
   return ((v >> (bit % 8)) & 1) > 0;
 }
 
+/**
+ * @param  {Number} numLevels
+ * @param  {Buffer} hi
+ * @returns {Array} array of booleans
+ */
 var getPath = function(numLevels, hi) {
   let path = [];
   for (var bitno = numLevels - 2; bitno >= 0; bitno--) {

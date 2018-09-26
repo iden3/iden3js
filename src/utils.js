@@ -32,6 +32,7 @@ var hexToBytes = function(hex) {
   }
   return Buffer.from(hex, 'hex');
 };
+
 /**
  * @param  {String} mHex
  * @param  {String} signatureHex
