@@ -10,8 +10,8 @@ const testPrivK = Buffer.from(testPrivKHex.replace('0x', ''), 'hex');
 const idaddr = ethUtil.privateToAddress(testPrivK);
 const idaddrHex = iden3.utils.bytesToHex(idaddr);
 
-const relay = new iden3.Relay('http://127.0.0.1:5000');
-// const relay = new iden3.Relay('http://142.93.107.198:5000');
+const relay = new iden3.Relay('http://127.0.0.1:8000');
+// const relay = new iden3.Relay('http://142.93.107.198:8000');
 
 describe('getRelayRoot()', function() {
   it('getRelayRoot()', function() {

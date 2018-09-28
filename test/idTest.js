@@ -8,7 +8,7 @@ let testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af0
 describe('new Id()', function() {
   let kc = new iden3.KeyContainer('teststorage');
   let key0id = kc.importKey(testPrivKHex);
-  const relay = new iden3.Relay('http://127.0.0.1:5000');
+  const relay = new iden3.Relay('http://127.0.0.1:8000');
   let id = new iden3.Id(key0id, key0id, key0id, relay, '');
   it('new Id without privK', function() {
     expect(id.keyRecover).to.be.equal(key0id);
@@ -22,7 +22,7 @@ describe('id.ClaimDefault()', function() {
   it('id.ClaimDefault()', function() {
     let kc = new iden3.KeyContainer('teststorage');
     let key0id = kc.importKey(testPrivKHex);
-    const relay = new iden3.Relay('http://127.0.0.1:5000');
+    const relay = new iden3.Relay('http://127.0.0.1:8000');
     let id = new iden3.Id(key0id, key0id, key0id, relay, '');
 
     // let key1 = kc.generateKey();
@@ -37,7 +37,7 @@ describe('id.AuthorizeKSignClaim()', function() {
   it('id.AuthorizeKSignClaim()', function() {
     let kc = new iden3.KeyContainer('teststorage');
     let key0id = kc.importKey(testPrivKHex);
-    const relay = new iden3.Relay('http://127.0.0.1:5000');
+    const relay = new iden3.Relay('http://127.0.0.1:8000');
     let id = new iden3.Id(key0id, key0id, key0id, relay, '');
 
     // let key1 = kc.generateKey();

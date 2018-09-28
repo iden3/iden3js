@@ -3,6 +3,7 @@ const merkletree = require('./merkletree');
 const Relay = require('./http/relay');
 const KeyContainer = require('./keyContainer');
 const Id = require('./id');
+const Auth = require('./auth/auth');
 const utils = require('./utils');
 
 module.exports = {
@@ -11,5 +12,6 @@ module.exports = {
   KeyContainer,
   Id,
   Relay,
+  Auth,
   utils
 };

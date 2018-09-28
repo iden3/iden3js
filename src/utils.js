@@ -34,6 +34,52 @@ var hexToBytes = function(hex) {
 };
 
 /**
+ * @param  {String} str
+ * @returns {String}
+ */
+var strToHex = function(str) {
+  var arr = [];
+  for (var i = 0, l = str.length; i < l; i++) {
+    var hex = Number(str.charCodeAt(i)).toString(16);
+    arr.push(hex);
+  }
+  return '0x' + arr.join('');
+}
+
+/**
+ * @param  {String} hexx
+ * @returns {String}
+ */
+var hexToStr = function(hexx) {
+  hexx = hexx.substring(2);
+  var hex = hexx.toString(); //force conversion
+  var str = '';
+  for (var i = 0; i < hex.length; i += 2)
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  return str;
+}
+
+/**
+ * @param  {Object} dataJson
+ * @returns {String}
+ */
+var jsonToQr = function(dataJson) {
+  let dataStr = JSON.stringify(dataJson);
+  let dataHex = strToHex(dataStr);
+  return dataHex;
+}
+
+/**
+ * @param  {String} dataHex
+ * @return {Object}
+ */
+var qrToJson = function(dataHex) {
+  let dataStr = hexToStr(dataHex); // remove the 0x
+  let data = JSON.parse(dataStr);
+  return data;
+}
+
+/**
  * @param  {String} mHex
  * @param  {String} signatureHex
  * @param  {String} addressHex
@@ -53,5 +99,9 @@ module.exports = {
   hashBytes,
   bytesToHex,
   hexToBytes,
+  strToHex,
+  hexToStr,
+  jsonToQr,
+  qrToJson,
   verifySignature
 };
