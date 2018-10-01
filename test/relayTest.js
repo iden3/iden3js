@@ -71,23 +71,23 @@ describe('getClaimByHi()', function() {
   it('getClaimByHi()', function() {
     return relay.getClaimByHi(key0id, hi).then(res => {
       // console.log('res.data', res.data);
-      let r = res.data;
+      let r = res.data.proofOfClaim;
       expect(res.status).to.be.equal(200);
-      expect(r.claimProof.Leaf).to.be.equal(iden3.utils.bytesToHex(authorizeKSignClaim.bytes()));
-      expect(r.claimProof.Proof).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001762e4952a1a6d1f5e771bb896469f9dd357c8c3e1e8f97c6ebb0fcbfd912db70');
-      expect(r.claimProof.Root).to.be.equal('0x4a8f06e5e06e585f091032f58d5363ea1e0a7b88a8f46b74b870a9b02544779c');
-      expect(r.setRootClaimProof.Leaf).to.be.equal('0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000001bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f4a8f06e5e06e585f091032f58d5363ea1e0a7b88a8f46b74b870a9b02544779c');
-      expect(r.setRootClaimProof.Proof).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001d97d44500f3a18b433881edc9edfb553704282ee8b91f3252d5fb994ebcd1a10');
-      expect(r.setRootClaimProof.Root).to.be.equal('0x645703140039d98916fc1f8c6e52d5e658e8d0d1812871e1d26a8de47d5b617a');
+      expect(r.ClaimProof.Leaf).to.be.equal(iden3.utils.bytesToHex(authorizeKSignClaim.bytes()));
+      expect(r.ClaimProof.Proof).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001762e4952a1a6d1f5e771bb896469f9dd357c8c3e1e8f97c6ebb0fcbfd912db70');
+      expect(r.ClaimProof.Root).to.be.equal('0x4a8f06e5e06e585f091032f58d5363ea1e0a7b88a8f46b74b870a9b02544779c');
+      expect(r.SetRootClaimProof.Leaf).to.be.equal('0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000001bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f4a8f06e5e06e585f091032f58d5363ea1e0a7b88a8f46b74b870a9b02544779c');
+      // expect(r.SetRootClaimProof.Proof).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001d97d44500f3a18b433881edc9edfb553704282ee8b91f3252d5fb994ebcd1a10'); // each time is different due previous tests, that add random data to the Merkle Tree
+      // expect(r.SetRootClaimProof.Root).to.be.equal('0x645703140039d98916fc1f8c6e52d5e658e8d0d1812871e1d26a8de47d5b617a');
 
       const EmptyNodeValue = new Buffer(32);
-      let verified = iden3.merkletree.checkProof(r.claimProof.Root, r.claimProof.Proof, r.claimProof.Hi, iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.claimProof.Leaf))), 140);
+      let verified = iden3.merkletree.checkProof(r.ClaimProof.Root, r.ClaimProof.Proof, r.ClaimProof.Hi, iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.ClaimProof.Leaf))), 140);
       expect(verified).to.be.equal(true);
-      verified = iden3.merkletree.checkProof(r.setRootClaimProof.Root, r.setRootClaimProof.Proof, r.setRootClaimProof.Hi, iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.setRootClaimProof.Leaf))), 140);
+      verified = iden3.merkletree.checkProof(r.SetRootClaimProof.Root, r.SetRootClaimProof.Proof, r.SetRootClaimProof.Hi, iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.SetRootClaimProof.Leaf))), 140);
       expect(verified).to.be.equal(true);
-      verified = iden3.merkletree.checkProof(r.claimNonRevocationProof.Root, r.claimNonRevocationProof.Proof, r.claimNonRevocationProof.Hi, iden3.utils.bytesToHex(EmptyNodeValue), 140);
+      verified = iden3.merkletree.checkProof(r.ClaimNonRevocationProof.Root, r.ClaimNonRevocationProof.Proof, r.ClaimNonRevocationProof.Hi, iden3.utils.bytesToHex(EmptyNodeValue), 140);
       expect(verified).to.be.equal(true);
-      verified = iden3.merkletree.checkProof(r.setRootClaimNonRevocationProof.Root, r.setRootClaimNonRevocationProof.Proof, r.setRootClaimNonRevocationProof.Hi, iden3.utils.bytesToHex(EmptyNodeValue), 140);
+      verified = iden3.merkletree.checkProof(r.SetRootClaimNonRevocationProof.Root, r.SetRootClaimNonRevocationProof.Proof, r.SetRootClaimNonRevocationProof.Hi, iden3.utils.bytesToHex(EmptyNodeValue), 140);
       expect(verified).to.be.equal(true);
     });
   });
