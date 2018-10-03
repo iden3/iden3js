@@ -4,7 +4,7 @@ const utils = require('../utils');
 
 function challenge() {
   let unixTime = Math.round((new Date()).getTime() / 1000);
-  let randStr = Math.random().toString(36).substring(7)
+  let randStr = Math.random().toString(36).substring(7);
   let challenge = 'uuid-' + unixTime + "-" + randStr;
   return challenge;
 }
@@ -34,7 +34,7 @@ class Auth {
     }
     this.send = function(data) {
       console.log("sending data", data);
-      this.ws.send(data)
+      this.ws.send(data);
     }
   }
 

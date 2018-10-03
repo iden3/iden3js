@@ -8,6 +8,9 @@ npm install iden3
 
 ## Basic example
 ```js
+// import iden3js
+const iden3 = require('iden3');
+
 // new key container
 let kc = new iden3.KeyContainer('teststorage');
 
@@ -30,14 +33,18 @@ let keyToAuth = kc.generateKey();
 
 // create new ClaimDefault, sign it and send it to the Relay
 id.ClaimDefault(kc, key0id, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
-  //
+  let proofOfClaim = res.data.proofOfClaim;
 });
 
 let unixtime = Math.round(+new Date()/1000);
 // create new AuthorizeKSignClaim, sign it, and send it to the Relay
 id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
-  //
+  let proofOfClaim = res.data.proofOfClaim;
 });
+
+// having a proofOfClaim, let's check it
+let verified = iden3.merkletree.checkProofOfClaim(proofOfClaim, 140);
+// verified == true
 ```
 
 ## Usage
@@ -162,6 +169,14 @@ let authorizeKSignClaimParsed = iden3.claim.parseAuthorizeKSignClaim(authorizeKS
 #### CheckProof
 ```js
 let verified = iden3.merkletree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
+console.log(verified); // true
+```
+
+#### CheckProofOfClaim
+This function checks the data structure of `proofOfClaim` and returns true if all the proofs are correct.
+Internally, it usees the `iden3.merkletree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
+```js
+let verified = iden3.merkletree.checkProofOfClaim(proofOfClaim, 140);
 console.log(verified); // true
 ```
 
@@ -297,6 +312,12 @@ To run all tests, needs to have a running [Relay](https://github.com/iden3/go-id
 
 ```
 npm test
+```
+
+## Browserify bundle
+To generate the browserify bundle:
+```
+browserify index.js --standalone iden3 > iden3js-bundle.js
 ```
 
 

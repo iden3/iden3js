@@ -74,6 +74,34 @@ var checkProof = function(rootHex, proofHex, hiHex, htHex, numLevels) {
   }
   return Buffer.compare(nodeHash, r) === 0;
 }
+var checkProofOfClaim = function(proofOfClaim, numLevels) {
+  let ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
+  let vClaimProof = checkProof(proofOfClaim.ClaimProof.Root,
+                        proofOfClaim.ClaimProof.Proof, proofOfClaim.ClaimProof.Hi,
+                        ht, numLevels);
+
+  ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
+  let vSetRootClaimProof = checkProof(proofOfClaim.SetRootClaimProof.Root,
+                        proofOfClaim.SetRootClaimProof.Proof, proofOfClaim.SetRootClaimProof.Hi,
+                        ht, numLevels);
+
+  ht = utils.bytesToHex(EmptyNodeValue);
+  let vClaimNonRevocationProof = checkProof(proofOfClaim.ClaimNonRevocationProof.Root,
+                        proofOfClaim.ClaimNonRevocationProof.Proof, proofOfClaim.ClaimNonRevocationProof.Hi,
+                        ht, numLevels);
+
+
+  let vSetRootClaimNonRevocationProof = checkProof(proofOfClaim.SetRootClaimNonRevocationProof.Root,
+                        proofOfClaim.SetRootClaimNonRevocationProof.Proof, proofOfClaim.SetRootClaimNonRevocationProof.Hi,
+                        ht, numLevels);
+
+  if(vClaimProof&&vSetRootClaimProof&&vClaimNonRevocationProof&&vSetRootClaimNonRevocationProof) {
+    return true;
+  }
+  return false;
+};
 module.exports = {
-  checkProof
+  EmptyNodeValue,
+  checkProof,
+  checkProofOfClaim
 }
