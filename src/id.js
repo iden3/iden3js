@@ -14,24 +14,27 @@ class Id {
     this.keyOp = keyOp;
     this.relay = relay;
     this.implementation = implementation;
+    // TODO send the data to Relay,and get the generated address of the counterfactual
+    this.address = keyOp; // tmp
   }
 
   /**
    * @param  {Object} kc
-   * @param  {String} keyid
+   * @param  {String} ksign
+   * @param  {Object} proofOfKSign
    * @param  {String} namespaceStr
    * @param  {String} typeStr
    * @param  {String} extraIndexData
    * @param  {String} data
    * @returns {Object}
    */
-  ClaimDefault(kc, keyid, namespaceStr, typeStr, extraIndexData, data) {
-    return this.relay.ClaimDefault(kc, keyid, namespaceStr, typeStr, extraIndexData, data);
+  ClaimDefault(kc, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data) {
+    return this.relay.ClaimDefault(kc, this.address, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data);
   }
 
   /**
    * @param  {Object} kc
-   * @param  {String} keyid
+   * @param  {String} ksign
    * @param  {String} namespaceStr
    * @param  {String} keyToAuthorize
    * @param  {String} applicationName
@@ -40,8 +43,8 @@ class Id {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  AuthorizeKSignClaim(kc, keyid, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    return this.relay.AuthorizeKSignClaim(kc, keyid, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
+  AuthorizeKSignClaim(kc, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
+    return this.relay.AuthorizeKSignClaim(kc, this.address, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
   }
 }
 module.exports = Id;

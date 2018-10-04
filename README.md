@@ -3,7 +3,7 @@ Javascript client library of the iden3 system.
 
 ## Install
 ```
-npm install iden3
+npm install --save iden3
 ```
 
 ## Basic example
@@ -29,18 +29,20 @@ const relay = new iden3.Relay('http://127.0.0.1:5000');
 let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
 
 // generate new key that will be the one authorized by the other key
-let keyToAuth = kc.generateKey();
-
-// create new ClaimDefault, sign it and send it to the Relay
-id.ClaimDefault(kc, key0id, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
-  let proofOfClaim = res.data.proofOfClaim;
-});
+let ksign = kc.generateKey();
 
 let unixtime = Math.round(+new Date()/1000);
 // create new AuthorizeKSignClaim, sign it, and send it to the Relay
-id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
+id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
+  proofOfKSign = res.data.proofOfClaim;
+});
+
+// create new ClaimDefault, sign it and send it to the Relay
+id.ClaimDefault(kc, ksign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
   let proofOfClaim = res.data.proofOfClaim;
 });
+
+
 
 // having a proofOfClaim, let's check it
 let verified = iden3.merkletree.checkProofOfClaim(proofOfClaim, 140);
@@ -82,14 +84,6 @@ const relay = new iden3.Relay('http://127.0.0.1:5000');
 let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
 ```
 
-#### id.ClaimDefault
-```js
-// perform a new ClaimDefault, sign it, and post it to the Relay
-id.ClaimDefault(kc, key0id, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
-  //
-});
-```
-
 #### id.AuthorizeKSignClaim
 ```js
 // perform a new AuthorizeKSignClaim, sign it, and post it to the Relay
@@ -98,6 +92,15 @@ id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'auth
   //
 });
 ```
+
+#### id.ClaimDefault
+```js
+// perform a new ClaimDefault, sign it, and post it to the Relay
+id.ClaimDefault(kc, ksign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+  //
+});
+```
+
 
 ### Claims
 
@@ -237,7 +240,7 @@ Response:
 #### relay.ClaimDefault
 Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.ClaimDefault(id.kc, 'iden3.io', 'default', 'data of the claim').then(res => {
+relay.ClaimDefault(id.kc, ksign, proofOfKSign, 'iden3.io', 'default', 'data of the claim').then(res => {
   // console.log("res.data", res.data);
   expect(res.status).to.be.equal(200);
 });
@@ -246,7 +249,7 @@ relay.ClaimDefault(id.kc, 'iden3.io', 'default', 'data of the claim').then(res =
 #### relay.AuthorizeKSignClaim
 Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.AuthorizeKSignClaim(id.kc, 'iden3.io', kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+relay.AuthorizeKSignClaim(id.kc, keyid, 'iden3.io', kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
   // console.log("res.data", res.data);
   expect(res.status).to.be.equal(200);
 });
@@ -261,14 +264,7 @@ relay.postClaim(idaddr, bytesSignedMsg)
   });
 ```
 
-Response:
-```js
-{
-  claimProof: '0x0000000000000000000000000000000000000000000000000000000000000081dcc5d3d840663fc2e49825faaa9a48e215bb9a61ca566e55311567ad77374d53c50cd586a354cfe618bead4d3a65b1d8e391c74c9166b90ae0e6cb7d84ff277d',
-  idRootProof: '0x00000000000000000000000000000000000000000000000000000000000000129df0ca90b13d691cd747e040e527d906415117d8554eaf522637eb6733e2b304b8193081f59feef7baab60cd827267371b2e6495cd2efab189370e0e2ea5819c',
-  root: '0xca1c44c4996412f43730d8306ce9b1a9dbf2d94d6d44d239385c6b5decd5c23d'
-}
-```
+The response is the `ProofOfClaim`, same as returned in relay.getClaimByHi().
 
 #### relay.getClaimByHi
 ```js
@@ -277,7 +273,7 @@ relay.getClaimByHi(idaddr, hi)
     console.log('res.data', res.data);
   });
 ```
-Response:
+Response, `ProofOfClaim`:
 ```js
 {
   claimProof: {

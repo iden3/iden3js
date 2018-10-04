@@ -18,32 +18,32 @@ describe('new Id()', function() {
   });
 });
 
-describe('id.ClaimDefault()', function() {
-  it('id.ClaimDefault()', function() {
+describe('id. AuthorizeKSignClaim() and ClaimDefault()', function() {
     let kc = new iden3.KeyContainer('teststorage');
     let key0id = kc.importKey(testPrivKHex);
     const relay = new iden3.Relay('http://127.0.0.1:8000');
     let id = new iden3.Id(key0id, key0id, key0id, relay, '');
 
-    // let key1 = kc.generateKey();
-    let key1 = key0id;
-    return id.ClaimDefault(kc, key0id, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
-      expect(res.status).to.be.equal(200);
+    let ksign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
+    // let ksign = key0id;
+    let proofOfKSign = {};
+    before(function() {
+      return id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', ksign, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+        proofOfKSign = res.data.proofOfClaim;
+        expect(res.status).to.be.equal(200);
+      });
     });
-  });
-});
 
-describe('id.AuthorizeKSignClaim()', function() {
-  it('id.AuthorizeKSignClaim()', function() {
-    let kc = new iden3.KeyContainer('teststorage');
-    let key0id = kc.importKey(testPrivKHex);
-    const relay = new iden3.Relay('http://127.0.0.1:8000');
-    let id = new iden3.Id(key0id, key0id, key0id, relay, '');
-
-    // let key1 = kc.generateKey();
-    let key1 = key0id;
-    return id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', key1, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
-      expect(res.status).to.be.equal(200);
+    it('id.AuthorizeKSignClaim()', function() {
+      expect(proofOfKSign).to.not.be.equal({});
     });
-  });
+
+
+    // use the ksign that have been authorized in the AuthorizeKSignClaim
+    // to sign a new ClaimDefault
+    it('id.ClaimDefault()', function() {
+      return id.ClaimDefault(kc, ksign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+        expect(res.status).to.be.equal(200);
+      });
+    });
 });

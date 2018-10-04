@@ -45,25 +45,30 @@ class Relay {
 
   /**
    * @param  {Object} kc
-   * @param  {String} keyid
+   * @param  {String} idaddr
+   * @param  {String} ksign
+   * @param  {Object} proofOfKSign
    * @param  {String} namespaceStr
    * @param  {String} typeStr
    * @param  {String} extraIndexData
    * @param  {String} data
    * @returns {Object}
    */
-  ClaimDefault(kc, keyid, namespaceStr, typeStr, extraIndexData, data) {
+  ClaimDefault(kc, idaddr, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data) {
     let claimDefault = new claim.ClaimDefault(namespaceStr, typeStr, extraIndexData, data);
-    let signatureObj = kc.sign(keyid, claimDefault.hex());
+    let signatureObj = kc.sign(ksign, claimDefault.hex());
     let bytesSignedMsg = {
       valueHex: claimDefault.hex(),
-      signatureHex: signatureObj.signature
+      signatureHex: signatureObj.signature,
+      ksign: ksign,
+      proofOfKSign: proofOfKSign
     };
-    return this.postClaim(keyid, bytesSignedMsg);
+    return this.postClaim(idaddr, bytesSignedMsg);
   }
 
   /**
    * @param  {Object} kc
+   * @param  {String} idaddr
    * @param  {String} keyid
    * @param  {String} namespaceStr
    * @param  {String} keyToAuthorize
@@ -73,14 +78,15 @@ class Relay {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  AuthorizeKSignClaim(kc, keyid, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
+  AuthorizeKSignClaim(kc, idaddr, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
     let authorizeKSignClaim = new claim.AuthorizeKSignClaim(namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
-    let signatureObj = kc.sign(keyid, authorizeKSignClaim.hex());
+    let signatureObj = kc.sign(ksign, authorizeKSignClaim.hex());
     let bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
-      signatureHex: signatureObj.signature
+      signatureHex: signatureObj.signature,
+      ksign: ksign // TODO proofOfKSign, how from the counterfactual
     };
-    return this.postClaim(keyid, bytesSignedMsg);
+    return this.postClaim(idaddr, bytesSignedMsg);
   }
 }
 
