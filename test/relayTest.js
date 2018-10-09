@@ -35,23 +35,21 @@ let key0id = kc.importKey(testPrivKHex);
 let ksign = kc.importKey('289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032');
 
 describe('post ClaimDefault()', function() {
-    let proofOfKSign = {};
+  let proofOfKSign = {};
 
-    let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('iden3.io', ksign, 'appToAuthName', 'authz', 1535208350, 1535208350);
-    let signatureObj = kc.sign(key0id, authorizeKSignClaim.hex());
-    let bytesSignedMsg = {
-      valueHex: authorizeKSignClaim.hex(),
-      signatureHex: signatureObj.signature,
-      ksign: key0id
-    };
-    before(function() {
-      return relay.postClaim(key0id, bytesSignedMsg).then(res => {
-        proofOfKSign = res.data.proofOfClaim;
-        expect(res.status).to.be.equal(200);
-      });
+  let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('iden3.io', ksign, 'appToAuthName', 'authz', 1535208350, 1535208350);
+  let signatureObj = kc.sign(key0id, authorizeKSignClaim.hex());
+  let bytesSignedMsg = {
+    valueHex: authorizeKSignClaim.hex(),
+    signatureHex: signatureObj.signature,
+    ksign: key0id
+  };
+  before(function() {
+    return relay.postClaim(key0id, bytesSignedMsg).then(res => {
+      proofOfKSign = res.data.proofOfClaim;
+      expect(res.status).to.be.equal(200);
     });
-
-
+  });
 
   it('post ClaimDefault()', function() {
     let claimDefault = new iden3.claim.ClaimDefault('iden3.io', 'default', 'extraindexdatastr', 'data');
@@ -67,8 +65,6 @@ describe('post ClaimDefault()', function() {
     });
   });
 });
-
-
 
 describe('getClaimByHi()', function() {
   let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('iden3.io', ksign, 'appToAuthName', 'authz', 1535208350, 1535208350);
@@ -86,13 +82,13 @@ describe('getClaimByHi()', function() {
       // expect(r.SetRootClaimProof.Proof).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001d97d44500f3a18b433881edc9edfb553704282ee8b91f3252d5fb994ebcd1a10'); // each time is different due previous tests, that add random data to the Merkle Tree
       // expect(r.SetRootClaimProof.Root).to.be.equal('0x645703140039d98916fc1f8c6e52d5e658e8d0d1812871e1d26a8de47d5b617a');
 
-      let verified = iden3.merkletree.checkProof(r.ClaimProof.Root, r.ClaimProof.Proof, r.ClaimProof.Hi, iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.ClaimProof.Leaf))), 140);
+      let verified = iden3.merkletree.checkProof(r.ClaimProof.Root, r.ClaimProof.Proof, iden3.utils.bytesToHex(iden3.claim.hiFromClaimBytes(iden3.utils.hexToBytes(r.ClaimProof.Leaf))), iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.ClaimProof.Leaf))), 140);
       expect(verified).to.be.equal(true);
-      verified = iden3.merkletree.checkProof(r.SetRootClaimProof.Root, r.SetRootClaimProof.Proof, r.SetRootClaimProof.Hi, iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.SetRootClaimProof.Leaf))), 140);
+      verified = iden3.merkletree.checkProof(r.SetRootClaimProof.Root, r.SetRootClaimProof.Proof, iden3.utils.bytesToHex(iden3.claim.hiFromClaimBytes(iden3.utils.hexToBytes(r.SetRootClaimProof.Leaf))), iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.SetRootClaimProof.Leaf))), 140);
       expect(verified).to.be.equal(true);
-      verified = iden3.merkletree.checkProof(r.ClaimNonRevocationProof.Root, r.ClaimNonRevocationProof.Proof, r.ClaimNonRevocationProof.Hi, iden3.utils.bytesToHex(iden3.merkletree.EmptyNodeValue), 140);
+      verified = iden3.merkletree.checkProof(r.ClaimNonRevocationProof.Root, r.ClaimNonRevocationProof.Proof, iden3.utils.bytesToHex(iden3.claim.hiFromClaimBytes(iden3.utils.hexToBytes(r.ClaimNonRevocationProof.Leaf))), iden3.utils.bytesToHex(iden3.merkletree.EmptyNodeValue), 140);
       expect(verified).to.be.equal(true);
-      verified = iden3.merkletree.checkProof(r.SetRootClaimNonRevocationProof.Root, r.SetRootClaimNonRevocationProof.Proof, r.SetRootClaimNonRevocationProof.Hi, iden3.utils.bytesToHex(iden3.merkletree.EmptyNodeValue), 140);
+      verified = iden3.merkletree.checkProof(r.SetRootClaimNonRevocationProof.Root, r.SetRootClaimNonRevocationProof.Proof, iden3.utils.bytesToHex(iden3.claim.hiFromClaimBytes(iden3.utils.hexToBytes(r.SetRootClaimNonRevocationProof.Leaf))), iden3.utils.bytesToHex(iden3.merkletree.EmptyNodeValue), 140);
       expect(verified).to.be.equal(true);
     });
   });
@@ -110,6 +106,53 @@ describe('post AuthorizeKSignClaim()', function() {
     };
     return relay.postClaim(key0id, bytesSignedMsg).then(res => {
       expect(res.status).to.be.equal(200);
+    });
+  });
+});
+
+describe('postVinculateID()', function() {
+  let kc = new iden3.KeyContainer('teststorage');
+  let key0id = kc.importKey(testPrivKHex);
+
+  it('postVinculateID()', function() {
+    let name = 'username';
+    let idBytes = iden3.utils.hexToBytes(key0id);
+    let nameBytes = Buffer.from(name);
+
+    let msgBytes = new Buffer([]);
+    msgBytes = Buffer.concat([msgBytes, idBytes]);
+    msgBytes = Buffer.concat([msgBytes, nameBytes]);
+
+    let signatureObj = kc.sign(key0id, iden3.utils.bytesToHex(msgBytes));
+    let vinculateIDMsg = {
+      ethID: key0id,
+      name: name,
+      signature: signatureObj.signature
+    };
+    return relay.postVinculateID(vinculateIDMsg).then(res => {
+      expect(res.status).to.be.equal(200);
+      // console.log("postVinculateID", res.data);
+      return relay.resolveName(name + "@iden3.io").then(res => {
+        // console.log("resolveName", res.data);
+        expect(res.status).to.be.equal(200);
+      });
+    });
+  });
+});
+
+describe('vinculateID()', function() {
+  let kc = new iden3.KeyContainer('teststorage');
+  let key0id = kc.importKey(testPrivKHex);
+
+  it('vinculateID()', function() {
+    let name = 'username';
+    return relay.vinculateID(kc, key0id, name).then(res => {
+      expect(res.status).to.be.equal(200);
+      // console.log("postVinculateID", res.data);
+      return relay.resolveName(name + "@iden3.io").then(res => {
+        // console.log("resolveName", res.data);
+        expect(res.status).to.be.equal(200);
+      });
     });
   });
 });

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const claim = require('../core/claim');
+const utils = require('../utils');
 
 /**
  * @param  {String} url
@@ -87,6 +88,36 @@ class Relay {
       ksign: ksign // TODO proofOfKSign, how from the counterfactual
     };
     return this.postClaim(idaddr, bytesSignedMsg);
+  }
+
+  /**
+   * @param  {String} idaddr
+   * @param {String} name
+   * @param {String} signature
+   * @returns {Object}
+   */
+  postVinculateID(vinculateIDMsg) {
+    return axios.post(this.url + '/vinculateid', vinculateIDMsg);
+  }
+
+  vinculateID(kc, keyid, name) {
+    let idBytes = utils.hexToBytes(keyid);
+    let nameBytes = Buffer.from(name);
+
+    let msgBytes = new Buffer([]);
+    msgBytes = Buffer.concat([msgBytes, idBytes]);
+    msgBytes = Buffer.concat([msgBytes, nameBytes]);
+
+    let signatureObj = kc.sign(keyid, utils.bytesToHex(msgBytes));
+    let vinculateIDMsg = {
+      ethID: keyid,
+      name: name,
+      signature: signatureObj.signature // for the moment, signature(idaddr+name)
+    };
+    return this.postVinculateID(vinculateIDMsg);
+  }
+  resolveName(name) {
+    return axios.get(this.url + '/identities/resolv/' + name);
   }
 }
 

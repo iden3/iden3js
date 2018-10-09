@@ -46,5 +46,9 @@ class Id {
   AuthorizeKSignClaim(kc, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
     return this.relay.AuthorizeKSignClaim(kc, this.address, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
   }
+
+ vinculateID(kc, keyid, name) {
+   return this.relay.vinculateID(kc, keyid, name);
+ }
 }
 module.exports = Id;
