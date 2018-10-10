@@ -110,52 +110,24 @@ describe('post AuthorizeKSignClaim()', function() {
   });
 });
 
-describe('postVinculateID()', function() {
-  let kc = new iden3.KeyContainer('teststorage');
-  let key0id = kc.importKey(testPrivKHex);
 
-  it('postVinculateID()', function() {
-    let name = 'username';
-    let idBytes = iden3.utils.hexToBytes(key0id);
-    let nameBytes = Buffer.from(name);
 
-    let msgBytes = new Buffer([]);
-    msgBytes = Buffer.concat([msgBytes, idBytes]);
-    msgBytes = Buffer.concat([msgBytes, nameBytes]);
-
-    let signatureObj = kc.sign(key0id, iden3.utils.bytesToHex(msgBytes));
-    let vinculateIDMsg = {
-      ethID: key0id,
-      name: name,
-      signature: signatureObj.signature
-    };
-    return relay.postVinculateID(vinculateIDMsg).then(res => {
-      expect(res.status).to.be.equal(200);
-      // console.log("postVinculateID", res.data);
-      return relay.resolveName(name + "@iden3.io").then(res => {
-        // console.log("resolveName", res.data);
-        expect(res.status).to.be.equal(200);
-      });
-    });
-  });
-});
-
-describe('vinculateID()', function() {
-  let kc = new iden3.KeyContainer('teststorage');
-  let key0id = kc.importKey(testPrivKHex);
-
-  it('vinculateID()', function() {
-    let name = 'username';
-    return relay.vinculateID(kc, key0id, name).then(res => {
-      expect(res.status).to.be.equal(200);
-      // console.log("postVinculateID", res.data);
-      return relay.resolveName(name + "@iden3.io").then(res => {
-        // console.log("resolveName", res.data);
-        expect(res.status).to.be.equal(200);
-      });
-    });
-  });
-});
+// describe('vinculateID()', function() {
+//   let kc = new iden3.KeyContainer('teststorage');
+//   let key0id = kc.importKey(testPrivKHex);
+//
+//   it('vinculateID()', function() {
+//     let name = 'username';
+//     return relay.vinculateID(kc, key0id, name).then(res => {
+//       expect(res.status).to.be.equal(200);
+//       // console.log("postVinculateID", res.data);
+//       return relay.resolveName(name + "@iden3.io").then(res => {
+//         // console.log("resolveName", res.data);
+//         expect(res.status).to.be.equal(200);
+//       });
+//     });
+//   });
+// });
 
 describe('relay.createID()', function() {
   let kc = new iden3.KeyContainer('teststorage');
@@ -169,6 +141,47 @@ describe('relay.createID()', function() {
 
       return relay.getID(res.data.idaddr).then(res => {
         // console.log("relay.getID", res.data);
+        expect(res.status).to.be.equal(200);
+      });
+
+    });
+  });
+});
+
+
+describe('postVinculateID()', function() {
+  let kc = new iden3.KeyContainer('teststorage');
+  // let key0id = kc.importKey(testPrivKHex);
+  let key0id = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
+
+  const relay = new iden3.Relay('http://127.0.0.1:8000');
+  let id = new iden3.Id(key0id, key0id, key0id, relay, '');
+
+  before(function() {
+    return id.createID().then(res => {
+    });
+  });
+
+  it('postVinculateID()', function() {
+    let name = 'johndoe';
+    let idBytes = iden3.utils.hexToBytes(id.idaddr);
+    let nameBytes = Buffer.from(name);
+
+    let msgBytes = new Buffer([]);
+    msgBytes = Buffer.concat([msgBytes, idBytes]);
+    msgBytes = Buffer.concat([msgBytes, nameBytes]);
+
+    let signatureObj = kc.sign(key0id, iden3.utils.bytesToHex(msgBytes));
+    let vinculateIDMsg = {
+      ethID: id.idaddr,
+      name: name,
+      signature: signatureObj.signature
+    };
+    return relay.postVinculateID(vinculateIDMsg).then(res => {
+      expect(res.status).to.be.equal(200);
+      // console.log("postVinculateID", res.data);
+      return relay.resolveName(name + "@iden3.io").then(res => {
+        // console.log("resolveName", res.data);
         expect(res.status).to.be.equal(200);
       });
     });

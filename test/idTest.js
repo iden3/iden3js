@@ -13,7 +13,7 @@ describe('new Id()', function() {
   it('new Id without privK', function() {
     expect(id.keyRecover).to.be.equal(key0id);
     expect(id.keyRevoke).to.be.equal(key0id);
-    expect(id.keyOp).to.be.equal(key0id);
+    expect(id.keyOperational).to.be.equal(key0id);
     expect(id.relay).to.be.equal(relay);
   });
 });
@@ -72,11 +72,16 @@ describe('id.vinculateID()', function() {
   const relay = new iden3.Relay('http://127.0.0.1:8000');
   let id = new iden3.Id(key0id, key0id, key0id, relay, '');
 
-  let ksign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
+  before(function() {
+    return id.createID().then(res => {
+    });
+  });
+
+  // let ksign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
 
   it('vinculateID()', function() {
     let name = 'username2';
-    return id.vinculateID(kc, key0id, name).then(res => {
+    return id.vinculateID(kc, name).then(res => {
       expect(res.status).to.be.equal(200);
       // console.log("postVinculateID", res.data);
       return relay.resolveName(name + "@iden3.io").then(res => {

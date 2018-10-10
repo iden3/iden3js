@@ -100,17 +100,17 @@ class Relay {
     return axios.post(this.url + '/vinculateid', vinculateIDMsg);
   }
 
-  vinculateID(kc, keyid, name) {
-    let idBytes = utils.hexToBytes(keyid);
+  vinculateID(kc, idaddr, keyOperational, name) {
+    let idBytes = utils.hexToBytes(idaddr);
     let nameBytes = Buffer.from(name);
 
     let msgBytes = new Buffer([]);
     msgBytes = Buffer.concat([msgBytes, idBytes]);
     msgBytes = Buffer.concat([msgBytes, nameBytes]);
 
-    let signatureObj = kc.sign(keyid, utils.bytesToHex(msgBytes));
+    let signatureObj = kc.sign(keyOperational, utils.bytesToHex(msgBytes));
     let vinculateIDMsg = {
-      ethID: keyid,
+      ethID: idaddr,
       name: name,
       signature: signatureObj.signature // for the moment, signature(idaddr+name)
     };

@@ -11,14 +11,14 @@ class Id {
   constructor(keyRecover, keyRevoke, keyOp, relay, implementation) {
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
-    this.keyOp = keyOp;
+    this.keyOperational = keyOp;
     this.relay = relay;
     this.implementation = implementation;
     this.idaddr = undefined;
   }
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
-    return this.relay.createID(this.keyOp, this.keyRecover, this.keyRevoke).then(res => {
+    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke).then(res => {
       this.idaddr = res.data.idaddr
       return this.idaddr;
     });
@@ -56,8 +56,8 @@ class Id {
     return this.relay.AuthorizeKSignClaim(kc, this.idaddr, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
   }
 
-  vinculateID(kc, keyid, name) {
-    return this.relay.vinculateID(kc, keyid, name);
+  vinculateID(kc, name) {
+    return this.relay.vinculateID(kc, this.idaddr, this.keyOperational, name);
   }
 }
 module.exports = Id;

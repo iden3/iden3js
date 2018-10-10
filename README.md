@@ -28,6 +28,17 @@ const relay = new iden3.Relay('http://127.0.0.1:5000');
 // create a new id object
 let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
 
+// create the counterfactoual contract through the relay, get the identity address as response
+id.createID().then(res => {
+  console.log(res);
+  console.log(id.idaddr); // res == id.idaddr
+});
+
+// vinculate the identity address to a name. Internally, signs the idaddr+name, and sends it to the relay, that will perform an AssignNameClaim vinculating the identity address with the name.
+id.vinculateID(kc, 'username').then(res => {
+  console.log(res.data);
+});
+
 // generate new key that will be the one authorized by the other key
 let ksign = kc.generateKey();
 
@@ -85,7 +96,7 @@ let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
 ```
 
 #### id.createID
-Creates the counterfactual contract throught the `Relay`, and gets the identity address.
+Creates the counterfactual contract through the `Relay`, and gets the identity address.
 ```js
 id.createID().then(res => {
   console.log(res);
