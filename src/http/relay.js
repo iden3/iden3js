@@ -119,6 +119,20 @@ class Relay {
   resolveName(name) {
     return axios.get(this.url + '/identities/resolv/' + name);
   }
+  createID(op, rec, rev) {
+    let keys = {
+      operational: op,
+      recoverer: rec,
+      revokator: rev
+    };
+    return axios.post(this.url + '/id', keys);
+  }
+  getID(idaddr) {
+    return axios.get(this.url + '/id/' + idaddr);
+  }
+  deployID(idaddr) {
+    return axios.post(this.url + '/id/' + idaddr + '/deploy');
+  }
 }
 
 module.exports = Relay;

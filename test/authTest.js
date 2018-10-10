@@ -8,7 +8,7 @@ let testPrivKHex0 = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af
 let testPrivKHex1 = '289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032';
 
 function successCallback(authData) {
-  console.log("successCallback");
+  console.log("websocket successCallback");
   console.log(authData);
 }
 
@@ -18,7 +18,7 @@ describe('new QR challenge', function() {
   let kc0 = new iden3.KeyContainer('teststorage');
   // let ksign = kc0.importKey(testPrivKHex0);
   let ksign = kc0.generateKey();
-  let auth = new iden3.Auth(kc0, ksign, authurl, authwsurl,successCallback);
+  let auth = new iden3.Auth(kc0, ksign, authurl, authwsurl, successCallback);
   qr = auth.qr();
 
   it('jsonQR.ksign equal to auth.ksign', function() {
@@ -40,6 +40,10 @@ describe('authorize the KSign (from the wallet side)', function() {
   let key0id = kc1.importKey(testPrivKHex1);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
   let id = new iden3.Id(key0id, key0id, key0id, relay, '');
+  before(function() {
+    return id.createID().then(res => {
+    });
+  });
 
   // decode the QR data
   let jsonQR = iden3.utils.qrToJson(qr);
@@ -60,7 +64,4 @@ describe('authorize the KSign (from the wallet side)', function() {
       });
     });
   });
-
-
-  
 });

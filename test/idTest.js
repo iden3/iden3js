@@ -18,6 +18,24 @@ describe('new Id()', function() {
   });
 });
 
+describe('id.createID() & id.deployID()', function() {
+  let kc = new iden3.KeyContainer('teststorage');
+  let key0id = kc.generateKey();
+  const relay = new iden3.Relay('http://127.0.0.1:8000');
+  let id = new iden3.Id(key0id, key0id, key0id, relay, '');
+  it('id.createID()', function() {
+    return id.createID().then(res => {
+      // console.log("idcreateID", res);
+      expect(res).to.be.equal(id.idaddr);
+
+      return id.deployID().then(res => {
+        // console.log("deployID", res.data);
+        expect(res.status).to.be.equal(200);
+      });
+    });
+  });
+});
+
 describe('id. AuthorizeKSignClaim() and ClaimDefault()', function() {
   let kc = new iden3.KeyContainer('teststorage');
   let key0id = kc.importKey(testPrivKHex);

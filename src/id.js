@@ -14,8 +14,17 @@ class Id {
     this.keyOp = keyOp;
     this.relay = relay;
     this.implementation = implementation;
-    // TODO send the data to Relay,and get the generated address of the counterfactual
-    this.address = keyOp; // tmp
+    this.idaddr = undefined;
+  }
+  createID() {
+    // send the data to Relay,and get the generated address of the counterfactual
+    return this.relay.createID(this.keyOp, this.keyRecover, this.keyRevoke).then(res => {
+      this.idaddr = res.data.idaddr
+      return this.idaddr;
+    });
+  }
+  deployID() {
+    return this.relay.deployID(this.idaddr);
   }
 
   /**
@@ -29,7 +38,7 @@ class Id {
    * @returns {Object}
    */
   ClaimDefault(kc, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data) {
-    return this.relay.ClaimDefault(kc, this.address, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data);
+    return this.relay.ClaimDefault(kc, this.idaddr, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data);
   }
 
   /**
@@ -44,11 +53,11 @@ class Id {
    * @returns {Object}
    */
   AuthorizeKSignClaim(kc, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    return this.relay.AuthorizeKSignClaim(kc, this.address, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
+    return this.relay.AuthorizeKSignClaim(kc, this.idaddr, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
   }
 
- vinculateID(kc, keyid, name) {
-   return this.relay.vinculateID(kc, keyid, name);
- }
+  vinculateID(kc, keyid, name) {
+    return this.relay.vinculateID(kc, keyid, name);
+  }
 }
 module.exports = Id;

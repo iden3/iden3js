@@ -84,6 +84,56 @@ const relay = new iden3.Relay('http://127.0.0.1:5000');
 let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
 ```
 
+#### id.createID
+Creates the counterfactual contract throught the `Relay`, and gets the identity address.
+```js
+id.createID().then(res => {
+  console.log(res);
+});
+```
+
+Output:
+```js
+{
+  idaddr : '0x46b57a3f315f99a6de39406310f5bd0db03326c1'
+}
+```
+
+#### id.deployID
+Deploys the counterfactual smart contract of identity to the blockchain.
+```js
+id.deployID().then(res => {
+  console.log(res.data);
+});
+```
+
+Output:
+```js
+{
+  idaddr: '0x8435ebb41634c05019be1710be0007fa0d92861f',
+  tx: '0x403859ccc701eb358d3a25c908c33de733cbb2d0ebc1c7738eed4908cc8cf5c4'
+}
+```
+
+#### id.vinculateID
+Vinculates a name to the identity.
+Internally, signs the idaddr+name, and sends it to the `Relay`, that will perform an AssignNameClaim vinculating the identity address with the name.
+
+```js
+id.vinculateID(kc, name).then(res => {
+  console.log(res.data);
+});
+```
+
+Output:
+```js
+{
+  ethID: '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f',
+  name: 'username',
+  signature: '0xeda8b278eae69cd8c4863380f0af5cfe8360481790d8ea5c188705b552bc0d5e1384efb627db5b423d4a163ad02ca23a2f05eea5dc787ac5837789aa95f50f101b'
+}
+```
+
 #### id.AuthorizeKSignClaim
 ```js
 // perform a new AuthorizeKSignClaim, sign it, and post it to the Relay
@@ -302,6 +352,48 @@ Response, `ProofOfClaim`:
   }
 }
 ```
+
+
+### GET relay.getID
+```js
+relay.getID('0x46b57a3f315f99a6de39406310f5bd0db03326c1')
+  .then(res => {
+    console.log('res.data', res.data);
+  });
+```
+Output:
+```js
+{
+  IDAddr: '0x46b57a3f315f99a6de39406310f5bd0db03326c1',
+  LocalDb: {
+    Operational: '0x970e8128ab834e8eac17ab8e3812f010678cf791',
+    Relayer: '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c',
+    Recoverer: '0x970e8128ab834e8eac17ab8e3812f010678cf791',
+    Revokator: '0x970e8128ab834e8eac17ab8e3812f010678cf791',
+    Impl: '0x2623ed1533d47d56f912300ae40f83b9370cead6'
+  },
+  Onchain: null
+}
+```
+
+
+
+#### relay.resolveName
+```js
+relay.resolveName('username@iden3.io')
+  .then(res => {
+    console.log('res.data', res.data);
+  });
+```
+
+Output:
+```js
+{
+  claim: '0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074b7ae3d3a2056c54f48763999f3ff99caffaaba3bab58cae900000080000000008a440962fb17f0fe928a3d930137743fe63b8f4c0ce5a5da63991310103d9aef3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f',
+  ethID: '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f'
+}
+```
+
 
 ## Tests
 To run all tests, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.

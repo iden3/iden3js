@@ -76,10 +76,10 @@ describe('getClaimByHi()', function() {
       let r = res.data.proofOfClaim;
       expect(res.status).to.be.equal(200);
       expect(r.ClaimProof.Leaf).to.be.equal(iden3.utils.bytesToHex(authorizeKSignClaim.bytes()));
-      expect(r.ClaimProof.Proof).to.be.equal('0x00000000000000000000000000000000000000000000000000000000000000052d3cbe677b6e4048e0db5a3d550e5f1bb2252c099a990137ac644ddfff9553dde5d128f57df872a6ab1c768ab3da7fc08faa153d4ac40c33471d25be32b38132');
-      expect(r.ClaimProof.Root).to.be.equal('0xb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101');
-      expect(r.SetRootClaimProof.Leaf).to.be.equal('0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000003bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9fb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101');
-      // expect(r.SetRootClaimProof.Proof).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001d97d44500f3a18b433881edc9edfb553704282ee8b91f3252d5fb994ebcd1a10'); // each time is different due previous tests, that add random data to the Merkle Tree
+      expect(r.ClaimProof.Proof).to.be.equal('0x00000000000000000000000000000000000000000000000000000000000000042d3cbe677b6e4048e0db5a3d550e5f1bb2252c099a990137ac644ddfff9553dd');
+      expect(r.ClaimProof.Root).to.be.equal('0x431a4805a4067afda64074580e5a18ddef8055da36fe3da96115c92f1ff19e68');
+      expect(r.SetRootClaimProof.Leaf).to.be.equal('0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000001bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f431a4805a4067afda64074580e5a18ddef8055da36fe3da96115c92f1ff19e68');
+      // expect(r.SetRootClaimProof.Proof).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001d97d44500f3a18b433881edc9edfb553704282ee8b91f3252d5fb994ebcd1a10');  each time is different due previous tests, that add random data to the Merkle Tree
       // expect(r.SetRootClaimProof.Root).to.be.equal('0x645703140039d98916fc1f8c6e52d5e658e8d0d1812871e1d26a8de47d5b617a');
 
       let verified = iden3.merkletree.checkProof(r.ClaimProof.Root, r.ClaimProof.Proof, iden3.utils.bytesToHex(iden3.claim.hiFromClaimBytes(iden3.utils.hexToBytes(r.ClaimProof.Leaf))), iden3.utils.bytesToHex(iden3.utils.hashBytes(iden3.utils.hexToBytes(r.ClaimProof.Leaf))), 140);
@@ -151,6 +151,24 @@ describe('vinculateID()', function() {
       // console.log("postVinculateID", res.data);
       return relay.resolveName(name + "@iden3.io").then(res => {
         // console.log("resolveName", res.data);
+        expect(res.status).to.be.equal(200);
+      });
+    });
+  });
+});
+
+describe('relay.createID()', function() {
+  let kc = new iden3.KeyContainer('teststorage');
+  // let key0id = kc.importKey('289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032');
+  let key0id = kc.generateKey();
+  const relay = new iden3.Relay('http://127.0.0.1:8000');
+  it('relay.createID() & relay.getID()', function() {
+    return relay.createID(key0id, key0id, key0id).then(res => {
+      // console.log("relay.createID", res.data);
+      expect(res.status).to.be.equal(200);
+
+      return relay.getID(res.data.idaddr).then(res => {
+        // console.log("relay.getID", res.data);
         expect(res.status).to.be.equal(200);
       });
     });
