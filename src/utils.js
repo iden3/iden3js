@@ -95,6 +95,15 @@ var verifySignature = function(mHex, signatureHex, addressHex) {
   return addr == addressHex;
 };
 
+/**
+ * Check if current environment is node, checking if exists the global object
+ * if not, we are in the browser (does not exist global object, but yes window
+ * @returns {Function} - to trigger and check if we are in a node environment
+ */
+var isNodeEnv = function() {
+  return new Function("try {return this===global;}catch(e){return false;}");
+};
+
 module.exports = {
   hashBytes,
   bytesToHex,
@@ -103,5 +112,6 @@ module.exports = {
   hexToStr,
   jsonToQr,
   qrToJson,
-  verifySignature
+  verifySignature,
+  isNodeEnv
 };

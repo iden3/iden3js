@@ -1,7 +1,10 @@
 const axios = require('axios');
 const utils = require('../utils');
 
-const WebSocket = require('ws'); // for nodejs tests
+let NodeWebSocket;
+if (utils.isNodeEnv()) {
+  NodeWebSocket = require('ws'); // for nodejs tests
+}
 
 
 function challenge() {
@@ -25,7 +28,7 @@ class Auth {
     this.url = url;
     this.wsurl = wsurl + '/ws/' + this.challenge;
     this.successCallback = successCallback;
-    this.ws = new WebSocket(this.wsurl);
+    this.ws = utils.isNodeEnv() ? new NodeWebSocket(this.wsurl) : new WebSocket(this.wsurl);
     this.ws.onmessage = function(msg) {
       var authData = JSON.parse(msg.data);
       successCallback(authData);
