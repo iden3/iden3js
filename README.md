@@ -5,14 +5,15 @@ Javascript client library of the iden3 system.
 ```
 npm install --save iden3
 ```
+https://www.npmjs.com/package/iden3
 
 ## Basic example
 ```js
 // import iden3js
 const iden3 = require('iden3');
 
-// new key container
-let kc = new iden3.KeyContainer('teststorage');
+// new key container using localStorage
+let kc = new iden3.KeyContainer('localstorage');
 
 // import key into the key container
 let keyId = kc.importKey('x'); // keyId is the address that is used to identify the key
@@ -68,10 +69,22 @@ const iden3 = require('iden3');
 ```
 
 ### KeyContainer
-```js
-// new key container
-let kc = new iden3.KeyContainer('teststorage');
 
+- new KeyContainer using localStorage
+  ```js
+  // new key container
+  let kc = new iden3.KeyContainer('teststorage');
+
+  ```
+- new KeyContainer using testStorage (memory)
+  ```js
+  // new key container
+  let kc = new iden3.KeyContainer('localstorage');
+  ```
+
+
+Usage:
+```js
 // import key
 let key0id = kc.importKey('x');
 // key0id is the address of the imported key, will be used as key identifier
@@ -82,6 +95,9 @@ let key1id = kc.generateKey();
 
 // sign using key0id
 let signature = kc.sign(key0id, 'test');
+
+// delete key
+kc.deleteKey(key0id);
 ```
 
 ### Id

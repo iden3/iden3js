@@ -1,6 +1,8 @@
 const axios = require('axios');
-const WebSocket = require('ws');
 const utils = require('../utils');
+
+const WebSocket = require('ws'); // for nodejs tests
+
 
 function challenge() {
   let unixTime = Math.round((new Date()).getTime() / 1000);
