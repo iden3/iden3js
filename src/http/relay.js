@@ -30,9 +30,8 @@ class Relay {
    * @param {Object} claim
    * @returns {Object}
    */
-  postClaim(idaddr, claim) {
-    return axios.post(this.url + '/claim/' + idaddr, claim);
-
+  postClaim(idaddr, bytesSignedMsg) {
+    return axios.post(this.url + '/claim/' + idaddr, bytesSignedMsg);
   }
 
   /**
@@ -61,8 +60,7 @@ class Relay {
     let bytesSignedMsg = {
       valueHex: claimDefault.hex(),
       signatureHex: signatureObj.signature,
-      ksign: ksign,
-      proofOfKSign: proofOfKSign
+      ksign: ksign
     };
     return this.postClaim(idaddr, bytesSignedMsg);
   }
@@ -85,7 +83,7 @@ class Relay {
     let bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
       signatureHex: signatureObj.signature,
-      ksign: ksign // TODO proofOfKSign, how from the counterfactual
+      ksign: ksign
     };
     return this.postClaim(idaddr, bytesSignedMsg);
   }
@@ -112,7 +110,8 @@ class Relay {
     let vinculateIDMsg = {
       ethID: idaddr,
       name: name,
-      signature: signatureObj.signature // for the moment, signature(idaddr+name)
+      signature: signatureObj.signature, // for the moment, signature(idaddr+name)
+      ksign: keyOperational
     };
     return this.postVinculateID(vinculateIDMsg);
   }

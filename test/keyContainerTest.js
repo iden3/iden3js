@@ -2,9 +2,22 @@ const chai = require('chai');
 const expect = chai.expect;
 const iden3 = require('../index');
 
+const kcutils = require('../src/keyContainer/kcutils');
+
 let testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 
+describe('kcutils.encrypt', function() {
+  it('encrypt', function() {
+    let passphrase = 'this is a test passphrase';
+    let key = kcutils.passToKey(passphrase, 'a');
+    expect(key).to.be.equal('zBugsLjaZkbccvqBulbGlKAqzW4d8ikDO2yY46AP+4E=');
 
+    let m = 'test';
+    let c = kcutils.encrypt(key, m);
+    let d = kcutils.decrypt(key, c);
+    expect(d).to.be.equal(m);
+  });
+});
 
 describe('kc.type', function() {
   let kcTest = new iden3.KeyContainer('teststorage');
@@ -15,7 +28,6 @@ describe('kc.type', function() {
     expect(kcLocalstorage.type).to.be.equal('localstorage');
   });
 });
-
 
 describe('new teststorageKeyContainer', function() {
   it('new teststorageKeyContainer', function() {
@@ -79,8 +91,6 @@ describe('testkc.deleteKey()', function() {
   });
 });
 
-
-
 describe('new localstorageKeyContainer', function() {
   it('new localstorageKeyContainer', function() {
     let kc0 = new iden3.KeyContainer('test');
@@ -94,6 +104,7 @@ describe('new localstorageKeyContainer', function() {
 
 describe('localstoragekc.importKey()', function() {
   let kc = new iden3.KeyContainer('localstorage');
+  kc.unlock('pass');
   kc.deleteAll(); // delete all to do the test with empty localStorage
   let key0 = kc.importKey(testPrivKHex);
   it('imported key', function() {
@@ -104,6 +115,7 @@ describe('localstoragekc.importKey()', function() {
 
 describe('localstoragekc.sign()', function() {
   let kc = new iden3.KeyContainer('localstorage');
+  kc.unlock('pass');
   kc.deleteAll(); // delete all to do the test with empty localStorage
   let key0 = kc.importKey(testPrivKHex);
 
@@ -116,6 +128,7 @@ describe('localstoragekc.sign()', function() {
 
 describe('localstoragekc.listKeys()', function() {
   let kc = new iden3.KeyContainer('localstorage');
+  kc.unlock('pass');
   kc.deleteAll(); // delete all to do the test with empty localStorage
   it('localstoragekc.listKeys', function() {
     let key0 = kc.importKey(testPrivKHex);
@@ -134,6 +147,7 @@ describe('localstoragekc.listKeys()', function() {
 
 describe('localstoragekc.deleteKey()', function() {
   let kc = new iden3.KeyContainer('localstorage');
+  kc.unlock('pass');
   kc.deleteAll(); // delete all to do the test with empty localStorage
   it('localstoragekc.deleteKey', function() {
     let key0 = kc.importKey(testPrivKHex);

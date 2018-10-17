@@ -1,5 +1,8 @@
 const ethWallet = require('ethereumjs-wallet');
 const ethUtil = require('ethereumjs-util');
+var nacl = require('tweetnacl');
+nacl.util = require('tweetnacl-util');
+
 const utils = require('../utils');
 const kcutils = require('./kcutils');
 
@@ -10,20 +13,36 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 
 class LocalstorageContainer {
   constructor() { // idaddr used as prefix
-    this.keys = {};
     this.prefix = 'i3-';
     this.type = 'localstorage';
+    this.encryptionKey = '';
+  }
+
+  unlock(passphrase) {
+    this.encryptionKey = kcutils.passToKey(passphrase, 'salt');
+    setTimeout(function(){
+      this.encryptionKey = '';
+      // console.log('KC locked');
+    }, 30000);
   }
 
   /**
    * @returns {String} AddressHex
    */
   generateKey() {
+    if(this.encryptionKey === '') {
+      // KeyContainer not unlocked
+      return undefined;
+    }
     let w = ethWallet.generate();
     let privK = w._privKey;
     let address = ethUtil.privateToAddress(privK);
     let addressHex = utils.bytesToHex(address);
-    localStorage.setItem(this.prefix + addressHex, privK);
+    let privKHex = utils.bytesToHex(privK);
+
+
+    let privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+    localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
 
@@ -31,10 +50,16 @@ class LocalstorageContainer {
    * @returns {String} AddressHex
    */
   importKey(privKHex) {
+    if(this.encryptionKey === '') {
+      // KeyContainer not unlocked
+      return undefined;
+    }
     let privK = utils.hexToBytes(privKHex);
     let address = ethUtil.privateToAddress(privK);
     let addressHex = utils.bytesToHex(address);
-    localStorage.setItem(this.prefix + addressHex, privKHex);
+
+    let privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+    localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
 
@@ -44,10 +69,16 @@ class LocalstorageContainer {
    * @returns {String} signature
    */
   sign(addressHex, data) {
-    let privKHex = localStorage.getItem(this.prefix + addressHex);
+    if(this.encryptionKey === '') {
+      // KeyContainer not unlocked
+      return undefined;
+    }
+    let privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
     var message = ethUtil.toBuffer(data);
     var msgHash = ethUtil.hashPersonalMessage(message);
-    var sig = ethUtil.ecsign(msgHash, Buffer.from(privKHex, 'hex'));
+
+    let privKHex = kcutils.decrypt(this.encryptionKey, privKHexEncrypted);
+    var sig = ethUtil.ecsign(msgHash, utils.hexToBytes(privKHex));
     return kcutils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
   }
 
@@ -57,8 +88,11 @@ class LocalstorageContainer {
   listKeys() {
     let keysList = [];
     for (var i = 0, len = localStorage.length; i < len; i++) {
-      var key = localStorage.key(i).replace(this.prefix, '');
-      keysList.push(key);
+      // get only the stored data related to keycontainer (that have the prefix)
+      if(localStorage.key(i).indexOf(this.prefix) !== -1) {
+        var key = localStorage.key(i).replace(this.prefix, '');
+        keysList.push(key);
+      }
     }
     return keysList;
   }
@@ -69,7 +103,7 @@ class LocalstorageContainer {
   deleteKey(addressHex) {
     localStorage.removeItem(this.prefix + addressHex);
   }
-  deleteAll(){
+  deleteAll() {
     localStorage.clear();
   }
 }

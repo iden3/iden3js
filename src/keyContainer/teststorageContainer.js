@@ -17,9 +17,11 @@ class TeststorageContainer {
   generateKey() {
     let w = ethWallet.generate();
     let privK = w._privKey;
+    // console.log(utils.bytesToHex(privK));
     let address = ethUtil.privateToAddress(privK);
     let addressHex = utils.bytesToHex(address);
-    this.keys[addressHex] = privK;
+    let privKHex = utils.bytesToHex(privK);
+    this.keys[addressHex] = privKHex;
     return addressHex;
   }
 
@@ -30,7 +32,7 @@ class TeststorageContainer {
     let privK = utils.hexToBytes(privKHex);
     let address = ethUtil.privateToAddress(privK);
     let addressHex = utils.bytesToHex(address);
-    this.keys[addressHex] = privK;
+    this.keys[addressHex] = privKHex;
     return addressHex;
   }
 
@@ -40,10 +42,10 @@ class TeststorageContainer {
    * @returns {String} signature
    */
   sign(addressHex, data) {
-    let privK = this.keys[addressHex];
+    let privKHex = this.keys[addressHex];
     var message = ethUtil.toBuffer(data);
     var msgHash = ethUtil.hashPersonalMessage(message);
-    var sig = ethUtil.ecsign(msgHash, Buffer.from(privK, 'hex'));
+    var sig = ethUtil.ecsign(msgHash, utils.hexToBytes(privKHex));
     return kcutils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
   }
 

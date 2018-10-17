@@ -13,7 +13,7 @@ function successCallback(authData) {
 }
 
 let qr = '';
-describe('new QR challenge', function() {
+describe('[auth]new QR challenge', function() {
   // inside the App where the user is going to authenticate
   let kc0 = new iden3.KeyContainer('teststorage');
   // let ksign = kc0.importKey(testPrivKHex0);
@@ -32,7 +32,7 @@ describe('new QR challenge', function() {
   });
 });
 
-describe('authorize the KSign (from the wallet side)', function() {
+describe('[auth] authorize the KSign (from the wallet side)', function() {
   // inside Wallet App
   // new AuthorizeKSignClaim with the ksign from the QR
   // previous work: generate an identity
@@ -40,27 +40,26 @@ describe('authorize the KSign (from the wallet side)', function() {
   let key0id = kc1.importKey(testPrivKHex1);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
   let id = new iden3.Id(key0id, key0id, key0id, relay, '');
-  before(function() {
-    return id.createID().then(res => {
-    });
-  });
 
-  // decode the QR data
-  let jsonQR = iden3.utils.qrToJson(qr);
+  return id.createID().then(res => {
+    expect(res).to.be.equal(id.idaddr);
 
-  // create a new AuthorizeKSignClaim signed with ID (key0id) and send it to the Relay
-  let unixtime = Math.round(+ new Date() / 1000);
-  it('id.AuthorizeKSignClaim()', function() {
-    return id.AuthorizeKSignClaim(kc1, key0id, 'iden3.io', jsonQR.ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
-      // console.log(res.data);
-      ksignProof = res.data.proofOfClaim;
-      expect(res.status).to.be.equal(200);
-
-      // now send the proof of the claim to the Auth centralized server
-      return iden3.auth.resolv(jsonQR.url, key0id, jsonQR.challenge, jsonQR.signed, jsonQR.ksign, ksignProof).then(res => {
+    // decode the QR data
+    let jsonQR = iden3.utils.qrToJson(qr);
+    // create a new AuthorizeKSignClaim signed with ID (key0id) and send it to the Relay
+    let unixtime = Math.round(+ new Date() / 1000);
+    it('[auth] id.AuthorizeKSignClaim()', function() {
+      return id.AuthorizeKSignClaim(kc1, key0id, 'iden3.io', jsonQR.ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
         // console.log(res.data);
+        ksignProof = res.data.proofOfClaim;
         expect(res.status).to.be.equal(200);
-        expect(res.data.authenticated).to.be.equal(true);
+
+        // now send the proof of the claim to the Auth centralized server
+        return iden3.auth.resolv(jsonQR.url, key0id, jsonQR.challenge, jsonQR.signed, jsonQR.ksign, ksignProof).then(res => {
+          // console.log(res.data);
+          expect(res.status).to.be.equal(200);
+          expect(res.data.authenticated).to.be.equal(true);
+        });
       });
     });
   });

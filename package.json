@@ -1,6 +1,6 @@
 {
   "name": "iden3",
-  "version": "0.0.3",
+  "version": "0.0.7",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,9 @@
     "keccak": "^1.4.0",
     "keythereum": "^1.0.4",
     "mocha": "^5.2.0",
+    "pbkdf2-sha256": "^1.1.1",
+    "tweetnacl": "^1.0.0",
+    "tweetnacl-util": "^0.15.0",
     "web3": "^1.0.0-beta.34"
   },
   "devDependencies": {

@@ -15,6 +15,10 @@ const iden3 = require('iden3');
 // new key container using localStorage
 let kc = new iden3.KeyContainer('localstorage');
 
+// unlock the KeyContainer for the next 30 seconds
+let passphrase = 'this is a test passphrase';
+kc.unlock(passphrase);
+
 // import key into the key container
 let keyId = kc.importKey('x'); // keyId is the address that is used to identify the key
 
@@ -46,7 +50,7 @@ let ksign = kc.generateKey();
 let unixtime = Math.round(+new Date()/1000);
 // create new AuthorizeKSignClaim, sign it, and send it to the Relay
 id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
-  proofOfKSign = res.data.proofOfClaim;
+  let proofOfKSign = res.data.proofOfClaim;
 });
 
 // create new ClaimDefault, sign it and send it to the Relay
@@ -55,9 +59,12 @@ id.ClaimDefault(kc, ksign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'd
 });
 
 
+// having a proof of a leaf, we can check it
+let verified = iden3.merkletree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
+// verified == true
 
 // having a proofOfClaim, let's check it
-let verified = iden3.merkletree.checkProofOfClaim(proofOfClaim, 140);
+let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
 // verified == true
 ```
 
@@ -73,18 +80,22 @@ const iden3 = require('iden3');
 - new KeyContainer using localStorage
   ```js
   // new key container
-  let kc = new iden3.KeyContainer('teststorage');
+  let kc = new iden3.KeyContainer('localstorage');
 
   ```
 - new KeyContainer using testStorage (memory)
   ```js
   // new key container
-  let kc = new iden3.KeyContainer('localstorage');
+  let kc = new iden3.KeyContainer('teststorage');
   ```
 
 
 Usage:
 ```js
+// unlock the KeyContainer
+let passphrase = 'this is a test passphrase';
+kc.unlock(passphrase);
+
 // import key
 let key0id = kc.importKey('x');
 // key0id is the address of the imported key, will be used as key identifier
@@ -96,15 +107,24 @@ let key1id = kc.generateKey();
 // sign using key0id
 let signature = kc.sign(key0id, 'test');
 
-// delete key
-kc.deleteKey(key0id);
+// get an array with the address identifiers of the keys stored in the KeyContainer
+let keysList = kc.listKeys();
 ```
 
 ### Id
 ```js
 // new key container
 let kc = new iden3.KeyContainer();
-let key0id = kc.generateKey();
+
+// unlock the KeyContainer for the next 30 seconds
+let passphrase = 'this is a test passphrase';
+kc.unlock(passphrase);
+
+// generate new keys
+let keyRecover = kc.generateKey();
+let keyRevoke = kc.generateKey();
+let keyOp = kc.generateKey();
+
 // new relay
 const relay = new iden3.Relay('http://127.0.0.1:5000');
 // create key
@@ -243,10 +263,49 @@ authorizeKSignClaim.ht(); // Hash of the index of the claim in Buffer representa
 let authorizeKSignClaimParsed = iden3.claim.parseAuthorizeKSignClaim(authorizeKSignClaim.bytes());
 ```
 
+#### checkProofOfClaim
+Checks the full `proof` of a `claim`. This means check the:
+- `Merkle Proof` of the `claim`
+- `Merkle Proof` of the non revocation `claim`
+- `Merkle Proof` of the `claim` that the `Relay` have performed over the `identity` `Merkle Root` (this kind of claim is the `SetRootClaim`)
+- `Merkle Proof` of the non revocation of the `SetRootClaim`
+
+```js
+let proofOfClaimStr = `
+{
+  "ClaimProof": {
+    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074353f867ef725411de05e3d4b0a01c37cf7ad24bcc213141a0000005400000000970e8128ab834e8eac17ab8e3812f010678cf7912077bb3f0400dd62421c97220536fd6ed2be29228e8db1315e8c6d7525f4bdf4dad9966a2e7371f0a24b1929ed765c0e7a3f2b4665a76a19d58173308bb34062000000005b816b9e000000005b816b9e",
+    "Proof": "0x00000000000000000000000000000000000000000000000000000000000000052d3cbe677b6e4048e0db5a3d550e5f1bb2252c099a990137ac644ddfff9553dde5d128f57df872a6ab1c768ab3da7fc08faa153d4ac40c33471d25be32b38132",
+    "Root": "0xb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101"
+  },
+  "SetRootClaimProof": {
+    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000003bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9fb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101",
+    "Proof": "0x000000000000000000000000000000000000000000000000000000000000000b7d2ff8e70da77ef7559614425aa33021eb88752f63a690911c031a1fae273f9393b3f57a79800ca02cd1ac3a555d9dbb7d5869251d51d34e01d7de4ab811e9753cb6d37abb4eae8eeea11cbae9a96a021e2d157340721884763fc2ac33313ecd",
+    "Root": "0x33f1e9b3ed86317369938d5bb04ba23e5f5de65da07c3a9368ffe19121e7a6c6"
+  },
+  "ClaimNonRevocationProof": {
+    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074353f867ef725411de05e3d4b0a01c37cf7ad24bcc213141a0000005400000001970e8128ab834e8eac17ab8e3812f010678cf7912077bb3f0400dd62421c97220536fd6ed2be29228e8db1315e8c6d7525f4bdf4dad9966a2e7371f0a24b1929ed765c0e7a3f2b4665a76a19d58173308bb34062000000005b816b9e000000005b816b9e",
+    "Proof": "0x0000000000000000000000000000000000000000000000000000000000000003df560419165ec6b3299f04ac93510999379987ff25b0799a738ad0d078c9b9d6f912e7e2fab90f745aab5874a5e4f7657921b271378ea05ee9b0f25d69f87a3c",
+    "Root": "0xb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101"
+  },
+  "SetRootClaimNonRevocationProof": {
+    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000004bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9fb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101",
+    "Proof": "0x000000000000000000000000000000000000000000000000000000000000000b615fadf56023c4ef72c3d455f0e6b6f9ace467e751e9b8e350fe0401368faf4801d4499dba57c843cd6c64fb07975d506e27b5e68166493618405a4bbf2b256eaf677f70fad9050c9d8e77b727fe6d29187c054cd47cfb3fcc10b2a4cbf08f8c",
+    "Root": "0x33f1e9b3ed86317369938d5bb04ba23e5f5de65da07c3a9368ffe19121e7a6c6"
+  },
+  "Date": 1539008518,
+  "Signature": "0x19074094d44fc77bc020d6c51c2e3f71fb45ede33b05202553d785cfce7d702411b98a4d0980d35383dfbe1d5b9779ee3b8f6295c27969bcf45156cdf6382b6201"
+}
+`;
+let proofOfClaim = JSON.parse(proofOfClaimStr);
+let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
+// verified === true
+```
 
 ### Merkletree
 
 #### CheckProof
+Checks the `Merkle Proof` of a `Leaf`.
 ```js
 let verified = iden3.merkletree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
 console.log(verified); // true
