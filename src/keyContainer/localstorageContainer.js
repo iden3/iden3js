@@ -3,13 +3,9 @@ const ethUtil = require('ethereumjs-util');
 const utils = require('../utils');
 const kcutils = require('./kcutils');
 
-// load node-localstorage if we are in a node environment,
-// if not, we are in a browser and already we have the local storage
-if (utils.isNodeEnv()){
-  if (typeof localStorage === "undefined" || localStorage === null) {
-    var LocalStorage = require('node-localstorage').LocalStorage;
-    localStorage = new LocalStorage('./scratch');
-  }
+if (typeof localStorage === "undefined" || localStorage === null) {
+  var LocalStorage = require('node-localstorage').LocalStorage;
+  localStorage = new LocalStorage('./tmp');
 }
 
 class LocalstorageContainer {
