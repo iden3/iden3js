@@ -1,15 +1,18 @@
 const axios = require('axios');
 const utils = require('../utils');
+const qrcode = require('qrcode-generator');
 
-const WebSocket = require('ws'); // for nodejs tests
+// const WebSocket = require('ws'); // for nodejs tests
 
 
 function challenge() {
   let unixTime = Math.round((new Date()).getTime() / 1000);
-  let randStr = Math.random().toString(36).substring(7);
+  let r = Math.random();
+  let randStr = r.toString(36).substr(7, 4);
   let challenge = 'uuid-' + unixTime + "-" + randStr;
-  return challenge;
+  return challenge; // challenge of 20 characters length
 }
+
 /**
  * @param  {Object} kc
  * @param  {String} ksign
@@ -21,7 +24,7 @@ class Auth {
     this.kc = kc;
     this.ksign = ksign;
     this.challenge = challenge();
-    this.signed = kc.sign(ksign, this.challenge).signature;
+    this.signature = kc.sign(ksign, this.challenge).signature;
     this.url = url;
     this.wsurl = wsurl + '/ws/' + this.challenge;
     this.successCallback = successCallback;
@@ -45,17 +48,31 @@ class Auth {
    */
   qr() {
     // generates the QR hex data challenge
-    let dataJson = {
-      ksign: this.ksign,
-      challenge: this.challenge,
-      signed: this.signed,
-      type: "webauth",
-      provider: "giveth",
-      url: this.url
-    };
-    let qrData = utils.jsonToQr(dataJson);
-    return qrData;
+    let b = new Buffer([]);
+    b = Buffer.concat([b, Buffer.from(this.challenge)]);
+    b = Buffer.concat([b, utils.hexToBytes(this.signature)]);
+    b = Buffer.concat([b, Buffer.from(this.url)]);
+    let r = utils.bytesToHex(b);
+    return r;
   }
+  printQr(qrHex, divId) {
+    var typeNumber = 9;
+    var errorCorrectionLevel = 'L';
+    var qr = qrcode(typeNumber, errorCorrectionLevel);
+    qr.addData(qrHex);
+    qr.make();
+    document.getElementById(divId).innerHTML = qr.createImgTag();
+  }
+}
+
+var parseQRhex = function(h) {
+  let b = utils.hexToBytes(h);
+  let j = {
+    challenge: b.slice(0,20).toString(), // 20 is the length of the challenge
+    signature: utils.bytesToHex(b.slice(20, 85)),
+    url: b.slice(85, b.length).toString()
+  };
+  return j;
 }
 
 var resolv = function (url, idaddr, challenge, signature, ksign, ksignProof) {
@@ -71,5 +88,6 @@ var resolv = function (url, idaddr, challenge, signature, ksign, ksignProof) {
 
 module.exports = {
   Auth,
+  parseQRhex,
   resolv
 };

@@ -6,10 +6,10 @@ nacl.util = require('tweetnacl-util');
 const utils = require('../utils');
 const kcutils = require('./kcutils');
 
-if (typeof localStorage === "undefined" || localStorage === null) {
-  var LocalStorage = require('node-localstorage').LocalStorage;
-  localStorage = new LocalStorage('./tmp');
-}
+// if (typeof localStorage === "undefined" || localStorage === null) {
+//   var LocalStorage = require('node-localstorage').LocalStorage;
+//   localStorage = new LocalStorage('./tmp');
+// }
 
 class LocalstorageContainer {
   constructor() { // idaddr used as prefix

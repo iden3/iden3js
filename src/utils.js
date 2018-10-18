@@ -95,6 +95,18 @@ var verifySignature = function(mHex, signatureHex, addressHex) {
   return addr == addressHex;
 };
 
+var addrFromSig = function(mOriginal, signatureHex) {
+  var message = ethUtil.toBuffer(mOriginal);
+  var msgHash = ethUtil.hashPersonalMessage(message);
+ // let m = hexToBytes(mHex);
+ let m = msgHash;
+ let r = signatureHex.slice(0, 66);
+ let s = '0x' + signatureHex.slice(66, 130);
+ let v = '0x' + signatureHex.slice(130, 132);
+ let pub = ethUtil.ecrecover(m, v, r, s);
+ let addr = '0x' + ethUtil.pubToAddress(pub).toString('hex');
+ return addr;
+};
 
 module.exports = {
   hashBytes,
@@ -104,5 +116,6 @@ module.exports = {
   hexToStr,
   jsonToQr,
   qrToJson,
-  verifySignature
+  verifySignature,
+  addrFromSig
 };
