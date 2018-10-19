@@ -1,9 +1,8 @@
 const LocalstorageContainer = require('./localstorageContainer');
 const TeststorageContainer = require('./teststorageContainer');
 
-
 /**
- * @param  {String} privK
+ * @param  {String} type
  */
 class KeyContainer {
   constructor(type) {

@@ -3,8 +3,6 @@ const ethUtil = require('ethereumjs-util');
 const utils = require('../utils');
 const kcutils = require('./kcutils');
 
-
-
 class TeststorageContainer {
   constructor() {
     this.keys = {};
@@ -39,7 +37,7 @@ class TeststorageContainer {
   /**
    * @param  {String} addressHex
    * @param  {String} data
-   * @returns {String} signature
+   * @returns {Object} signatureObj
    */
   sign(addressHex, data) {
     let privKHex = this.keys[addressHex];

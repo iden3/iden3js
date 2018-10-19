@@ -18,9 +18,12 @@ class LocalstorageContainer {
     this.encryptionKey = '';
   }
 
+  /**
+   * @param  {String} passphrase
+   */
   unlock(passphrase) {
     this.encryptionKey = kcutils.passToKey(passphrase, 'salt');
-    setTimeout(function(){
+    setTimeout(function() {
       this.encryptionKey = '';
       // console.log('KC locked');
     }, 30000);
@@ -30,7 +33,7 @@ class LocalstorageContainer {
    * @returns {String} AddressHex
    */
   generateKey() {
-    if(this.encryptionKey === '') {
+    if (this.encryptionKey === '') {
       // KeyContainer not unlocked
       return undefined;
     }
@@ -39,7 +42,6 @@ class LocalstorageContainer {
     let address = ethUtil.privateToAddress(privK);
     let addressHex = utils.bytesToHex(address);
     let privKHex = utils.bytesToHex(privK);
-
 
     let privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
     localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
@@ -50,7 +52,7 @@ class LocalstorageContainer {
    * @returns {String} AddressHex
    */
   importKey(privKHex) {
-    if(this.encryptionKey === '') {
+    if (this.encryptionKey === '') {
       // KeyContainer not unlocked
       return undefined;
     }
@@ -66,10 +68,10 @@ class LocalstorageContainer {
   /**
    * @param  {String} addressHex
    * @param  {String} data
-   * @returns {String} signature
+   * @returns {Object} signatureObj
    */
   sign(addressHex, data) {
-    if(this.encryptionKey === '') {
+    if (this.encryptionKey === '') {
       // KeyContainer not unlocked
       return undefined;
     }
@@ -89,7 +91,7 @@ class LocalstorageContainer {
     let keysList = [];
     for (var i = 0, len = localStorage.length; i < len; i++) {
       // get only the stored data related to keycontainer (that have the prefix)
-      if(localStorage.key(i).indexOf(this.prefix) !== -1) {
+      if (localStorage.key(i).indexOf(this.prefix) !== -1) {
         var key = localStorage.key(i).replace(this.prefix, '');
         keysList.push(key);
       }

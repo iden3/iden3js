@@ -20,7 +20,7 @@ describe('[auth]new QR challenge (centralized website side)', function() {
   // let ksign = kc0.importKey(testPrivKHex0);
   ksignGeneratedInWeb = kc0.generateKey();
   let auth = new iden3.Auth(kc0, ksignGeneratedInWeb, authurl, authwsurl, successCallback);
-  qr = auth.qr();
+  qr = auth.qrHex();
   it('jsonQR.ksign equal to auth.ksign', function() {
     expect(iden3.auth.parseQRhex(qr).authurl).to.be.equal(auth.authurl);
   });

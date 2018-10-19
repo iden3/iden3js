@@ -226,40 +226,37 @@ var parseAuthorizeKSignClaim = function(b) {
   return c;
 }
 
+/**
+ * @param  {Buffer} b
+ * @returns {Buffer}
+ */
 var hiFromClaimBytes = function(b) {
   let indexLength = ethBytesToUint32(b.slice(56, 60));
   return utils.hashBytes(b.slice(0, indexLength));
 }
 
+/**
+ * @param  {Object} proofOfClaim
+ * @param  {Number} numLevels
+ * @returns {Boolean}
+ */
 var checkProofOfClaim = function(proofOfClaim, numLevels) {
   let ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
   let hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
-  let vClaimProof = merkletree.checkProof(proofOfClaim.ClaimProof.Root,
-                        proofOfClaim.ClaimProof.Proof,
-                        hi,
-                        ht, numLevels);
+  let vClaimProof = merkletree.checkProof(proofOfClaim.ClaimProof.Root, proofOfClaim.ClaimProof.Proof, hi, ht, numLevels);
 
   ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
-  let vSetRootClaimProof = merkletree.checkProof(proofOfClaim.SetRootClaimProof.Root,
-                        proofOfClaim.SetRootClaimProof.Proof,
-                        hi,
-                        ht, numLevels);
+  let vSetRootClaimProof = merkletree.checkProof(proofOfClaim.SetRootClaimProof.Root, proofOfClaim.SetRootClaimProof.Proof, hi, ht, numLevels);
 
   ht = utils.bytesToHex(merkletree.EmptyNodeValue);
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimNonRevocationProof.Leaf)));
-  let vClaimNonRevocationProof = merkletree.checkProof(proofOfClaim.ClaimNonRevocationProof.Root,
-                        proofOfClaim.ClaimNonRevocationProof.Proof,
-                        hi,
-                        ht, numLevels);
+  let vClaimNonRevocationProof = merkletree.checkProof(proofOfClaim.ClaimNonRevocationProof.Root, proofOfClaim.ClaimNonRevocationProof.Proof, hi, ht, numLevels);
 
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimNonRevocationProof.Leaf)));
-  let vSetRootClaimNonRevocationProof = merkletree.checkProof(proofOfClaim.SetRootClaimNonRevocationProof.Root,
-                        proofOfClaim.SetRootClaimNonRevocationProof.Proof,
-                        hi,
-                        ht, numLevels);
+  let vSetRootClaimNonRevocationProof = merkletree.checkProof(proofOfClaim.SetRootClaimNonRevocationProof.Root, proofOfClaim.SetRootClaimNonRevocationProof.Proof, hi, ht, numLevels);
 
-  if(vClaimProof&&vSetRootClaimProof&&vClaimNonRevocationProof&&vSetRootClaimNonRevocationProof) {
+  if (vClaimProof && vSetRootClaimProof && vClaimNonRevocationProof && vSetRootClaimNonRevocationProof) {
     return true;
   }
   return false;

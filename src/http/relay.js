@@ -98,6 +98,12 @@ class Relay {
     return axios.post(this.url + '/vinculateid', vinculateIDMsg);
   }
 
+  /**
+   * @param  {Object} kc - Keycontainer
+   * @param  {String} idaddr
+   * @param  {String} keyOperational
+   * @param  {String} name
+   */
   vinculateID(kc, idaddr, keyOperational, name) {
     let idBytes = utils.hexToBytes(idaddr);
     let nameBytes = Buffer.from(name);
@@ -115,9 +121,19 @@ class Relay {
     };
     return this.postVinculateID(vinculateIDMsg);
   }
+
+  /**
+   * @param  {String} name
+   */
   resolveName(name) {
     return axios.get(this.url + '/identities/resolv/' + name);
   }
+
+  /**
+   * @param  {String} op
+   * @param  {String} rec
+   * @param  {String} rev
+   */
   createID(op, rec, rev) {
     let keys = {
       operational: op,
@@ -126,9 +142,17 @@ class Relay {
     };
     return axios.post(this.url + '/id', keys);
   }
+
+  /**
+   * @param  {String} idaddr
+   */
   getID(idaddr) {
     return axios.get(this.url + '/id/' + idaddr);
   }
+
+  /**
+   * @param  {String} idaddr
+   */
   deployID(idaddr) {
     return axios.post(this.url + '/id/' + idaddr + '/deploy');
   }

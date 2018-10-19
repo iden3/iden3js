@@ -30,12 +30,21 @@ function concatSignature(msg, msgHash, v, r, s) {
   return signedMsg;
 }
 
-
+/**
+ * @param  {String} key
+ * @param  {String} salt
+ * @returns {String} - Key encoded in base64
+ */
 function passToKey(key, salt) {
   var res = pbkdf2(key, salt, 256, 32);
   return nacl.util.encodeBase64(res);
 }
 
+/**
+ * @param  {String} key - Key encoded in base64
+ * @param  {String} msg
+ * @returns {String} - Encrypted msg in base64 encoding
+ */
 function encrypt(key, msg) {
   const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength);
 
@@ -54,14 +63,15 @@ function encrypt(key, msg) {
   return base64FullMessage;
 }
 
+/**
+ * @param  {String} key - Key encoded in base64
+ * @param  {String} messageWithNonce
+ */
 function decrypt(key, messageWithNonce) {
   const keyUint8Array = nacl.util.decodeBase64(key);
   const messageWithNonceAsUint8Array = nacl.util.decodeBase64(messageWithNonce);
   const nonce = messageWithNonceAsUint8Array.slice(0, nacl.secretbox.nonceLength);
-  const message = messageWithNonceAsUint8Array.slice(
-    nacl.secretbox.nonceLength,
-    messageWithNonce.length
-  );
+  const message = messageWithNonceAsUint8Array.slice(nacl.secretbox.nonceLength, messageWithNonce.length);
 
   const decrypted = nacl.secretbox.open(message, nonce, keyUint8Array);
 

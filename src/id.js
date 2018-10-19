@@ -4,7 +4,7 @@ const claim = require('./core/claim');
  * @param  {String} keyRecover
  * @param  {String} keyRevoke
  * @param  {String} keyOp
- * @param  {Obj} relay
+ * @param  {Object} relay
  * @param  {String} implementation
  */
 class Id {
@@ -16,6 +16,7 @@ class Id {
     this.implementation = implementation;
     this.idaddr = undefined;
   }
+
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
     return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke).then(res => {
@@ -23,6 +24,7 @@ class Id {
       return this.idaddr;
     });
   }
+
   deployID() {
     return this.relay.deployID(this.idaddr);
   }
@@ -56,6 +58,10 @@ class Id {
     return this.relay.AuthorizeKSignClaim(kc, this.idaddr, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
   }
 
+  /**
+   * @param  {Object} kc
+   * @param  {String} name
+   */
   vinculateID(kc, name) {
     return this.relay.vinculateID(kc, this.idaddr, this.keyOperational, name);
   }

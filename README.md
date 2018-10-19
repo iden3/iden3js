@@ -66,6 +66,28 @@ let verified = iden3.merkletree.checkProof(rootHex, mpHex, hiHex, htHex, numLeve
 // having a proofOfClaim, let's check it
 let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
 // verified == true
+
+
+
+// centralized authentication
+// once have the QR data scanned, or the hex QR data copied
+let qrJson = iden3.auth.parseQRhex(qrHex);
+let qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
+// perform the AuthorizeKSignClaim over the qrKSign
+id.AuthorizeKSignClaim(kc, id.keyOperational, 'iden3.io', qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
+  let ksignProof = res.data.proofOfClaim;
+
+  // send the challenge, signature, KSign, and KSignProof to the qr url, that is the url of the backend of the centralized auth
+  iden3.auth.resolv(qrJson.url, id.keyOperational, qrJson.challenge, qrJson.signature, qrKSign, ksignProof).then(res => {
+    console.log('centralized auth success, the website will refresh with the jwt');
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+})
+.catch(function (error) {
+  console.log(error);
+});
 ```
 
 ## Usage
@@ -319,7 +341,7 @@ let verified = iden3.merkletree.checkProofOfClaim(proofOfClaim, 140);
 console.log(verified); // true
 ```
 
-#### Utils
+### Utils
 ```js
 // hash Buffer
 let hash = iden3.utils.hashBytes(b);
@@ -480,6 +502,78 @@ Output:
 }
 ```
 
+### Auth
+```js
+// once have the QR data scanned, or the hex QR data copied
+let qrJson = iden3.auth.parseQRhex(qrHex);
+let qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
+// perform the AuthorizeKSignClaim over the qrKSign
+id.AuthorizeKSignClaim(kc, id.keyOperational, 'iden3.io', qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
+  let ksignProof = res.data.proofOfClaim;
+
+  // send the challenge, signature, KSign, and KSignProof to the qr url, that is the url of the backend of the centralized auth
+  iden3.auth.resolv(qrJson.url, id.keyOperational, qrJson.challenge, qrJson.signature, qrKSign, ksignProof).then(res => {
+    alert('centralized auth success, the website will refresh with the jwt');
+  })
+  .catch(function (error) {
+    alert(error);
+  });
+})
+.catch(function (error) {
+  alert(error);
+});
+```
+
+## Centralized Apps integration
+The following instructions are for centralized apps, to integrate the iden3 system for authentication.
+
+Once having a `centrauth` backend running ( https://github.com/iden3/go-iden3 ).
+
+Include the `iden3js` library:
+```js
+const iden3 = require('iden3');
+```
+
+Or in the html include:
+```html
+<script src="iden3js-bundle.js"></script>
+```
+
+Add in the html the div that will contain the QR:
+```html
+<div id="qrcodediv"></div>
+
+<!-- and optionally, the textarea to place the qr data in hex format -->
+<textarea id="qrHex" rows="4" cols="30" readonly="readonly"></textarea>
+```
+
+
+In the js:
+```js
+let passphrase = 'this is a test passphrase';
+const authurl = 'http://IPcentrauth:5000';
+const authwsurl = 'ws://IPcentrauth:5000';
+
+let kc = new iden3.KeyContainer('localstorage');
+kc.unlock(passphrase);
+
+let ksign = kc.generateKey();
+
+let auth = new iden3.Auth(kc, ksign, authurl, authwsurl, function(authData) {
+  // callback that will be called when the websocket gets the token, after the backend checks the authentication (challenge, signature, KSign, KSignProof, etc)
+  alert("✔️ Logged in");
+  /*
+    authData = {
+      "success": true,
+      "token": "xxxxxxxx"
+    }
+  */
+});
+auth.printQr('qrcodediv');
+
+let qrHex = auth.qrHex(); // optional, to show the qr hex data
+document.getElementById("qrHex").value = qrHex; // optional, to show the qr hex data
+```
 
 ## Tests
 To run all tests, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.
