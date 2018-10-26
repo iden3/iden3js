@@ -73,7 +73,7 @@ class LocalstorageContainer {
   sign(addressHex, data) {
     if (this.encryptionKey === '') {
       // KeyContainer not unlocked
-      return undefined;
+      return "KeyContainer blocked";
     }
     let privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
     var message = ethUtil.toBuffer(data);

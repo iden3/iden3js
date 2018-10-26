@@ -5,6 +5,8 @@ const KeyContainer = require('./keyContainer/keyContainer');
 const Id = require('./id');
 const auth = require('./auth/auth');
 const Auth = auth.Auth;
+const dapp = require('./auth/dapp');
+const Dapp = dapp.Dapp;
 const utils = require('./utils');
 
 module.exports = {
@@ -15,5 +17,7 @@ module.exports = {
   Relay,
   auth,
   Auth,
+  dapp,
+  Dapp,
   utils
 };
