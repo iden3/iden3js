@@ -54,7 +54,7 @@ id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', ksign, 'appToAuthName', 'authz', 
 });
 
 // create new ClaimDefault, sign it and send it to the Relay
-id.ClaimDefault(kc, ksign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+id.ClaimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
   let proofOfClaim = res.data.proofOfClaim;
 });
 
@@ -215,7 +215,7 @@ id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'auth
 #### id.ClaimDefault
 ```js
 // perform a new ClaimDefault, sign it, and post it to the Relay
-id.ClaimDefault(kc, ksign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+id.ClaimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
   //
 });
 ```
@@ -398,7 +398,7 @@ Response:
 #### relay.ClaimDefault
 Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.ClaimDefault(id.kc, ksign, proofOfKSign, 'iden3.io', 'default', 'data of the claim').then(res => {
+relay.ClaimDefault(id.kc, ksign, 'iden3.io', 'default', 'data of the claim').then(res => {
   // console.log("res.data", res.data);
   expect(res.status).to.be.equal(200);
 });

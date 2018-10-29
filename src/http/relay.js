@@ -47,14 +47,13 @@ class Relay {
    * @param  {Object} kc
    * @param  {String} idaddr
    * @param  {String} ksign
-   * @param  {Object} proofOfKSign
    * @param  {String} namespaceStr
    * @param  {String} typeStr
    * @param  {String} extraIndexData
    * @param  {String} data
    * @returns {Object}
    */
-  ClaimDefault(kc, idaddr, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data) {
+  ClaimDefault(kc, idaddr, ksign, namespaceStr, typeStr, extraIndexData, data) {
     let claimDefault = new claim.ClaimDefault(namespaceStr, typeStr, extraIndexData, data);
     let signatureObj = kc.sign(ksign, claimDefault.hex());
     let bytesSignedMsg = {

@@ -32,15 +32,14 @@ class Id {
   /**
    * @param  {Object} kc
    * @param  {String} ksign
-   * @param  {Object} proofOfKSign
    * @param  {String} namespaceStr
    * @param  {String} typeStr
    * @param  {String} extraIndexData
    * @param  {String} data
    * @returns {Object}
    */
-  ClaimDefault(kc, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data) {
-    return this.relay.ClaimDefault(kc, this.idaddr, ksign, proofOfKSign, namespaceStr, typeStr, extraIndexData, data);
+  ClaimDefault(kc, ksign, namespaceStr, typeStr, extraIndexData, data) {
+    return this.relay.ClaimDefault(kc, this.idaddr, ksign, namespaceStr, typeStr, extraIndexData, data);
   }
 
   /**
