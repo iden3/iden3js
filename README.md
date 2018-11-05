@@ -23,9 +23,35 @@ kc.unlock(passphrase);
 let keyId = kc.importKey('x'); // keyId is the address that is used to identify the key
 
 // generate new keys
-let keyRecover = kc.generateKey();
-let keyRevoke = kc.generateKey();
-let keyOp = kc.generateKey();
+let keys = kc.generateKeysMnemonic();
+/*
+keys =
+{
+  keys: [
+    '0x94f1d9fdf01abec15ba9c473dbb87f9931986a86',
+    '0xa50970867092c1ae769fc24d5f5151c7b87ff715',
+    '0x1526824c893cb894d18f0cc400c24d96340a4341'
+  ],
+  mnemonic: 'blanket kick genre rubber better helmet youth slush acid select brick setup'
+}
+*/
+let keyRecover = keys.keys[0];
+let keyRevoke = keys.keys[1];
+let keyOp = keys.keys[2];
+
+
+// also we can import an already existing seed
+let seed = 'blanket kick genre rubber better helmet youth slush acid select brick setup';
+let keys = kc.generateKeysMnemonic(seed);
+
+// import privkey
+let key0id = kc.importKey('privKHex');
+// key0id is the address of the imported key, will be used as key identifier
+
+// generate key random
+let key1id = kc.generateKeyRand();
+// key1id is the address of the generated key, will be used as key identifier
+
 
 // create a new relay object
 const relay = new iden3.Relay('http://127.0.0.1:5000');
@@ -105,7 +131,7 @@ const iden3 = require('iden3');
   let kc = new iden3.KeyContainer('localstorage');
 
   ```
-- new KeyContainer using testStorage (memory)
+- [no use this] new KeyContainer using testStorage (memory)
   ```js
   // new key container
   let kc = new iden3.KeyContainer('teststorage');
@@ -118,12 +144,29 @@ Usage:
 let passphrase = 'this is a test passphrase';
 kc.unlock(passphrase);
 
+let keys = kc.generateKeysMnemonic();
+/*
+keys =
+{
+  keys: [ // addresses of the keys
+    '0x94f1d9fdf01abec15ba9c473dbb87f9931986a86',
+    '0xa50970867092c1ae769fc24d5f5151c7b87ff715',
+    '0x1526824c893cb894d18f0cc400c24d96340a4341'
+  ],
+  mnemonic: 'blanket kick genre rubber better helmet youth slush acid select brick setup'
+}
+*/
+
+// also we can import an already existing seed
+let seed = 'blanket kick genre rubber better helmet youth slush acid select brick setup';
+let keys = kc.generateKeysMnemonic(seed);
+
 // import key
-let key0id = kc.importKey('x');
+let key0id = kc.importKey('privKHex');
 // key0id is the address of the imported key, will be used as key identifier
 
 // generate key
-let key1id = kc.generateKey();
+let key1id = kc.generateKeyRandom();
 // key1id is the address of the generated key, will be used as key identifier
 
 // sign using key0id

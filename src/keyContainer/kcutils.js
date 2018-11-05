@@ -19,15 +19,13 @@ function concatSignature(msg, msgHash, v, r, s) {
     serialized,
     Buffer.from([v]),
   ]);
-
-  // signed message
   return {
     message: ethUtil.bufferToHex(msg),
     messageHash: ethUtil.bufferToHex(msgHash),
     v: ethUtil.bufferToHex(v),
     r: ethUtil.bufferToHex(r),
     s: ethUtil.bufferToHex(s),
-    signature: ethUtil.bufferToHex(serialized),
+    signature: ethUtil.bufferToHex(serialized)
   };
 }
 
@@ -75,7 +73,6 @@ function decrypt(key, messageWithNonce) {
   if (!decrypted) {
     throw new Error('Could not decrypt message');
   }
-
   // base64 decrypted message
   return nacl.util.encodeUTF8(decrypted);
 }

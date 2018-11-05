@@ -5,6 +5,12 @@ const IPFS = require('ipfs');
 const IPFSRoom = require('ipfs-pubsub-room');
 const encoder = new TextEncoder("utf-8");
 
+/**
+ * @param  {String} idaddr
+ * @param  {String} roomQr
+ * @param  {Param} roomConnectedCallback
+ * @param  {Param} msgSendCallback
+ */
 class Dapp {
   constructor(idaddr, roomQr, roomConnectedCallback, msgSendCallback) {
     this.peerInfo = '';
@@ -47,6 +53,12 @@ class Dapp {
     }))
   }
 
+  /**
+   * @param  {String} idaddr
+   * @param  {String} roomQr
+   * @param  {Param} roomConnectedCallback
+   * @param  {Param} msgSendCallback
+   */
   parseQr(idaddr, roomQr, roomConnectedCallback, msgSendCallback) {
     this.secretkey = nacl.util.decodeBase64(roomQr);
     this.roomid = nacl.util.encodeBase64(nacl.hash(this.secretkey).slice(48));
@@ -54,13 +66,17 @@ class Dapp {
 
     this.room = IPFSRoom(this.ipfs, this.roomid);
     this.room.on('subscribed', () => {
-      console.log("Now connected to room "+this.roomid)
+      console.log("Now connected to room " + this.roomid)
       roomConnectedCallback(this.roomid);
       this.room.on('message', (message) => this.recv(message, this.recv_wallet));
       this.send("idaddr|" + idaddr, msgSendCallback);
     });
   }
 
+  /**
+   * @param  {String} message
+   * @param  {Param} msgSendCallback
+   */
   send(message, msgSendCallback) {
     console.log("send", message);
     let nonceBytes = new Uint8Array(nacl.box.nonceLength);
@@ -71,6 +87,11 @@ class Dapp {
     this.nonce++;
     msgSendCallback();
   }
+
+  /**
+   * @param  {String} message
+   * @param  {Param} callback
+   */
   recv(message, callback) {
     if (message.from == this.peerInfo.id) {
       return;
@@ -129,7 +150,6 @@ class Dapp {
     }
   }
 }
-
 
 module.exports = {
   Dapp

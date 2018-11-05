@@ -10,10 +10,14 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
+    "bip39": "^2.5.0",
     "chai": "^4.1.2",
     "ethereumjs-util": "^5.2.0",
     "ethereumjs-wallet": "^0.6.2",
     "ethjs-util": "^0.1.6",
+    "hdkey": "^1.1.0",
+    "ipfs": "^0.32.3",
+    "ipfs-pubsub-room": "^1.4.0",
     "keccak": "^1.4.0",
     "keythereum": "^1.0.4",
     "mocha": "^5.2.0",
@@ -21,9 +25,7 @@
     "qrcode-generator": "^1.4.1",
     "tweetnacl": "^1.0.0",
     "tweetnacl-util": "^0.15.0",
-    "web3": "^1.0.0-beta.34",
-    "ipfs": "^0.32.3",
-    "ipfs-pubsub-room": "^1.4.0"
+    "web3": "^1.0.0-beta.34"
   },
   "devDependencies": {
     "eslint": "^5.8.0",

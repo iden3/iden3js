@@ -16,10 +16,12 @@ let qr = '';
 let ksignGeneratedInWeb = '';
 describe('[auth]new QR challenge (centralized website side)', function() {
   // inside the App where the user is going to authenticate
-  let kc0 = new iden3.KeyContainer('teststorage');
+  let kc0 = new iden3.KeyContainer('localstorage');
+  kc0.unlock('pass');
   // let ksign = kc0.importKey(testPrivKHex0);
-  ksignGeneratedInWeb = kc0.generateKey();
+  ksignGeneratedInWeb = kc0.generateKeyRand();
   let auth = new iden3.Auth(kc0, ksignGeneratedInWeb, authurl, authwsurl, successCallback);
+  // console.log(auth);
   qr = auth.qrHex();
   it('jsonQR.ksign equal to auth.ksign', function() {
     expect(iden3.auth.parseQRhex(qr).authurl).to.be.equal(auth.authurl);
@@ -36,11 +38,12 @@ describe('[auth] authorize the KSign (from the wallet side)', function() {
   // inside Wallet App
   // new AuthorizeKSignClaim with the ksign from the QR
   // previous work: generate an identity
-  let kc = new iden3.KeyContainer('teststorage');
+  let kc = new iden3.KeyContainer('localstorage');
+  kc.unlock('pass');
   // let key0id = kc.importKey(testPrivKHex1);
-  let ko = kc.generateKey();
-  let krec = kc.generateKey();
-  let krev = kc.generateKey();
+  let ko = kc.generateKeyRand();
+  let krec = kc.generateKeyRand();
+  let krev = kc.generateKeyRand();
   const relay = new iden3.Relay('http://127.0.0.1:8000');
   let id = new iden3.Id(krec, krev, ko, relay, '');
 
@@ -54,6 +57,7 @@ describe('[auth] authorize the KSign (from the wallet side)', function() {
       expect(qrKSign).to.be.equal(ksignGeneratedInWeb);
       // create a new AuthorizeKSignClaim signed with ID (key0id) and send it to the Relay
       let unixtime = Math.round(+ new Date() / 1000);
+      kc.unlock('pass');
       return id.AuthorizeKSignClaim(kc, id.keyOperational, 'iden3.io', qrKSign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
         // console.log(res.data);
         ksignProof = res.data.proofOfClaim;

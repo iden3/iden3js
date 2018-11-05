@@ -1,9 +1,15 @@
+import * as CONSTANTS from '../constants';
+
 const ethWallet = require('ethereumjs-wallet');
 const ethUtil = require('ethereumjs-util');
 const nacl = require('tweetnacl');
-nacl.util = require('tweetnacl-util');
+const bip39 = require('bip39');
+const hdkey = require('hdkey');
 const utils = require('../utils');
 const kcutils = require('./kcutils');
+
+nacl.util = require('tweetnacl-util');
+
 
 // if (typeof localStorage === "undefined" || localStorage === null) {
 //   var LocalStorage = require('node-localstorage').LocalStorage;
@@ -12,8 +18,8 @@ const kcutils = require('./kcutils');
 
 class LocalstorageContainer {
   constructor() { // idaddr used as prefix
-    this.prefix = 'i3-';
-    this.type = 'localstorage';
+    this.prefix = `${CONSTANTS.PREFIX.I3.ID}-`;
+    this.type = CONSTANTS.STORAGE.LOCAL_STORAGE.ID;
     this.encryptionKey = '';
   }
 
@@ -29,30 +35,62 @@ class LocalstorageContainer {
   }
 
   /**
-   * @returns {String} AddressHex
+   * @param  {string} mnemonic - String with 12 words
+   * @param  {Number} numberOfDerivatedKeys
+   *
+   * @returns {Object}
    */
-  generateKey() {
-    if (!this.encryptionKey) {
+  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), numberOfDerivatedKeys = 3) {
+    if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
       return undefined;
     }
+    const root = hdkey.fromMasterSeed(mnemonic);
+    const keys = [];
+    const path = "m/44'/60'/0'/0/";
 
-    const w = ethWallet.generate();
-    const privK = w._privKey;
-    const privKHex = utils.bytesToHex(privK);
-    const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
-    const address = ethUtil.privateToAddress(privK);
-    const addressHex = utils.bytesToHex(address);
+    // to allow in the future specify how many keys want to derivate
+    for (let i = 0; i < numberOfDerivatedKeys; i++) {
+      const addrNode = root.derive(path + i); // "m/44'/60'/0'/0/i"
+      const privK = addrNode._privateKey;
+      const address = ethUtil.privateToAddress(addrNode._privateKey);
+      const addressHex = utils.bytesToHex(address);
+      const privKHex = utils.bytesToHex(privK);
+      const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
 
-    localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
-    return addressHex;
+      keys.push(addressHex);
+      localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+    }
+
+    return { keys, mnemonic };
   }
 
   /**
    * @returns {String} AddressHex
    */
-  importKey(privKHex) {
+  generateKeyRand() {
     if (!this.encryptionKey) {
+      // KeyContainer not unlocked
+      return undefined;
+    }
+    const w = ethWallet.generate();
+    const privK = w._privKey;
+    const address = ethUtil.privateToAddress(privK);
+    const addressHex = utils.bytesToHex(address);
+    const privKHex = utils.bytesToHex(privK);
+
+    const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+    localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+    return addressHex;
+  }
+
+  /**
+   * @param {String} privKHex - PrivK
+   *
+   * @returns {String} AddressHex
+   */
+  importKey(privKHex) {
+    if (!this.encryptionKey || privKHex.constructor !== String) {
       // KeyContainer not unlocked
       return undefined;
     }
@@ -68,6 +106,7 @@ class LocalstorageContainer {
   /**
    * @param  {String} addressHex
    * @param  {String} data
+   *
    * @returns {Object} signatureObj
    */
   sign(addressHex, data) {
