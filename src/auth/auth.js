@@ -38,11 +38,11 @@ class Auth {
     this.ws.onmessage = function(msg) {
       var authData = JSON.parse(msg.data);
       successCallback(authData);
-    }
+    };
     this.ws.onopen = function() {
       console.log("open ws");
       this.send(challenge);
-    }
+    };
     this.send = function(data) {
       console.log("sending data", data);
       this.ws.send(data);
@@ -67,8 +67,8 @@ class Auth {
       b,
       Buffer.from(this.url)
     ]);
-    let r = utils.bytesToHex(b);
-    return r;
+
+    return utils.bytesToHex(b);
   }
 
   /**

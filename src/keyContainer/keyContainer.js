@@ -6,10 +6,10 @@ const TeststorageContainer = require('./teststorageContainer');
  */
 class KeyContainer {
   constructor(type) {
-    if (type == 'teststorage') {
-      return new TeststorageContainer;
-    } else if (type == 'localstorage') {
-      return new LocalstorageContainer;
+    if (type === 'teststorage') {
+      return new TeststorageContainer();
+    } if (type === 'localstorage') {
+      return new LocalstorageContainer();
     }
     return undefined;
   }

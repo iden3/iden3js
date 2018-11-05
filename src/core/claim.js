@@ -9,7 +9,7 @@ var uint32ToEthBytes = function(u) { // compatible with Uint32ToEthBytes() go-id
   var buf = new Buffer(4);
   buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
   return buf;
-}
+};
 
 /**
  * @param  {Buffer} b
@@ -17,7 +17,7 @@ var uint32ToEthBytes = function(u) { // compatible with Uint32ToEthBytes() go-id
  */
 var ethBytesToUint32 = function(b) { // compatible with EthBytesToUint32() go-iden3 version
   return b.readUIntBE(0, 4);
-}
+};
 
 /**
  * @param  {uint64} u
@@ -27,7 +27,7 @@ var uint64ToEthBytes = function(u) { // compatible with Uint64ToEthBytes() go-id
   var buf = new Buffer(8);
   buf.writeUIntBE(u, 0, 8);
   return buf;
-}
+};
 
 /**
  * @param  {Buffer} b
@@ -35,7 +35,7 @@ var uint64ToEthBytes = function(u) { // compatible with Uint64ToEthBytes() go-id
  */
 var ethBytesToUint64 = function(b) { // compatible with EthBytesToUint64() go-iden3 version
   return b.readUIntBE(0, 8);
-}
+};
 
 /**
  * @param  {String} namespaceStr
@@ -44,19 +44,7 @@ var ethBytesToUint64 = function(b) { // compatible with EthBytesToUint64() go-id
  * @returns  {Object} claim
  */
 class ClaimDefault {
-  constructor(namespaceStr, typeStr, extraIndexData, data) {
-    if (namespaceStr === undefined) {
-      namespaceStr = '';
-    }
-    if (typeStr === undefined) {
-      typeStr = '';
-    }
-    if (extraIndexData === undefined) {
-      extraIndexData = '';
-    }
-    if (data === undefined) {
-      data = '';
-    }
+  constructor(namespaceStr='', typeStr='', extraIndexData='', data='') {
     this.claim = {
       baseIndex: {
         namespace: utils.hashBytes(Buffer.from(namespaceStr)),
@@ -128,25 +116,7 @@ var parseClaimDefaultBytes = function(b) {
  * @returns {Object} claim
  */
 class AuthorizeKSignClaim {
-  constructor(namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    if (namespaceStr === undefined) {
-      namespaceStr = '';
-    }
-    if (keyToAuthorize === undefined) {
-      keyToAuthorize = '';
-    }
-    if (applicationName === undefined) {
-      applicationName = '';
-    }
-    if (applicationAuthz === undefined) {
-      applicationAuthz = '';
-    }
-    if (validFrom === undefined) {
-      validFrom = '';
-    }
-    if (validUntil === undefined) {
-      validUntil = '';
-    }
+  constructor(namespaceStr='', keyToAuthorize='', applicationName='', applicationAuthz='', validFrom='', validUntil='') {
     this.claim = {
       baseIndex: {
         namespace: utils.hashBytes(Buffer.from(namespaceStr)),
@@ -163,6 +133,7 @@ class AuthorizeKSignClaim {
       validUntil: validUntil
     };
   }
+
   bytes() {
     var b = new Buffer([]);
     b = Buffer.concat([b, this.claim.baseIndex.namespace]);
@@ -187,19 +158,22 @@ class AuthorizeKSignClaim {
     b = Buffer.concat([b, validUntilBuf]);
     return b;
   }
+
   hex() {
     return utils.bytesToHex(this.bytes());
   }
+
   hi() {
     return utils.hashBytes(this.bytes().slice(0, this.claim.baseIndex.indexLength));
   }
+
   ht() {
     return utils.hashBytes(this.bytes());
   }
 }
 
 /**
- * @param  {Buffer} bytes
+ * @param  {Buffer} b - bytes
  * @returns {Object} claim
  */
 var parseAuthorizeKSignClaim = function(b) {
@@ -224,7 +198,7 @@ var parseAuthorizeKSignClaim = function(b) {
     validUntil: validUntil
   };
   return c;
-}
+};
 
 /**
  * @param  {Buffer} b
@@ -233,7 +207,7 @@ var parseAuthorizeKSignClaim = function(b) {
 var hiFromClaimBytes = function(b) {
   let indexLength = ethBytesToUint32(b.slice(56, 60));
   return utils.hashBytes(b.slice(0, indexLength));
-}
+};
 
 /**
  * @param  {Object} proofOfClaim

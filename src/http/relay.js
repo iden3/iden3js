@@ -26,8 +26,8 @@ class Relay {
   }
 
   /**
-   * @param  {String} - ID Address
-   * @param {Object} claim
+   * @param  {String} idaddr - ID Address
+   * @param {Object} bytesSignedMsg
    * @returns {Object}
    */
   postClaim(idaddr, bytesSignedMsg) {
@@ -67,7 +67,7 @@ class Relay {
   /**
    * @param  {Object} kc
    * @param  {String} idaddr
-   * @param  {String} keyid
+   * @param  {String} ksign
    * @param  {String} namespaceStr
    * @param  {String} keyToAuthorize
    * @param  {String} applicationName

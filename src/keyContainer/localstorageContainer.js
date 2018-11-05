@@ -1,8 +1,7 @@
 const ethWallet = require('ethereumjs-wallet');
 const ethUtil = require('ethereumjs-util');
-var nacl = require('tweetnacl');
+const nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
-
 const utils = require('../utils');
 const kcutils = require('./kcutils');
 
@@ -23,7 +22,7 @@ class LocalstorageContainer {
    */
   unlock(passphrase) {
     this.encryptionKey = kcutils.passToKey(passphrase, 'salt');
-    setTimeout(function() {
+    setTimeout(function () {
       this.encryptionKey = '';
       // console.log('KC locked');
     }, 30000);
@@ -33,17 +32,18 @@ class LocalstorageContainer {
    * @returns {String} AddressHex
    */
   generateKey() {
-    if (this.encryptionKey === '') {
+    if (!this.encryptionKey) {
       // KeyContainer not unlocked
       return undefined;
     }
-    let w = ethWallet.generate();
-    let privK = w._privKey;
-    let address = ethUtil.privateToAddress(privK);
-    let addressHex = utils.bytesToHex(address);
-    let privKHex = utils.bytesToHex(privK);
 
-    let privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+    const w = ethWallet.generate();
+    const privK = w._privKey;
+    const privKHex = utils.bytesToHex(privK);
+    const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+    const address = ethUtil.privateToAddress(privK);
+    const addressHex = utils.bytesToHex(address);
+
     localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
@@ -52,15 +52,15 @@ class LocalstorageContainer {
    * @returns {String} AddressHex
    */
   importKey(privKHex) {
-    if (this.encryptionKey === '') {
+    if (!this.encryptionKey) {
       // KeyContainer not unlocked
       return undefined;
     }
-    let privK = utils.hexToBytes(privKHex);
-    let address = ethUtil.privateToAddress(privK);
-    let addressHex = utils.bytesToHex(address);
+    const privK = utils.hexToBytes(privKHex);
+    const address = ethUtil.privateToAddress(privK);
+    const addressHex = utils.bytesToHex(address);
+    const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
 
-    let privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
     localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
@@ -71,16 +71,16 @@ class LocalstorageContainer {
    * @returns {Object} signatureObj
    */
   sign(addressHex, data) {
-    if (this.encryptionKey === '') {
+    if (!this.encryptionKey) {
       // KeyContainer not unlocked
-      return "KeyContainer blocked";
+      return 'KeyContainer blocked';
     }
-    let privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
-    var message = ethUtil.toBuffer(data);
-    var msgHash = ethUtil.hashPersonalMessage(message);
+    const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
+    const message = ethUtil.toBuffer(data);
+    const msgHash = ethUtil.hashPersonalMessage(message);
+    const privKHex = kcutils.decrypt(this.encryptionKey, privKHexEncrypted);
+    const sig = ethUtil.ecsign(msgHash, utils.hexToBytes(privKHex));
 
-    let privKHex = kcutils.decrypt(this.encryptionKey, privKHexEncrypted);
-    var sig = ethUtil.ecsign(msgHash, utils.hexToBytes(privKHex));
     return kcutils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
   }
 
@@ -88,14 +88,17 @@ class LocalstorageContainer {
    * @returns {Array}
    */
   listKeys() {
-    let keysList = [];
-    for (var i = 0, len = localStorage.length; i < len; i++) {
+    const keysList = [];
+    const localStorageLength = localStorage.length;
+
+    for (let i = 0, len = localStorageLength; i < len; i++) {
       // get only the stored data related to keycontainer (that have the prefix)
       if (localStorage.key(i).indexOf(this.prefix) !== -1) {
-        var key = localStorage.key(i).replace(this.prefix, '');
+        const key = localStorage.key(i).replace(this.prefix, '');
         keysList.push(key);
       }
     }
+
     return keysList;
   }
 
@@ -105,6 +108,7 @@ class LocalstorageContainer {
   deleteKey(addressHex) {
     localStorage.removeItem(this.prefix + addressHex);
   }
+
   deleteAll() {
     localStorage.clear();
   }
