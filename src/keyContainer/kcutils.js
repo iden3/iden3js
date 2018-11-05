@@ -19,7 +19,7 @@ function concatSignature(msg, msgHash, v, r, s) {
     serialized,
     Buffer.from([v])
   ]);
-  var signedMsg = {
+  return {
     message: ethUtil.bufferToHex(msg),
     messageHash: ethUtil.bufferToHex(msgHash),
     v: ethUtil.bufferToHex(v),
@@ -27,7 +27,6 @@ function concatSignature(msg, msgHash, v, r, s) {
     s: ethUtil.bufferToHex(s),
     signature: ethUtil.bufferToHex(serialized)
   };
-  return signedMsg;
 }
 
 /**
@@ -59,8 +58,7 @@ function encrypt(key, msg) {
   fullMessage.set(nonce);
   fullMessage.set(box, nonce.length);
 
-  const base64FullMessage = nacl.util.encodeBase64(fullMessage);
-  return base64FullMessage;
+  return nacl.util.encodeBase64(fullMessage); // base64FullMessage
 }
 
 /**
@@ -79,8 +77,7 @@ function decrypt(key, messageWithNonce) {
     throw new Error("Could not decrypt message");
   }
 
-  const base64DecryptedMessage = nacl.util.encodeUTF8(decrypted);
-  return base64DecryptedMessage;
+  return nacl.util.encodeUTF8(decrypted); // base64DecryptedMessage
 }
 
 module.exports = {

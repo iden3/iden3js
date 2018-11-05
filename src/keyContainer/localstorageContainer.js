@@ -2,6 +2,8 @@ const ethWallet = require('ethereumjs-wallet');
 const ethUtil = require('ethereumjs-util');
 var nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
+var bip39 = require('bip39');
+var hdkey = require('hdkey');
 
 const utils = require('../utils');
 const kcutils = require('./kcutils');
@@ -30,9 +32,42 @@ class LocalstorageContainer {
   }
 
   /**
+   * @param  {String} mnemonic
+   * @returns {Object}
+   */
+  generateKeysMnemonic(mnemonic) {
+    if (this.encryptionKey === '') {
+      // KeyContainer not unlocked
+      return undefined;
+    }
+    if (mnemonic == undefined) {
+      mnemonic = bip39.generateMnemonic(); // by default 128, 256
+    }
+    const root = hdkey.fromMasterSeed(mnemonic);
+    const masterPrivateKey = root.privateKey;
+    const masterPubKey = root.publicKey;
+
+    var keys = [];
+    var path = "m/44'/60'/0'/0/";
+    for (var i = 0; i < 3; i++) { // to allow in the future specify how many keys want to derivate
+      const addrNode = root.derive(path + i); // "m/44'/60'/0'/0/i"
+      let privK = addrNode._privateKey;
+      const pubKey = ethUtil.privateToPublic(addrNode._privateKey);
+      let address = ethUtil.privateToAddress(addrNode._privateKey);
+      let addressHex = utils.bytesToHex(address);
+      keys.push(addressHex);
+      let privKHex = utils.bytesToHex(privK);
+      let privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+      localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+    }
+
+    return {keys: keys, mnemonic: mnemonic};
+  }
+
+  /**
    * @returns {String} AddressHex
    */
-  generateKey() {
+  generateKeyRand() {
     if (this.encryptionKey === '') {
       // KeyContainer not unlocked
       return undefined;
@@ -49,6 +84,7 @@ class LocalstorageContainer {
   }
 
   /**
+   * @param {String} - PrivK
    * @returns {String} AddressHex
    */
   importKey(privKHex) {
@@ -105,6 +141,7 @@ class LocalstorageContainer {
   deleteKey(addressHex) {
     localStorage.removeItem(this.prefix + addressHex);
   }
+
   deleteAll() {
     localStorage.clear();
   }

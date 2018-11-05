@@ -28,11 +28,11 @@ describe('getIDRoot()', function() {
   });
 });
 
-
 describe('relay.createID()', function() {
-  let kc = new iden3.KeyContainer('teststorage');
+  let kc = new iden3.KeyContainer('localstorage');
+  kc.unlock('pass');
   // let key0id = kc.importKey('289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032');
-  let key0id = kc.generateKey();
+  let key0id = kc.generateKeyRand();
   const relay = new iden3.Relay('http://127.0.0.1:8000');
   it('relay.createID() & relay.getID()', function() {
     return relay.createID(key0id, key0id, key0id).then(res => {
@@ -43,14 +43,13 @@ describe('relay.createID()', function() {
         // console.log("relay.getID", res.data);
         expect(res.status).to.be.equal(200);
       });
-
     });
   });
 });
 
-
 describe('postVinculateID()', function() {
-  let kc = new iden3.KeyContainer('teststorage');
+  let kc = new iden3.KeyContainer('localstorage');
+  kc.unlock('pass');
   // let key0id = kc.importKey(testPrivKHex);
   let key0id = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
 
@@ -58,8 +57,7 @@ describe('postVinculateID()', function() {
   let id = new iden3.Id(key0id, key0id, key0id, relay, '');
 
   before(function() {
-    return id.createID().then(res => {
-    });
+    return id.createID().then(res => {});
   });
 
   it('postVinculateID()', function() {
@@ -71,6 +69,7 @@ describe('postVinculateID()', function() {
     msgBytes = Buffer.concat([msgBytes, idBytes]);
     msgBytes = Buffer.concat([msgBytes, nameBytes]);
 
+    kc.unlock('pass');
     let signatureObj = kc.sign(key0id, iden3.utils.bytesToHex(msgBytes));
     let vinculateIDMsg = {
       ethID: id.idaddr,

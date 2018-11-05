@@ -12,8 +12,7 @@ function challenge() {
   let unixTime = Math.round((new Date()).getTime() / 1000);
   let r = Math.random();
   let randStr = r.toString(36).substr(7, 4);
-  let challenge = 'uuid-' + unixTime + "-" + randStr;
-  return challenge; // challenge of 20 characters length
+  return 'uuid-' + unixTime + "-" + randStr; // challenge of 20 characters length
 }
 
 /**
@@ -67,8 +66,7 @@ class Auth {
       b,
       Buffer.from(this.url)
     ]);
-    let r = utils.bytesToHex(b);
-    return r;
+    return utils.bytesToHex(b);
   }
 
   /**
@@ -85,6 +83,7 @@ class Auth {
     document.getElementById(divId).innerHTML = qr.createImgTag();
   }
 }
+
 /**
  * Parses the QR Hex data into an object
  * @param  {String} h - Hex string
@@ -92,13 +91,13 @@ class Auth {
  */
 var parseQRhex = function(h) {
   let b = utils.hexToBytes(h);
-  let j = {
+  return {
     challenge: b.slice(0, 20).toString(), // 20 is the length of the challenge
     signature: utils.bytesToHex(b.slice(20, 85)),
     url: b.slice(85, b.length).toString()
   };
-  return j;
 }
+
 /**
  * @param  {String} url
  * @param  {String} idaddr
