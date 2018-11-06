@@ -101,20 +101,20 @@ const parseQRhex = function (h) {
 
 /**
  * @param  {String} url
- * @param  {String} idaddr
+ * @param  {String} idAddr
  * @param  {String} challenge
  * @param  {String} signature
- * @param  {String} ksign
- * @param  {Object} ksignProof
+ * @param  {String} kSign
+ * @param  {Object} kSignProof
  * @returns
  */
-const resolv = function (url, idaddr, challenge, signature, ksign, ksignProof) {
+const resolv = function (url, idAddr, challengeStr, signature, kSign, kSignProof) {
   const authMsg = {
-    address: idaddr,
-    challenge,
+    address: idAddr,
+    challengeStr,
     signature,
-    ksign,
-    ksignProof,
+    kSign,
+    kSignProof,
   };
   return axios.post(`${url}/auth`, authMsg);
 };

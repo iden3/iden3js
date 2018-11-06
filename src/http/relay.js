@@ -14,33 +14,33 @@ class Relay {
    * @returns {Object}
    */
   getRelayRoot() {
-    return axios.get(this.url + '/root')
+    return axios.get(`${this.url}/root`);
   }
 
   /**
    * @param {String} - ID Address
    * @returns {Object}
    */
-  getIDRoot(idaddr) {
-    return axios.get(this.url + '/claim/' + idaddr + '/root')
+  getIDRoot(idAddr) {
+    return axios.get(`${this.url}/claim/${idAddr}/root`);
   }
 
   /**
-   * @param  {String} idaddr - ID Address
+   * @param  {String} idAddr - ID Address
    * @param {Object} bytesSignedMsg
    * @returns {Object}
    */
-  postClaim(idaddr, bytesSignedMsg) {
-    return axios.post(this.url + '/claim/' + idaddr, bytesSignedMsg);
+  postClaim(idAddr, bytesSignedMsg) {
+    return axios.post(`${this.url}/claim/${idAddr}`, bytesSignedMsg);
   }
 
   /**
-   * @param  {String} idaddr
+   * @param  {String} idAddr
    * @param  {String} hi, Hash(index)
    * @returns {Object}
    */
-  getClaimByHi(idaddr, hi) {
-    return axios.get(this.url + '/claim/' + idaddr + '/hi/' + hi);
+  getClaimByHi(idAddr, hi) {
+    return axios.get(`${this.url}/claim/${idAddr}/hi/${hi}`);
   }
 
   /**
@@ -53,15 +53,16 @@ class Relay {
    * @param  {String} data
    * @returns {Object}
    */
-  ClaimDefault(kc, idaddr, ksign, namespaceStr, typeStr, extraIndexData, data) {
-    let claimDefault = new claim.ClaimDefault(namespaceStr, typeStr, extraIndexData, data);
-    let signatureObj = kc.sign(ksign, claimDefault.hex());
-    let bytesSignedMsg = {
+  ClaimDefault(kc, idAddr, kSign, namespaceStr, typeStr, extraIndexData, data) {
+    const claimDefault = new claim.ClaimDefault(namespaceStr, typeStr, extraIndexData, data);
+    const signatureObj = kc.sign(kSign, claimDefault.hex());
+    const bytesSignedMsg = {
       valueHex: claimDefault.hex(),
       signatureHex: signatureObj.signature,
-      ksign: ksign
+      ksign: kSign,
     };
-    return this.postClaim(idaddr, bytesSignedMsg);
+
+    return this.postClaim(idAddr, bytesSignedMsg);
   }
 
   /**
@@ -76,15 +77,30 @@ class Relay {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  AuthorizeKSignClaim(kc, idaddr, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    let authorizeKSignClaim = new claim.AuthorizeKSignClaim(namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
-    let signatureObj = kc.sign(ksign, authorizeKSignClaim.hex());
-    let bytesSignedMsg = {
+  AuthorizeKSignClaim(kc,
+    idAddr,
+    kSign,
+    namespaceStr,
+    keyToAuthorize,
+    applicationName,
+    applicationAuthz,
+    validFrom,
+    validUntil) {
+    const authorizeKSignClaim = new claim.AuthorizeKSignClaim(
+      namespaceStr,
+      keyToAuthorize,
+      applicationName,
+      applicationAuthz,
+      validFrom,
+      validUntil,
+    );
+    const signatureObj = kc.sign(kSign, authorizeKSignClaim.hex());
+    const bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
       signatureHex: signatureObj.signature,
-      ksign: ksign
+      kSign,
     };
-    return this.postClaim(idaddr, bytesSignedMsg);
+    return this.postClaim(idAddr, bytesSignedMsg);
   }
 
   /**
@@ -94,7 +110,7 @@ class Relay {
    * @returns {Object}
    */
   postVinculateID(vinculateIDMsg) {
-    return axios.post(this.url + '/vinculateid', vinculateIDMsg);
+    return axios.post(`${this.url}/vinculateid`, vinculateIDMsg);
   }
 
   /**
@@ -103,20 +119,20 @@ class Relay {
    * @param  {String} keyOperational
    * @param  {String} name
    */
-  vinculateID(kc, idaddr, keyOperational, name) {
-    let idBytes = utils.hexToBytes(idaddr);
-    let nameBytes = Buffer.from(name);
+  vinculateID(kc, idAddr, keyOperational, name) {
+    const idBytes = utils.hexToBytes(idAddr);
+    const nameBytes = Buffer.from(name);
+    let msgBytes = Buffer.from([]);
 
-    let msgBytes = new Buffer([]);
     msgBytes = Buffer.concat([msgBytes, idBytes]);
     msgBytes = Buffer.concat([msgBytes, nameBytes]);
 
-    let signatureObj = kc.sign(keyOperational, utils.bytesToHex(msgBytes));
-    let vinculateIDMsg = {
-      ethID: idaddr,
-      name: name,
+    const signatureObj = kc.sign(keyOperational, utils.bytesToHex(msgBytes));
+    const vinculateIDMsg = {
+      ethID: idAddr,
+      name,
       signature: signatureObj.signature, // for the moment, signature(idaddr+name)
-      ksign: keyOperational
+      ksign: keyOperational,
     };
     return this.postVinculateID(vinculateIDMsg);
   }
@@ -125,7 +141,7 @@ class Relay {
    * @param  {String} name
    */
   resolveName(name) {
-    return axios.get(this.url + '/identities/resolv/' + name);
+    return axios.get(`${this.url}/identities/resolv/${name}`);
   }
 
   /**
@@ -134,26 +150,26 @@ class Relay {
    * @param  {String} rev
    */
   createID(op, rec, rev) {
-    let keys = {
+    const keys = {
       operational: op,
       recoverer: rec,
-      revokator: rev
+      revokator: rev,
     };
-    return axios.post(this.url + '/id', keys);
+    return axios.post(`${this.url}/id`, keys);
   }
 
   /**
    * @param  {String} idaddr
    */
   getID(idaddr) {
-    return axios.get(this.url + '/id/' + idaddr);
+    return axios.get(`${this.url}/id/${idaddr}`);
   }
 
   /**
    * @param  {String} idaddr
    */
   deployID(idaddr) {
-    return axios.post(this.url + '/id/' + idaddr + '/deploy');
+    return axios.post(`${this.url}/id/${idaddr}/deploy`);
   }
 }
 

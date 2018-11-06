@@ -5,8 +5,8 @@ const utils = require('../utils');
  * @param  {uint32} u
  * @returns {Buffer}
  */
-var uint32ToEthBytes = function(u) { // compatible with Uint32ToEthBytes() go-iden3 version
-  var buf = new Buffer(4);
+const uint32ToEthBytes = function (u) { // compatible with Uint32ToEthBytes() go-iden3 version
+  const buf = Buffer.from(4);
   buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
   return buf;
 };
@@ -15,7 +15,7 @@ var uint32ToEthBytes = function(u) { // compatible with Uint32ToEthBytes() go-id
  * @param  {Buffer} b
  * @returns {uint32}
  */
-var ethBytesToUint32 = function(b) { // compatible with EthBytesToUint32() go-iden3 version
+const ethBytesToUint32 = function (b) { // compatible with EthBytesToUint32() go-iden3 version
   return b.readUIntBE(0, 4);
 };
 
@@ -23,8 +23,8 @@ var ethBytesToUint32 = function(b) { // compatible with EthBytesToUint32() go-id
  * @param  {uint64} u
  * @returns {Buffer}
  */
-var uint64ToEthBytes = function(u) { // compatible with Uint64ToEthBytes() go-iden3 version
-  var buf = new Buffer(8);
+const uint64ToEthBytes = function (u) { // compatible with Uint64ToEthBytes() go-iden3 version
+  const buf = Buffer.from(8);
   buf.writeUIntBE(u, 0, 8);
   return buf;
 };
@@ -33,7 +33,7 @@ var uint64ToEthBytes = function(u) { // compatible with Uint64ToEthBytes() go-id
  * @param  {Buffer} b
  * @returns {uint64}
  */
-var ethBytesToUint64 = function(b) { // compatible with EthBytesToUint64() go-iden3 version
+const ethBytesToUint64 = function (b) { // compatible with EthBytesToUint64() go-iden3 version
   return b.readUIntBE(0, 8);
 };
 
@@ -44,42 +44,46 @@ var ethBytesToUint64 = function(b) { // compatible with EthBytesToUint64() go-id
  * @returns  {Object} claim
  */
 class ClaimDefault {
-  constructor(namespaceStr='', typeStr='', extraIndexData='', data='') {
+  constructor(namespaceStr = '', typeStr = '', extraIndexData = '', data = '') {
     this.claim = {
       baseIndex: {
         namespace: utils.hashBytes(Buffer.from(namespaceStr)),
         type: utils.hashBytes(Buffer.from(typeStr)).slice(0, 24),
         indexLength: 64 + Buffer.from(extraIndexData).length,
-        version: 0
+        version: 0,
       },
       extraIndex: {
-        data: Buffer.from(extraIndexData)
+        data: Buffer.from(extraIndexData),
       },
-      data: Buffer.from(data)
+      data: Buffer.from(data),
     };
   }
+
   bytes() {
-    var b = new Buffer([]);
+    let b = Buffer.from([]);
     b = Buffer.concat([b, this.claim.baseIndex.namespace]);
     b = Buffer.concat([b, this.claim.baseIndex.type]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.indexLength)
+      uint32ToEthBytes(this.claim.baseIndex.indexLength),
     ]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.version)
+      uint32ToEthBytes(this.claim.baseIndex.version),
     ]);
     b = Buffer.concat([b, this.claim.extraIndex.data]);
     b = Buffer.concat([b, this.claim.data]);
     return b;
   }
+
   hex() {
     return utils.bytesToHex(this.bytes());
   }
+
   hi() {
     return utils.hashBytes(this.bytes().slice(0, this.claim.baseIndex.indexLength));
   }
+
   ht() {
     return utils.hashBytes(this.bytes());
   }
@@ -89,22 +93,22 @@ class ClaimDefault {
  * @param  {Buffer} bytes
  * @returns  {Object} claim
  */
-var parseClaimDefaultBytes = function(b) {
-  let c = new ClaimDefault();
+const parseClaimDefaultBytes = function (b) {
+  const c = new ClaimDefault();
   c.claim = {
     baseIndex: {
       namespace: b.slice(0, 32),
       type: b.slice(32, 56),
       indexLength: ethBytesToUint32(b.slice(56, 60)),
-      version: ethBytesToUint32(b.slice(60, 64))
+      version: ethBytesToUint32(b.slice(60, 64)),
     },
     extraIndex: {
-      data: b.slice(64, ethBytesToUint32(b.slice(56, 60)))
+      data: b.slice(64, ethBytesToUint32(b.slice(56, 60))),
     },
-    data: b.slice(ethBytesToUint32(b.slice(56, 60)), b.length)
+    data: b.slice(ethBytesToUint32(b.slice(56, 60)), b.length),
   };
   return c;
-}
+};
 
 /**
  * @param  {String} namespaceStr
@@ -116,45 +120,50 @@ var parseClaimDefaultBytes = function(b) {
  * @returns {Object} claim
  */
 class AuthorizeKSignClaim {
-  constructor(namespaceStr='', keyToAuthorize='', applicationName='', applicationAuthz='', validFrom='', validUntil='') {
+  constructor(namespaceStr = '',
+    keyToAuthorize = '',
+    applicationName = '',
+    applicationAuthz = '',
+    validFrom = '',
+    validUntil = '') {
     this.claim = {
       baseIndex: {
         namespace: utils.hashBytes(Buffer.from(namespaceStr)),
         type: utils.hashBytes(Buffer.from('authorizeksign')).slice(0, 24),
         indexLength: 84,
-        version: 0
+        version: 0,
       },
       extraIndex: {
-        keyToAuthorize: keyToAuthorize
+        keyToAuthorize,
       },
       application: utils.hashBytes(Buffer.from(applicationName)),
       applicationAuthz: utils.hashBytes(Buffer.from(applicationAuthz)),
-      validFrom: validFrom,
-      validUntil: validUntil
+      validFrom,
+      validUntil,
     };
   }
 
   bytes() {
-    var b = new Buffer([]);
+    let b = Buffer.from([]);
     b = Buffer.concat([b, this.claim.baseIndex.namespace]);
     b = Buffer.concat([b, this.claim.baseIndex.type]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.indexLength)
+      uint32ToEthBytes(this.claim.baseIndex.indexLength),
     ]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.version)
+      uint32ToEthBytes(this.claim.baseIndex.version),
     ]);
     b = Buffer.concat([
       b,
-      utils.hexToBytes(this.claim.extraIndex.keyToAuthorize)
+      utils.hexToBytes(this.claim.extraIndex.keyToAuthorize),
     ]);
     b = Buffer.concat([b, this.claim.application]);
     b = Buffer.concat([b, this.claim.applicationAuthz]);
-    let validFromBuf = uint64ToEthBytes(this.claim.validFrom);
+    const validFromBuf = uint64ToEthBytes(this.claim.validFrom);
     b = Buffer.concat([b, validFromBuf]);
-    let validUntilBuf = uint64ToEthBytes(this.claim.validUntil);
+    const validUntilBuf = uint64ToEthBytes(this.claim.validUntil);
     b = Buffer.concat([b, validUntilBuf]);
     return b;
   }
@@ -176,27 +185,29 @@ class AuthorizeKSignClaim {
  * @param  {Buffer} b - bytes
  * @returns {Object} claim
  */
-var parseAuthorizeKSignClaim = function(b) {
-  let validFromBytes = b.slice(148, 156);
-  let validFrom = ethBytesToUint64(validFromBytes);
-  let validUntilBytes = b.slice(156, 164);
-  let validUntil = ethBytesToUint64(validUntilBytes);
-  let c = new AuthorizeKSignClaim();
+const parseAuthorizeKSignClaim = function (b) {
+  const validFromBytes = b.slice(148, 156);
+  const validFrom = ethBytesToUint64(validFromBytes);
+  const validUntilBytes = b.slice(156, 164);
+  const validUntil = ethBytesToUint64(validUntilBytes);
+  const c = new AuthorizeKSignClaim();
+
   c.claim = {
     baseIndex: {
       namespace: b.slice(0, 32),
       type: b.slice(32, 56),
       indexLength: ethBytesToUint32(b.slice(56, 60)),
-      version: ethBytesToUint32(b.slice(60, 64))
+      version: ethBytesToUint32(b.slice(60, 64)),
     },
     extraIndex: {
-      keyToAuthorize: utils.bytesToHex(b.slice(64, 84))
+      keyToAuthorize: utils.bytesToHex(b.slice(64, 84)),
     },
     application: b.slice(84, 116),
     applicationAuthz: b.slice(116, 148),
-    validFrom: validFrom,
-    validUntil: validUntil
+    validFrom,
+    validUntil,
   };
+
   return c;
 };
 
@@ -204,8 +215,8 @@ var parseAuthorizeKSignClaim = function(b) {
  * @param  {Buffer} b
  * @returns {Buffer}
  */
-var hiFromClaimBytes = function(b) {
-  let indexLength = ethBytesToUint32(b.slice(56, 60));
+const hiFromClaimBytes = function (b) {
+  const indexLength = ethBytesToUint32(b.slice(56, 60));
   return utils.hashBytes(b.slice(0, indexLength));
 };
 
@@ -214,26 +225,47 @@ var hiFromClaimBytes = function(b) {
  * @param  {Number} numLevels
  * @returns {Boolean}
  */
-var checkProofOfClaim = function(proofOfClaim, numLevels) {
+const checkProofOfClaim = function (proofOfClaim, numLevels) {
   let ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
   let hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
-  let vClaimProof = merkletree.checkProof(proofOfClaim.ClaimProof.Root, proofOfClaim.ClaimProof.Proof, hi, ht, numLevels);
+  const vClaimProof = merkletree.checkProof(
+    proofOfClaim.ClaimProof.Root,
+    proofOfClaim.ClaimProof.Proof,
+    hi,
+    ht,
+    numLevels,
+  );
 
   ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
-  let vSetRootClaimProof = merkletree.checkProof(proofOfClaim.SetRootClaimProof.Root, proofOfClaim.SetRootClaimProof.Proof, hi, ht, numLevels);
+  const vSetRootClaimProof = merkletree.checkProof(
+    proofOfClaim.SetRootClaimProof.Root,
+    proofOfClaim.SetRootClaimProof.Proof,
+    hi,
+    ht,
+    numLevels,
+  );
 
   ht = utils.bytesToHex(merkletree.EmptyNodeValue);
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimNonRevocationProof.Leaf)));
-  let vClaimNonRevocationProof = merkletree.checkProof(proofOfClaim.ClaimNonRevocationProof.Root, proofOfClaim.ClaimNonRevocationProof.Proof, hi, ht, numLevels);
+  const vClaimNonRevocationProof = merkletree.checkProof(
+    proofOfClaim.ClaimNonRevocationProof.Root,
+    proofOfClaim.ClaimNonRevocationProof.Proof,
+    hi,
+    ht,
+    numLevels,
+  );
 
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimNonRevocationProof.Leaf)));
-  let vSetRootClaimNonRevocationProof = merkletree.checkProof(proofOfClaim.SetRootClaimNonRevocationProof.Root, proofOfClaim.SetRootClaimNonRevocationProof.Proof, hi, ht, numLevels);
+  const vSetRootClaimNonRevocationProof = merkletree.checkProof(
+    proofOfClaim.SetRootClaimNonRevocationProof.Root,
+    proofOfClaim.SetRootClaimNonRevocationProof.Proof,
+    hi,
+    ht,
+    numLevels,
+  );
 
-  if (vClaimProof && vSetRootClaimProof && vClaimNonRevocationProof && vSetRootClaimNonRevocationProof) {
-    return true;
-  }
-  return false;
+  return !!(vClaimProof && vSetRootClaimProof && vClaimNonRevocationProof && vSetRootClaimNonRevocationProof);
 };
 
 module.exports = {
@@ -246,5 +278,5 @@ module.exports = {
   AuthorizeKSignClaim,
   parseAuthorizeKSignClaim,
   hiFromClaimBytes,
-  checkProofOfClaim
+  checkProofOfClaim,
 };
