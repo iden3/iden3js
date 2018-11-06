@@ -1,12 +1,11 @@
-import * as CONSTANTS from '../constants';
-
 const ethWallet = require('ethereumjs-wallet');
 const ethUtil = require('ethereumjs-util');
 const nacl = require('tweetnacl');
 const bip39 = require('bip39');
 const hdkey = require('hdkey');
+const CONSTANTS = require('../constants');
 const utils = require('../utils');
-const kcutils = require('./kcutils');
+const kcUtils = require('./kc-utils');
 
 nacl.util = require('tweetnacl-util');
 
@@ -16,9 +15,9 @@ nacl.util = require('tweetnacl-util');
 //   localStorage = new LocalStorage('./tmp');
 // }
 
-class LocalstorageContainer {
+class LocalStorageContainer {
   constructor() { // idaddr used as prefix
-    this.prefix = `${CONSTANTS.PREFIX.I3.ID}-`;
+    this.prefix = CONSTANTS.PREFIX.I3.ID;
     this.type = CONSTANTS.STORAGE.LOCAL_STORAGE.ID;
     this.encryptionKey = '';
   }
@@ -27,7 +26,7 @@ class LocalstorageContainer {
    * @param  {String} passphrase
    */
   unlock(passphrase) {
-    this.encryptionKey = kcutils.passToKey(passphrase, 'salt');
+    this.encryptionKey = kcUtils.passToKey(passphrase, 'salt');
     setTimeout(function () {
       this.encryptionKey = '';
       // console.log('KC locked');
@@ -56,7 +55,7 @@ class LocalstorageContainer {
       const address = ethUtil.privateToAddress(addrNode._privateKey);
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
-      const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+      const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
 
       keys.push(addressHex);
       localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
@@ -79,7 +78,7 @@ class LocalstorageContainer {
     const addressHex = utils.bytesToHex(address);
     const privKHex = utils.bytesToHex(privK);
 
-    const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+    const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
     localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
@@ -97,7 +96,7 @@ class LocalstorageContainer {
     const privK = utils.hexToBytes(privKHex);
     const address = ethUtil.privateToAddress(privK);
     const addressHex = utils.bytesToHex(address);
-    const privKHexEncrypted = kcutils.encrypt(this.encryptionKey, privKHex);
+    const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
 
     localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
@@ -117,10 +116,10 @@ class LocalstorageContainer {
     const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
     const message = ethUtil.toBuffer(data);
     const msgHash = ethUtil.hashPersonalMessage(message);
-    const privKHex = kcutils.decrypt(this.encryptionKey, privKHexEncrypted);
+    const privKHex = kcUtils.decrypt(this.encryptionKey, privKHexEncrypted);
     const sig = ethUtil.ecsign(msgHash, utils.hexToBytes(privKHex));
 
-    return kcutils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
+    return kcUtils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
   }
 
   /**
@@ -153,4 +152,4 @@ class LocalstorageContainer {
   }
 }
 
-module.exports = LocalstorageContainer;
+module.exports = LocalStorageContainer;

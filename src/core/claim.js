@@ -1,4 +1,4 @@
-const merkletree = require('../merkletree');
+const merkleTree = require('../merkle-tree');
 const utils = require('../utils');
 
 /**
@@ -6,7 +6,7 @@ const utils = require('../utils');
  * @returns {Buffer}
  */
 const uint32ToEthBytes = function (u) { // compatible with Uint32ToEthBytes() go-iden3 version
-  const buf = Buffer.from(4);
+  const buf = Buffer.alloc(4);
   buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
   return buf;
 };
@@ -24,7 +24,7 @@ const ethBytesToUint32 = function (b) { // compatible with EthBytesToUint32() go
  * @returns {Buffer}
  */
 const uint64ToEthBytes = function (u) { // compatible with Uint64ToEthBytes() go-iden3 version
-  const buf = Buffer.from(8);
+  const buf = Buffer.alloc(8);
   buf.writeUIntBE(u, 0, 8);
   return buf;
 };
@@ -228,7 +228,7 @@ const hiFromClaimBytes = function (b) {
 const checkProofOfClaim = function (proofOfClaim, numLevels) {
   let ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
   let hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
-  const vClaimProof = merkletree.checkProof(
+  const vClaimProof = merkleTree.checkProof(
     proofOfClaim.ClaimProof.Root,
     proofOfClaim.ClaimProof.Proof,
     hi,
@@ -238,7 +238,7 @@ const checkProofOfClaim = function (proofOfClaim, numLevels) {
 
   ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
-  const vSetRootClaimProof = merkletree.checkProof(
+  const vSetRootClaimProof = merkleTree.checkProof(
     proofOfClaim.SetRootClaimProof.Root,
     proofOfClaim.SetRootClaimProof.Proof,
     hi,
@@ -246,9 +246,9 @@ const checkProofOfClaim = function (proofOfClaim, numLevels) {
     numLevels,
   );
 
-  ht = utils.bytesToHex(merkletree.EmptyNodeValue);
+  ht = utils.bytesToHex(merkleTree.emptyNodeValue);
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimNonRevocationProof.Leaf)));
-  const vClaimNonRevocationProof = merkletree.checkProof(
+  const vClaimNonRevocationProof = merkleTree.checkProof(
     proofOfClaim.ClaimNonRevocationProof.Root,
     proofOfClaim.ClaimNonRevocationProof.Proof,
     hi,
@@ -257,7 +257,7 @@ const checkProofOfClaim = function (proofOfClaim, numLevels) {
   );
 
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimNonRevocationProof.Leaf)));
-  const vSetRootClaimNonRevocationProof = merkletree.checkProof(
+  const vSetRootClaimNonRevocationProof = merkleTree.checkProof(
     proofOfClaim.SetRootClaimNonRevocationProof.Root,
     proofOfClaim.SetRootClaimNonRevocationProof.Proof,
     hi,

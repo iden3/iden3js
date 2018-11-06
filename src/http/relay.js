@@ -53,7 +53,7 @@ class Relay {
    * @param  {String} data
    * @returns {Object}
    */
-  ClaimDefault(kc, idAddr, kSign, namespaceStr, typeStr, extraIndexData, data) {
+  claimDefault(kc, idAddr, kSign, namespaceStr, typeStr, extraIndexData, data) {
     const claimDefault = new claim.ClaimDefault(namespaceStr, typeStr, extraIndexData, data);
     const signatureObj = kc.sign(kSign, claimDefault.hex());
     const bytesSignedMsg = {
@@ -77,7 +77,7 @@ class Relay {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  AuthorizeKSignClaim(kc,
+  authorizeKSignClaim(kc,
     idAddr,
     kSign,
     namespaceStr,
@@ -109,8 +109,8 @@ class Relay {
    * @param {String} signature
    * @returns {Object}
    */
-  postVinculateID(vinculateIDMsg) {
-    return axios.post(`${this.url}/vinculateid`, vinculateIDMsg);
+  postBindID(bindIDMsg) {
+    return axios.post(`${this.url}/vinculateid`, bindIDMsg);
   }
 
   /**
@@ -119,7 +119,7 @@ class Relay {
    * @param  {String} keyOperational
    * @param  {String} name
    */
-  vinculateID(kc, idAddr, keyOperational, name) {
+  bindID(kc, idAddr, keyOperational, name) {
     const idBytes = utils.hexToBytes(idAddr);
     const nameBytes = Buffer.from(name);
     let msgBytes = Buffer.from([]);
@@ -128,13 +128,13 @@ class Relay {
     msgBytes = Buffer.concat([msgBytes, nameBytes]);
 
     const signatureObj = kc.sign(keyOperational, utils.bytesToHex(msgBytes));
-    const vinculateIDMsg = {
+    const bindIDMsg = {
       ethID: idAddr,
       name,
       signature: signatureObj.signature, // for the moment, signature(idaddr+name)
       ksign: keyOperational,
     };
-    return this.postVinculateID(vinculateIDMsg);
+    return this.postBindID(bindIDMsg);
   }
 
   /**

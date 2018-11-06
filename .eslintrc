@@ -1,0 +1,22 @@
+{
+  "extends": "airbnb-base",
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true
+  },
+  "plugins": [
+    "mocha"
+  ],
+  "rules": {
+    "mocha/no-exclusive-tests": "error",
+    "max-len": ["error", { "code": 140, "comments": 200, "ignoreStrings": true, "ignoreTemplateLiterals": true }],
+    "no-unused-vars": [2, { "varsIgnorePattern": "export^" }],
+    "no-return-assign": [0],
+    "no-underscore-dangle": [0],
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "func-names": [0],
+    "class-methods-use-this": ["error", { "exceptMethods": ["foo"] }],
+    "no-bitwise": [0]
+  }
+}

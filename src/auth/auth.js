@@ -1,8 +1,7 @@
 const axios = require('axios');
 const qrcode = require('qrcode-generator');
-const utils = require('../utils');
-
 // const WebSocket = require('ws'); // for nodejs tests
+const utils = require('../utils');
 
 /**
  * Generates the challenge with the current unixtime
@@ -12,7 +11,7 @@ function challenge() {
   const unixTime = Math.round((new Date()).getTime() / 1000);
   const r = Math.random();
   const randStr = r.toString(36).substr(7, 4);
-  return `uuid-${unixTime}-${randStr}`; // challenge of 20 characters length
+  return `uuid-${unixTime}-${randStr}`;
 }
 
 /**
@@ -54,7 +53,6 @@ class Auth {
    */
   qrHex() {
     let b = Buffer.from([]);
-
     b = Buffer.concat([
       b,
       Buffer.from(this.challenge),
@@ -102,7 +100,7 @@ const parseQRhex = function (h) {
 /**
  * @param  {String} url
  * @param  {String} idAddr
- * @param  {String} challenge
+ * @param  {String} challengeStr
  * @param  {String} signature
  * @param  {String} kSign
  * @param  {Object} kSignProof
@@ -111,10 +109,10 @@ const parseQRhex = function (h) {
 const resolv = function (url, idAddr, challengeStr, signature, kSign, kSignProof) {
   const authMsg = {
     address: idAddr,
-    challengeStr,
+    challenge: challengeStr,
     signature,
-    kSign,
-    kSignProof,
+    ksign: kSign,
+    ksignProof: kSignProof,
   };
   return axios.post(`${url}/auth`, authMsg);
 };

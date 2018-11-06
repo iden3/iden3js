@@ -65,8 +65,8 @@ id.createID().then(res => {
   console.log(id.idaddr); // res == id.idaddr
 });
 
-// vinculate the identity address to a name. Internally, signs the idaddr+name, and sends it to the relay, that will perform an AssignNameClaim vinculating the identity address with the name.
-id.vinculateID(kc, 'username').then(res => {
+// bind the identity address to a name. Internally, signs the idaddr+name, and sends it to the relay, that will perform an AssignNameClaim vinculating the identity address with the name.
+id.bindID(kc, 'username').then(res => {
   console.log(res.data);
 });
 
@@ -79,8 +79,8 @@ id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', ksign, 'appToAuthName', 'authz', 
   let proofOfKSign = res.data.proofOfClaim;
 });
 
-// create new ClaimDefault, sign it and send it to the Relay
-id.ClaimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+// create new claimDefault, sign it and send it to the Relay
+id.claimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
   let proofOfClaim = res.data.proofOfClaim;
 });
 
@@ -128,7 +128,7 @@ const iden3 = require('iden3');
 - new KeyContainer using localStorage
   ```js
   // new key container
-  let kc = new iden3.KeyContainer('localstorage');
+  let kc = new iden3.KeyContainer('localStorage');
 
   ```
 - [no use this] new KeyContainer using testStorage (memory)
@@ -227,12 +227,12 @@ Output:
 }
 ```
 
-#### id.vinculateID
+#### id.bindID
 Vinculates a name to the identity.
 Internally, signs the idaddr+name, and sends it to the `Relay`, that will perform an AssignNameClaim vinculating the identity address with the name.
 
 ```js
-id.vinculateID(kc, name).then(res => {
+id.bindID(kc, name).then(res => {
   console.log(res.data);
 });
 ```
@@ -246,19 +246,19 @@ Output:
 }
 ```
 
-#### id.AuthorizeKSignClaim
+#### id.authorizeKSignClaim
 ```js
 // perform a new AuthorizeKSignClaim, sign it, and post it to the Relay
 let keyToAuth = kc.generateKey();
-id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+id.authorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
   //
 });
 ```
 
-#### id.ClaimDefault
+#### id.claimDefault
 ```js
-// perform a new ClaimDefault, sign it, and post it to the Relay
-id.ClaimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+// perform a new claimDefault, sign it, and post it to the Relay
+id.claimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
   //
 });
 ```
@@ -294,7 +294,7 @@ claim.ht(); // Hash of the claim in Buffer representation
 let claimParsed = iden3.claim.parseClaimDefaultBytes(claim.bytes());
 ```
 
-#### AuthorizeKSignClaim
+#### authorizeKSignClaim
 
 ```js
 // new AuthorizeKSignClaim
@@ -378,9 +378,9 @@ console.log(verified); // true
 
 #### CheckProofOfClaim
 This function checks the data structure of `proofOfClaim` and returns true if all the proofs are correct.
-Internally, it usees the `iden3.merkletree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
+Internally, it usees the `iden3.merkleTree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
 ```js
-let verified = iden3.merkletree.checkProofOfClaim(proofOfClaim, 140);
+let verified = iden3.merkleTree.checkProofOfClaim(proofOfClaim, 140);
 console.log(verified); // true
 ```
 
@@ -438,19 +438,19 @@ Response:
 }
 ```
 
-#### relay.ClaimDefault
+#### relay.claimDefault
 Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.ClaimDefault(id.kc, ksign, 'iden3.io', 'default', 'data of the claim').then(res => {
+relay.claimDefault(id.kc, ksign, 'iden3.io', 'default', 'data of the claim').then(res => {
   // console.log("res.data", res.data);
   expect(res.status).to.be.equal(200);
 });
 ```
 
-#### relay.AuthorizeKSignClaim
-Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
+#### relay.authorizeKSignClaim
+Creates a new authorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.AuthorizeKSignClaim(id.kc, keyid, 'iden3.io', kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+relay.authorizeKSignClaim(id.kc, keyid, 'iden3.io', kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
   // console.log("res.data", res.data);
   expect(res.status).to.be.equal(200);
 });

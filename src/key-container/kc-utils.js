@@ -13,19 +13,21 @@ nacl.util = require('tweetnacl-util');
  */
 function concatSignature(msg, msgHash, v, r, s) {
   let serialized = Buffer.from('');
+
   serialized = Buffer.concat([serialized, r]);
   serialized = Buffer.concat([serialized, s]);
   serialized = Buffer.concat([
     serialized,
     Buffer.from([v]),
   ]);
+
   return {
     message: ethUtil.bufferToHex(msg),
     messageHash: ethUtil.bufferToHex(msgHash),
     v: ethUtil.bufferToHex(v),
     r: ethUtil.bufferToHex(r),
     s: ethUtil.bufferToHex(s),
-    signature: ethUtil.bufferToHex(serialized)
+    signature: ethUtil.bufferToHex(serialized),
   };
 }
 

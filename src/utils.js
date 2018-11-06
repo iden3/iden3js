@@ -1,4 +1,5 @@
 const ethUtil = require('ethereumjs-util');
+const createKeccakHash = require('keccak');
 
 /**
  * Create a hash from a Buffer (a byte)
@@ -6,8 +7,7 @@ const ethUtil = require('ethereumjs-util');
  * @param {Buffer} b - A byte. It's a Buffer to do the hash
  * @returns {PromiseLike<ArrayBuffer>} - A hash created with keccak256
  */
-var hashBytes = function(b) {
-  var createKeccakHash = require('keccak');
+const hashBytes = function (b) {
   return createKeccakHash('keccak256').update(b).digest();
 };
 
@@ -16,9 +16,8 @@ var hashBytes = function(b) {
  * @param {Buffer} buff - Buffer to decode
  * @returns {String} - Decoded Buffer in UTF-16
  */
-var bytesToHex = function(buff) {
-  var hex = '0x' + buff.toString('hex');
-  return hex;
+const bytesToHex = function (buff) {
+  return `0x${buff.toString('hex')}`;
 };
 
 /**
@@ -26,10 +25,11 @@ var bytesToHex = function(buff) {
  * @param {String} hex - Hexadecimal string to parse to a Buffer of bytes
  * @returns {Buffer} - A new Buffer
  */
-var hexToBytes = function(hex) {
+const hexToBytes = function (hex) {
   if (hex.substr(0, 2) === '0x') {
-    return new Buffer.from(hex.substr(2), 'hex');
+    return Buffer.from(hex.substr(2), 'hex');
   }
+
   return Buffer.from(hex, 'hex');
 };
 
@@ -37,47 +37,50 @@ var hexToBytes = function(hex) {
  * @param  {String} str
  * @returns {String}
  */
-var strToHex = function(str) {
-  var arr = [];
-  for (var i = 0, l = str.length; i < l; i++) {
-    var hex = Number(str.charCodeAt(i)).toString(16);
+const strToHex = function (str) {
+  const arr = [];
+
+  for (let i = 0, l = str.length; i < l; i++) {
+    const hex = Number(str.charCodeAt(i)).toString(16);
     arr.push(hex);
   }
-  return '0x' + arr.join('');
-}
+
+  return `0x${arr.join('')}`;
+};
 
 /**
- * @param  {String} hexx
+ * @param  {String} hex
  * @returns {String}
  */
-var hexToStr = function(hexx) {
-  hexx = hexx.substring(2);
-  var hex = hexx.toString(); //force conversion
-  var str = '';
-  for (var i = 0; i < hex.length; i += 2)
-    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+const hexToStr = function (hex) {
+  const _hex = hex.toString().substring(2);
+  const _hexLength = _hex.length;
+  let str = '';
+
+  for (let i = 0; i < _hexLength; i += 2) {
+    str += String.fromCharCode(parseInt(_hex.substr(i, 2), 16));
+  }
+
   return str;
-}
+};
 
 /**
  * @param  {Object} dataJson
  * @returns {String}
  */
-var jsonToQr = function(dataJson) {
-  let dataStr = JSON.stringify(dataJson);
-  let dataHex = strToHex(dataStr);
-  return dataHex;
-}
+const jsonToQr = function (dataJson) {
+  const dataStr = JSON.stringify(dataJson);
+  return strToHex(dataStr);
+};
 
 /**
  * @param  {String} dataHex
  * @return {Object}
  */
-var qrToJson = function(dataHex) {
-  let dataStr = hexToStr(dataHex); // remove the 0x
-  let data = JSON.parse(dataStr);
-  return data;
-}
+const qrToJson = function (dataHex) {
+  const dataStr = hexToStr(dataHex); // remove the 0x
+  return JSON.parse(dataStr);
+};
 
 /**
  * @param  {String} mHex
@@ -85,14 +88,15 @@ var qrToJson = function(dataHex) {
  * @param  {String} addressHex
  * @returns {Boolean}
  */
-var verifySignature = function(mHex, signatureHex, addressHex) {
-  let m = hexToBytes(mHex);
-  let r = signatureHex.slice(0, 66);
-  let s = '0x' + signatureHex.slice(66, 130);
-  let v = '0x' + signatureHex.slice(130, 132);
-  let pub = ethUtil.ecrecover(m, v, r, s);
-  let addr = '0x' + ethUtil.pubToAddress(pub).toString('hex');
-  return addr == addressHex;
+const verifySignature = function (mHex, signatureHex, addressHex) {
+  const m = hexToBytes(mHex);
+  const r = signatureHex.slice(0, 66);
+  const s = `0x${signatureHex.slice(66, 130)}`;
+  const v = `0x${signatureHex.slice(130, 132)}`;
+  const pub = ethUtil.ecrecover(m, v, r, s);
+  const addr = `0x${ethUtil.pubToAddress(pub).toString('hex')}`;
+
+  return addr === addressHex;
 };
 
 /**
@@ -100,17 +104,15 @@ var verifySignature = function(mHex, signatureHex, addressHex) {
  * @param  {String} signatureHex
  * @returns {String} addressHex
  */
-var addrFromSig = function(mOriginal, signatureHex) {
-  var message = ethUtil.toBuffer(mOriginal);
-  var msgHash = ethUtil.hashPersonalMessage(message);
-  // let m = hexToBytes(mHex);
-  let m = msgHash;
-  let r = signatureHex.slice(0, 66);
-  let s = '0x' + signatureHex.slice(66, 130);
-  let v = '0x' + signatureHex.slice(130, 132);
-  let pub = ethUtil.ecrecover(m, v, r, s);
-  let addr = '0x' + ethUtil.pubToAddress(pub).toString('hex');
-  return addr;
+const addrFromSig = function (mOriginal, signatureHex) {
+  const message = ethUtil.toBuffer(mOriginal);
+  const m = ethUtil.hashPersonalMessage(message); // message hash
+  const r = signatureHex.slice(0, 66);
+  const s = `0x${signatureHex.slice(66, 130)}`;
+  const v = `0x${signatureHex.slice(130, 132)}`;
+  const pub = ethUtil.ecrecover(m, v, r, s);
+
+  return `0x${ethUtil.pubToAddress(pub).toString('hex')}`;
 };
 
 module.exports = {
@@ -122,5 +124,5 @@ module.exports = {
   jsonToQr,
   qrToJson,
   verifySignature,
-  addrFromSig
+  addrFromSig,
 };

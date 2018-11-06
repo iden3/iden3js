@@ -3,7 +3,6 @@ const nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 const IPFS = require('ipfs');
 const IPFSRoom = require('ipfs-pubsub-room');
-
 const encoder = new TextEncoder('utf-8');
 
 /**
@@ -94,7 +93,7 @@ class Dapp {
    * @param  {Param} callback
    */
   recv(message, callback) {
-    if (message.from == this.peerInfo.id) {
+    if (message.from === this.peerInfo.id) {
       return;
     }
 
