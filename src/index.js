@@ -1,17 +1,18 @@
 const claim = require('./core/claim');
-const merkletree = require('./merkletree');
+const merkleTree = require('./merkle-tree');
 const Relay = require('./http/relay');
-const KeyContainer = require('./keyContainer/keyContainer');
+const KeyContainer = require('./key-container/key-container');
 const Id = require('./id');
-const auth = require('./auth/auth');
-const Auth = auth.Auth;
 const dapp = require('./auth/dapp');
-const Dapp = dapp.Dapp;
 const utils = require('./utils');
+const auth = require('./auth/auth');
+
+const { Auth } = auth;
+const { Dapp } = dapp;
 
 module.exports = {
   claim,
-  merkletree,
+  merkleTree,
   KeyContainer,
   Id,
   Relay,
@@ -19,5 +20,5 @@ module.exports = {
   Auth,
   dapp,
   Dapp,
-  utils
+  utils,
 };
