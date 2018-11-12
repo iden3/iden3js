@@ -75,18 +75,18 @@ let ksign = kc.generateKey();
 
 let unixtime = Math.round(+new Date()/1000);
 // create new AuthorizeKSignClaim, sign it, and send it to the Relay
-id.AuthorizeKSignClaim(kc, key0id, 'iden3.io', ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
+id.authorizeKSignClaim(kc, key0id, ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
   let proofOfKSign = res.data.proofOfClaim;
 });
 
-// create new claimDefault, sign it and send it to the Relay
-id.claimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+// create new genericClaim, sign it and send it to the Relay
+id.genericClaim(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
   let proofOfClaim = res.data.proofOfClaim;
 });
 
 
 // having a proof of a leaf, we can check it
-let verified = iden3.merkletree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
+let verified = iden3.merkleTree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
 // verified == true
 
 // having a proofOfClaim, let's check it
@@ -100,7 +100,7 @@ let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
 let qrJson = iden3.auth.parseQRhex(qrHex);
 let qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
 // perform the AuthorizeKSignClaim over the qrKSign
-id.AuthorizeKSignClaim(kc, id.keyOperational, 'iden3.io', qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
+id.authorizeKSignClaim(kc, id.keyOperational, qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
   let ksignProof = res.data.proofOfClaim;
 
   // send the challenge, signature, KSign, and KSignProof to the qr url, that is the url of the backend of the centralized auth
@@ -250,15 +250,15 @@ Output:
 ```js
 // perform a new AuthorizeKSignClaim, sign it, and post it to the Relay
 let keyToAuth = kc.generateKey();
-id.authorizeKSignClaim(kc, key0id, 'iden3.io', keyToAuth, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+id.authorizeKSignClaim(kc, key0id, keyToAuth, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
   //
 });
 ```
 
-#### id.claimDefault
+#### id.genericClaim
 ```js
-// perform a new claimDefault, sign it, and post it to the Relay
-id.claimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
+// perform a new genericClaim, sign it, and post it to the Relay
+id.genericClaim(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
   //
 });
 ```
@@ -268,8 +268,8 @@ id.claimDefault(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res
 
 #### Generic Claim
 ```js
-// new ClaimDefault
-let claim = new iden3.claim.ClaimDefault('iden3.io', 'default', 'extra data');
+// new GenericClaim
+let claim = new iden3.claim.GenericClaim('iden3.io', 'default', 'extra index data', 'extra data');
 /*
 claim:
 {
@@ -285,21 +285,20 @@ claim:
   data: < Buffer >
 }
 */
-// methods of the ClaimDefault
+// methods of the GenericClaim
 claim.bytes(); // claim in Buffer representation
 claim.hi(); // Hash of the index of the claim in Buffer representation
 claim.ht(); // Hash of the claim in Buffer representation
 
-// parse ClaimDefault from Buffer
-let claimParsed = iden3.claim.parseClaimDefaultBytes(claim.bytes());
+// parse GenericClaim from Buffer
+let claimParsed = iden3.claim.parseGenericClaimBytes(claim.bytes());
 ```
 
 #### authorizeKSignClaim
 
 ```js
 // new AuthorizeKSignClaim
-let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('iden3.io',
-                  '0x101d2fa51f8259df207115af9eaa73f3f4e52e60',
+let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('0x101d2fa51f8259df207115af9eaa73f3f4e52e60',
                   'appToAuthName', 'authz', 1535208350, 1535208350);
 /*
 authorizeKSignClaim:
@@ -372,7 +371,7 @@ let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
 #### CheckProof
 Checks the `Merkle Proof` of a `Leaf`.
 ```js
-let verified = iden3.merkletree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
+let verified = iden3.merkleTree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
 console.log(verified); // true
 ```
 
@@ -438,11 +437,11 @@ Response:
 }
 ```
 
-#### relay.claimDefault
+#### relay.genericClaim
 Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.claimDefault(id.kc, ksign, 'iden3.io', 'default', 'data of the claim').then(res => {
-  // console.log("res.data", res.data);
+relay.genericClaim(id.kc, ksign, 'iden3.io', 'default', 'data of the claim').then(res => {
+  // console.log('res.data', res.data);
   expect(res.status).to.be.equal(200);
 });
 ```
@@ -450,8 +449,8 @@ relay.claimDefault(id.kc, ksign, 'iden3.io', 'default', 'data of the claim').the
 #### relay.authorizeKSignClaim
 Creates a new authorizeKSignClaim, signs it, and sends it to the Relay.
 ```js
-relay.authorizeKSignClaim(id.kc, keyid, 'iden3.io', kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
-  // console.log("res.data", res.data);
+relay.authorizeKSignClaim(id.kc, keyid, kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
+  // console.log('res.data', res.data);
   expect(res.status).to.be.equal(200);
 });
 ```
@@ -461,7 +460,7 @@ Sends to the Relay a signed Claim.
 ```js
 relay.postClaim(idaddr, bytesSignedMsg)
   .then(res => {
-    console.log("res.data", res.data);
+    console.log('res.data', res.data);
   });
 ```
 
@@ -551,7 +550,7 @@ Output:
 let qrJson = iden3.auth.parseQRhex(qrHex);
 let qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
 // perform the AuthorizeKSignClaim over the qrKSign
-id.AuthorizeKSignClaim(kc, id.keyOperational, 'iden3.io', qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
+id.authorizeKSignClaim(kc, id.keyOperational, qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
   let ksignProof = res.data.proofOfClaim;
 
   // send the challenge, signature, KSign, and KSignProof to the qr url, that is the url of the backend of the centralized auth
@@ -604,7 +603,7 @@ let ksign = kc.generateKey();
 
 let auth = new iden3.Auth(kc, ksign, authurl, authwsurl, function(authData) {
   // callback that will be called when the websocket gets the token, after the backend checks the authentication (challenge, signature, KSign, KSignProof, etc)
-  alert("✔️ Logged in");
+  alert('✔️ Logged in');
   /*
     authData = {
       "success": true,

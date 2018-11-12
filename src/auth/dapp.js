@@ -23,12 +23,12 @@ class Dapp {
       start: true,
       config: {
         Addresses: {
-          Swarm: ['/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'],
-        },
+          Swarm: ['/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star']
+        }
       },
       EXPERIMENTAL: {
-        pubsub: true,
-      },
+        pubsub: true
+      }
     });
 
     this.ipfs.once('ready', () => this.ipfs.id((err, _peerInfo) => {
@@ -134,14 +134,14 @@ class Dapp {
         buf(args.to),
         buf(args.data),
         buf(uint256(args.value)),
-        buf(uint256(args.gas)),
+        buf(uint256(args.gas))
       ]).toString('hex')}`;
       const fwdsig = ethutil.ecsign(buf(sha3(fwdsigpre)), ksignpvk);
 
       args.fwdsig = `0x${Buffer.concat([
         fwdsig.r,
         fwdsig.s,
-        buf(fwdsig.v),
+        buf(fwdsig.v)
       ]).toString('hex')}`;
 
       // forward call
@@ -151,5 +151,5 @@ class Dapp {
 }
 
 module.exports = {
-  Dapp,
+  Dapp
 };

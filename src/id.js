@@ -17,11 +17,10 @@ class Id {
 
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
-    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke)
-      .then((res) => {
-        this.idaddr = res.data.idaddr;
-        return this.idaddr;
-      });
+    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke).then((res) => {
+      this.idaddr = res.data.idaddr;
+      return this.idaddr;
+    });
   }
 
   deployID() {
@@ -31,20 +30,18 @@ class Id {
   /**
    * @param  {Object} kc
    * @param  {String} ksign
-   * @param  {String} namespaceStr
    * @param  {String} typeStr
    * @param  {String} extraIndexData
    * @param  {String} data
    * @returns {Object}
    */
-  claimDefault(kc, ksign, namespaceStr, typeStr, extraIndexData, data) {
-    return this.relay.claimDefault(kc, this.idaddr, ksign, namespaceStr, typeStr, extraIndexData, data);
+  genericClaim(kc, ksign, typeStr, extraIndexData, data) {
+    return this.relay.genericClaim(kc, this.idaddr, ksign, typeStr, extraIndexData, data);
   }
 
   /**
    * @param  {Object} kc
    * @param  {String} ksign
-   * @param  {String} namespaceStr
    * @param  {String} keyToAuthorize
    * @param  {String} applicationName
    * @param  {String} applicationAuthz
@@ -52,18 +49,8 @@ class Id {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  authorizeKSignClaim(kc, ksign, namespaceStr, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    return this.relay.authorizeKSignClaim(
-      kc,
-      this.idaddr,
-      ksign,
-      namespaceStr,
-      keyToAuthorize,
-      applicationName,
-      applicationAuthz,
-      validFrom,
-      validUntil,
-    );
+  authorizeKSignClaim(kc, ksign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
+    return this.relay.authorizeKSignClaim(kc, this.idaddr, ksign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil,);
   }
 
   /**

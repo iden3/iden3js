@@ -7,18 +7,20 @@ const CONSTANTS = require('../constants');
 const utils = require('../utils');
 const kcUtils = require('./kc-utils');
 
+// prefix for the localStorage stored items
+const prefix = 'i3-';
+
 nacl.util = require('tweetnacl-util');
 
-
-// if (typeof localStorage === "undefined" || localStorage === null) {
+// if (typeof localStorage === 'undefined' || localStorage === null) {
 //   var LocalStorage = require('node-localstorage').LocalStorage;
 //   localStorage = new LocalStorage('./tmp');
 // }
 
 class LocalStorageContainer {
   constructor() { // idaddr used as prefix
-    this.prefix = CONSTANTS.PREFIX.I3.ID;
-    this.type = CONSTANTS.STORAGE.LOCAL_STORAGE.ID;
+    this.prefix = CONSTANTS.PREFIX;
+    this.type = 'localStorage';
     this.encryptionKey = '';
   }
 
@@ -27,14 +29,14 @@ class LocalStorageContainer {
    */
   unlock(passphrase) {
     this.encryptionKey = kcUtils.passToKey(passphrase, 'salt');
-    setTimeout(function () {
+    setTimeout(function() {
       this.encryptionKey = '';
       // console.log('KC locked');
     }, 30000);
   }
 
   /**
-   * @param  {string} mnemonic - String with 12 words
+   * @param  {String} mnemonic - String with 12 words
    * @param  {Number} numberOfDerivatedKeys
    *
    * @returns {Object}
@@ -61,7 +63,7 @@ class LocalStorageContainer {
       localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     }
 
-    return { keys, mnemonic };
+    return {keys, mnemonic};
   }
 
   /**

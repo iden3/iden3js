@@ -18,7 +18,7 @@ function concatSignature(msg, msgHash, v, r, s) {
   serialized = Buffer.concat([serialized, s]);
   serialized = Buffer.concat([
     serialized,
-    Buffer.from([v]),
+    Buffer.from([v])
   ]);
 
   return {
@@ -27,7 +27,7 @@ function concatSignature(msg, msgHash, v, r, s) {
     v: ethUtil.bufferToHex(v),
     r: ethUtil.bufferToHex(r),
     s: ethUtil.bufferToHex(s),
-    signature: ethUtil.bufferToHex(serialized),
+    signature: ethUtil.bufferToHex(serialized)
   };
 }
 
@@ -83,5 +83,5 @@ module.exports = {
   concatSignature,
   passToKey,
   encrypt,
-  decrypt,
+  decrypt
 };

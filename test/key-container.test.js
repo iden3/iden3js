@@ -1,9 +1,8 @@
 const chai = require('chai');
-const CONSTANTS = require('../src/constants');
 const iden3 = require('../index');
 const kcUtils = require('../src/key-container/kc-utils');
 
-const { expect } = chai;
+const {expect} = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 
 describe('kcUtils.encrypt', () => {
@@ -20,12 +19,12 @@ describe('kcUtils.encrypt', () => {
 });
 
 describe('kc.type', () => {
-  const kcTest = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
-  const kcLocalstorage = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kcTest = new iden3.KeyContainer('localStorage');
+  const kcLocalstorage = new iden3.KeyContainer('localStorage');
 
   it('type', () => {
-    expect(kcTest.type).to.be.equal(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
-    expect(kcLocalstorage.type).to.be.equal(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+    expect(kcTest.type).to.be.equal('localStorage');
+    expect(kcLocalstorage.type).to.be.equal('localStorage');
   });
 });
 
@@ -33,13 +32,13 @@ describe('new localstorageKeyContainer', () => {
   it('new localstorageKeyContainer', () => {
     const kc0 = new iden3.KeyContainer('test');
     expect(kc0.type).to.be.equal(undefined);
-    const kc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
-    expect(kc.type).to.be.equal(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+    const kc = new iden3.KeyContainer('localStorage');
+    expect(kc.type).to.be.equal('localStorage');
   });
 });
 
 describe('testkc.importKey()', () => {
-  const kc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kc = new iden3.KeyContainer('localStorage');
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
 
@@ -49,7 +48,7 @@ describe('testkc.importKey()', () => {
 });
 
 describe('testkc.sign()', () => {
-  const kc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kc = new iden3.KeyContainer('localStorage');
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
   const signatureObj = kc.sign(key0, 'test');
@@ -63,15 +62,15 @@ describe('new localstorageKeyContainer', () => {
   it('new localstorageKeyContainer', () => {
     const kc0 = new iden3.KeyContainer('test');
     expect(kc0.type).to.be.equal(undefined);
-    const testkc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
-    expect(testkc.type).to.be.equal(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
-    const lskc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
-    expect(lskc.type).to.be.equal(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+    const testkc = new iden3.KeyContainer('localStorage');
+    expect(testkc.type).to.be.equal('localStorage');
+    const lskc = new iden3.KeyContainer('localStorage');
+    expect(lskc.type).to.be.equal('localStorage');
   });
 });
 
 describe('localstoragekc.importKey()', () => {
-  const kc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kc = new iden3.KeyContainer('localStorage');
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
 
@@ -81,7 +80,7 @@ describe('localstoragekc.importKey()', () => {
 });
 
 describe('localstoragekc.sign()', () => {
-  const kc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kc = new iden3.KeyContainer('localStorage');
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
   const signatureObj = kc.sign(key0, 'test');
@@ -92,13 +91,13 @@ describe('localstoragekc.sign()', () => {
 });
 
 describe('key from mnemonic', () => {
-  const kc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kc = new iden3.KeyContainer('localStorage');
   kc.unlock('pass');
   // kc.deleteAll();  delete all to do the test with empty localStorage
   it('key from mnemonic', () => {
     const seed = 'blanket kick genre rubber better helmet youth slush acid select brick setup';
     const keys = kc.generateKeysMnemonic(seed);
-    // console.log("keys", keys);
+    // console.log('keys', keys);
     expect(keys.keys[0]).to.be.equal('0x94f1d9fdf01abec15ba9c473dbb87f9931986a86');
     expect(keys.keys[1]).to.be.equal('0xa50970867092c1ae769fc24d5f5151c7b87ff715');
     expect(keys.keys[2]).to.be.equal('0x1526824c893cb894d18f0cc400c24d96340a4341');

@@ -1,10 +1,10 @@
 const chai = require('chai');
 const iden3 = require('../index');
 
-const { expect } = chai;
+const {expect} = chai;
 
-describe('claimDefault', () => {
-  const claim = new iden3.claim.ClaimDefault('iden3.io', 'default', 'c1');
+describe('genericClaim', () => {
+  const claim = new iden3.claim.GenericClaim('iden3.io', 'default', 'c1');
 
   it('claim.baseIndex.indexLength', () => {
     expect(claim.claim.baseIndex.indexLength).to.be.equal(66); // as it's the 64 bytes from the baseIndex + 2 bytes from the extraIndex
@@ -34,15 +34,15 @@ describe('claimDefault', () => {
     expect(ht).to.be.equal('0x0fce11cbd33e15d137a3a1953cda71aa81898ee8b917c21615073b59cd4dca8c');
   });
 
-  it('parseClaimDefaultBytes()', () => {
-    const claimParsed = iden3.claim.parseClaimDefaultBytes(claim.bytes());
+  it('parseGenericClaimBytes()', () => {
+    const claimParsed = iden3.claim.parseGenericClaimBytes(claim.bytes());
     const hex = iden3.utils.bytesToHex(claimParsed.bytes());
     expect(hex).to.be.equal('0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074cfee7c08a98f4b565d124c7e4e28acc52e1bc780e3887db000000042000000006331');
   });
 });
 
 describe('authorizeKSignClaim', () => {
-  const claim = new iden3.claim.AuthorizeKSignClaim('iden3.io', '0x101d2fa51f8259df207115af9eaa73f3f4e52e60', 'appToAuthName', 'authz', 1535208350, 1535208350);
+  const claim = new iden3.claim.AuthorizeKSignClaim('0x101d2fa51f8259df207115af9eaa73f3f4e52e60', 'appToAuthName', 'authz', 1535208350, 1535208350);
   it('claim.baseIndex.indexLength', () => {
     expect(claim.claim.baseIndex.indexLength).to.be.equal(84);
   });

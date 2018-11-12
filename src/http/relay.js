@@ -47,19 +47,18 @@ class Relay {
    * @param  {Object} kc
    * @param  {String} idaddr
    * @param  {String} ksign
-   * @param  {String} namespaceStr
    * @param  {String} typeStr
    * @param  {String} extraIndexData
    * @param  {String} data
    * @returns {Object}
    */
-  claimDefault(kc, idAddr, kSign, namespaceStr, typeStr, extraIndexData, data) {
-    const claimDefault = new claim.ClaimDefault(namespaceStr, typeStr, extraIndexData, data);
-    const signatureObj = kc.sign(kSign, claimDefault.hex());
+  genericClaim(kc, idAddr, kSign, namespaceStr, typeStr, extraIndexData, data) {
+    const genericClaim = new claim.GenericClaim(namespaceStr, typeStr, extraIndexData, data);
+    const signatureObj = kc.sign(kSign, genericClaim.hex());
     const bytesSignedMsg = {
-      valueHex: claimDefault.hex(),
+      valueHex: genericClaim.hex(),
       signatureHex: signatureObj.signature,
-      ksign: kSign,
+      ksign: kSign
     };
 
     return this.postClaim(idAddr, bytesSignedMsg);
@@ -69,7 +68,6 @@ class Relay {
    * @param  {Object} kc
    * @param  {String} idaddr
    * @param  {String} ksign
-   * @param  {String} namespaceStr
    * @param  {String} keyToAuthorize
    * @param  {String} applicationName
    * @param  {String} applicationAuthz
@@ -77,28 +75,13 @@ class Relay {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  authorizeKSignClaim(kc,
-    idAddr,
-    kSign,
-    namespaceStr,
-    keyToAuthorize,
-    applicationName,
-    applicationAuthz,
-    validFrom,
-    validUntil) {
-    const authorizeKSignClaim = new claim.AuthorizeKSignClaim(
-      namespaceStr,
-      keyToAuthorize,
-      applicationName,
-      applicationAuthz,
-      validFrom,
-      validUntil,
-    );
+  authorizeKSignClaim(kc, idAddr, kSign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
+    const authorizeKSignClaim = new claim.AuthorizeKSignClaim(keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil,);
     const signatureObj = kc.sign(kSign, authorizeKSignClaim.hex());
     const bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
       signatureHex: signatureObj.signature,
-      kSign,
+      kSign
     };
     return this.postClaim(idAddr, bytesSignedMsg);
   }
@@ -132,7 +115,7 @@ class Relay {
       ethID: idAddr,
       name,
       signature: signatureObj.signature, // for the moment, signature(idaddr+name)
-      ksign: keyOperational,
+      ksign: keyOperational
     };
     return this.postBindID(bindIDMsg);
   }
@@ -153,7 +136,7 @@ class Relay {
     const keys = {
       operational: op,
       recoverer: rec,
-      revokator: rev,
+      revokator: rev
     };
     return axios.post(`${this.url}/id`, keys);
   }

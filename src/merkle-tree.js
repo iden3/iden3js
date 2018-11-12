@@ -7,7 +7,7 @@ const emptyNodeValue = Buffer.alloc(32);
  * @param  {Number} bit
  * @returns {Boolean}
  */
-const getBit = function (b, bit) {
+const getBit = function(b, bit) {
   const v = b.readUInt8(b.length - Math.floor(bit / 8) - 1);
   return ((v >> (bit % 8)) & 1) > 0;
 };
@@ -17,7 +17,7 @@ const getBit = function (b, bit) {
  * @param  {Buffer} hi
  * @returns {Array} array of booleans
  */
-const getPath = function (numLevels, hi) {
+const getPath = function(numLevels, hi) {
   const path = [];
   for (let bitno = numLevels - 2; bitno >= 0; bitno--) {
     path.push(getBit(hi, bitno));
@@ -33,7 +33,7 @@ const getPath = function (numLevels, hi) {
  * @param  {Number} numLevels
  * @returns  {Bool}
  */
-const checkProof = function (rootHex, proofHex, hiHex, htHex, numLevels) {
+const checkProof = function(rootHex, proofHex, hiHex, htHex, numLevels) {
   const r = utils.hexToBytes(rootHex);
   const proof = utils.hexToBytes(proofHex);
   const proofLength = proof.length;
@@ -80,5 +80,5 @@ const checkProof = function (rootHex, proofHex, hiHex, htHex, numLevels) {
 
 module.exports = {
   emptyNodeValue,
-  checkProof,
+  checkProof
 };

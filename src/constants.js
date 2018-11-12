@@ -1,16 +1,9 @@
-const STORAGE = {
-  LOCAL_STORAGE: {
-    ID: 'localStorage',
-  },
-};
+const utils = require('./utils');
 
-const PREFIX = {
-  I3: {
-    ID: 'i3-',
-  },
-};
+const PREFIX = 'i3-';
+const NAMESPACEHASH = utils.hashBytes(Buffer.from('iden3.io'));
 
 module.exports = {
-  STORAGE,
   PREFIX,
+  NAMESPACEHASH
 };

@@ -1,8 +1,7 @@
 const chai = require('chai');
-const CONSTANTS = require('../src/constants');
 const iden3 = require('../index');
 
-const { expect } = chai;
+const {expect} = chai;
 const authurl = 'http://127.0.0.1:5000';
 const authwsurl = 'ws://127.0.0.1:5000';
 const testPrivKHex0 = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
@@ -17,7 +16,7 @@ function successCallback(authData) {
 
 describe('[auth]new QR challenge (centralized website side)', () => {
   // inside the App where the user is going to authenticate
-  const kc0 = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kc0 = new iden3.KeyContainer('localStorage');
   kc0.unlock('pass');
   // let ksign = kc0.importKey(testPrivKHex0);
   ksignGeneratedInWeb = kc0.generateKeyRand();
@@ -42,7 +41,7 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
   // inside Wallet App
   // new AuthorizeKSignClaim with the ksign from the QR
   // previous work: generate an identity
-  const kc = new iden3.KeyContainer(CONSTANTS.STORAGE.LOCAL_STORAGE.ID);
+  const kc = new iden3.KeyContainer('localStorage');
   kc.unlock('pass');
   // let key0id = kc.importKey(testPrivKHex1);
   const ko = kc.generateKeyRand();
@@ -59,21 +58,19 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
     const qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
     expect(qrKSign).to.be.equal(ksignGeneratedInWeb);
     // create a new AuthorizeKSignClaim signed with ID (key0id) and send it to the Relay
-    const unixtime = Math.round(+new Date() / 1000);
+    const unixtime = Math.round(+ new Date() / 1000);
     kc.unlock('pass');
-    return id.authorizeKSignClaim(kc, id.keyOperational, 'iden3.io', qrKSign, 'appToAuthName', 'authz', unixtime, unixtime)
-      .then((authorizeRes) => {
+    return id.authorizeKSignClaim(kc, id.keyOperational, qrKSign, 'appToAuthName', 'authz', unixtime, unixtime).then((authorizeRes) => {
       // console.log(res.data);
-        const ksignProof = authorizeRes.data.proofOfClaim;
-        expect(authorizeRes.status).to.be.equal(200);
+      const ksignProof = authorizeRes.data.proofOfClaim;
+      expect(authorizeRes.status).to.be.equal(200);
 
-        // now send the proof of the claim to the Auth centralized server
-        return iden3.auth.resolv(qrJson.url, id.idaddr, qrJson.challenge, qrJson.signature, qrKSign, ksignProof)
-          .then((resolvRes) => {
-            // console.log(res.data);
-            expect(resolvRes.status).to.be.equal(200);
-            expect(resolvRes.data.authenticated).to.be.equal(true);
-          });
+      // now send the proof of the claim to the Auth centralized server
+      return iden3.auth.resolv(qrJson.url, id.idaddr, qrJson.challenge, qrJson.signature, qrKSign, ksignProof).then((resolvRes) => {
+        // console.log(res.data);
+        expect(resolvRes.status).to.be.equal(200);
+        expect(resolvRes.data.authenticated).to.be.equal(true);
       });
+    });
   }));
 });

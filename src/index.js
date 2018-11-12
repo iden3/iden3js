@@ -7,8 +7,8 @@ const dapp = require('./auth/dapp');
 const utils = require('./utils');
 const auth = require('./auth/auth');
 
-const { Auth } = auth;
-const { Dapp } = dapp;
+const {Auth} = auth;
+const {Dapp} = dapp;
 
 module.exports = {
   claim,
@@ -20,5 +20,5 @@ module.exports = {
   Auth,
   dapp,
   Dapp,
-  utils,
+  utils
 };

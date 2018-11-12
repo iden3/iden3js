@@ -1,4 +1,3 @@
-const CONSTANTS = require('../constants');
 const LocalStorageContainer = require('./local-storage-container');
 
 /**
@@ -6,7 +5,7 @@ const LocalStorageContainer = require('./local-storage-container');
  */
 class KeyContainer {
   constructor(type) {
-    if (type === CONSTANTS.STORAGE.LOCAL_STORAGE.ID) {
+    if (type === 'localStorage') {
       return new LocalStorageContainer();
     }
     return undefined;
