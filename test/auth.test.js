@@ -8,6 +8,7 @@ const testPrivKHex0 = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489
 const testPrivKHex1 = '289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032';
 let qr = '';
 let ksignGeneratedInWeb = '';
+const db = new iden3.Db();
 
 function successCallback(authData) {
   console.log('websocket successCallback');
@@ -16,7 +17,7 @@ function successCallback(authData) {
 
 describe('[auth]new QR challenge (centralized website side)', () => {
   // inside the App where the user is going to authenticate
-  const kc0 = new iden3.KeyContainer('localStorage');
+  const kc0 = new iden3.KeyContainer('localStorage', db);
   kc0.unlock('pass');
   // let ksign = kc0.importKey(testPrivKHex0);
   ksignGeneratedInWeb = kc0.generateKeyRand();
@@ -41,7 +42,7 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
   // inside Wallet App
   // new AuthorizeKSignClaim with the ksign from the QR
   // previous work: generate an identity
-  const kc = new iden3.KeyContainer('localStorage');
+  const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   // let key0id = kc.importKey(testPrivKHex1);
   const ko = kc.generateKeyRand();

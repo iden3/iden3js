@@ -4,9 +4,10 @@ const iden3 = require('../index');
 const {expect} = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 const testPrivKHex1 = '9bd38c22848a3ebca7ae8ef915cac93a2d97c57bb2cb6da7160b86ca81598a7b';
+const db = new iden3.Db();
 
 describe('new Id()', () => {
-  const kc = new iden3.KeyContainer('localStorage');
+  const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
@@ -21,7 +22,7 @@ describe('new Id()', () => {
 });
 
 describe('id.createID() & id.deployID()', () => {
-  const kc = new iden3.KeyContainer('localStorage');
+  const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.generateKeyRand();
   const relay = new iden3.Relay('http://127.0.0.1:8000');
@@ -37,7 +38,7 @@ describe('id.createID() & id.deployID()', () => {
 });
 
 describe('id. AuthorizeKSignClaim() and GenericClaim()', () => {
-  const kc = new iden3.KeyContainer('localStorage');
+  const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
@@ -65,7 +66,7 @@ describe('id. AuthorizeKSignClaim() and GenericClaim()', () => {
 });
 
 describe('id.bindID()', () => {
-  const kc = new iden3.KeyContainer('localStorage');
+  const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex1);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
@@ -88,7 +89,7 @@ describe('id.bindID()', () => {
 
 describe('id localstorage test', () => {
   it('id(localStorage).createID() & bindID()', () => {
-    const kc = new iden3.KeyContainer('localStorage');
+    const kc = new iden3.KeyContainer('localStorage', db);
     kc.unlock('pass');
     const ko = kc.generateKeyRand();
     const krec = kc.generateKeyRand();

@@ -4,6 +4,7 @@ const nacl = require('tweetnacl');
 const bip39 = require('bip39');
 const hdkey = require('hdkey');
 const CONSTANTS = require('../constants');
+const Db = require('../db');
 const utils = require('../utils');
 const kcUtils = require('./kc-utils');
 
@@ -16,10 +17,11 @@ nacl.util = require('tweetnacl-util');
 // }
 
 class LocalStorageContainer {
-  constructor() { // idaddr used as prefix
-    this.prefix = CONSTANTS.PREFIX;
+  constructor(db) {
+    this.prefix = CONSTANTS.KCPREFIX;
     this.type = 'localStorage';
     this.encryptionKey = '';
+    this.db = db;
   }
 
   /**
@@ -43,6 +45,7 @@ class LocalStorageContainer {
   generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile=0, numberOfDerivatedKeys = 3) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
+      console.log("Error: KeyContainer not unlocked");
       return undefined;
     }
     const root = hdkey.fromMasterSeed(mnemonic);
@@ -59,7 +62,8 @@ class LocalStorageContainer {
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
 
       keys.push(addressHex);
-      localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+      // localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+      this.db.insert(this.prefix + addressHex, privKHexEncrypted);
     }
 
     return {keys, mnemonic};
@@ -71,6 +75,7 @@ class LocalStorageContainer {
   generateKeyRand() {
     if (!this.encryptionKey) {
       // KeyContainer not unlocked
+      console.log("Error: KeyContainer not unlocked");
       return undefined;
     }
     const w = ethWallet.generate();
@@ -80,7 +85,8 @@ class LocalStorageContainer {
     const privKHex = utils.bytesToHex(privK);
 
     const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
-    localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+    // localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+    this.db.insert(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
 
@@ -92,6 +98,7 @@ class LocalStorageContainer {
   importKey(privKHex) {
     if (!this.encryptionKey || privKHex.constructor !== String) {
       // KeyContainer not unlocked
+      console.log("Error: KeyContainer not unlocked");
       return undefined;
     }
     const privK = utils.hexToBytes(privKHex);
@@ -99,7 +106,8 @@ class LocalStorageContainer {
     const addressHex = utils.bytesToHex(address);
     const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
 
-    localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+    // localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+    this.db.insert(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
 
@@ -112,9 +120,11 @@ class LocalStorageContainer {
   sign(addressHex, data) {
     if (!this.encryptionKey) {
       // KeyContainer not unlocked
+      console.log("Error: KeyContainer not unlocked");
       return 'KeyContainer blocked';
     }
-    const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
+    // const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
+    const privKHexEncrypted = this.db.get(this.prefix + addressHex);
     const message = ethUtil.toBuffer(data);
     const msgHash = ethUtil.hashPersonalMessage(message);
     const privKHex = kcUtils.decrypt(this.encryptionKey, privKHexEncrypted);
@@ -132,8 +142,8 @@ class LocalStorageContainer {
 
     for (let i = 0, len = localStorageLength; i < len; i++) {
       // get only the stored data related to keycontainer (that have the prefix)
-      if (localStorage.key(i).indexOf(this.prefix) !== -1) {
-        const key = localStorage.key(i).replace(this.prefix, '');
+      if (localStorage.key(i).indexOf(this.prefix + this.db.prefix) !== -1) {
+        const key = localStorage.key(i).replace(this.prefix + this.db.prefix, '');
         keysList.push(key);
       }
     }
@@ -145,11 +155,13 @@ class LocalStorageContainer {
    * @param  {String} addressHex
    */
   deleteKey(addressHex) {
-    localStorage.removeItem(this.prefix + addressHex);
+    // localStorage.removeItem(this.prefix + addressHex);
+    this.db.delete(this.prefix + addressHex);
   }
 
   deleteAll() {
-    localStorage.clear();
+    // localStorage.clear();
+    this.db.deleteAll();
   }
 }
 

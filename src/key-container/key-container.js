@@ -4,9 +4,9 @@ const LocalStorageContainer = require('./local-storage-container');
  * @param  {String} type
  */
 class KeyContainer {
-  constructor(type) {
+  constructor(type, db) {
     if (type === 'localStorage') {
-      return new LocalStorageContainer();
+      return new LocalStorageContainer(db);
     }
     return undefined;
   }

@@ -1,9 +1,11 @@
 const utils = require('./utils');
 
-const PREFIX = 'i3-';
+const DBPREFIX = 'i3db-';
+const KCPREFIX = 'i3kc-';
 const NAMESPACEHASH = utils.hashBytes(Buffer.from('iden3.io'));
 
 module.exports = {
-  PREFIX,
+  DBPREFIX,
+  KCPREFIX,
   NAMESPACEHASH
 };

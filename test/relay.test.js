@@ -10,6 +10,7 @@ const testPrivK = Buffer.from(testPrivKHex.replace('0x', ''), 'hex');
 const idaddr = ethUtil.privateToAddress(testPrivK);
 const idaddrHex = iden3.utils.bytesToHex(idaddr);
 const relay = new iden3.Relay('http://127.0.0.1:8000');
+const db = new iden3.Db();
 
 describe('getRelayRoot()', () => {
   it('getRelayRoot()', () => relay.getRelayRoot().then((res) => {
@@ -26,7 +27,7 @@ describe('getIDRoot()', () => {
 });
 
 describe('relay.createID()', () => {
-  const kc = new iden3.KeyContainer('localStorage');
+  const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   // let key0id = kc.importKey('289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032');
   const key0id = kc.generateKeyRand();
@@ -44,7 +45,7 @@ describe('relay.createID()', () => {
 });
 
 describe('postBindID()', () => {
-  const kc = new iden3.KeyContainer('localStorage');
+  const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   // let key0id = kc.importKey(testPrivKHex);
   const key0id = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
