@@ -144,8 +144,10 @@ Usage:
 let passphrase = 'this is a test passphrase';
 kc.unlock(passphrase);
 
+// we can generate a new mnemonic just calling:
 let keys = kc.generateKeysMnemonic();
 /*
+this returns:
 keys =
 {
   keys: [ // addresses of the keys
@@ -160,6 +162,21 @@ keys =
 // also we can import an already existing seed
 let seed = 'blanket kick genre rubber better helmet youth slush acid select brick setup';
 let keys = kc.generateKeysMnemonic(seed);
+
+/*
+And we can specify the diferent identity profiles that we want to derivate from that seed.
+We can specify which identity profile we want to derivate, and how many keys we want to generate
+*/
+
+// for example, for our first identity0, we want 4 different keys, so will call the method specifying that we want the identity profile 0, and 4 keys:
+let keys_id0 = kc.generateKeysMnemonic(seed, 0, 4);
+// for the idenity1, we want 2 keys:
+let keys_id1 = kc.generateKeysMnemonic(seed, 1, 2);
+// and for the identity2 we want 5 keys:
+let keys_id2 = kc.generateKeysMnemonic(seed, 2, 5);
+
+// by default, if we don't specify the path profile and the number of keys, the function returns 3 keys for the path profile 0.
+
 
 // import key
 let key0id = kc.importKey('privKHex');

@@ -7,8 +7,6 @@ const CONSTANTS = require('../constants');
 const utils = require('../utils');
 const kcUtils = require('./kc-utils');
 
-// prefix for the localStorage stored items
-const prefix = 'i3-';
 
 nacl.util = require('tweetnacl-util');
 
@@ -37,22 +35,23 @@ class LocalStorageContainer {
 
   /**
    * @param  {String} mnemonic - String with 12 words
-   * @param  {Number} numberOfDerivatedKeys
+   * @param {Number} pathProfile - indicates the penultimate layer of the derivation path, for the different identity profiles
+   * @param  {Number} numberOfDerivatedKeys - indicates the last layer of the derivation path, for the different keys of the identity profile
    *
    * @returns {Object}
    */
-  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), numberOfDerivatedKeys = 3) {
+  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile=0, numberOfDerivatedKeys = 3) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
       return undefined;
     }
     const root = hdkey.fromMasterSeed(mnemonic);
     const keys = [];
-    const path = "m/44'/60'/0'/0/";
+    const path = "m/44'/60'/0'/";
 
     // to allow in the future specify how many keys want to derivate
     for (let i = 0; i < numberOfDerivatedKeys; i++) {
-      const addrNode = root.derive(path + i); // "m/44'/60'/0'/0/i"
+      const addrNode = root.derive(path + pathProfile + '/' + i); // "m/44'/60'/0'/pathProfile/i"
       const privK = addrNode._privateKey;
       const address = ethUtil.privateToAddress(addrNode._privateKey);
       const addressHex = utils.bytesToHex(address);
