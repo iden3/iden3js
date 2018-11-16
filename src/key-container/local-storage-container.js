@@ -8,7 +8,6 @@ const Db = require('../db');
 const utils = require('../utils');
 const kcUtils = require('./kc-utils');
 
-
 nacl.util = require('tweetnacl-util');
 
 // if (typeof localStorage === 'undefined' || localStorage === null) {
@@ -29,9 +28,11 @@ class LocalStorageContainer {
    */
   unlock(passphrase) {
     this.encryptionKey = kcUtils.passToKey(passphrase, 'salt');
+    console.log('KC unlocked');
+    let self = this;
     setTimeout(function() {
-      this.encryptionKey = '';
-      // console.log('KC locked');
+      self.encryptionKey = '';
+      console.log('KC locked');
     }, 30000);
   }
 
@@ -42,7 +43,7 @@ class LocalStorageContainer {
    *
    * @returns {Object}
    */
-  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile=0, numberOfDerivatedKeys = 3) {
+  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivatedKeys = 3) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
       console.log("Error: KeyContainer not unlocked");
@@ -162,6 +163,20 @@ class LocalStorageContainer {
   deleteAll() {
     // localStorage.clear();
     this.db.deleteAll();
+  }
+  encrypt(m) {
+    if (!this.encryptionKey) {
+      console.log("Error: KeyContainer not unlocked");
+      return undefined;
+    }
+    return kcutils.encrypt(this.encryptionKey, m);
+  }
+  decrypt(c) {
+    if (!this.encryptionKey) {
+      console.log("Error: KeyContainer not unlocked");
+      return undefined;
+    }
+    return kcUtils.decrypt(this.encryptionKey, c);
   }
 }
 
