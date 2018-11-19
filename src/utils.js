@@ -115,6 +115,35 @@ const addrFromSig = function(mOriginal, signatureHex) {
   return `0x${ethUtil.pubToAddress(pub).toString('hex')}`;
 };
 
+/**
+ * @param  {Buffer} hash
+ * @param  {Number} difficulty
+ * @returns {Boolean}
+ */
+const checkPoW = function(hash, difficulty) {
+  for(var i=0; i<difficulty; i++) {
+    if (hash[i] !== 0) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/**
+ * @param  {Object} data
+ * @param  {Number} difficulty
+ * @returns {Object}
+ */
+const pow = function(data, difficulty) {
+  data.nonce = 0;
+  let hash = hashBytes(Buffer.from(JSON.stringify(data)));
+  while (!checkPoW(hash, difficulty)) {
+    data.nonce++;
+    hash = hashBytes(Buffer.from(JSON.stringify(data)));
+  }
+  return data;
+};
+
 module.exports = {
   hashBytes,
   bytesToHex,
@@ -124,5 +153,7 @@ module.exports = {
   jsonToQr,
   qrToJson,
   verifySignature,
-  addrFromSig
+  addrFromSig,
+  checkPoW,
+  pow
 };

@@ -1,12 +1,8 @@
 const nacl = require('tweetnacl');
 const axios = require('axios');
+const utils = require('./utils');
 const kcUtils = require('./key-container/kc-utils');
 const CONSTANTS = require('./constants');
-
-// if (typeof localStorage === 'undefined' || localStorage === null) {
-//   var LocalStorage = require('node-localstorage').LocalStorage;
-//   localStorage = new LocalStorage('./tmp');
-// }
 
 
 /**
@@ -15,7 +11,7 @@ const CONSTANTS = require('./constants');
 class Db {
   constructor(url) {
     this.prefix = CONSTANTS.DBPREFIX;
-    this.url = url;
+    this.url = url; // backup server url
   }
 
   /**
@@ -68,15 +64,19 @@ class Db {
     */
     const dataEncrypted = kcUtils.encrypt(kc.encryptionKey, data);
     let dataPacket = {
-      idaddrHex: idaddr,
+      idaddrhex: idaddr,
       data: dataEncrypted,
-      dataSignature: kc.sign(ksign, dataEncrypted).signature,
+      datasignature: kc.sign(ksign, dataEncrypted).signature,
       type: type,
       ksign: ksign,
-      proofOfKSignHex: proofOfKSign,
-      relayAddr: relayAddr,
-      timestamp: undefined // will be setted by the backend
+      proofofksignhex: proofOfKSign,
+      relayaddr: relayAddr,
+      timestamp: 0, // will be setted by the backend
+      nonce: 0 // will be setted in next step of PoW
     };
+    // PoW
+    dataPacket = utils.pow(dataPacket, 2);
+
     // send dataPacket to the backend POST /store/{idaddr}
     return axios.post(`${this.url}/${idaddr}/save`, dataPacket);
   }
@@ -96,6 +96,15 @@ class Db {
    */
   recoverDataByTimestamp(idaddr, timestamp) {
     return axios.post(`${this.url}/${idaddr}/recover/timestamp/${timestamp}`, {});
+  }
+
+  /**
+   * @param  {String} idaddr - hex representation of idaddr
+   * @param {String} type - typeof the data
+   * @returns {Object}
+   */
+  recoverDataByType(idaddr, type) {
+    return axios.post(`${this.url}/${idaddr}/recover/type/${type}`, {});
   }
 
   export(kc, idAddr, ksign) {
