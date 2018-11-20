@@ -95,6 +95,7 @@ describe('pow dataBackup', function() {
       nonce: 0
     };
     data = iden3.utils.pow(data, 2);
+    expect(data.nonce).to.be.equal(11429);
     let hash = iden3.utils.hashBytes(Buffer.from(JSON.stringify(data)));
     expect(iden3.utils.checkPoW(hash, 2)).to.be.equal(true);
   });

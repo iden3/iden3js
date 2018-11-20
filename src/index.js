@@ -2,6 +2,7 @@ const claim = require('./core/claim');
 const merkleTree = require('./merkle-tree');
 const Relay = require('./http/relay');
 const Db = require('./db');
+const Backup = require('./backup');
 const KeyContainer = require('./key-container/key-container');
 const Id = require('./id');
 const dapp = require('./auth/dapp');
@@ -15,6 +16,7 @@ module.exports = {
   claim,
   merkleTree,
   Db,
+  Backup,
   KeyContainer,
   Id,
   Relay,

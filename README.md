@@ -19,9 +19,6 @@ let kc = new iden3.KeyContainer('localstorage');
 let passphrase = 'this is a test passphrase';
 kc.unlock(passphrase);
 
-// import key into the key container
-let keyId = kc.importKey('x'); // keyId is the address that is used to identify the key
-
 // generate new keys
 let keys = kc.generateKeysMnemonic();
 /*
@@ -43,6 +40,11 @@ let keyOp = keys.keys[2];
 // also we can import an already existing seed
 let seed = 'blanket kick genre rubber better helmet youth slush acid select brick setup';
 let keys = kc.generateKeysMnemonic(seed);
+
+// For more info and details about mnemonic, see section Usage>KeyContainer
+
+
+// Also, we have other 2 methods to create keys, kc.importKey and kc.generateKeyRand:
 
 // import privkey
 let key0id = kc.importKey('privKHex');
@@ -131,12 +133,6 @@ const iden3 = require('iden3');
   let kc = new iden3.KeyContainer('localStorage');
 
   ```
-- [no use this] new KeyContainer using testStorage (memory)
-  ```js
-  // new key container
-  let kc = new iden3.KeyContainer('teststorage');
-  ```
-
 
 Usage:
 ```js
@@ -178,6 +174,8 @@ let keys_id2 = kc.generateKeysMnemonic(seed, 2, 5);
 // by default, if we don't specify the path profile and the number of keys, the function returns 3 keys for the path profile 0.
 
 
+// Also, we have other 2 methods to create keys, kc.importKey and kc.generateKeyRand:
+
 // import key
 let key0id = kc.importKey('privKHex');
 // key0id is the address of the imported key, will be used as key identifier
@@ -185,6 +183,7 @@ let key0id = kc.importKey('privKHex');
 // generate key
 let key1id = kc.generateKeyRandom();
 // key1id is the address of the generated key, will be used as key identifier
+
 
 // sign using key0id
 let signature = kc.sign(key0id, 'test');

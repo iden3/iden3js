@@ -121,10 +121,8 @@ const addrFromSig = function(mOriginal, signatureHex) {
  * @returns {Boolean}
  */
 const checkPoW = function(hash, difficulty) {
-  for(var i=0; i<difficulty; i++) {
-    if (hash[i] !== 0) {
-      return false;
-    }
+  if (Buffer.compare(hash.slice(0, difficulty), Buffer.alloc(2)) !== 0) {
+    return false;
   }
   return true;
 };

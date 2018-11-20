@@ -1,17 +1,13 @@
 const nacl = require('tweetnacl');
-const axios = require('axios');
-const utils = require('./utils');
 const kcUtils = require('./key-container/kc-utils');
 const CONSTANTS = require('./constants');
-
 
 /**
  * @param  {String} url - url of the backup system backend
  */
 class Db {
-  constructor(url) {
+  constructor() {
     this.prefix = CONSTANTS.DBPREFIX;
-    this.url = url; // backup server url
   }
 
   /**
@@ -42,72 +38,11 @@ class Db {
   }
 
   /**
-   * @param  {Object} kc
-   * @param  {String} idaddr - hex representation of idaddr
-   * @param  {String} ksign - address of the KSign to use to sign
-   * @param  {Object} proofOfKSign
-   * @param  {String} type
-   * @param  {String} data
-   * @param  {String} relayAddr
-   * @returns {Object}
+   * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string
+   * @param  {Object} kc - KeyContainer
+   * @returns {Object} - encrypted packed data
    */
-  backupData(kc, idaddr, ksign, proofOfKSign, type, data, relayAddr) {
-    // TODO relayAddr will be setted in a global config, not passed in this function as parameter
-    /*
-      types:
-        - claim
-        - key/identity
-        - received Proof
-        - received Claim
-        - logs (history)
-        - ...
-    */
-    const dataEncrypted = kcUtils.encrypt(kc.encryptionKey, data);
-    let dataPacket = {
-      idaddrhex: idaddr,
-      data: dataEncrypted,
-      datasignature: kc.sign(ksign, dataEncrypted).signature,
-      type: type,
-      ksign: ksign,
-      proofofksignhex: proofOfKSign,
-      relayaddr: relayAddr,
-      timestamp: 0, // will be setted by the backend
-      nonce: 0 // will be setted in next step of PoW
-    };
-    // PoW
-    dataPacket = utils.pow(dataPacket, 2);
-
-    // send dataPacket to the backend POST /store/{idaddr}
-    return axios.post(`${this.url}/${idaddr}/save`, dataPacket);
-  }
-
-  /**
-   * @param  {String} idaddr - hex representation of idaddr
-   * @returns {Object}
-   */
-  recoverData(idaddr) {
-    return axios.post(`${this.url}/${idaddr}/recover`, {});
-  }
-
-  /**
-   * @param  {String} idaddr - hex representation of idaddr
-   * @param {Number} timestamp - unixtime
-   * @returns {Object}
-   */
-  recoverDataByTimestamp(idaddr, timestamp) {
-    return axios.post(`${this.url}/${idaddr}/recover/timestamp/${timestamp}`, {});
-  }
-
-  /**
-   * @param  {String} idaddr - hex representation of idaddr
-   * @param {String} type - typeof the data
-   * @returns {Object}
-   */
-  recoverDataByType(idaddr, type) {
-    return axios.post(`${this.url}/${idaddr}/recover/type/${type}`, {});
-  }
-
-  export(kc, idAddr, ksign) {
+  exportLocalStorage(kc) {
     if (!kc.encryptionKey) {
       // KeyContainer not unlocked
       console.log("Error: KeyContainer not unlocked");
@@ -127,7 +62,12 @@ class Db {
     return dbEncr;
   }
 
-  import (kc, dbEncr) {
+  /**
+   * Unencrypts the encrpyted packed data by the exportLocalStorage function, and saves it into localStorage
+   * @param  {Object} kc - KeyContainer
+   * @param  {String} dbEncr
+   */
+  importLocalStorage(kc, dbEncr) {
     const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncr);
     const dbExp = JSON.parse(dbExpStr);
     for (var property in dbExp) {
