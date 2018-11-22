@@ -3,3 +3,4 @@ package-lock.json
 notes.js
 tmp
 .idea
+.vscode
