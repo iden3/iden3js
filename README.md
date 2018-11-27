@@ -12,8 +12,10 @@ https://www.npmjs.com/package/iden3
 // import iden3js
 const iden3 = require('iden3');
 
+// new database
+const db = new iden3.Db();
 // new key container using localStorage
-let kc = new iden3.KeyContainer('localstorage');
+const kc = new iden3.KeyContainer('localStorage', db);
 
 // unlock the KeyContainer for the next 30 seconds
 let passphrase = 'this is a test passphrase';
@@ -73,11 +75,11 @@ id.bindID(kc, 'username').then(res => {
 });
 
 // generate new key that will be the one authorized by the other key
-let ksign = kc.generateKey();
+let ksign = kc.generateKeyRand();
 
 let unixtime = Math.round(+new Date()/1000);
 // create new AuthorizeKSignClaim, sign it, and send it to the Relay
-id.authorizeKSignClaim(kc, key0id, ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
+id.authorizeKSignClaim(kc, keyOp, ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
   let proofOfKSign = res.data.proofOfClaim;
 });
 
