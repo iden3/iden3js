@@ -44,49 +44,6 @@ class Relay {
   }
 
   /**
-   * @param  {Object} kc
-   * @param  {String} idaddr
-   * @param  {String} ksign
-   * @param  {String} typeStr
-   * @param  {String} extraIndexData
-   * @param  {String} data
-   * @returns {Object}
-   */
-  genericClaim(kc, idAddr, kSign, namespaceStr, typeStr, extraIndexData, data) {
-    const genericClaim = new claim.GenericClaim(namespaceStr, typeStr, extraIndexData, data);
-    const signatureObj = kc.sign(kSign, genericClaim.hex());
-    const bytesSignedMsg = {
-      valueHex: genericClaim.hex(),
-      signatureHex: signatureObj.signature,
-      ksign: kSign
-    };
-
-    return this.postClaim(idAddr, bytesSignedMsg);
-  }
-
-  /**
-   * @param  {Object} kc
-   * @param  {String} idaddr
-   * @param  {String} ksign
-   * @param  {String} keyToAuthorize
-   * @param  {String} applicationName
-   * @param  {String} applicationAuthz
-   * @param  {Number} validFrom
-   * @param  {Number} validUntil
-   * @returns {Object}
-   */
-  authorizeKSignClaim(kc, idAddr, kSign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    const authorizeKSignClaim = new claim.AuthorizeKSignClaim(keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil,);
-    const signatureObj = kc.sign(kSign, authorizeKSignClaim.hex());
-    const bytesSignedMsg = {
-      valueHex: authorizeKSignClaim.hex(),
-      signatureHex: signatureObj.signature,
-      kSign
-    };
-    return this.postClaim(idAddr, bytesSignedMsg);
-  }
-
-  /**
    * @param  {String} idaddr
    * @param {String} name
    * @param {String} signature

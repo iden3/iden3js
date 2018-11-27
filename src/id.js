@@ -1,3 +1,5 @@
+const claim = require('./core/claim');
+
 /**
  * @param  {String} keyRecover
  * @param  {String} keyRevoke
@@ -6,13 +8,15 @@
  * @param  {String} implementation
  */
 class Id {
-  constructor(keyRecover, keyRevoke, keyOp, relay, implementation = '') {
+  constructor(keyRecover, keyRevoke, keyOp, relay, relayAddr, implementation = '', backup=undefined) {
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
     this.keyOperational = keyOp;
     this.relay = relay;
+    this.relayAddr = relayAddr; // this can be getted from a relay endpoint
     this.idaddr = undefined;
     this.implementation = implementation;
+    this.backup = backup;
   }
 
   createID() {
@@ -35,8 +39,22 @@ class Id {
    * @param  {String} data
    * @returns {Object}
    */
-  genericClaim(kc, ksign, typeStr, extraIndexData, data) {
-    return this.relay.genericClaim(kc, this.idaddr, ksign, typeStr, extraIndexData, data);
+  genericClaim(kc, ksign, proofOfKSign, typeStr, extraIndexData, data) {
+    const genericClaim = new claim.GenericClaim('namespace', typeStr, extraIndexData, data); // TODO namespace will be hardcoded in conf
+    const signatureObj = kc.sign(kSign, genericClaim.hex());
+    const bytesSignedMsg = {
+      valueHex: genericClaim.hex(),
+      signatureHex: signatureObj.signature,
+      ksign: kSign
+    };
+
+    let self = this;
+    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then(function(res) {
+      if ((self.backup!== undefined)&&(proofOfKSign!==undefined)){
+        self.backup.backupData(kc, self.idaddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+      }
+      return res;
+    });
   }
 
   /**
@@ -49,8 +67,23 @@ class Id {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  authorizeKSignClaim(kc, ksign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    return this.relay.authorizeKSignClaim(kc, this.idaddr, ksign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil,);
+  authorizeKSignClaim(kc, kSign, proofOfKSign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
+    // TODO get proofOfKSign
+
+    const authorizeKSignClaim = new claim.AuthorizeKSignClaim(keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
+    const signatureObj = kc.sign(kSign, authorizeKSignClaim.hex());
+    const bytesSignedMsg = {
+      valueHex: authorizeKSignClaim.hex(),
+      signatureHex: signatureObj.signature,
+      kSign
+    };
+    let self = this;
+    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then(function(res) {
+      if ((self.backup!== undefined)&&(proofOfKSign!==undefined)){
+        self.backup.backupData(kc, self.idaddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+      }
+      return res;
+    });
   }
 
   /**

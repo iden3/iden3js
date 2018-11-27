@@ -4,13 +4,22 @@ const utils = require('./utils');
 const kcUtils = require('./key-container/kc-utils');
 
 class Backup {
-  constructor(url) {
+  constructor(url, version=0) {
     this.url = url; // backup server url
-    this.version = 0; // current last used version
+    this.version = version; // current last used version
+    this.difficulty = 2;
   }
 
   getPoWDifficulty() {
-    return axios.get(`${this.url}/`, {});
+    if (this.url===undefined) {
+      console.log("backup url not defined");
+      return;
+    }
+    let self = this;
+    return axios.get(`${this.url}/`, {}).then(function(res) {
+      self.difficulty = res.data.powdifficulty;
+      return res;
+    });
   }
 
   /**
@@ -23,7 +32,11 @@ class Backup {
    * @param  {String} relayAddr
    * @returns {Object}
    */
-  backupData(kc, idaddr, ksign, proofOfKSign, type, data, difficulty, relayAddr) {
+  backupData(kc, idaddr, ksign, proofOfKSign, type, data, relayAddr) {
+    if (this.url===undefined) {
+      console.log("backup url not defined");
+      return;
+    }
     // TODO relayAddr will be setted in a global config, not passed in this function as parameter
     /*
       types:
@@ -48,10 +61,21 @@ class Backup {
       nonce: 0 // will be setted in next step of PoW
     };
     // PoW
-    dataPacket = utils.pow(dataPacket, difficulty);
+    dataPacket = utils.pow(dataPacket, this.difficulty);
 
     // send dataPacket to the backend POST /store/{idaddr}
-    return axios.post(`${this.url}/${idaddr}/save`, dataPacket);
+    let self = this;
+    return axios.post(`${this.url}/${idaddr}/save`, dataPacket)
+      .then(function(res) {
+        self.version = res.data.version;
+        return;
+      })
+      .catch(function(err) {
+        console.error(error);
+      })
+      .then(function() {
+        return;
+      });
   }
 
   /**
@@ -59,6 +83,10 @@ class Backup {
    * @returns {Object}
    */
   recoverData(idaddr) {
+    if (this.url===undefined) {
+      console.log("backup url not defined");
+      return;
+    }
     return axios.post(`${this.url}/${idaddr}/recover`, {});
   }
 
@@ -68,6 +96,10 @@ class Backup {
    * @returns {Object}
    */
   recoverDataSinceVersion(idaddr, version) {
+    if (this.url===undefined) {
+      console.log("backup url not defined");
+      return;
+    }
     return axios.post(`${this.url}/${idaddr}/recover/version/${version}`, {});
   }
 
@@ -77,6 +109,10 @@ class Backup {
    * @returns {Object}
    */
   recoverDataByType(idaddr, type) {
+    if (this.url===undefined) {
+      console.log("backup url not defined");
+      return;
+    }
     return axios.post(`${this.url}/${idaddr}/recover/type/${type}`, {});
   }
 }

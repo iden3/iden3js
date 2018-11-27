@@ -84,7 +84,6 @@ class LocalStorageContainer {
     const address = ethUtil.privateToAddress(privK);
     const addressHex = utils.bytesToHex(address);
     const privKHex = utils.bytesToHex(privK);
-
     const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
     // localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     this.db.insert(this.prefix + addressHex, privKHexEncrypted);

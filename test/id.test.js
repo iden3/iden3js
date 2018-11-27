@@ -5,13 +5,14 @@ const {expect} = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 const testPrivKHex1 = '9bd38c22848a3ebca7ae8ef915cac93a2d97c57bb2cb6da7160b86ca81598a7b';
 const db = new iden3.Db();
+let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
 describe('new Id()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
-  const id = new iden3.Id(key0id, key0id, key0id, relay, '');
+  const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
 
   it('new Id without privK', () => {
     expect(id.keyRecover).to.be.equal(key0id);
@@ -26,7 +27,7 @@ describe('id.createID() & id.deployID()', () => {
   kc.unlock('pass');
   const key0id = kc.generateKeyRand();
   const relay = new iden3.Relay('http://127.0.0.1:8000');
-  const id = new iden3.Id(key0id, key0id, key0id, relay, '');
+  const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
 
   it('id.createID()', () => id.createID().then((ceateIDRes) => {
     expect(ceateIDRes).to.be.equal(id.idaddr);
@@ -42,7 +43,7 @@ describe('id. AuthorizeKSignClaim() and GenericClaim()', () => {
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
-  const id = new iden3.Id(key0id, key0id, key0id, relay, '');
+  const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
 
   return id.createID().then((res) => {
     const kSign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
@@ -70,7 +71,7 @@ describe('id.bindID()', () => {
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex1);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
-  const id = new iden3.Id(key0id, key0id, key0id, relay, '');
+  const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
 
   before(() => id.createID().then((res) => {}));
 
@@ -95,7 +96,7 @@ describe('id localstorage test', () => {
     const krec = kc.generateKeyRand();
     const krev = kc.generateKeyRand();
     const relay = new iden3.Relay('http://127.0.0.1:8000');
-    const id = new iden3.Id(krec, krev, ko, relay, '');
+    const id = new iden3.Id(krec, krev, ko, relay, relayAddr, '');
 
     return id.createID().then((res) => {
       expect(res).to.be.equal(id.idaddr);

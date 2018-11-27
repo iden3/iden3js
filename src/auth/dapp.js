@@ -3,7 +3,7 @@ const nacl = require('tweetnacl');
 nacl.util = require('tweetnacl-util');
 const IPFS = require('ipfs');
 const IPFSRoom = require('ipfs-pubsub-room');
-//const encoder = new TextEncoder('utf-8');
+// const encoder = new TextEncoder('utf-8');
 
 /**
  * @param  {String} idaddr
@@ -40,7 +40,7 @@ class Dapp {
 
       const go = () => {
         this.ipfs.swarm.addrs().then((peers) => {
-          if (peers.length == 0) {
+          if (peers.length === 0) {
             toastr.info('no peers connected. waiting...');
             setTimeout(() => go(), 1000);
           } else {
@@ -101,7 +101,7 @@ class Dapp {
     nonceBytes[nacl.box.nonceLength - 1] = this.nonce & 0xff;
     nonceBytes[nacl.box.nonceLength - 2] = (this.nonce >> 8) & 0xff;
     plaintext = nacl.secretbox.open(message.data, nonceBytes, this.secretkey);
-    if (plaintext == null) {
+    if (plaintext === null) {
       status('Invalid message recieved', true);
       return;
     }
@@ -114,7 +114,7 @@ class Dapp {
     status(`wallet got ${message}`, true);
 
     const [op, args] = message.split('|');
-    if (op == 'call') {
+    if (op === 'call') {
       ksignaddr = '0xee602447b5a75cf4f25367f5d199b860844d10c4';
       ksignpvk = ethutil.toBuffer('0x8A85AAA2A8CE0D24F66D3EAA7F9F501F34992BACA0FF942A8EDF7ECE6B91F713');
 
