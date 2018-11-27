@@ -1,18 +1,22 @@
 const utils = require('./utils');
 const helpers = require('./merkle-tree-utils');
+const CONSTANTS = require('./constants');
 
 const emptyNodeValue = Buffer.alloc(32);
 
 class MerkleTree {
   /**
   * Initiate merkle tree with a given number of levels
+  * @param {Object} db - Database
   * @param {uint} numLevels - Number of levels of the merkle tree
+  * @param {String} iaddr - adress of the identity
   */
-  constructor(numLevels){
+  constructor(db,numLevels,idaddr){
+      this.db = db;
+      this.prefix = CONSTANTS.MTPREFIX + idaddr;
       this.numLevels = numLevels;
       this.numLayers = this.numLevels - 1;
-      this.root = emptyNodeValue;      
-      this.mt = new Map();
+      this.root = emptyNodeValue;
   }
 
   /**
@@ -41,7 +45,7 @@ class MerkleTree {
       // Find last node written
       key = this.root; // Start with root node 
       for(let i = 0; i < this.numLayers;i++){
-          nodeValue = getNodeValueByKey(this.mt,key);
+          nodeValue = getNodeValue(this.db,key,this.prefix);
           if(nodeValue == emptyNodeValue){ // Empty node found
               finalIndex = i-1;
               break;
@@ -64,14 +68,14 @@ class MerkleTree {
           let hashTmp = getCutNodeHash(ht,positionClaim,this.numLayers,this.numLayers);
           this.root = hashTmp;
           let node =  helpers.addFlagNode(claim,true);
-          this.mt.set(hashTmp, node);
+          setNodeValue(this.db,hashTmp,node,this.prefix);
           return;
       }
       if(nodeValue == emptyNodeValue){
           // Calcular nuevo nodo, que sera nodo final
           let hashTmp = getCutNodeHash(ht,positionClaim,this.numLayers - (finalIndex+1),this.numLayers);
           let node =  helpers.addFlagNode(claim,true);
-          this.mt.set(hashTmp, node);
+          setNodeValue(this.db,hashTmp,node,this.prefix);
 
           let sibling;
           let nextHash = hashTmp;
@@ -85,7 +89,7 @@ class MerkleTree {
               concat = positionClaim[i]?[sibling,nextHash]:[nextHash,sibling];
               let nodeNext =  helpers.addFlagNode(concat,false);
               nextHash = utils.hashBytes(Buffer.concat(concat));
-              this.mt.set(nextHash, nodeNext);
+              setNodeValue(this.db,nextHash,nodeNext,this.prefix);
           }
           this.root = nextHash;
           return;
@@ -105,15 +109,15 @@ class MerkleTree {
       let hashNew = getCutNodeHash(ht,positionClaim,this.numLayers - (finalIndex+1),this.numLayers);
       let hashTmp = getCutNodeHash(htTmp,positionClaimTmp,this.numLayers - (finalIndex+1),this.numLayers);
       let node =  helpers.addFlagNode(claim,true);
-      this.mt.set(hashNew, node);
+      setNodeValue(this.db,hashNew,node,this.prefix);
       node =  helpers.addFlagNode(claimTmp,true);
-      this.mt.set(hashTmp, node);
+      setNodeValue(this.db,hashTmp,node,this.prefix);
 
       // Write next node
       let concat = positionClaim[finalIndex]?[hashTmp,hashNew]:[hashNew,hashTmp];
       let firstNode = helpers.addFlagNode(concat,false);
       let firstHash = utils.hashBytes(Buffer.concat(concat));
-      this.mt.set(firstHash, firstNode);
+      setNodeValue(this.db,firstHash,firstNode,this.prefix);
 
       let sibling;
       let nextHash = firstHash;
@@ -126,7 +130,7 @@ class MerkleTree {
           concat = positionClaim[i]?[sibling,nextHash]:[nextHash,sibling];
           let nodeNext =  helpers.addFlagNode(concat,false);
           nextHash = utils.hashBytes(Buffer.concat(concat));
-          this.mt.set(nextHash, nodeNext);
+          setNodeValue(this.db,nextHash,nodeNext,this.prefix);
       }
       this.root = nextHash;
   }
@@ -146,7 +150,7 @@ class MerkleTree {
       // Find last node written
       // Start with root node
       for(let i = 0; i < this.numLayers;i++){
-          nodeValue = getNodeValueByKey(this.mt,key);
+          nodeValue = getNodeValue(this.db,key,this.prefix);
           if(!nodeValue.flag){ // Check if it is a final node
               let childLeft = nodeValue.data[0];
               let childRight = nodeValue.data[1];
@@ -210,7 +214,7 @@ class MerkleTree {
       let nodeValue;
       // Find last node written
       for(let i = 0; i < this.numLayers;i++){
-          nodeValue = getNodeValueByKey(this.mt,key);
+          nodeValue = getNodeValue(this.db,key,this.prefix);
           if(!nodeValue.flag){ // Check if it is a final node
               let childLeft = nodeValue.data[0];
               let childRight = nodeValue.data[1];
@@ -225,14 +229,31 @@ class MerkleTree {
 
 /**
 * Retrieve node value from merkle tree
+* @param {Object} db - Data base object representation
 * @param {Buffer} key - Key value of the node
+* @param {String} prefix - Prefix added to the key
 * @returns {Buffer} - Value of the node
 */
-function getNodeValueByKey(mt,key){
-  if(mt.has(key))
-    return mt.get(key);
-  else
-    return emptyNodeValue;
+function getNodeValue(db,key,prefix){
+    let keyHex = utils.bytesToHex(key);
+    let valueHex = db.get(prefix + keyHex);
+    if(valueHex === null)
+        return emptyNodeValue;
+    else
+        return helpers.bufferToNodeValue(utils.hexToBytes(valueHex));
+}
+
+/**
+* Set node value to the merkle tree
+* @param {Object} db - Data base object representation
+* @param {Buffer} key - Key value of the node
+* @param {Buffer} value - Value of the node
+* @param {String} prefix - Prefix added to the key
+*/
+function setNodeValue(db,key,value,prefix){
+    let keyHex = utils.bytesToHex(key);
+    let valueHex = utils.bytesToHex(helpers.nodeValueToBuffer(value));
+    db.insert(prefix + keyHex, valueHex);
 }
 
 /**
