@@ -49,7 +49,8 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
   const krec = kc.generateKeyRand();
   const krev = kc.generateKeyRand();
   const relay = new iden3.Relay('http://127.0.0.1:8000');
-  const id = new iden3.Id(krec, krev, ko, relay, '');
+  let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+  const id = new iden3.Id(krec, krev, ko, relay, relayAddr, '');
 
   it('[auth] id.AuthorizeKSignClaim()', () => id.createID().then((res) => {
     expect(res).to.be.equal(id.idaddr);
@@ -61,7 +62,7 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
     // create a new AuthorizeKSignClaim signed with ID (key0id) and send it to the Relay
     const unixtime = Math.round(+ new Date() / 1000);
     kc.unlock('pass');
-    return id.authorizeKSignClaim(kc, id.keyOperational, qrKSign, 'appToAuthName', 'authz', unixtime, unixtime).then((authorizeRes) => {
+    return id.authorizeKSignClaim(kc, id.keyOperational, '', qrKSign, 'appToAuthName', 'authz', unixtime, unixtime).then((authorizeRes) => {
       // console.log(res.data);
       const ksignProof = authorizeRes.data.proofOfClaim;
       expect(authorizeRes.status).to.be.equal(200);

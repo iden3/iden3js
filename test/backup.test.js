@@ -17,37 +17,33 @@ const kSign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f
 
 
 let proofOfKSign = {};
-let version = 0;
-let difficulty = 1;
 
-describe('backup.backupData backup.recoverData backup.recoverDataByTimestamp', () => {
+describe('backup.backupData backup.recoverData backup.recoverDataSinceVersion', () => {
   before(() => backup.getPoWDifficulty().then((res) => {
-    console.log("dif", res.data);
-    difficulty = res.data.powdifficulty;
+    // difficulty = res.data.powdifficulty;
   }));
   it('backupData', () => {
-
     return id.createID().then((idaddr) => {
-      return id.authorizeKSignClaim(kc, id.keyOperational, kSign, 'appToAuthName', 'authz', 1535208350, 1535208350).then((authRes) => {
+      return id.authorizeKSignClaim(kc, id.keyOperational, {}, kSign, 'appToAuthName', 'authz', 1535208350, 1535208350).then((authRes) => {
         proofOfKSign = authRes.data.proofOfClaim;
         expect(authRes.status).to.be.equal(200);
 
         setTimeout(function() {
-          backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'this is the test data', difficulty, relayAddr).then((resp) => {
+          backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'this is the test data', relayAddr).then((resp) => {
             // console.log("backup", resp.data);
           });
         }, 100);
         setTimeout(function() {
-          backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype2', 'test data 2', difficulty, relayAddr).then((resp) => {
+          backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype2', 'test data 2', relayAddr).then((resp) => {
             // console.log("backup", resp.data);
           });
         }, 500);
-        backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'test data 3', difficulty, relayAddr).then((resp) => {
+
+        backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'test data 3', relayAddr).then((resp) => {
           // console.log("backup", resp.data);
         });
         setTimeout(function() {
-          return backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'test data 4', difficulty, relayAddr).then((resp) => {
-            version = resp.data.version;
+          return backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'test data 4', relayAddr).then((resp) => {
 
             return backup.recoverData(id.idaddr).then((resp) => {
               let data = resp.data.backups;
@@ -60,11 +56,11 @@ describe('backup.backupData backup.recoverData backup.recoverDataByTimestamp', (
                 // let lastdata = data[0].data;
                 // let r = kc.decrypt(lastdata);
                 // expect(r).to.be.equal("test data 4");
-                expect(data.length == 1).to.be.equal(true);
+                expect(data.length === 1).to.be.equal(true);
               });
             });
           });
-        }, 3000);
+        }, 4000);
       });
 
     });

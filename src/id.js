@@ -1,3 +1,5 @@
+const claim = require('./core/claim');
+
 /**
  * @param  {String} keyRecover
  * @param  {String} keyRevoke
@@ -37,7 +39,7 @@ class Id {
    * @param  {String} data
    * @returns {Object}
    */
-  genericClaim(kc, ksign, typeStr, extraIndexData, data) {
+  genericClaim(kc, ksign, proofOfKSign, typeStr, extraIndexData, data) {
     const genericClaim = new claim.GenericClaim('namespace', typeStr, extraIndexData, data); // TODO namespace will be hardcoded in conf
     const signatureObj = kc.sign(kSign, genericClaim.hex());
     const bytesSignedMsg = {
@@ -46,8 +48,11 @@ class Id {
       ksign: kSign
     };
 
+    let self = this;
     return this.relay.postClaim(this.idaddr, bytesSignedMsg).then(function(res) {
-      this.backup.backupData(kc, this.idaddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), this.relayAddr);
+      if ((self.backup!== undefined)&&(proofOfKSign!==undefined)){
+        self.backup.backupData(kc, self.idaddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+      }
       return res;
     });
   }
@@ -62,7 +67,7 @@ class Id {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  authorizeKSignClaim(kc, ksign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
+  authorizeKSignClaim(kc, kSign, proofOfKSign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
     // TODO get proofOfKSign
 
     const authorizeKSignClaim = new claim.AuthorizeKSignClaim(keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
@@ -72,9 +77,11 @@ class Id {
       signatureHex: signatureObj.signature,
       kSign
     };
+    let self = this;
     return this.relay.postClaim(this.idaddr, bytesSignedMsg).then(function(res) {
-      const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c'; // TODO this will not be hardcoded
-      this.backup.backupData(kc, this.idaddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), this.relayAddr);
+      if ((self.backup!== undefined)&&(proofOfKSign!==undefined)){
+        self.backup.backupData(kc, self.idaddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+      }
       return res;
     });
   }

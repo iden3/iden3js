@@ -50,7 +50,8 @@ describe('postBindID()', () => {
   // let key0id = kc.importKey(testPrivKHex);
   const key0id = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
   const _relay = new iden3.Relay('http://127.0.0.1:8000');
-  const id = new iden3.Id(key0id, key0id, key0id, _relay, '');
+  let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+  const id = new iden3.Id(key0id, key0id, key0id, _relay, relayAddr, '');
 
   before(() => id.createID().then((res) => {}));
 

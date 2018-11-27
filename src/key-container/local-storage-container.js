@@ -10,10 +10,10 @@ const kcUtils = require('./kc-utils');
 
 nacl.util = require('tweetnacl-util');
 
-// if (typeof localStorage === 'undefined' || localStorage === null) {
-//   var LocalStorage = require('node-localstorage').LocalStorage;
-//   localStorage = new LocalStorage('./tmp');
-// }
+if (typeof localStorage === 'undefined' || localStorage === null) {
+  var LocalStorage = require('node-localstorage').LocalStorage;
+  localStorage = new LocalStorage('./tmp');
+}
 
 class LocalStorageContainer {
   constructor(db) {
@@ -84,7 +84,6 @@ class LocalStorageContainer {
     const address = ethUtil.privateToAddress(privK);
     const addressHex = utils.bytesToHex(address);
     const privKHex = utils.bytesToHex(privK);
-
     const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
     // localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
     this.db.insert(this.prefix + addressHex, privKHexEncrypted);

@@ -6,7 +6,7 @@ const kcUtils = require('./key-container/kc-utils');
 class Backup {
   constructor(url, version=0) {
     this.url = url; // backup server url
-    // this.version = 0; // current last used version
+    this.version = version; // current last used version
     this.difficulty = 2;
   }
 
@@ -15,8 +15,9 @@ class Backup {
       console.log("backup url not defined");
       return;
     }
+    let self = this;
     return axios.get(`${this.url}/`, {}).then(function(res) {
-      this.difficulty = res.data.powdifficulty;
+      self.difficulty = res.data.powdifficulty;
       return res;
     });
   }
@@ -63,9 +64,11 @@ class Backup {
     dataPacket = utils.pow(dataPacket, this.difficulty);
 
     // send dataPacket to the backend POST /store/{idaddr}
+    let self = this;
     return axios.post(`${this.url}/${idaddr}/save`, dataPacket)
       .then(function(res) {
-        this.version = res.data.version;
+        self.version = res.data.version;
+        return;
       })
       .catch(function(err) {
         console.error(error);
