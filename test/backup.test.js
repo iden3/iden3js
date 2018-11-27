@@ -11,12 +11,13 @@ const kc = new iden3.KeyContainer('localStorage', db);
 kc.unlock('pass');
 const key0id = kc.importKey(testPrivKHex);
 const relay = new iden3.Relay('http://127.0.0.1:8000');
-const id = new iden3.Id(key0id, key0id, key0id, relay, '');
-const kSign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
 let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
+const kSign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
+
 
 let proofOfKSign = {};
-let timestamp = 0;
+let version = 0;
 let difficulty = 1;
 
 describe('backup.backupData backup.recoverData backup.recoverDataByTimestamp', () => {
@@ -46,7 +47,7 @@ describe('backup.backupData backup.recoverData backup.recoverDataByTimestamp', (
         });
         setTimeout(function() {
           return backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'test data 4', difficulty, relayAddr).then((resp) => {
-            timestamp = resp.data.timestamp;
+            version = resp.data.version;
 
             return backup.recoverData(id.idaddr).then((resp) => {
               let data = resp.data.backups;
