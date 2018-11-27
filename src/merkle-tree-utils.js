@@ -57,9 +57,53 @@ function hashToPosition(array,length){
     return positionClaim.slice(0,length);
 }
 
+/**
+* Create a buffer from a node object
+* @param {Object} nodeValue - Object representation of node value data
+* @returns {Buffer} - New buffer 
+*/
+function nodeValueToBuffer(nodeValue){
+    let buffFlag = Buffer.alloc(1);
+    buffFlag.writeUInt8(nodeValue.flag);
+    if(buffFlag[0]){
+        let buffIndex = Buffer.alloc(4);
+        buffIndex.writeUInt32LE(nodeValue.data.indexLength);
+        return Buffer.concat([buffFlag,buffIndex,nodeValue.data.data]);
+    }else
+        return Buffer.concat([buffFlag,nodeValue.data[0],nodeValue.data[1]]);
+}
+
+/**
+* Decode a buffer into an object represenation of node value
+* @param {Buffer} nodeValueBuffer - Buffer to decode
+* @returns {Object} - New object containing node value data
+*/
+function bufferToNodeValue(nodeValueBuffer){
+    let flag = nodeValueBuffer.readUInt8();
+    let nodeValue;
+    if(flag){
+        nodeValue = {
+            flag:nodeValueBuffer.readUInt8(),
+            data:   {
+                        data:nodeValueBuffer.slice(5,nodeValueBuffer.length),
+                        indexLength: nodeValueBuffer.readUInt32LE(1)
+                    }
+        };
+    }
+    else{
+        nodeValue = {
+            flag:nodeValueBuffer.readUInt8(),
+            data:[nodeValueBuffer.slice(1,33),nodeValueBuffer.slice(33,nodeValueBuffer.length)],      
+        };
+    }
+    return  nodeValue;
+}
+
 module.exports = {
     addFlagNode,
     setBit,
     getBit,
-    hashToPosition
+    hashToPosition,
+    nodeValueToBuffer,
+    bufferToNodeValue
 };
