@@ -4,7 +4,7 @@ const iden3 = require('../index');
 
 const testPrivKHex = '5ca155481bafd651f6297f525781430e737c3e64a7f854af5870897fa307ae65';
 
-describe('db.export db.import', () => {
+describe('[db] db.export db.import', () => {
   it('encrypt', () => {
     const db = new iden3.Db();
     const kc = new iden3.KeyContainer('localStorage', db);

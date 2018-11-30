@@ -3,7 +3,7 @@ const iden3 = require('../index');
 
 const {expect} = chai;
 
-describe('genericClaim', () => {
+describe('[claim] genericClaim', () => {
   const claim = new iden3.claim.GenericClaim('iden3.io', 'default', 'c1');
 
   it('claim.baseIndex.indexLength', () => {
@@ -41,7 +41,7 @@ describe('genericClaim', () => {
   });
 });
 
-describe('authorizeKSignClaim', () => {
+describe('[claim] authorizeKSignClaim', () => {
   const claim = new iden3.claim.AuthorizeKSignClaim('0x101d2fa51f8259df207115af9eaa73f3f4e52e60', 'appToAuthName', 'authz', 1535208350, 1535208350);
   it('claim.baseIndex.indexLength', () => {
     expect(claim.claim.baseIndex.indexLength).to.be.equal(84);
@@ -75,7 +75,7 @@ describe('authorizeKSignClaim', () => {
   });
 });
 
-describe('proofOfClaim()', () => {
+describe('[claim] proofOfClaim()', () => {
   it('proofOfClaim', () => {
     const proofOfClaimStr = `
     {

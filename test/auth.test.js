@@ -15,7 +15,7 @@ function successCallback(authData) {
   console.log(authData);
 }
 
-describe('[auth]new QR challenge (centralized website side)', () => {
+describe('[auth] new QR challenge (centralized website side)', () => {
   // inside the App where the user is going to authenticate
   const kc0 = new iden3.KeyContainer('localStorage', db);
   kc0.unlock('pass');

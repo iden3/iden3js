@@ -18,7 +18,7 @@ const kSign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f
 
 let proofOfKSign = {};
 
-describe('id.genericClaim with backup', () => {
+describe('[id-backup] id.genericClaim with backup', () => {
   before(() => backup.getPoWDifficulty().then((res) => {
     // difficulty = res.data.powdifficulty;
   }));

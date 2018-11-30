@@ -12,21 +12,21 @@ const idaddrHex = iden3.utils.bytesToHex(idaddr);
 const relay = new iden3.Relay('http://127.0.0.1:8000');
 const db = new iden3.Db();
 
-describe('getRelayRoot()', () => {
+describe('[relay] getRelayRoot()', () => {
   it('getRelayRoot()', () => relay.getRelayRoot().then((res) => {
     // console.log('res.data', res.data);
     expect(res.status).to.be.equal(200);
   }));
 });
 
-describe('getIDRoot()', () => {
+describe('[relay] getIDRoot()', () => {
   it('getIDRoot()', () => relay.getIDRoot(idaddrHex).then((res) => {
     // console.log('res.data', res.data);
     expect(res.status).to.be.equal(200);
   }));
 });
 
-describe('relay.createID()', () => {
+describe('[relay] relay.createID()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   // let key0id = kc.importKey('289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032');
@@ -44,7 +44,7 @@ describe('relay.createID()', () => {
   }));
 });
 
-describe('postBindID()', () => {
+describe('[relay] postBindID()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   // let key0id = kc.importKey(testPrivKHex);

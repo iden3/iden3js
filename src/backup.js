@@ -7,7 +7,7 @@ class Backup {
   constructor(url, version=0) {
     this.url = url; // backup server url
     this.version = version; // current last used version
-    this.difficulty = 2;
+    this.difficulty = 1;
   }
 
   getPoWDifficulty() {

@@ -2,7 +2,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const iden3 = require('../index');
 
-describe('hashBytes()', function() {
+describe('[util] hashBytes()', function() {
   it('hashBytes()', function() {
     let b = Buffer.from('test');
     let hash = iden3.utils.hashBytes(b);
@@ -17,7 +17,7 @@ describe('hashBytes()', function() {
   });
 });
 
-describe('bytesToHex()', function() {
+describe('[util] bytesToHex()', function() {
   it('check bytesToHex()', function() {
     let b = Buffer.from('test');
     let hex = iden3.utils.bytesToHex(b);
@@ -25,7 +25,7 @@ describe('bytesToHex()', function() {
   });
 });
 
-describe('hexToBytes()', function() {
+describe('[util] hexToBytes()', function() {
   it('check hexToBytes()', function() {
     let hex = '0x74657374';
     let b = iden3.utils.hexToBytes(hex);
@@ -34,7 +34,7 @@ describe('hexToBytes()', function() {
   });
 });
 
-describe('verifySignature()', function() {
+describe('[util] verifySignature()', function() {
   it('check hexToBytes()', function() {
     let addressHex = '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f';
     let msgHashHex = '0x4a5c5d454721bbbb25540c3317521e71c373ae36458f960d2ad46ef088110e95';
@@ -44,7 +44,7 @@ describe('verifySignature()', function() {
   });
 });
 
-describe('pow()', function() {
+describe('[util] pow()', function() {
   it('check pow()', function() {
     let data = {
       base: 'test',
@@ -58,7 +58,7 @@ describe('pow()', function() {
 });
 
 
-describe('pow dataBackup', function() {
+describe('[util] pow dataBackup', function() {
   it('check pow dataBackup', function() {
     let data = {
       idaddrhex : '0xa6d0cfcb340d63e092d94f1418ed747e06600ce8',

@@ -7,7 +7,7 @@ const testPrivKHex1 = '9bd38c22848a3ebca7ae8ef915cac93a2d97c57bb2cb6da7160b86ca8
 const db = new iden3.Db();
 let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
-describe('new Id()', () => {
+describe('[id] new Id()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex);
@@ -22,7 +22,7 @@ describe('new Id()', () => {
   });
 });
 
-describe('id.createID() & id.deployID()', () => {
+describe('[id] id.createID() & id.deployID()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.generateKeyRand();
@@ -38,7 +38,7 @@ describe('id.createID() & id.deployID()', () => {
   }));
 });
 
-describe('id. AuthorizeKSignClaim() and GenericClaim()', () => {
+describe('[id] id. AuthorizeKSignClaim() and GenericClaim()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex);
@@ -66,7 +66,7 @@ describe('id. AuthorizeKSignClaim() and GenericClaim()', () => {
   });
 });
 
-describe('id.bindID()', () => {
+describe('[id] id.bindID()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0id = kc.importKey(testPrivKHex1);
@@ -88,7 +88,7 @@ describe('id.bindID()', () => {
   });
 });
 
-describe('id localstorage test', () => {
+describe('[id] id localstorage test', () => {
   it('id(localStorage).createID() & bindID()', () => {
     const kc = new iden3.KeyContainer('localStorage', db);
     kc.unlock('pass');

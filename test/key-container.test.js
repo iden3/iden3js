@@ -6,7 +6,7 @@ const {expect} = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 
 const db = new iden3.Db();
-describe('kcUtils.encrypt', () => {
+describe('[key-container] kcUtils.encrypt', () => {
   it('encrypt', () => {
     const passphrase = 'this is a test passphrase';
     const key = kcUtils.passToKey(passphrase, 'a');
@@ -19,7 +19,7 @@ describe('kcUtils.encrypt', () => {
   });
 });
 
-describe('kc.type', () => {
+describe('[key-container] kc.type', () => {
   const kcTest = new iden3.KeyContainer('localStorage', db);
   const kcLocalstorage = new iden3.KeyContainer('localStorage', db);
 
@@ -29,7 +29,7 @@ describe('kc.type', () => {
   });
 });
 
-describe('new localstorageKeyContainer', () => {
+describe('[key-container] new localstorageKeyContainer', () => {
   it('new localstorageKeyContainer', () => {
     const kc0 = new iden3.KeyContainer('test');
     expect(kc0.type).to.be.equal(undefined);
@@ -38,7 +38,7 @@ describe('new localstorageKeyContainer', () => {
   });
 });
 
-describe('testkc.importKey()', () => {
+describe('[key-container] testkc.importKey()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
@@ -48,7 +48,7 @@ describe('testkc.importKey()', () => {
   });
 });
 
-describe('testkc.sign()', () => {
+describe('[key-container] testkc.sign()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
@@ -59,7 +59,7 @@ describe('testkc.sign()', () => {
   });
 });
 
-describe('new localstorageKeyContainer', () => {
+describe('[key-container] new localstorageKeyContainer', () => {
   it('new localstorageKeyContainer', () => {
     const kc0 = new iden3.KeyContainer('test');
     expect(kc0.type).to.be.equal(undefined);
@@ -70,7 +70,7 @@ describe('new localstorageKeyContainer', () => {
   });
 });
 
-describe('localstoragekc.importKey()', () => {
+describe('[key-container] localstoragekc.importKey()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
@@ -80,7 +80,7 @@ describe('localstoragekc.importKey()', () => {
   });
 });
 
-describe('localstoragekc.sign()', () => {
+describe('[key-container] localstoragekc.sign()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   const key0 = kc.importKey(testPrivKHex);
@@ -91,7 +91,7 @@ describe('localstoragekc.sign()', () => {
   });
 });
 
-describe('key from mnemonic', () => {
+describe('[key-container] key from mnemonic', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   // kc.deleteAll();  delete all to do the test with empty localStorage
@@ -111,7 +111,7 @@ describe('key from mnemonic', () => {
 });
 
 
-describe('mnemonic paths', () => {
+describe('[key-container] mnemonic paths', () => {
   const kc = new iden3.KeyContainer('localStorage', db);
   kc.unlock('pass');
   // kc.deleteAll();  delete all to do the test with empty localStorage
