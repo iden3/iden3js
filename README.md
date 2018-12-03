@@ -469,6 +469,8 @@ let hashTotal2Hex = iden3.utils.bytesToHex(iden3.utils.hashBytes(leaf2.data));
 // check if a leaf is on the merkle tree
 let verifiedRandom = iden3.merkleTree.checkProof(rootHex, profLeaf2Hex, hashIndex2Hex, hashTotal2Hex, 140);
 ```
+The complete example can be found in [`merkle-tree.example.js`](https://github.com/iden3/iden3js/blob/master/examples/merkle-tree.example.js).
+
 
 ### Utils
 ```js
