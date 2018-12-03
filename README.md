@@ -346,6 +346,9 @@ let authorizeKSignClaimParsed = iden3.claim.parseAuthorizeKSignClaim(authorizeKS
 ```
 
 #### checkProofOfClaim
+This function checks the data structure of `proofOfClaim` and returns true if all the proofs are correct.
+Internally, it usees the `iden3.merkleTree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
+
 Checks the full `proof` of a `claim`. This means check the:
 - `Merkle Proof` of the `claim`
 - `Merkle Proof` of the non revocation `claim`
@@ -386,19 +389,85 @@ let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
 
 ### Merkletree
 
-#### CheckProof
-Checks the `Merkle Proof` of a `Leaf`.
+#### Merkle tree initialization
+Three parameters as an inputs:
+- db --> where to store key-value merkle tree nodes
+- numLevels --> number of levels of the merkle tree
+- idaddr --> used as key prefix at the time to store key nodes
 ```js
-let verified = iden3.merkleTree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
-console.log(verified); // true
+// new database
+const db = new iden3.Db();
+// hardcoded id address for multi identity purposes
+const idaddr = "";
+// number of merkle tree levels
+const numLevels = 140;
+// new merkle tree class instance
+let mt = new iden3.merkleTree.MerkleTree(db,numLevels,idaddr);
 ```
 
-#### CheckProofOfClaim
-This function checks the data structure of `proofOfClaim` and returns true if all the proofs are correct.
-Internally, it usees the `iden3.merkleTree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
+#### Add claim
+Add a leaf into the merkle tree. Note the leaf object structure containing `data` and `indexLength` in order to compute total hash and index hash
 ```js
-let verified = iden3.merkleTree.checkProofOfClaim(proofOfClaim, 140);
-console.log(verified); // true
+// Create data leaf structure
+let leaf = {
+        data: Buffer.from('this is a test leaf'),
+        indexLength: 15
+      };
+
+// Add leaf to the merkle tree
+mt.addClaim(leaf);
+```
+#### Get leaf data by hash Index
+Look for a index leaf on the merkle tree ans retrieves its data
+```js
+// compute hash index of the leaf
+const hashIndex = iden3.utils.hashBytes(leaf.data.slice(0, leaf.indexLength));
+// retrieve data of the leaf
+let dataLeaf = mt.getClaimByHi(hashIndex);
+```
+
+#### Generate Proof
+Generates an array with all the siblings needed in order to proof that a certain leaf is on a merkle tree.
+```js
+// get leafProof for a given leaf index
+const leafProof = mt.generateProof(hashIndex);
+// code `leafProof` into a string
+let leafProofHex = iden3.utils.bytesToHex(leafProof);
+```
+
+#### CheckProof
+Checks the `Merkle Proof` of a `Leaf`.
+##### Proof-of-existence
+```js
+// retrieve merkle tree root and code it into a string
+let rootHex = iden3.utils.bytesToHex(mt.root);
+// code hash index into a string
+let hashIndexHex = iden3.utils.bytesToHex(hashIndex);
+// compute total hash of the leaf and code it into a string
+let hashTotalHex = iden3.utils.bytesToHex(iden3.utils.hashBytes(leaf.data));
+// check if a leaf is on the merkle tree
+let verified = iden3.merkleTree.checkProof(rootHex, leafProofHex, hashIndexHex, hashTotalHex, 140);
+```
+##### Proof-of-non-existence
+Generates `leafProof` of a leaf that is not on the merkle tree and check if it is on the merkle tree.
+```js
+// create leaf data structure
+let leaf2 = {
+        data: Buffer.from('this is a second test leaf'),
+        indexLength: 15
+      }
+// compute hash index
+const hashIndex2 = iden3.utils.hashBytes(leaf2.data.slice(0, leaf2.indexLength));
+// generate leaf proof
+const profLeaf2 = mt.generateProof(hashIndex2);
+// code leaf proof into a string
+let profLeaf2Hex = iden3.utils.bytesToHex(profLeaf2);
+// code hash index into a string
+let hashIndex2Hex = iden3.utils.bytesToHex(hashIndex2);
+// compute total hash index and code it into a string
+let hashTotal2Hex = iden3.utils.bytesToHex(iden3.utils.hashBytes(leaf2.data)); 
+// check if a leaf is on the merkle tree
+let verifiedRandom = iden3.merkleTree.checkProof(rootHex, profLeaf2Hex, hashIndex2Hex, hashTotal2Hex, 140);
 ```
 
 ### Utils

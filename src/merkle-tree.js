@@ -63,7 +63,7 @@ class MerkleTree {
           }
       }
 
-      if(finalIndex < 0) // No siblings where found
+      if(finalIndex < 0) // No siblings were found
       {
           let hashTmp = getCutNodeHash(ht,positionClaim,this.numLayers,this.numLayers);
           this.root = hashTmp;
@@ -72,7 +72,7 @@ class MerkleTree {
           return;
       }
       if(nodeValue == emptyNodeValue){
-          // Calcular nuevo nodo, que sera nodo final
+          // Compute new node which would be a final node
           let hashTmp = getCutNodeHash(ht,positionClaim,this.numLayers - (finalIndex+1),this.numLayers);
           let node =  helpers.addFlagNode(claim,true);
           setNodeValue(this.db,hashTmp,node,this.prefix);
@@ -149,46 +149,53 @@ class MerkleTree {
       let claimTmp;
       // Find last node written
       // Start with root node
-      for(let i = 0; i < this.numLayers;i++){
+        for(let i = 0; i < this.numLayers;i++){
           nodeValue = getNodeValue(this.db,key,this.prefix);
+          if(nodeValue == emptyNodeValue){ // Empty node found
+            finalIndex = i;
+            break;
+          }
           if(!nodeValue.flag){ // Check if it is a final node
-              let childLeft = nodeValue.data[0];
-              let childRight = nodeValue.data[1];
-              siblingArray.push(positionClaim[i]?childLeft:childRight);
-              key = positionClaim[i]?childRight:childLeft;
+            let childLeft = nodeValue.data[0];
+            let childRight = nodeValue.data[1];
+            siblingArray.push(positionClaim[i]?childLeft:childRight);
+            key = positionClaim[i]?childRight:childLeft;
           }
           else{ 
-              finalIndex = i;
-              claimTmp = nodeValue.data;
-              break;
+            finalIndex = i;
+            claimTmp = nodeValue.data;
+            break;
           }
-      }
+        }
 
-      let hiTmp = claimTmp.data.slice(0, claimTmp.indexLength);
-      let htTmp = utils.hashBytes(claimTmp.data);
-      let positionClaimTmp = helpers.hashToPosition(utils.hashBytes(hiTmp),this.numLayers);
-      let indexSibling = -1;
-      // Compare position claims and find split merkle branch
-      // for non-existence proof
-      for(let i = finalIndex; i < this.numLayers;i++){
-          if(positionClaimTmp[i]^positionClaim[i]){
-              indexSibling = i;
-              break;
-          }
-      }
+        let indexSibling = -1;
+        let siblingsIndicator = Buffer.alloc(32);
+        let numByte;
+        let startIndex = siblingsIndicator.length - 1;;
+        if(nodeValue != emptyNodeValue){
+            let hiTmp = claimTmp.data.slice(0, claimTmp.indexLength);
+            let htTmp = utils.hashBytes(claimTmp.data);
+            let positionClaimTmp = helpers.hashToPosition(utils.hashBytes(hiTmp),this.numLayers);
+            // Compare position claims and find split merkle branch
+            // for non-existence proof
+            for(let i = finalIndex; i < this.numLayers;i++){
+                if(positionClaimTmp[i]^positionClaim[i]){
+                    indexSibling = i;
+                    break;
+                }
+            }
 
-      // Calculate sibling of the last node
-      let siblingsIndicator = Buffer.alloc(32);
-      let startIndex = siblingsIndicator.length - 1;
-      let newSibling = getCutNodeHash(htTmp,positionClaimTmp,this.numLayers - (indexSibling+1),this.numLayers);
-      let numByte = Math.floor((indexSibling)/8);
-      if(indexSibling > 0 ){
-          siblingArray.push(newSibling);
-          siblingsIndicator[startIndex - numByte] = helpers.setBit(siblingsIndicator[startIndex - numByte],indexSibling%8);
-      }
-      if(indexSibling == -1)
+            // Calculate sibling of the last node
+            if(indexSibling >= 0 ){
+                let newSibling = getCutNodeHash(htTmp,positionClaimTmp,this.numLayers - (indexSibling+1),this.numLayers);
+                numByte = Math.floor((indexSibling)/8);
+                siblingArray.push(newSibling);
+                siblingsIndicator[startIndex - numByte] = helpers.setBit(siblingsIndicator[startIndex - numByte],indexSibling%8);
+            }
+        }
+
+        if(indexSibling == -1)
           indexSibling = 0;
-      
       // Build data object containing: siblings indicator || n*siblings
       for(let i = finalIndex; i > 0 ; i--){
           numByte = Math.floor((i)/8);
@@ -282,6 +289,7 @@ function getCutNodeHash(ht,bitsHi,index,numLayers){
 * @param  {Number} numLevels - Number of levels of the merkle tree
 * @returns  {Bool} - Result of the merkle tree verification
 */
+
 function checkProof(rootHex, proofHex, hiHex, htHex, numLevels) {
   const r = utils.hexToBytes(rootHex);
   const proof = utils.hexToBytes(proofHex);
@@ -328,6 +336,7 @@ function checkProof(rootHex, proofHex, hiHex, htHex, numLevels) {
   }
   return Buffer.compare(nodeHash, r) === 0;
 };
+
 
 
 module.exports = {
