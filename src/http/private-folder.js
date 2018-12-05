@@ -1,22 +1,22 @@
 const nacl = require('tweetnacl');
 const axios = require('axios');
-const utils = require('./utils');
-const kcUtils = require('./key-container/kc-utils');
+const utils = require('../utils');
+const kcUtils = require('../key-container/kc-utils');
 
 class Backup {
-  constructor(url, version=0) {
+  constructor(url, version = 0) {
     this.url = url; // backup server url
     this.version = version; // current last used version
     this.difficulty = 1;
   }
 
   getPoWDifficulty() {
-    if (this.url===undefined) {
-      console.log("backup url not defined");
-      return;
+    if (this.url === undefined) {
+      console.log('backup url not defined');
+      return undefined;
     }
-    let self = this;
-    return axios.get(`${this.url}/`, {}).then(function(res) {
+    const self = this;
+    return axios.get(`${this.url}/`, {}).then((res) => {
       self.difficulty = res.data.powdifficulty;
       return res;
     });
@@ -33,8 +33,8 @@ class Backup {
    * @returns {Object}
    */
   backupData(kc, idaddr, ksign, proofOfKSign, type, data, relayAddr) {
-    if (this.url===undefined) {
-      console.log("backup url not defined");
+    if (this.url === undefined) {
+      console.log('backup url not defined');
       return;
     }
     // TODO relayAddr will be setted in a global config, not passed in this function as parameter
@@ -47,33 +47,33 @@ class Backup {
         - logs (history)
         - ...
     */
-    this.version++;
+    this.version += 1;
     const dataEncrypted = kcUtils.encrypt(kc.encryptionKey, data);
     let dataPacket = {
       idaddrhex: idaddr,
       data: dataEncrypted,
       datasignature: kc.sign(ksign, dataEncrypted).signature,
-      type: type,
-      ksign: ksign,
+      type,
+      ksign,
       proofofksignhex: proofOfKSign,
       relayaddr: relayAddr,
       version: this.version, // version from the last stored value
-      nonce: 0 // will be setted in next step of PoW
+      nonce: 0, // will be setted in next step of PoW
     };
     // PoW
     dataPacket = utils.pow(dataPacket, this.difficulty);
 
     // send dataPacket to the backend POST /store/{idaddr}
-    let self = this;
+    const self = this;
     return axios.post(`${this.url}/${idaddr}/save`, dataPacket)
-      .then(function(res) {
+      .then((res) => {
         self.version = res.data.version;
         return;
       })
-      .catch(function(err) {
+      .catch((err) => {
         console.error(error);
       })
-      .then(function() {
+      .then(() => {
         return;
       });
   }
@@ -83,9 +83,9 @@ class Backup {
    * @returns {Object}
    */
   recoverData(idaddr) {
-    if (this.url===undefined) {
-      console.log("backup url not defined");
-      return;
+    if (this.url === undefined) {
+      console.log('backup url not defined');
+      return undefined;
     }
     return axios.post(`${this.url}/${idaddr}/recover`, {});
   }
@@ -96,9 +96,9 @@ class Backup {
    * @returns {Object}
    */
   recoverDataSinceVersion(idaddr, version) {
-    if (this.url===undefined) {
-      console.log("backup url not defined");
-      return;
+    if (this.url === undefined) {
+      console.log('backup url not defined');
+      return undefined;
     }
     return axios.post(`${this.url}/${idaddr}/recover/version/${version}`, {});
   }
@@ -109,9 +109,9 @@ class Backup {
    * @returns {Object}
    */
   recoverDataByType(idaddr, type) {
-    if (this.url===undefined) {
-      console.log("backup url not defined");
-      return;
+    if (this.url === undefined) {
+      console.log('backup url not defined');
+      return undefined;
     }
     return axios.post(`${this.url}/${idaddr}/recover/type/${type}`, {});
   }

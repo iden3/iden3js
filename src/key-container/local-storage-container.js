@@ -4,14 +4,13 @@ const nacl = require('tweetnacl');
 const bip39 = require('bip39');
 const hdkey = require('hdkey');
 const CONSTANTS = require('../constants');
-const Db = require('../db');
 const utils = require('../utils');
 const kcUtils = require('./kc-utils');
 
 nacl.util = require('tweetnacl-util');
 
 if (typeof localStorage === 'undefined' || localStorage === null) {
-  var LocalStorage = require('node-localstorage').LocalStorage;
+  const LocalStorage = require('node-localstorage').LocalStorage;
   localStorage = new LocalStorage('./tmp');
 }
 
@@ -21,19 +20,34 @@ class LocalStorageContainer {
     this.type = 'localStorage';
     this.encryptionKey = '';
     this.db = db;
+    this.timer = {};
   }
 
-  /**
+  /*
    * @param  {String} passphrase
    */
   unlock(passphrase) {
     this.encryptionKey = kcUtils.passToKey(passphrase, 'salt');
     console.log('KC unlocked');
-    let self = this;
-    setTimeout(function() {
+    const self = this;
+    this.timer = setTimeout(() => {
       self.encryptionKey = '';
       console.log('KC locked');
     }, 30000);
+  }
+
+  /**
+   * Lock local storage container
+   */
+  lock() {
+    if (!this.encryptionKey) {
+      console.log('Error: KeyContainer not unlocked');
+      return;
+    }
+    const self = this;
+    clearTimeout(this.timer);
+    self.encryptionKey = '';
+    console.log('KC locked');
   }
 
   /**
@@ -46,7 +60,7 @@ class LocalStorageContainer {
   generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivatedKeys = 3) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
-      console.log("Error: KeyContainer not unlocked");
+      console.log('Error: KeyContainer not unlocked');
       return undefined;
     }
     const root = hdkey.fromMasterSeed(mnemonic);
@@ -55,7 +69,7 @@ class LocalStorageContainer {
 
     // to allow in the future specify how many keys want to derivate
     for (let i = 0; i < numberOfDerivatedKeys; i++) {
-      const addrNode = root.derive(path + pathProfile + '/' + i); // "m/44'/60'/0'/pathProfile/i"
+      const addrNode = root.derive(`${path + pathProfile}/${i}`); // "m/44'/60'/0'/pathProfile/i"
       const privK = addrNode._privateKey;
       const address = ethUtil.privateToAddress(addrNode._privateKey);
       const addressHex = utils.bytesToHex(address);
@@ -67,7 +81,7 @@ class LocalStorageContainer {
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
     }
 
-    return {keys, mnemonic};
+    return { keys, mnemonic };
   }
 
   /**
@@ -76,7 +90,7 @@ class LocalStorageContainer {
   generateKeyRand() {
     if (!this.encryptionKey) {
       // KeyContainer not unlocked
-      console.log("Error: KeyContainer not unlocked");
+      console.log('Error: KeyContainer not unlocked');
       return undefined;
     }
     const w = ethWallet.generate();
@@ -98,7 +112,7 @@ class LocalStorageContainer {
   importKey(privKHex) {
     if (!this.encryptionKey || privKHex.constructor !== String) {
       // KeyContainer not unlocked
-      console.log("Error: KeyContainer not unlocked");
+      console.log('Error: KeyContainer not unlocked');
       return undefined;
     }
     const privK = utils.hexToBytes(privKHex);
@@ -120,7 +134,7 @@ class LocalStorageContainer {
   sign(addressHex, data) {
     if (!this.encryptionKey) {
       // KeyContainer not unlocked
-      console.log("Error: KeyContainer not unlocked");
+      console.log('Error: KeyContainer not unlocked');
       return 'KeyContainer blocked';
     }
     // const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
@@ -163,16 +177,18 @@ class LocalStorageContainer {
     // localStorage.clear();
     this.db.deleteAll();
   }
+
   encrypt(m) {
     if (!this.encryptionKey) {
-      console.log("Error: KeyContainer not unlocked");
+      console.log('Error: KeyContainer not unlocked');
       return undefined;
     }
-    return kcutils.encrypt(this.encryptionKey, m);
+    return kcUtils.encrypt(this.encryptionKey, m);
   }
+
   decrypt(c) {
     if (!this.encryptionKey) {
-      console.log("Error: KeyContainer not unlocked");
+      console.log('Error: KeyContainer not unlocked');
       return undefined;
     }
     return kcUtils.decrypt(this.encryptionKey, c);

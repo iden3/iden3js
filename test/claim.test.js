@@ -1,7 +1,7 @@
 const chai = require('chai');
 const iden3 = require('../index');
 
-const {expect} = chai;
+const { expect } = chai;
 
 describe('[claim] genericClaim', () => {
   const claim = new iden3.claim.GenericClaim('iden3.io', 'default', 'c1');

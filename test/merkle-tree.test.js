@@ -1,5 +1,6 @@
 const chai = require('chai');
 const iden3 = require('../index');
+
 const { expect } = chai;
 
 // new database
@@ -9,124 +10,123 @@ const idaddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c6
 
 describe('[merkle-tree] empty tree', () => {
   it('should be empty', () => {
-    let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
   });
 });
 
 describe('[merkle-tree] addClaim', () => {
-    it('add one claim', () => {
-      let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-      let claim = {
-        data: Buffer.from('this is a test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
-    });
+  it('add one claim', () => {
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const claim = {
+      data: Buffer.from('this is a test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
   });
+});
 
 describe('[merkle-tree] add two claims', () => {
-    it('adding two claims', () => {
-      let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-      let claim = {
-        data: Buffer.from('this is a test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
-      
-      let claim2 = {
-        data: Buffer.from('this is a second test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim2);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
-     
-    });
+  it('adding two claims', () => {
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const claim = {
+      data: Buffer.from('this is a test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
+
+    const claim2 = {
+      data: Buffer.from('this is a second test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim2);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
   });
+});
 
 describe('[merkle-tree] generateProof', () => {
-    it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
-      let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-      let claim = {
-        data: Buffer.from('this is a test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
-      const hi = iden3.utils.hashBytes(claim.data.slice(0, claim.indexLength));
-      const proof = mt.generateProof(hi);
-      expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
-  
-      let claim2 = {
-        data: Buffer.from('this is a second test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim2);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
-      const hi2 = iden3.utils.hashBytes(claim2.data.slice(0, claim2.indexLength));
-      const proof2 = mt.generateProof(hi2);
-      expect(iden3.utils.bytesToHex(proof2)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001feedc5746452611b2d5fc83bbc72ebeb1e284c071e1552a1876ae7e1d5043946');
-    });
+  it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const claim = {
+      data: Buffer.from('this is a test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
+    const hi = iden3.utils.hashBytes(claim.data.slice(0, claim.indexLength));
+    const proof = mt.generateProof(hi);
+    expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
+
+    const claim2 = {
+      data: Buffer.from('this is a second test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim2);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
+    const hi2 = iden3.utils.hashBytes(claim2.data.slice(0, claim2.indexLength));
+    const proof2 = mt.generateProof(hi2);
+    expect(iden3.utils.bytesToHex(proof2)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001feedc5746452611b2d5fc83bbc72ebeb1e284c071e1552a1876ae7e1d5043946');
   });
+});
 
 describe('[merkle-tree] generateProof of emptyLeaf', () => {
-    it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
-      let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-      let claim = {
-        data: Buffer.from('this is a test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
-      const hi = iden3.utils.hashBytes(claim.data.slice(0, claim.indexLength));
-      const proof = mt.generateProof(hi);
-      expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
-  
-      let claim2 = {
-        data: Buffer.from('this is a second test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim2);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
-      const hi2 = iden3.utils.hashBytes(claim2.data.slice(0, claim2.indexLength));
-      const proof2 = mt.generateProof(hi2);
-      expect(iden3.utils.bytesToHex(proof2)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001feedc5746452611b2d5fc83bbc72ebeb1e284c071e1552a1876ae7e1d5043946');
-  
-      // we won't add this claim to the merkletree, to generate the proof of the emptyLeaf
-      let claim3 = {
-        data: Buffer.from('this is a third test claim'),
-        indexLength: 15
-      };
-      const hi3 = iden3.utils.hashBytes(claim3.data.slice(0, claim3.indexLength));
-      const proof3 = mt.generateProof(hi3);
-      expect(iden3.utils.bytesToHex(proof3)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000003c11c2813e3b6ab49fb0a1236bd6b0b150d06a9ddc04fbde23d3cb71f58ee9d7ffeedc5746452611b2d5fc83bbc72ebeb1e284c071e1552a1876ae7e1d5043946');
-    });
+  it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const claim = {
+      data: Buffer.from('this is a test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
+    const hi = iden3.utils.hashBytes(claim.data.slice(0, claim.indexLength));
+    const proof = mt.generateProof(hi);
+    expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
+
+    const claim2 = {
+      data: Buffer.from('this is a second test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim2);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
+    const hi2 = iden3.utils.hashBytes(claim2.data.slice(0, claim2.indexLength));
+    const proof2 = mt.generateProof(hi2);
+    expect(iden3.utils.bytesToHex(proof2)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001feedc5746452611b2d5fc83bbc72ebeb1e284c071e1552a1876ae7e1d5043946');
+
+    // we won't add this claim to the merkletree, to generate the proof of the emptyLeaf
+    const claim3 = {
+      data: Buffer.from('this is a third test claim'),
+      indexLength: 15,
+    };
+    const hi3 = iden3.utils.hashBytes(claim3.data.slice(0, claim3.indexLength));
+    const proof3 = mt.generateProof(hi3);
+    expect(iden3.utils.bytesToHex(proof3)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000003c11c2813e3b6ab49fb0a1236bd6b0b150d06a9ddc04fbde23d3cb71f58ee9d7ffeedc5746452611b2d5fc83bbc72ebeb1e284c071e1552a1876ae7e1d5043946');
   });
+});
 
 describe('[merkle-tree] getClaimByHi', () => {
-    it('getClaimByHi', () => {
-      let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-      let claim = {
-        data: Buffer.from('this is a test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
-  
-      let claim2 = {
-        data: Buffer.from('this is a second test claim'),
-        indexLength: 15
-      };
-      mt.addClaim(claim2);
-      expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
-      const hi2 = iden3.utils.hashBytes(claim2.data.slice(0, claim2.indexLength));
-      let bytesInHi = mt.getClaimByHi(hi2);
-      expect(bytesInHi).to.be.equal(iden3.utils.bytesToHex(claim2.data));
-    });
+  it('getClaimByHi', () => {
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const claim = {
+      data: Buffer.from('this is a test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
+
+    const claim2 = {
+      data: Buffer.from('this is a second test claim'),
+      indexLength: 15,
+    };
+    mt.addClaim(claim2);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
+    const hi2 = iden3.utils.hashBytes(claim2.data.slice(0, claim2.indexLength));
+    const bytesInHi = mt.getClaimByHi(hi2);
+    expect(bytesInHi).to.be.equal(iden3.utils.bytesToHex(claim2.data));
   });
-  
+});
+
 describe('[merkle-tree] checkProof of a Leaf', () => {
   it('checkProof', () => {
     const rootHex = '0x7d7c5e8f4b3bf434f3d9d223359c4415e2764dd38de2e025fbf986e976a7ed3d';
@@ -151,10 +151,10 @@ describe('[merkle-tree] checkProof of Empty Leaf', () => {
 
 describe('[merkle-tree] generateProof and checkProof', () => {
   it('generateProof and checkProof', () => {
-    let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-    let claim = {
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const claim = {
       data: Buffer.from('this is a test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
     mt.addClaim(claim);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1c4160fe7330f22ef5bd5f4eefc3a818a6dec63a5014600c83fe0ef8495e28ed');
@@ -162,9 +162,9 @@ describe('[merkle-tree] generateProof and checkProof', () => {
     const proof = mt.generateProof(hi);
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
 
-    let claim2 = {
+    const claim2 = {
       data: Buffer.from('this is a second test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
     mt.addClaim(claim2);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
@@ -182,9 +182,9 @@ describe('[merkle-tree] generateProof and checkProof', () => {
 
     // check proof of non existence (emptyLeaf)
     // to checkProof of an emptyLeaf, we won't add this claim to the merkletree
-    let claim3 = {
+    const claim3 = {
       data: Buffer.from('this is a third test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
     const hi3 = iden3.utils.hashBytes(claim3.data.slice(0, claim3.indexLength));
     const proof3 = mt.generateProof(hi3);
@@ -201,26 +201,26 @@ describe('[merkle-tree] generateProof and checkProof', () => {
 
 describe('[merkle-tree] add claims in different orders', () => {
   it('add claims in different orders', () => {
-    let mt1 = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-    let claim0 = {
+    const mt1 = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const claim0 = {
       data: Buffer.from('0 this is a test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
-    let claim1 = {
+    const claim1 = {
       data: Buffer.from('1 this is a test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
-    let claim2 = {
+    const claim2 = {
       data: Buffer.from('2 this is a test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
-    let claim3 = {
+    const claim3 = {
       data: Buffer.from('3 this is a test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
-    let claim4 = {
+    const claim4 = {
       data: Buffer.from('4 this is a test claim'),
-      indexLength: 15
+      indexLength: 15,
     };
     mt1.addClaim(claim0);
     mt1.addClaim(claim1);
@@ -228,7 +228,7 @@ describe('[merkle-tree] add claims in different orders', () => {
     mt1.addClaim(claim3);
     mt1.addClaim(claim4);
 
-    let mt2 = new iden3.merkleTree.MerkleTree(db,140,idaddr);
+    const mt2 = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
     mt2.addClaim(claim2);
     mt2.addClaim(claim1);
     mt2.addClaim(claim0);
@@ -238,18 +238,17 @@ describe('[merkle-tree] add claims in different orders', () => {
   });
 });
 
-describe('[merkle-tree] add 1000 claims', () => {
-  it('add 1000 claims', () => {
-    let mt = new iden3.merkleTree.MerkleTree(db,140,idaddr);
-    let numToAdd = 1000;
-    for(var i=0; i<numToAdd; i++) {
-      let claim = {
-        data: Buffer.from(i + ' this is a test claim'),
-        indexLength: 15
+describe('[merkle-tree] add 100 claims', () => {
+  it('add 100 claims', () => {
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const numToAdd = 100;
+    for (let i = 0; i < numToAdd; i++) {
+      const claim = {
+        data: Buffer.from(`${i} this is a test claim`),
+        indexLength: 15,
       };
       mt.addClaim(claim);
     }
-    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xf1f6e6380d311dd7742be1aaecc35e9d7218bf11218d9f5bf8f7497b00a830c9');
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x823062a650962611926e30e54f28ea08608eccbbbedf30e20cd9457243df20f9');
   });
 });
-

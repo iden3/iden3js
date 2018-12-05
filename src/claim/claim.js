@@ -1,4 +1,4 @@
-const merkleTree = require('../merkle-tree');
+const merkleTree = require('../merkle-tree/merkle-tree');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
 
@@ -6,7 +6,7 @@ const CONSTANTS = require('../constants');
  * @param  {uint32} u
  * @returns {Buffer}
  */
-const uint32ToEthBytes = function(u) { // compatible with Uint32ToEthBytes() go-iden3 version
+const uint32ToEthBytes = function (u) { // compatible with Uint32ToEthBytes() go-iden3 version
   const buf = Buffer.alloc(4);
   buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
   return buf;
@@ -16,7 +16,7 @@ const uint32ToEthBytes = function(u) { // compatible with Uint32ToEthBytes() go-
  * @param  {Buffer} b
  * @returns {uint32}
  */
-const ethBytesToUint32 = function(b) { // compatible with EthBytesToUint32() go-iden3 version
+const ethBytesToUint32 = function (b) { // compatible with EthBytesToUint32() go-iden3 version
   return b.readUIntBE(0, 4);
 };
 
@@ -24,7 +24,7 @@ const ethBytesToUint32 = function(b) { // compatible with EthBytesToUint32() go-
  * @param  {uint64} u
  * @returns {Buffer}
  */
-const uint64ToEthBytes = function(u) { // compatible with Uint64ToEthBytes() go-iden3 version
+const uint64ToEthBytes = function (u) { // compatible with Uint64ToEthBytes() go-iden3 version
   const buf = Buffer.alloc(8);
   buf.writeUIntBE(u, 0, 8);
   return buf;
@@ -34,7 +34,7 @@ const uint64ToEthBytes = function(u) { // compatible with Uint64ToEthBytes() go-
  * @param  {Buffer} b
  * @returns {uint64}
  */
-const ethBytesToUint64 = function(b) { // compatible with EthBytesToUint64() go-iden3 version
+const ethBytesToUint64 = function (b) { // compatible with EthBytesToUint64() go-iden3 version
   return b.readUIntBE(0, 8);
 };
 
@@ -51,12 +51,12 @@ class GenericClaim {
         namespace: utils.hashBytes(Buffer.from(namespaceStr)),
         type: utils.hashBytes(Buffer.from(typeStr)).slice(0, 24),
         indexLength: 64 + Buffer.from(extraIndexData).length,
-        version: 0
+        version: 0,
       },
       extraIndex: {
-        data: Buffer.from(extraIndexData)
+        data: Buffer.from(extraIndexData),
       },
-      data: Buffer.from(data)
+      data: Buffer.from(data),
     };
   }
 
@@ -66,11 +66,11 @@ class GenericClaim {
     b = Buffer.concat([b, this.claim.baseIndex.type]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.indexLength)
+      uint32ToEthBytes(this.claim.baseIndex.indexLength),
     ]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.version)
+      uint32ToEthBytes(this.claim.baseIndex.version),
     ]);
     b = Buffer.concat([b, this.claim.extraIndex.data]);
     b = Buffer.concat([b, this.claim.data]);
@@ -94,19 +94,19 @@ class GenericClaim {
  * @param  {Buffer} bytes
  * @returns  {Object} claim
  */
-const parseGenericClaimBytes = function(b) {
+const parseGenericClaimBytes = function (b) {
   const c = new GenericClaim();
   c.claim = {
     baseIndex: {
       namespace: b.slice(0, 32),
       type: b.slice(32, 56),
       indexLength: ethBytesToUint32(b.slice(56, 60)),
-      version: ethBytesToUint32(b.slice(60, 64))
+      version: ethBytesToUint32(b.slice(60, 64)),
     },
     extraIndex: {
-      data: b.slice(64, ethBytesToUint32(b.slice(56, 60)))
+      data: b.slice(64, ethBytesToUint32(b.slice(56, 60))),
     },
-    data: b.slice(ethBytesToUint32(b.slice(56, 60)), b.length)
+    data: b.slice(ethBytesToUint32(b.slice(56, 60)), b.length),
   };
   return c;
 };
@@ -127,15 +127,15 @@ class AuthorizeKSignClaim {
         namespace: CONSTANTS.NAMESPACEHASH,
         type: utils.hashBytes(Buffer.from('authorizeksign')).slice(0, 24),
         indexLength: 84,
-        version: 0
+        version: 0,
       },
       extraIndex: {
-        keyToAuthorize
+        keyToAuthorize,
       },
       application: utils.hashBytes(Buffer.from(applicationName)),
       applicationAuthz: utils.hashBytes(Buffer.from(applicationAuthz)),
       validFrom,
-      validUntil
+      validUntil,
     };
   }
 
@@ -145,15 +145,15 @@ class AuthorizeKSignClaim {
     b = Buffer.concat([b, this.claim.baseIndex.type]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.indexLength)
+      uint32ToEthBytes(this.claim.baseIndex.indexLength),
     ]);
     b = Buffer.concat([
       b,
-      uint32ToEthBytes(this.claim.baseIndex.version)
+      uint32ToEthBytes(this.claim.baseIndex.version),
     ]);
     b = Buffer.concat([
       b,
-      utils.hexToBytes(this.claim.extraIndex.keyToAuthorize)
+      utils.hexToBytes(this.claim.extraIndex.keyToAuthorize),
     ]);
     b = Buffer.concat([b, this.claim.application]);
     b = Buffer.concat([b, this.claim.applicationAuthz]);
@@ -181,7 +181,7 @@ class AuthorizeKSignClaim {
  * @param  {Buffer} b - bytes
  * @returns {Object} claim
  */
-const parseAuthorizeKSignClaim = function(b) {
+const parseAuthorizeKSignClaim = function (b) {
   const validFromBytes = b.slice(148, 156);
   const validFrom = ethBytesToUint64(validFromBytes);
   const validUntilBytes = b.slice(156, 164);
@@ -193,15 +193,15 @@ const parseAuthorizeKSignClaim = function(b) {
       namespace: b.slice(0, 32),
       type: b.slice(32, 56),
       indexLength: ethBytesToUint32(b.slice(56, 60)),
-      version: ethBytesToUint32(b.slice(60, 64))
+      version: ethBytesToUint32(b.slice(60, 64)),
     },
     extraIndex: {
-      keyToAuthorize: utils.bytesToHex(b.slice(64, 84))
+      keyToAuthorize: utils.bytesToHex(b.slice(64, 84)),
     },
     application: b.slice(84, 116),
     applicationAuthz: b.slice(116, 148),
     validFrom,
-    validUntil
+    validUntil,
   };
 
   return c;
@@ -211,7 +211,7 @@ const parseAuthorizeKSignClaim = function(b) {
  * @param  {Buffer} b
  * @returns {Buffer}
  */
-const hiFromClaimBytes = function(b) {
+const hiFromClaimBytes = function (b) {
   const indexLength = ethBytesToUint32(b.slice(56, 60));
   return utils.hashBytes(b.slice(0, indexLength));
 };
@@ -221,21 +221,24 @@ const hiFromClaimBytes = function(b) {
  * @param  {Number} numLevels
  * @returns {Boolean}
  */
-const checkProofOfClaim = function(proofOfClaim, numLevels) {
+const checkProofOfClaim = function (proofOfClaim, numLevels) {
   let ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
   let hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
-  const vClaimProof = merkleTree.checkProof(proofOfClaim.ClaimProof.Root, proofOfClaim.ClaimProof.Proof, hi, ht, numLevels,);
+  const vClaimProof = merkleTree.checkProof(proofOfClaim.ClaimProof.Root, proofOfClaim.ClaimProof.Proof, hi, ht, numLevels);
 
   ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
-  const vSetRootClaimProof = merkleTree.checkProof(proofOfClaim.SetRootClaimProof.Root, proofOfClaim.SetRootClaimProof.Proof, hi, ht, numLevels,);
+  const vSetRootClaimProof = merkleTree.checkProof(proofOfClaim.SetRootClaimProof.Root,
+    proofOfClaim.SetRootClaimProof.Proof, hi, ht, numLevels);
 
   ht = utils.bytesToHex(merkleTree.emptyNodeValue);
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimNonRevocationProof.Leaf)));
-  const vClaimNonRevocationProof = merkleTree.checkProof(proofOfClaim.ClaimNonRevocationProof.Root, proofOfClaim.ClaimNonRevocationProof.Proof, hi, ht, numLevels,);
+  const vClaimNonRevocationProof = merkleTree.checkProof(proofOfClaim.ClaimNonRevocationProof.Root,
+    proofOfClaim.ClaimNonRevocationProof.Proof, hi, ht, numLevels);
 
   hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimNonRevocationProof.Leaf)));
-  const vSetRootClaimNonRevocationProof = merkleTree.checkProof(proofOfClaim.SetRootClaimNonRevocationProof.Root, proofOfClaim.SetRootClaimNonRevocationProof.Proof, hi, ht, numLevels,);
+  const vSetRootClaimNonRevocationProof = merkleTree.checkProof(proofOfClaim.SetRootClaimNonRevocationProof.Root,
+    proofOfClaim.SetRootClaimNonRevocationProof.Proof, hi, ht, numLevels);
 
   return !!(vClaimProof && vSetRootClaimProof && vClaimNonRevocationProof && vSetRootClaimNonRevocationProof);
 };
@@ -250,5 +253,5 @@ module.exports = {
   AuthorizeKSignClaim,
   parseAuthorizeKSignClaim,
   hiFromClaimBytes,
-  checkProofOfClaim
+  checkProofOfClaim,
 };
