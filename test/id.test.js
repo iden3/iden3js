@@ -1,11 +1,11 @@
 const chai = require('chai');
 const iden3 = require('../index');
 
-const {expect} = chai;
+const { expect } = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 const testPrivKHex1 = '9bd38c22848a3ebca7ae8ef915cac93a2d97c57bb2cb6da7160b86ca81598a7b';
 const db = new iden3.Db();
-let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
 describe('[id] new Id()', () => {
   const kc = new iden3.KeyContainer('localStorage', db);

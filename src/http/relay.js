@@ -1,5 +1,4 @@
 const axios = require('axios');
-const claim = require('../core/claim');
 const utils = require('../utils');
 
 /**
@@ -72,7 +71,7 @@ class Relay {
       ethID: idAddr,
       name,
       signature: signatureObj.signature, // for the moment, signature(idaddr+name)
-      ksign: keyOperational
+      ksign: keyOperational,
     };
     return this.postBindID(bindIDMsg);
   }
@@ -93,7 +92,7 @@ class Relay {
     const keys = {
       operational: op,
       recoverer: rec,
-      revokator: rev
+      revokator: rev,
     };
     return axios.post(`${this.url}/id`, keys);
   }

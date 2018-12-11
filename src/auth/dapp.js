@@ -23,12 +23,12 @@ class Dapp {
       start: true,
       config: {
         Addresses: {
-          Swarm: ['/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star']
-        }
+          Swarm: ['/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'],
+        },
       },
       EXPERIMENTAL: {
-        pubsub: true
-      }
+        pubsub: true,
+      },
     });
 
     this.ipfs.once('ready', () => this.ipfs.id((err, _peerInfo) => {
@@ -84,7 +84,7 @@ class Dapp {
     nonceBytes[nacl.box.nonceLength - 2] = (this.nonce >> 8) & 0xff;
     const ciphertext = nacl.secretbox(encoder.encode(message), nonceBytes, this.secretkey);
     this.room.broadcast(ciphertext);
-    this.nonce++;
+    this.nonce += 1;
     msgSendCallback();
   }
 
@@ -97,15 +97,15 @@ class Dapp {
       return;
     }
 
-    nonceBytes = new Uint8Array(nacl.box.nonceLength);
+    const nonceBytes = new Uint8Array(nacl.box.nonceLength);
     nonceBytes[nacl.box.nonceLength - 1] = this.nonce & 0xff;
     nonceBytes[nacl.box.nonceLength - 2] = (this.nonce >> 8) & 0xff;
-    plaintext = nacl.secretbox.open(message.data, nonceBytes, this.secretkey);
+    const plaintext = nacl.secretbox.open(message.data, nonceBytes, this.secretkey);
     if (plaintext === null) {
       status('Invalid message recieved', true);
       return;
     }
-    this.nonce++;
+    this.nonce += 1;
 
     callback(decoder.decode(plaintext));
   }
@@ -134,14 +134,14 @@ class Dapp {
         buf(args.to),
         buf(args.data),
         buf(uint256(args.value)),
-        buf(uint256(args.gas))
+        buf(uint256(args.gas)),
       ]).toString('hex')}`;
       const fwdsig = ethutil.ecsign(buf(sha3(fwdsigpre)), ksignpvk);
 
       args.fwdsig = `0x${Buffer.concat([
         fwdsig.r,
         fwdsig.s,
-        buf(fwdsig.v)
+        buf(fwdsig.v),
       ]).toString('hex')}`;
 
       // forward call
@@ -151,5 +151,5 @@ class Dapp {
 }
 
 module.exports = {
-  Dapp
+  Dapp,
 };

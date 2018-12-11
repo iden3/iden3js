@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 20000"
+    "test": "rm -rf tmp && mocha --timeout 20000"
   },
   "author": "iden3.io",
   "license": "ISC",

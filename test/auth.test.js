@@ -1,7 +1,7 @@
 const chai = require('chai');
 const iden3 = require('../index');
 
-const {expect} = chai;
+const { expect } = chai;
 const authurl = 'http://127.0.0.1:5000';
 const authwsurl = 'ws://127.0.0.1:5000';
 const testPrivKHex0 = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
@@ -49,7 +49,7 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
   const krec = kc.generateKeyRand();
   const krev = kc.generateKeyRand();
   const relay = new iden3.Relay('http://127.0.0.1:8000');
-  let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+  const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
   const id = new iden3.Id(krec, krev, ko, relay, relayAddr, '');
 
   it('[auth] id.AuthorizeKSignClaim()', () => id.createID().then((res) => {
@@ -60,7 +60,7 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
     const qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
     expect(qrKSign).to.be.equal(ksignGeneratedInWeb);
     // create a new AuthorizeKSignClaim signed with ID (key0id) and send it to the Relay
-    const unixtime = Math.round(+ new Date() / 1000);
+    const unixtime = Math.round(+new Date() / 1000);
     kc.unlock('pass');
     return id.authorizeKSignClaim(kc, id.keyOperational, '', qrKSign, 'appToAuthName', 'authz', unixtime, unixtime).then((authorizeRes) => {
       // console.log(res.data);

@@ -17,6 +17,7 @@
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "func-names": [0],
     "class-methods-use-this": ["error", { "exceptMethods": ["foo"] }],
-    "no-bitwise": [0]
+    "no-bitwise": [0],
+    "no-param-reassign": "off"
   }
 }

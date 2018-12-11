@@ -1,4 +1,4 @@
-const claim = require('./core/claim');
+const claim = require('../claim/claim');
 
 /**
  * @param  {String} keyRecover
@@ -8,7 +8,7 @@ const claim = require('./core/claim');
  * @param  {String} implementation
  */
 class Id {
-  constructor(keyRecover, keyRevoke, keyOp, relay, relayAddr, implementation = '', backup=undefined) {
+  constructor(keyRecover, keyRevoke, keyOp, relay, relayAddr, implementation = '', backup = undefined) {
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
     this.keyOperational = keyOp;
@@ -39,19 +39,19 @@ class Id {
    * @param  {String} data
    * @returns {Object}
    */
-  genericClaim(kc, ksign, proofOfKSign, typeStr, extraIndexData, data) {
+  genericClaim(kc, kSign, proofOfKSign, typeStr, extraIndexData, data) {
     const genericClaim = new claim.GenericClaim('namespace', typeStr, extraIndexData, data); // TODO namespace will be hardcoded in conf
     const signatureObj = kc.sign(kSign, genericClaim.hex());
     const bytesSignedMsg = {
       valueHex: genericClaim.hex(),
       signatureHex: signatureObj.signature,
-      ksign: kSign
+      ksign: kSign,
     };
 
-    let self = this;
-    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then(function(res) {
-      if ((self.backup!== undefined)&&(proofOfKSign!==undefined)){
-        self.backup.backupData(kc, self.idaddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+    const self = this;
+    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then((res) => {
+      if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
+        self.backup.backupData(kc, self.idaddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
       }
       return res;
     });
@@ -75,11 +75,11 @@ class Id {
     const bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
       signatureHex: signatureObj.signature,
-      kSign
+      kSign,
     };
-    let self = this;
-    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then(function(res) {
-      if ((self.backup!== undefined)&&(proofOfKSign!==undefined)){
+    const self = this;
+    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then((res) => {
+      if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
         self.backup.backupData(kc, self.idaddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
       }
       return res;

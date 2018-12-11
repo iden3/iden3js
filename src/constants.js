@@ -9,5 +9,5 @@ module.exports = {
   DBPREFIX,
   KCPREFIX,
   MTPREFIX,
-  NAMESPACEHASH
+  NAMESPACEHASH,
 };

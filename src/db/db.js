@@ -1,6 +1,6 @@
 const nacl = require('tweetnacl');
-const kcUtils = require('./key-container/kc-utils');
-const CONSTANTS = require('./constants');
+const kcUtils = require('../key-container/kc-utils');
+const CONSTANTS = require('../constants');
 
 /**
  * @param  {String} url - url of the backup system backend
@@ -45,10 +45,10 @@ class Db {
   exportLocalStorage(kc) {
     if (!kc.encryptionKey) {
       // KeyContainer not unlocked
-      console.log("Error: KeyContainer not unlocked");
+      console.log('Error: KeyContainer not unlocked');
       return undefined;
     }
-    let dbExp = {};
+    const dbExp = {};
 
     for (let i = 0; i < localStorage.length; i++) {
       // get only the stored data related to db (that have the prefix)
@@ -70,7 +70,7 @@ class Db {
   importLocalStorage(kc, dbEncr) {
     const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncr);
     const dbExp = JSON.parse(dbExpStr);
-    for (var property in dbExp) {
+    for (let property in dbExp) {
       if (dbExp.hasOwnProperty(property)) {
         localStorage.setItem(property, dbExp[property]);
       }

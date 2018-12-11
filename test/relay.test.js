@@ -2,7 +2,7 @@ const chai = require('chai');
 const ethUtil = require('ethereumjs-util');
 const iden3 = require('../index');
 
-const {expect} = chai;
+const { expect } = chai;
 
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 // const testPrivKHex = '289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032';
@@ -50,7 +50,7 @@ describe('[relay] postBindID()', () => {
   // let key0id = kc.importKey(testPrivKHex);
   const key0id = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
   const _relay = new iden3.Relay('http://127.0.0.1:8000');
-  let relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+  const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
   const id = new iden3.Id(key0id, key0id, key0id, _relay, relayAddr, '');
 
   before(() => id.createID().then((res) => {}));
@@ -69,7 +69,7 @@ describe('[relay] postBindID()', () => {
     const bindIDMsg = {
       ethID: id.idaddr,
       name,
-      signature: signatureObj.signature
+      signature: signatureObj.signature,
     };
     return _relay.postBindID(bindIDMsg).then((bindIDRes) => {
       expect(bindIDRes.status).to.be.equal(200);
