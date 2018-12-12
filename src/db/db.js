@@ -1,4 +1,3 @@
-const nacl = require('tweetnacl');
 const kcUtils = require('../key-container/kc-utils');
 const CONSTANTS = require('../constants');
 
@@ -38,14 +37,15 @@ class Db {
   }
 
   /**
-   * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string
+   * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string.
+   *
    * @param  {Object} kc - KeyContainer
    * @returns {Object} - encrypted packed data
    */
   exportLocalStorage(kc) {
     if (!kc.encryptionKey) {
       // KeyContainer not unlocked
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
     const dbExp = {};
@@ -57,24 +57,22 @@ class Db {
       }
     }
     const dbExpStr = JSON.stringify(dbExp);
-
-    const dbEncr = kcUtils.encrypt(kc.encryptionKey, dbExpStr);
-    return dbEncr;
+    return kcUtils.encrypt(kc.encryptionKey, dbExpStr); // encrypted database
   }
 
   /**
-   * Unencrypts the encrpyted packed data by the exportLocalStorage function, and saves it into localStorage
+   * Decrypts the encrypted packed data by the exportLocalStorage function, and saves it into localStorage.
+   *
    * @param  {Object} kc - KeyContainer
-   * @param  {String} dbEncr
+   * @param  {String} encryptedDB
    */
-  importLocalStorage(kc, dbEncr) {
-    const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncr);
+  importLocalStorage(kc, encryptedDB) {
+    const dbExpStr = kcUtils.decrypt(kc.encryptionKey, encryptedDB);
     const dbExp = JSON.parse(dbExpStr);
-    for (let property in dbExp) {
-      if (dbExp.hasOwnProperty(property)) {
-        localStorage.setItem(property, dbExp[property]);
-      }
-    }
+
+    Object.keys(dbExp).forEach((key) => {
+      localStorage.setItem(key, dbExp[key]);
+    });
   }
 }
 

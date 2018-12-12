@@ -14,8 +14,10 @@ const emptyNodeValue = Buffer.alloc(32);
 function getNodeValue(db, key, prefix) {
   const keyHex = utils.bytesToHex(key);
   const valueHex = db.get(prefix + keyHex);
-  if (valueHex === null) { return emptyNodeValue; }
-  return helpers.bufferToNodeValue(utils.hexToBytes(valueHex));
+
+  return valueHex
+    ? emptyNodeValue
+    : helpers.bufferToNodeValue(utils.hexToBytes(valueHex));
 }
 
 /**
@@ -28,6 +30,7 @@ function getNodeValue(db, key, prefix) {
 function setNodeValue(db, key, value, prefix) {
   const keyHex = utils.bytesToHex(key);
   const valueHex = utils.bytesToHex(helpers.nodeValueToBuffer(value));
+
   db.insert(prefix + keyHex, valueHex);
 }
 
@@ -53,11 +56,11 @@ class MerkleTree {
   * Initiate merkle tree with a given number of levels
   * @param {Object} db - Database
   * @param {uint} numLevels - Number of levels of the merkle tree
-  * @param {String} iaddr - adress of the identity
+  * @param {String} iAddr - adress of the identity
   */
-  constructor(db, numLevels, idaddr) {
+  constructor(db, numLevels, idAddr) {
     this.db = db;
-    this.prefix = CONSTANTS.MTPREFIX + idaddr;
+    this.prefix = CONSTANTS.MTPREFIX + idAddr;
     this.numLevels = numLevels;
     this.numLayers = this.numLevels - 1;
     this.root = emptyNodeValue;

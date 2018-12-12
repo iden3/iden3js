@@ -27,12 +27,10 @@ class LocalStorageContainer {
    * @param  {String} passphrase
    */
   unlock(passphrase) {
-    this.encryptionKey = kcUtils.passToKey(passphrase, 'salt');
-    console.log('KC unlocked');
+    this.encryptionKey = kcUtils.passToKey(passphrase, 'salt'); // unlock key container
     const self = this;
     this.timer = setTimeout(() => {
-      self.encryptionKey = '';
-      console.log('KC locked');
+      self.encryptionKey = ''; // key container locked again
     }, 30000);
   }
 
@@ -41,13 +39,12 @@ class LocalStorageContainer {
    */
   lock() {
     if (!this.encryptionKey) {
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return;
     }
     const self = this;
     clearTimeout(this.timer);
-    self.encryptionKey = '';
-    console.log('KC locked');
+    self.encryptionKey = ''; // key container locked
   }
 
   /**
@@ -57,10 +54,10 @@ class LocalStorageContainer {
    *
    * @returns {Object}
    */
-  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivatedKeys = 3) {
+  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivedKeys = 3) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
     const root = hdkey.fromMasterSeed(mnemonic);
@@ -68,7 +65,7 @@ class LocalStorageContainer {
     const path = "m/44'/60'/0'/";
 
     // to allow in the future specify how many keys want to derivate
-    for (let i = 0; i < numberOfDerivatedKeys; i++) {
+    for (let i = 0; i < numberOfDerivedKeys; i++) {
       const addrNode = root.derive(`${path + pathProfile}/${i}`); // "m/44'/60'/0'/pathProfile/i"
       const privK = addrNode._privateKey;
       const address = ethUtil.privateToAddress(addrNode._privateKey);
@@ -90,7 +87,7 @@ class LocalStorageContainer {
   generateKeyRand() {
     if (!this.encryptionKey) {
       // KeyContainer not unlocked
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
     const w = ethWallet.generate();
@@ -99,7 +96,7 @@ class LocalStorageContainer {
     const addressHex = utils.bytesToHex(address);
     const privKHex = utils.bytesToHex(privK);
     const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
-    // localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
+
     this.db.insert(this.prefix + addressHex, privKHexEncrypted);
     return addressHex;
   }
@@ -112,7 +109,7 @@ class LocalStorageContainer {
   importKey(privKHex) {
     if (!this.encryptionKey || privKHex.constructor !== String) {
       // KeyContainer not unlocked
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
     const privK = utils.hexToBytes(privKHex);
@@ -134,7 +131,7 @@ class LocalStorageContainer {
   sign(addressHex, data) {
     if (!this.encryptionKey) {
       // KeyContainer not unlocked
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return 'KeyContainer blocked';
     }
     // const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
@@ -180,7 +177,7 @@ class LocalStorageContainer {
 
   encrypt(m) {
     if (!this.encryptionKey) {
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
     return kcUtils.encrypt(this.encryptionKey, m);
@@ -188,7 +185,7 @@ class LocalStorageContainer {
 
   decrypt(c) {
     if (!this.encryptionKey) {
-      console.log('Error: KeyContainer not unlocked');
+      console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
     return kcUtils.decrypt(this.encryptionKey, c);
