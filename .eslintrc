@@ -16,7 +16,7 @@
     "no-underscore-dangle": [0],
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "func-names": [0],
-    "class-methods-use-this": ["error", { "exceptMethods": ["foo"] }],
+    "class-methods-use-this": [0],
     "no-bitwise": [0],
     "no-param-reassign": "off"
   }
