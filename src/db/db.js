@@ -73,11 +73,6 @@ class Db {
     Object.keys(dbExp).forEach((key) => {
       localStorage.setItem(key, dbExp[key]);
     });
-    /* for (let property in dbExp) {
-      if (dbExp.hasOwnProperty(property)) {
-        localStorage.setItem(property, dbExp[property]);
-      }
-    } */
   }
 }
 

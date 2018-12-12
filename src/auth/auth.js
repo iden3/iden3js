@@ -38,11 +38,9 @@ class Auth {
       successCallback(authData);
     };
     this.ws.onopen = function () {
-      console.log('open ws');
       this.send(challenge);
     };
     this.send = function (data) {
-      console.log('sending data', data);
       this.ws.send(data);
     };
   }

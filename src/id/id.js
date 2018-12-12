@@ -13,27 +13,28 @@ class Id {
     this.keyRevoke = keyRevoke;
     this.keyOperational = keyOp;
     this.relay = relay;
-    this.relayAddr = relayAddr; // this can be getted from a relay endpoint
-    this.idaddr = undefined;
+    this.relayAddr = relayAddr; // this can be get from a relay endpoint
+    this.idAddr = undefined;
     this.implementation = implementation;
     this.backup = backup;
   }
 
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
-    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke).then((res) => {
-      this.idaddr = res.data.idaddr;
-      return this.idaddr;
-    });
+    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke)
+      .then((res) => {
+        this.idAddr = res.data.idaddr;
+        return this.idAddr;
+      });
   }
 
   deployID() {
-    return this.relay.deployID(this.idaddr);
+    return this.relay.deployID(this.idAddr);
   }
 
   /**
    * @param  {Object} kc
-   * @param  {String} ksign
+   * @param  {String} kSign
    * @param  {String} typeStr
    * @param  {String} extraIndexData
    * @param  {String} data
@@ -49,17 +50,18 @@ class Id {
     };
 
     const self = this;
-    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then((res) => {
-      if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
-        self.backup.backupData(kc, self.idaddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
-      }
-      return res;
-    });
+    return this.relay.postClaim(this.idAddr, bytesSignedMsg)
+      .then((res) => {
+        if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
+          self.backup.backupData(kc, self.idAddr, kSign, proofOfKSign, 'claim', genericClaim.hex(), self.relayAddr);
+        }
+        return res;
+      });
   }
 
   /**
    * @param  {Object} kc
-   * @param  {String} ksign
+   * @param  {String} kSign
    * @param  {String} keyToAuthorize
    * @param  {String} applicationName
    * @param  {String} applicationAuthz
@@ -78,12 +80,13 @@ class Id {
       kSign,
     };
     const self = this;
-    return this.relay.postClaim(this.idaddr, bytesSignedMsg).then((res) => {
-      if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
-        self.backup.backupData(kc, self.idaddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
-      }
-      return res;
-    });
+    return this.relay.postClaim(this.idAddr, bytesSignedMsg)
+      .then((res) => {
+        if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
+          self.backup.backupData(kc, self.idAddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+        }
+        return res;
+      });
   }
 
   /**
@@ -91,7 +94,7 @@ class Id {
    * @param  {String} name
    */
   bindID(kc, name) {
-    return this.relay.bindID(kc, this.idaddr, this.keyOperational, name);
+    return this.relay.bindID(kc, this.idAddr, this.keyOperational, name);
   }
 }
 

@@ -70,7 +70,7 @@ class Relay {
     const bindIDMsg = {
       ethID: idAddr,
       name,
-      signature: signatureObj.signature, // for the moment, signature(idaddr+name)
+      signature: signatureObj.signature, // for the moment, signature(idAddr+name)
       ksign: keyOperational,
     };
     return this.postBindID(bindIDMsg);
@@ -98,17 +98,17 @@ class Relay {
   }
 
   /**
-   * @param  {String} idaddr
+   * @param  {String} idAddr
    */
-  getID(idaddr) {
-    return axios.get(`${this.url}/id/${idaddr}`);
+  getID(idAddr) {
+    return axios.get(`${this.url}/id/${idAddr}`);
   }
 
   /**
    * @param  {String} idaddr
    */
-  deployID(idaddr) {
-    return axios.post(`${this.url}/id/${idaddr}/deploy`);
+  deployID(idAddr) {
+    return axios.post(`${this.url}/id/${idAddr}/deploy`);
   }
 }
 
