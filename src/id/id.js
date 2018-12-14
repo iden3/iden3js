@@ -1,4 +1,6 @@
 const claim = require('../claim/claim');
+const api = require('../api/api');
+const utils = require('../utils');
 
 /**
  * @param  {String} keyRecover
@@ -19,17 +21,26 @@ class Id {
     this.backup = backup;
   }
 
-  createID() {
+  /**
+   * Create an identity. Will call the Relay and will receive a counterfactual address (not the deployed onto the chain yet).
+   */
+  create() {
     // send the data to Relay,and get the generated address of the counterfactual
-    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke)
+    const keys = {
+      operational: this.keyOperational,
+      recoverer: this.keyRecover,
+      revokator: this.keyRevoke,
+    };
+
+    return api.createId(this.relay.url, keys)
       .then((res) => {
         this.idAddr = res.data.idaddr;
         return this.idAddr;
       });
   }
 
-  deployID() {
-    return this.relay.deployID(this.idAddr);
+  deploy() {
+    return api.deployId(this.relay.url, this.idAddr);
   }
 
   /**
@@ -90,11 +101,37 @@ class Id {
   }
 
   /**
-   * @param  {Object} kc
-   * @param  {String} name
+   * Bind a label with an identity in the Relay.
+   *
+   * @param {Object} kc - Key container
+   * @param {String} label - To bind to an address
    */
-  bindID(kc, name) {
-    return this.relay.bindID(kc, this.idAddr, this.keyOperational, name);
+  bindWithLabel(kc, label) {
+    const idBytes = utils.hexToBytes(this.idAddr);
+    const dataBytes = Buffer.concat([Buffer.from([]), idBytes, Buffer.from(label)]);
+    const signedData = kc.sign(this.keyOperational, utils.bytesToHex(dataBytes));
+
+    return api.bindIdLabel(this.relay.url, {
+      ethID: this.idAddr,
+      name: label,
+      signature: signedData.signature, // for the moment, signature(idAddr+name)
+      ksign: this.keyOperational,
+    });
+  }
+
+  /**
+   * Get from the Relay, the root of this identity Merkle tree.
+   */
+  getRoot() {
+    return api.getIdRoot(this.relay.url, this.idAddr);
+  }
+
+  /**
+   * Retrieve from the Relay information regarding this identity such as address,
+   * key address and if is deployed in the blockchain or not.
+   */
+  getInformation() {
+    return api.getIdInfo(this.relay.url, this.idAddr);
   }
 }
 

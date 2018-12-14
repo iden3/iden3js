@@ -50,7 +50,7 @@ class LocalStorageContainer {
   /**
    * @param  {String} mnemonic - String with 12 words
    * @param {Number} pathProfile - indicates the penultimate layer of the derivation path, for the different identity profiles
-   * @param  {Number} numberOfDerivatedKeys - indicates the last layer of the derivation path, for the different keys of the identity profile
+   * @param  {Number} numberOfDerivedKeys - indicates the last layer of the derivation path, for the different keys of the identity profile
    *
    * @returns {Object}
    */

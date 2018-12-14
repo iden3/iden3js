@@ -1,5 +1,5 @@
 const axios = require('axios');
-const utils = require('../utils');
+const api = require('../api/api');
 
 /**
  * @param  {String} url
@@ -9,20 +9,24 @@ class Relay {
     this.url = url;
   }
 
+  get url() {
+    return this.url;
+  }
+
   /**
    * @returns {Object}
    */
-  getRelayRoot() {
-    return axios.get(`${this.url}/root`);
+  getRoot() {
+    return api.getRelayRoot(this.url);
   }
 
   /**
    * @param {String} - ID Address
    * @returns {Object}
    */
-  getIDRoot(idAddr) {
+  /*getIDRoot(idAddr) {
     return axios.get(`${this.url}/claim/${idAddr}/root`);
-  }
+  }*/
 
   /**
    * @param  {String} idAddr - ID Address
@@ -48,9 +52,9 @@ class Relay {
    * @param {String} signature
    * @returns {Object}
    */
-  postBindID(bindIDMsg) {
+  /* postBindID(bindIDMsg) {
     return axios.post(`${this.url}/vinculateid`, bindIDMsg);
-  }
+  } */
 
   /**
    * @param  {Object} kc - Keycontainer
@@ -58,7 +62,7 @@ class Relay {
    * @param  {String} keyOperational
    * @param  {String} name
    */
-  bindID(kc, idAddr, keyOperational, name) {
+  /* bindID(kc, idAddr, keyOperational, name) {
     const idBytes = utils.hexToBytes(idAddr);
     const nameBytes = Buffer.from(name);
     let msgBytes = Buffer.from([]);
@@ -74,7 +78,7 @@ class Relay {
       ksign: keyOperational,
     };
     return this.postBindID(bindIDMsg);
-  }
+  }*/
 
   /**
    * @param  {String} name
@@ -88,28 +92,28 @@ class Relay {
    * @param  {String} rec
    * @param  {String} rev
    */
-  createID(op, rec, rev) {
+  /*createID(op, rec, rev) {
     const keys = {
       operational: op,
       recoverer: rec,
       revokator: rev,
     };
     return axios.post(`${this.url}/id`, keys);
-  }
+  }*/
 
   /**
    * @param  {String} idAddr
    */
-  getID(idAddr) {
+ /* getID(idAddr) {
     return axios.get(`${this.url}/id/${idAddr}`);
-  }
+  }*/
 
   /**
    * @param  {String} idaddr
    */
-  deployID(idAddr) {
+  /*deployID(idAddr) {
     return axios.post(`${this.url}/id/${idAddr}/deploy`);
-  }
+  }*/
 }
 
 module.exports = Relay;
