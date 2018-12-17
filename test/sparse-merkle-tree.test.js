@@ -49,11 +49,11 @@ describe('[sparse-merkle-tree] add two claims', () => {
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1e027004fed670669c5ac756f7cf39cd607299252c241a14d49f478dbd52c3a5');
 
     const secondClaim = {
-      value: [bigInt(19458), bigInt(98421), bigInt(486314), bigInt(96573)],
-      index: [bigInt(35429), bigInt(459826)],
+      value: [bigInt(33), bigInt(44), bigInt(55), bigInt(66)],
+      index: [bigInt(33), bigInt(44)],
     };
     mt.addClaim(secondClaim);
-    const root = iden3.utils.bytesToHex(mt.root);
-    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0xc85f08a5500320b7877bffec8298f5c222c260e6ba86968114d70f8591ccef3e');
+    let root = iden3.utils.bytesToHex(mt.root);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2fecf7f54e3784545e083af5aaed31ebe8529d0a05b3c83f7ecfd96b99dd3220');
   });
 });
