@@ -53,7 +53,31 @@ describe('[sparse-merkle-tree] add two claims', () => {
       index: [bigInt(33), bigInt(44)],
     };
     mt.addClaim(secondClaim);
-    let root = iden3.utils.bytesToHex(mt.root);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2fecf7f54e3784545e083af5aaed31ebe8529d0a05b3c83f7ecfd96b99dd3220');
+  });
+});
+
+describe('[sparse-merkle-tree] getClaimByHi', () => {
+  it('getClaimByHi', () => {
+    const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr);
+    const firstClaim = {
+      value: [bigInt(12), bigInt(45), bigInt(78), bigInt(41)],
+      index: [bigInt(12), bigInt(45)],
+    };
+    mt.addClaim(firstClaim);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1e027004fed670669c5ac756f7cf39cd607299252c241a14d49f478dbd52c3a5');
+
+    const secondClaim = {
+      value: [bigInt(33), bigInt(44), bigInt(55), bigInt(66)],
+      index: [bigInt(33), bigInt(44)],
+    };
+    mt.addClaim(secondClaim);
+
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2fecf7f54e3784545e083af5aaed31ebe8529d0a05b3c83f7ecfd96b99dd3220');
+    const totalClaim = mt.getClaimByHi(secondClaim.index);
+    expect(totalClaim[0].value).to.be.equal(secondClaim.value[0].value);
+    expect(totalClaim[1].value).to.be.equal(secondClaim.value[1].value);
+    expect(totalClaim[2].value).to.be.equal(secondClaim.value[2].value);
+    expect(totalClaim[3].value).to.be.equal(secondClaim.value[3].value);
   });
 });

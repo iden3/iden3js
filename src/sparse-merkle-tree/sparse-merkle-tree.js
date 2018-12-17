@@ -130,6 +130,27 @@ class SparseMerkleTree {
       this.root = nextHash;
     }
   }
+
+  /**
+  * Retrieve data for a given leaf position
+  * @param {Uint8Array(32)} hi - Hash of the position of the leaf
+  * @returns {Object} - Data of the leaf
+  */
+  getClaimByHi(indexHi) {
+    // Compute hi of the claim
+    const hi = helpers.getIndexArray(mimc7.smtHash(indexHi));
+    // Find last node written
+    let key = this.root;
+    let nodeValue = getNodeValue(this.db, key, this.prefix);
+    let claimIndex = 0;
+    while (nodeValue.length === 2) {
+      const bitLeaf = (claimIndex > (hi.length - 1)) ? 0 : hi[claimIndex];
+      key = bitLeaf ? nodeValue[1] : nodeValue[0];
+      nodeValue = getNodeValue(this.db, key, this.prefix);
+      claimIndex += 1;
+    }
+    return helpers.getArrayBigIntFromBuffArray(nodeValue);
+  }
 }
 
 module.exports = {
