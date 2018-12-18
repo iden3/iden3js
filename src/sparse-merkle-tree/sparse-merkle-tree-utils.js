@@ -4,6 +4,20 @@ const utils = require('../utils');
 const { bigInt } = snarkjs;
 
 /**
+* Sets bit to 1 into a Uint8
+* @param {Uint8} buff - Buffer
+* @returns {Uint8} pos - Position of the bit to set
+*/
+function setBit(byte, pos) {
+  let mask = 1;
+  while (pos) {
+    mask <<= 1;
+    pos -= 1;
+  }
+  return byte | mask;
+}
+
+/**
 * Gets binary representation of leaf position
 * @param {bigInt} _index - Hash index of the leaf
 * @returns {Array} - Array of bits determining leaf position
@@ -121,4 +135,5 @@ module.exports = {
   bufferToBigInt,
   bigIntToBuffer,
   getIndexArray,
+  setBit,
 };

@@ -74,7 +74,7 @@ class SparseMerkleTree {
     while (nodeValue.length === 2) {
       const bitLeaf = (claimIndex > (hi.length - 1)) ? 0 : hi[claimIndex];
       arraySiblings.push(bitLeaf ? nodeValue[0] : nodeValue[1]);
-      key = bitLeaf ? nodeValue[0] : nodeValue[1];
+      key = bitLeaf ? nodeValue[1] : nodeValue[0];
       nodeValue = getNodeValue(this.db, key, this.prefix);
       claimIndex += 1;
     }
@@ -150,6 +150,42 @@ class SparseMerkleTree {
       claimIndex += 1;
     }
     return helpers.getArrayBigIntFromBuffArray(nodeValue);
+  }
+
+  /**
+  * Generates the merkle proof of the leaf in the position hi
+  * @param {Uint8Array(32)} hi - Hash of the position of the leaf
+  * @returns {Object} - Data containing merkle tree proof of existence or non-existence
+  */
+  generateProof(indexHi) {
+    // Compute hi of the claim
+    const hi = helpers.getIndexArray(mimc7.smtHash(indexHi));
+    // Find last node written
+    let key = this.root;
+    let nodeValue = getNodeValue(this.db, key, this.prefix);
+    let claimIndex = 0;
+    const arraySiblings = [];
+    let nextSibling;
+    const indicatorSibling = Buffer.alloc(31);
+    const startIndex = indicatorSibling.length - 1;
+    let numByte;
+    while (nodeValue.length === 2) {
+      const bitLeaf = (claimIndex > (hi.length - 1)) ? 0 : hi[claimIndex];
+      nextSibling = bitLeaf ? nodeValue[0] : nodeValue[1];
+      key = bitLeaf ? nodeValue[1] : nodeValue[0];
+      nodeValue = getNodeValue(this.db, key, this.prefix);
+      if (nextSibling !== emptyNodeValue) {
+        arraySiblings.push(nextSibling);
+        numByte = Math.floor((claimIndex) / 8);
+        indicatorSibling[startIndex - numByte] = helpers.setBit(indicatorSibling[startIndex - numByte], claimIndex % 8);
+      }
+      claimIndex += 1;
+    }
+    // Generate proof structure
+    const firstByte = Buffer.alloc(1);
+    firstByte.writeUInt8(claimIndex);
+    const concat = claimIndex ? [firstByte, indicatorSibling, arraySiblings] : [firstByte, indicatorSibling];
+    return Buffer.concat(concat);
   }
 }
 
