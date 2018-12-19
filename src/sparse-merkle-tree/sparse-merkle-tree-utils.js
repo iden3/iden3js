@@ -96,7 +96,9 @@ function bufferToNodeValue(nodeValueBuffer) {
   */
   const arrayBuff = [];
   for (let i = 0; i < nodeValueBuffer.length - 1; i += 32) {
-    arrayBuff.push(nodeValueBuffer.slice(i, i + 32));
+    const buffTmp = Buffer.alloc(32);
+    buffTmp.fill(nodeValueBuffer.slice(i, i + 32));
+    arrayBuff.push(buffTmp);
   }
   return arrayBuff;
 }
