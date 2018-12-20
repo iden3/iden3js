@@ -1,4 +1,4 @@
-const utils = require('../utils');
+const utils = require('../utils/utils');
 const helpers = require('./merkle-tree-utils');
 const CONSTANTS = require('../constants');
 
@@ -60,7 +60,7 @@ class MerkleTree {
   */
   constructor(db, numLevels, idAddr) {
     this.db = db;
-    this.prefix = CONSTANTS.MTPREFIX + idAddr;
+    this.prefix = CONSTANTS.MT_PREFIX + idAddr;
     this.numLevels = numLevels;
     this.numLayers = this.numLevels - 1;
     this.root = emptyNodeValue;

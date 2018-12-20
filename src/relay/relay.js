@@ -13,8 +13,14 @@ class Relay {
     return this.url;
   }
 
+  set url(url) {
+    this.url = url;
+  }
+
   /**
-   * @returns {Object}
+   * Get the root of the Relay's tree.
+   *
+   * @return {Promise} Promise object with the contract root and relay's root
    */
   getRoot() {
     return api.getRelayRoot(this.url);
@@ -33,18 +39,20 @@ class Relay {
    * @param {Object} bytesSignedMsg
    * @returns {Object}
    */
-  postClaim(idAddr, bytesSignedMsg) {
-    return axios.post(`${this.url}/claim/${idAddr}`, bytesSignedMsg);
-  }
+  /* postClaim(idAddr, bytesSignedMsg) {
+    // return axios.post(`${this.url}/claim/${idAddr}`, bytesSignedMsg);
+    return api.postClaim(this.url, idAddr, bytesSignedMsg);
+  } */
 
   /**
    * @param  {String} idAddr
    * @param  {String} hi, Hash(index)
    * @returns {Object}
    */
-  getClaimByHi(idAddr, hi) {
-    return axios.get(`${this.url}/claim/${idAddr}/hi/${hi}`);
-  }
+  /* getClaimByHi(idAddr, hi) {
+    // return axios.get(`${this.url}/claim/${idAddr}/hi/${hi}`);
+    return api.getClaimByHi(this.url, idAddr, hi);
+  } */
 
   /**
    * @param  {String} idaddr
@@ -83,9 +91,9 @@ class Relay {
   /**
    * @param  {String} name
    */
-  resolveName(name) {
+  /* resolveName(name) {
     return axios.get(`${this.url}/identities/resolv/${name}`);
-  }
+  } */
 
   /**
    * @param  {String} op

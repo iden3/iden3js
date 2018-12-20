@@ -7,7 +7,7 @@ const createKeccakHash = require('keccak');
  * @param {Buffer} b - A byte. It's a Buffer to do the hash
  * @returns {PromiseLike<ArrayBuffer>} - A hash created with keccak256
  */
-const hashBytes = function (b) {
+const hashBytes = function hBytes(b) {
   return createKeccakHash('keccak256').update(b).digest();
 };
 
@@ -16,7 +16,7 @@ const hashBytes = function (b) {
  * @param {Buffer} buff - Buffer to decode
  * @returns {String} - Decoded Buffer in UTF-16
  */
-const bytesToHex = function (buff) {
+const bytesToHex = function bytesHex(buff) {
   return `0x${buff.toString('hex')}`;
 };
 
@@ -25,7 +25,7 @@ const bytesToHex = function (buff) {
  * @param {String} hex - Hexadecimal string to parse to a Buffer of bytes
  * @returns {Buffer} - A new Buffer
  */
-const hexToBytes = function (hex) {
+const hexToBytes = function hexBytes(hex) {
   if (hex.substr(0, 2) === '0x') {
     return Buffer.from(hex.substr(2), 'hex');
   }
@@ -37,7 +37,7 @@ const hexToBytes = function (hex) {
  * @param  {String} str
  * @returns {String}
  */
-const strToHex = function (str) {
+const strToHex = function stringHex(str) {
   const arr = [];
 
   for (let i = 0, l = str.length; i < l; i++) {
@@ -52,7 +52,7 @@ const strToHex = function (str) {
  * @param  {String} hex
  * @returns {String}
  */
-const hexToStr = function (hex) {
+const hexToStr = function hexString(hex) {
   const _hex = hex.toString().substring(2);
   const _hexLength = _hex.length;
   let str = '';
@@ -68,7 +68,7 @@ const hexToStr = function (hex) {
  * @param  {Object} dataJson
  * @returns {String}
  */
-const jsonToQr = function (dataJson) {
+const jsonToQr = function jsonToQR(dataJson) {
   const dataStr = JSON.stringify(dataJson);
   return strToHex(dataStr);
 };
@@ -77,7 +77,7 @@ const jsonToQr = function (dataJson) {
  * @param  {String} dataHex
  * @return {Object}
  */
-const qrToJson = function (dataHex) {
+const qrToJson = function QRToJson(dataHex) {
   const dataStr = hexToStr(dataHex); // remove the 0x
   return JSON.parse(dataStr);
 };
@@ -88,7 +88,7 @@ const qrToJson = function (dataHex) {
  * @param  {String} addressHex
  * @returns {Boolean}
  */
-const verifySignature = function (mHex, signatureHex, addressHex) {
+const verifySignature = function verifySign(mHex, signatureHex, addressHex) {
   const m = hexToBytes(mHex);
   const r = signatureHex.slice(0, 66);
   const s = `0x${signatureHex.slice(66, 130)}`;
@@ -104,7 +104,7 @@ const verifySignature = function (mHex, signatureHex, addressHex) {
  * @param  {String} signatureHex
  * @returns {String} addressHex
  */
-const addrFromSig = function (mOriginal, signatureHex) {
+const addrFromSig = function addressFromSignature(mOriginal, signatureHex) {
   const message = ethUtil.toBuffer(mOriginal);
   const m = ethUtil.hashPersonalMessage(message); // message hash
   const r = signatureHex.slice(0, 66);
@@ -120,7 +120,7 @@ const addrFromSig = function (mOriginal, signatureHex) {
  * @param  {Number} difficulty
  * @returns {Boolean}
  */
-const checkPoW = function (hash, difficulty) {
+const checkPoW = function checkProofOfWork(hash, difficulty) {
   if (Buffer.compare(hash.slice(0, difficulty), Buffer.alloc(difficulty)) !== 0) {
     return false;
   }
@@ -132,7 +132,7 @@ const checkPoW = function (hash, difficulty) {
  * @param  {Number} difficulty
  * @returns {Object}
  */
-const pow = function (data, difficulty) {
+const pow = function proofOfWork(data, difficulty) {
   data.nonce = 0;
   let hash = hashBytes(Buffer.from(JSON.stringify(data)));
   while (!checkPoW(hash, difficulty)) {
@@ -140,6 +140,42 @@ const pow = function (data, difficulty) {
     hash = hashBytes(Buffer.from(JSON.stringify(data)));
   }
   return data;
+};
+
+/**
+ * @param  {uint32} u
+ * @returns {Buffer}
+ */
+const uint32ToEthBytes = function (u) { // compatible with Uint32ToEthBytes() go-iden3 version
+  const buf = Buffer.alloc(4);
+  buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
+  return buf;
+};
+
+/**
+ * @param  {Buffer} b
+ * @returns {uint32}
+ */
+const ethBytesToUint32 = function (b) { // compatible with EthBytesToUint32() go-iden3 version
+  return b.readUIntBE(0, 4);
+};
+
+/**
+ * @param  {uint64} u
+ * @returns {Buffer}
+ */
+const uint64ToEthBytes = function (u) { // compatible with Uint64ToEthBytes() go-iden3 version
+  const buf = Buffer.alloc(8);
+  buf.writeUIntBE(u, 0, 8);
+  return buf;
+};
+
+/**
+ * @param  {Buffer} b
+ * @returns {uint64}
+ */
+const ethBytesToUint64 = function (b) { // compatible with EthBytesToUint64() go-iden3 version
+  return b.readUIntBE(0, 8);
 };
 
 module.exports = {
@@ -154,4 +190,8 @@ module.exports = {
   addrFromSig,
   checkPoW,
   pow,
+  uint32ToEthBytes,
+  ethBytesToUint32,
+  uint64ToEthBytes,
+  ethBytesToUint64,
 };

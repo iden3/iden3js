@@ -4,7 +4,7 @@ const nacl = require('tweetnacl');
 const bip39 = require('bip39');
 const hdkey = require('hdkey');
 const CONSTANTS = require('../constants');
-const utils = require('../utils');
+const utils = require('../utils/utils');
 const kcUtils = require('./kc-utils');
 
 nacl.util = require('tweetnacl-util');
@@ -16,7 +16,7 @@ if (typeof localStorage === 'undefined' || localStorage === null) {
 
 class LocalStorageContainer {
   constructor(db) {
-    this.prefix = CONSTANTS.KCPREFIX;
+    this.prefix = CONSTANTS.KC_PREFIX;
     this.type = 'localStorage';
     this.encryptionKey = '';
     this.db = db;

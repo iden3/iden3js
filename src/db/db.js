@@ -6,7 +6,7 @@ const CONSTANTS = require('../constants');
  */
 class Db {
   constructor() {
-    this.prefix = CONSTANTS.DBPREFIX;
+    this.prefix = CONSTANTS.DB_PREFIX;
   }
 
   /**
@@ -40,6 +40,7 @@ class Db {
    * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string.
    *
    * @param  {Object} kc - KeyContainer
+   *
    * @returns {Object} - encrypted packed data
    */
   exportLocalStorage(kc) {

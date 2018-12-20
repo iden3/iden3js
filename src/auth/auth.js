@@ -1,7 +1,7 @@
 const axios = require('axios');
 const qrcode = require('qrcode-generator');
 const WebSocket = require('ws'); // for nodejs tests
-const utils = require('../utils');
+const utils = require('../utils/utils');
 
 /**
  * Generates the challenge with the current unixtime
