@@ -18,6 +18,15 @@ function setBit(byte, pos) {
 }
 
 /**
+* Gets a concrete bit of a Uint8
+* @param {Uint8} byte - Byte to get the bit
+* @returns {Uint8} pos - Position of the bit to get
+*/
+function getBit(byte, pos) {
+  return (byte >> pos) & 0x01;
+}
+
+/**
 * Gets binary representation of leaf position
 * @param {bigInt} _index - Hash index of the leaf
 * @returns {Array} - Array of bits determining leaf position
@@ -67,12 +76,6 @@ function bufferToBigInt(buff) {
 * @returns {Buffer} - New buffer
 */
 function nodeValueToBuffer(nodeValue) {
-  /*
-  const buffFlag = Buffer.alloc(1);
-  buffFlag.writeUInt8(nodeValue.flag);
-  const buffTmp = Buffer.concat(nodeValue.data);
-  return Buffer.concat([buffFlag, buffTmp]);
-  */
   return Buffer.concat(nodeValue);
 }
 
@@ -82,18 +85,6 @@ function nodeValueToBuffer(nodeValue) {
 * @returns {Object} - New object containing node value data
 */
 function bufferToNodeValue(nodeValueBuffer) {
-  /*
-  const arrayBuff = [];
-  for (let i = 0; i < nodeValueBuffer.length - 2; i += 32) {
-    arrayBuff.push(nodeValueBuffer.slice(i + 1, i + 33));
-  }
-  const
-    nodeValue = {
-      flag: nodeValueBuffer.readUInt8(),
-      data: arrayBuff,
-    };
-  return nodeValue;
-  */
   const arrayBuff = [];
   for (let i = 0; i < nodeValueBuffer.length - 1; i += 32) {
     const buffTmp = Buffer.alloc(32);
@@ -129,7 +120,53 @@ function getArrayBigIntFromBuffArray(arrayBuff) {
   return arrayBigInt;
 }
 
+/**
+* Gets proof object given a string hexadecimal encoded
+* @param {String} buffHex - hexadecimal string to parse
+* @returns {Object} - -structure proof
+*/
+function parseProof(buffHex) {
+  const buffBytes = utils.hexToBytes(buffHex);
+  const flag = buffBytes.readUInt8();
+  const bitDiff = getBit(flag, 1);
+  let proofStruct;
+  if (bitDiff) {
+    proofStruct = {
+      flagExistence: flag,
+      siblingsLength: buffBytes.readUInt8(1),
+      siblingsBitIndex: buffBytes.slice(2, 32),
+      siblings: buffBytes.slice(32, buffBytes.length - 2),
+      metaData: buffBytes.slice(buffBytes.length - 2, buffBytes.length),
+    };
+  } else {
+    proofStruct = {
+      flagExistence: flag,
+      siblingsLength: buffBytes.readUInt8(1),
+      siblingsBitIndex: buffBytes.slice(2, 32),
+      siblings: buffBytes.slice(32, buffBytes.length),
+    };
+  }
+  return proofStruct;
+}
+
+/**
+* Gets proof object given a string hexadecimal encoded
+* @param {String} buffHex - hexadecimal string to parse
+* @returns {Object} - -structure proof
+*/
+function genProofStruct(buffHex) {
+  const buffBytes = utils.hexToBytes(buffHex);
+  return {
+    flagExistence: buffBytes.readUInt8(),
+    siblingsLength: buffBytes.readUInt8(),
+    siblings: buffBytes.slice(1, buffBytes.length - 2),
+    metadataNode: buffBytes.slice(buffBytes.length - 2, buffBytes.length),
+  };
+}
+
 module.exports = {
+  getBit,
+  parseProof,
   getArrayBigIntFromBuffArray,
   getArrayBuffFromArrayBigInt,
   bufferToNodeValue,
