@@ -44,11 +44,12 @@ function getHashFinalNode(hi, ht) {
 
 function getHiHt(claim) {
   const totalHash = [];
-  const indexGen = claim.slice(0, 2);
-  const middleGen = claim.slice(2);
+  const indexGen = claim.slice(2);
+  const middleGen = claim.slice(0, 2);
   const hi = mimc7.smtHash(indexGen);
+  const hv = mimc7.smtHash(middleGen);
+  totalHash.push(hv);
   totalHash.push(hi);
-  totalHash.push(mimc7.smtHash(middleGen));
   return [hi, mimc7.smtHash(totalHash)];
 }
 
@@ -115,7 +116,7 @@ class SparseMerkleTree {
     if (nodeValue.length === 4) {
       // get current node value and its hIndex
       const totalTmp = helpers.getArrayBigIntFromBuffArray(nodeValue);
-      let hiTmp = totalTmp.slice(0, 2);
+      let hiTmp = totalTmp.slice(2);
       hiTmp = helpers.getIndexArray(mimc7.smtHash(hiTmp));
       // compare position index until find a split
       let compare = false;
@@ -208,7 +209,7 @@ class SparseMerkleTree {
       exist = false;
       // get current node value and its hIndex
       totalTmp = helpers.getArrayBigIntFromBuffArray(nodeValue);
-      let hiTmp = totalTmp.slice(0, 2);
+      let hiTmp = totalTmp.slice(2);
       hiTmp = helpers.getIndexArray(mimc7.smtHash(hiTmp));
       // Check input index and node index
       let pos = claimIndex;
