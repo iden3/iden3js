@@ -239,9 +239,9 @@ class SparseMerkleTree {
     }
     if (checkIndex) {
       const hashes = getHiHt(totalTmp);
-      const hiFinal = hashes[0];
-      const htFinal = hashes[1];
-      buffTmp = Buffer.concat(buffTmp, hiFinal, htFinal);
+      const hiFinal = helpers.bigIntToBuffer(hashes[0]);
+      const htFinal = helpers.bigIntToBuffer(hashes[1]);
+      buffTmp = Buffer.concat([buffTmp, hiFinal, htFinal]);
     }
     return buffTmp;
   }
@@ -263,7 +263,7 @@ function checkProof(rootHex, proofHex, claim) {
   const hi = hashes[0];
   const ht = hashes[1];
   const htBuff = getHashFinalNode(hi, ht);
-  const hiBinay = helpers.getIndexArray(mimc7.smtHash(hi));
+  const hiBinay = helpers.getIndexArray(hi);
   const { siblings } = proofBuff;
   const arrayFullSiblings = [];
   const siblingsIndex = proofBuff.siblingsBitIndex;
@@ -274,34 +274,32 @@ function checkProof(rootHex, proofHex, claim) {
   let pos = 0;
   let newHash = emptyNodeValue;
   if (flagNonExistence && flagNonDiff) {
-    const hiTmp = proofBuff.metaData[0];
-    const htTmp = proofBuff.metaData[1];
-    const hiTmpBinary = helpers.getIndexArray(mimc7.smtHash(hiTmp));
+    const hiTmp = helpers.bufferToBigInt(proofBuff.metaData.slice(0, 32));
+    const htTmp = helpers.bufferToBigInt(proofBuff.metaData.slice(32, proofBuff.metaData.length));
+    const hiTmpBinary = helpers.getIndexArray(hiTmp);
     while (!exist && !((pos > hiBinay.length - 1) && (pos > hiTmpBinary.length - 1))) {
       const bitLeaf = (pos > (hiBinay.length - 1)) ? 0 : hiBinay[pos];
       const bitLeafTmp = (pos > (hiTmpBinary.length - 1)) ? 0 : hiTmpBinary[pos];
       exist = bitLeaf ^ bitLeafTmp;
       pos += 1;
     }
-    if (exist) {
+    if (!exist) {
       return false;
     }
     newHash = getHashFinalNode(hiTmp, htTmp);
   }
 
   // Second step --> Build structure to calculate root afterwards
-  if (!proofBuff.flagExistence) {
-    let posSiblings = 0;
-    // Go through siblings until the root
-    for (let i = 0; i < proofBuff.siblingsLength; i++) {
-      const numByte = Math.floor(i / 8);
-      const flagBit = helpers.getBit(siblingsIndex[siblingsIndex.length - 1 - numByte], i % 8);
-      if (flagBit) {
-        arrayFullSiblings.push(siblings.slice(posSiblings * 32, (posSiblings + 1) * 32));
-        posSiblings += 1;
-      } else {
-        arrayFullSiblings.push(emptyNodeValue);
-      }
+  let posSiblings = 0;
+  // Go through siblings until the root
+  for (let i = 0; i < proofBuff.siblingsLength; i++) {
+    const numByte = Math.floor(i / 8);
+    const flagBit = helpers.getBit(siblingsIndex[siblingsIndex.length - 1 - numByte], i % 8);
+    if (flagBit) {
+      arrayFullSiblings.push(siblings.slice(posSiblings * 32, (posSiblings + 1) * 32));
+      posSiblings += 1;
+    } else {
+      arrayFullSiblings.push(emptyNodeValue);
     }
   }
 
@@ -313,7 +311,7 @@ function checkProof(rootHex, proofHex, claim) {
     concat = hiBinay[i] ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
     nextHash = helpers.bigIntToBuffer(mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(concat)));
   }
-  return Buffer.compare(nextHash, root);
+  return Buffer.compare(nextHash, root) === 0;
 }
 
 module.exports = {

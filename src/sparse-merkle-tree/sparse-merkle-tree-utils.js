@@ -135,8 +135,8 @@ function parseProof(buffHex) {
       flagExistence: flag,
       siblingsLength: buffBytes.readUInt8(1),
       siblingsBitIndex: buffBytes.slice(2, 32),
-      siblings: buffBytes.slice(32, buffBytes.length - 2),
-      metaData: buffBytes.slice(buffBytes.length - 2, buffBytes.length),
+      siblings: buffBytes.slice(32, buffBytes.length - 32 * 2),
+      metaData: buffBytes.slice(buffBytes.length - 32 * 2, buffBytes.length),
     };
   } else {
     proofStruct = {

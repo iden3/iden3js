@@ -10,7 +10,7 @@ const { expect } = chai;
 const db = new iden3.Db();
 // hardcoded id address for testing purposes
 const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
-/*
+
 describe('[merkle-tree] empty tree', () => {
   it('should be empty', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, idAddr);
@@ -121,9 +121,9 @@ describe('[sparse-merkle-tree] generateProof', () => {
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x000400000000000000000000000000000000000000000000000000000000000f292506e16d361eefe251663c5c172716c7ac21dcb6cee25045b2f04f14d02bce1f7ee0d60e20dd6b7d65052a0257b0324f8a74caf84e7471172ba4ca5447653f2be99c641f7d3dbad0ae9efb269374d9222624293bb32b2f70bcfc14d2b65a9024ced9ee38f11308d7f2d2e41a0758fdc51caf1c63abac55a2c7713e12b5bcfe');
   });
 });
-*/
+
 describe('[sparse-merkle-tree] VerifyProof', () => {
-  it('with 64 caim', () => {
+  it('proof-of-existence', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr);
     for (let i = 0; i < 4; i++) {
       const claim = [bigInt(0), bigInt(i), bigInt(0), bigInt(0)];
@@ -135,6 +135,34 @@ describe('[sparse-merkle-tree] VerifyProof', () => {
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
 
+    const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, proofClaim);
+    expect(check).to.be.equal(true);
+  });
+  it('proof-of-non-existence non empty node value', () => {
+    const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr);
+    for (let i = 0; i < 8; i++) {
+      const claim = [bigInt(0), bigInt(i), bigInt(0), bigInt(0)];
+      mt.addClaim(claim);
+    }
+    const proofClaim = [bigInt(0), bigInt(42), bigInt(0), bigInt(0)];
+    const proof = mt.generateProof(proofClaim.slice(0, 2));
+    const rootHex = iden3.utils.bytesToHex(mt.root);
+    const proofHex = iden3.utils.bytesToHex(proof);
+    expect(proofHex).to.be.equal('0x03020000000000000000000000000000000000000000000000000000000000030981f2898f5b2cfe953fd7cc0d3ae98b04d9beba4ac86e7fe6e8da769db837fc02d28a1a583c2f28cdfd2cc3c201bbe4e36869e32cafba225a0fc1464c8cdadd198571b3d34d0989950c7dfd52209ceb5d85400d08137d90cbd96d6223f3a18b2a8a3683e4dd0669d671a979315e27fc30b270d660580ee9073e088f36bb096e');
+    const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, proofClaim);
+    expect(check).to.be.equal(true);
+  });
+  it('proof-of-non-existence empty node value', () => {
+    const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr);
+    for (let i = 0; i < 8; i++) {
+      const claim = [bigInt(0), bigInt(i), bigInt(0), bigInt(0)];
+      mt.addClaim(claim);
+    }
+    const proofClaim = [bigInt(0), bigInt(12), bigInt(0), bigInt(0)];
+    const proof = mt.generateProof(proofClaim.slice(0, 2));
+    const rootHex = iden3.utils.bytesToHex(mt.root);
+    const proofHex = iden3.utils.bytesToHex(proof);
+    expect(proofHex).to.be.equal('0x010400000000000000000000000000000000000000000000000000000000000b0981f2898f5b2cfe953fd7cc0d3ae98b04d9beba4ac86e7fe6e8da769db837fc06ecbe5130b29a9dbfa0a89a3605bb67773b3020d8796d546779ead5687432f306349b60712f9d0d4e692fc43031c6d2b173357eab8698aa44ec3f89a2f5407d');
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, proofClaim);
     expect(check).to.be.equal(true);
   });
