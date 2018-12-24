@@ -9,11 +9,11 @@ const { bigInt } = snarkjs;
 const emptyNodeValue = Buffer.alloc(32);
 
 /**
-* Retrieve node value from sparse merkle tree
+* Retrieve node value from merkle tree
 * @param {Object} db - Data base object representation
 * @param {Buffer} key - Key value of the node
 * @param {String} prefix - Prefix added to the key
-* @returns {Buffer} - Value of the node
+* @returns {Object} - Object representation of node value
 */
 function getNodeValue(db, key, prefix) {
   const keyHex = utils.bytesToHex(key);
@@ -26,7 +26,7 @@ function getNodeValue(db, key, prefix) {
 * Set node value to the merkle tree
 * @param {Object} db - Data base object representation
 * @param {Buffer} key - Key value of the node
-* @param {Buffer} value - Value of the node
+* @param {Object} value - Object representation of node value
 * @param {String} prefix - Prefix added to the key
 */
 function setNodeValue(db, key, value, prefix) {
@@ -35,13 +35,22 @@ function setNodeValue(db, key, value, prefix) {
   db.insert(prefix + keyHex, valueHex);
 }
 
-
+/**
+* Retrieve node hash as Hash[1, hi, ht] in buffer object
+* @param {bigInt} hi - Hash index of the claim
+* @param {bigInt} ht - Hash total of the claim
+* @returns {Buffer} - Key node value
+*/
 function getHashFinalNode(hi, ht) {
   const hashArray = [bigInt(1), hi, ht];
   const hashKey = mimc7.smtHash(hashArray);
   return helpers.bigIntToBuffer(hashKey);
 }
 
+/**
+* Retrieve Hash index and Hash total from claim object
+* @param {Array(bigInt)} claim - Array of bigInt representing claim object
+*/
 function getHiHt(claim) {
   const totalHash = [];
   const indexGen = claim.slice(2);
@@ -75,7 +84,7 @@ class SparseMerkleTree {
 
   /**
   * Adds new data to a leaf
-  * @param {Object} claim - Claim data object to be added to the merkle tree
+  * @param {Array(bigInt)} claim - Claim data object to be added to the merkle tree
   */
   addClaim(claim) {
     const currentClaim = claim;
@@ -151,8 +160,8 @@ class SparseMerkleTree {
 
   /**
   * Retrieve data for a given leaf position
-  * @param {Uint8Array(32)} hi - Hash of the position of the leaf
-  * @returns {Object} - Data of the leaf
+  * @param {Array(bigInt)} indexHi - Claim slice representing the index leaf generator
+  * @returns {Array(bigInt)} - Data of the leaf given as a claim object
   */
   getClaimByHi(indexHi) {
     // Compute hi of the claim
@@ -171,9 +180,9 @@ class SparseMerkleTree {
   }
 
   /**
-  * Generates the merkle proof of the leaf in the position hi
-  * @param {Uint8Array(32)} hi - Hash of the position of the leaf
-  * @returns {Object} - Data containing merkle tree proof of existence or non-existence
+  * Generates the merkle proof of the leaf at a given position
+  * @param {Array[bigInt]} indexHi - Claim slice representing the index leaf generator
+  * @returns {Buffer} - Data containing merkle tree proof of existence or non-existence
   */
   generateProof(indexHi) {
     // Compute hi of the claim
@@ -252,17 +261,15 @@ class SparseMerkleTree {
 * Verifies the merkle proof
 * @param  {String} rootHex - Hexadecimal string of the merkle tree root
 * @param  {String} proofHex - Hexadecimal string of the merkle tree proof
-* @param  {String} hiHex - Hexadecimal string of the leaf hash index position
-* @param  {String} htHex - Hexadecimal string of the leaf hash data
+* @param  {String} hiHex - Hexadecimal string of the leaf index hash
+* @param  {String} htHex - Hexadecimal string of the leaf total data hash
 * @returns  {Bool} - Result of the merkle tree verification
 */
-
-function checkProof(rootHex, proofHex, claim) {
+function checkProof(rootHex, proofHex, hiHex, htHex) {
   const root = utils.hexToBytes(rootHex);
   const proofBuff = helpers.parseProof(proofHex);
-  const hashes = getHiHt(claim);
-  const hi = hashes[0];
-  const ht = hashes[1];
+  const hi = helpers.bufferToBigInt(utils.hexToBytes(hiHex));
+  const ht = helpers.bufferToBigInt(utils.hexToBytes(htHex));
   const htBuff = getHashFinalNode(hi, ht);
   const hiBinay = helpers.getIndexArray(hi);
   const { siblings } = proofBuff;
@@ -319,4 +326,5 @@ module.exports = {
   checkProof,
   SparseMerkleTree,
   emptyNodeValue,
+  getHiHt,
 };

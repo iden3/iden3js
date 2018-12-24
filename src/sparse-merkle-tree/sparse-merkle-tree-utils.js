@@ -5,7 +5,7 @@ const { bigInt } = snarkjs;
 
 /**
 * Sets bit to 1 into a Uint8
-* @param {Uint8} buff - Buffer
+* @param {Uint8} byte - Byte to set the bit
 * @returns {Uint8} pos - Position of the bit to set
 */
 function setBit(byte, pos) {
@@ -28,17 +28,16 @@ function getBit(byte, pos) {
 
 /**
 * Gets binary representation of leaf position
-* @param {bigInt} _index - Hash index of the leaf
-* @returns {Array} - Array of bits determining leaf position
+* @param {bigInt} index - Hash index of the leaf
+* @returns {Array(Uint8)} - Array of bits determining leaf position
 */
-function getIndexArray(_index) {
-  const index = bigInt(_index);
+function getIndexArray(index) {
   return index.toArray(2).value.reverse();
 }
 
 /**
 * Allocates a new Buffer from a bigInt number
-* @param {bigInt} _number - bigInt number
+* @param {bigInt} number - bigInt number
 * @returns {Buffer} - Decoded Buffer in UTF-16
 */
 function bigIntToBuffer(number) {
@@ -54,8 +53,8 @@ function bigIntToBuffer(number) {
 
 /**
 * Allocates a new bigInt from a buffer
-* @param {Buffer} _buff - bigInt number
-* @returns {Buffer} - Decoded Buffer in UTF-16
+* @param {Buffer} buff - Buffer to convert
+* @returns {bigInt} - Decoded bigInt
 */
 function bufferToBigInt(buff) {
   let number = bigInt(0);
@@ -95,9 +94,9 @@ function bufferToNodeValue(nodeValueBuffer) {
 }
 
 /**
-* Gets binary representation of leaf position
-* @param {bigInt} _index - Hash index of the leaf
-* @returns {Array} - Array of bits determining leaf position
+* Gets an array of buffers from bigInt array
+* @param {Array(bigInt)} arrayBigInt - Hash index of the leaf
+* @returns {Array(Buffer)} - Array of decoded buffers
 */
 function getArrayBuffFromArrayBigInt(arrayBigInt) {
   const arrayBuff = [];
@@ -108,9 +107,9 @@ function getArrayBuffFromArrayBigInt(arrayBigInt) {
 }
 
 /**
-* Gets binary representation of leaf position
-* @param {bigInt} _index - Hash index of the leaf
-* @returns {Array} - Array of bits determining leaf position
+* Gets an array of bigInt from buffer array
+* @param {Array(Buffer)} arrayBuff - Array of buffer to decode
+* @returns {Array(bigInt)} - Array of bigInt decoded
 */
 function getArrayBigIntFromBuffArray(arrayBuff) {
   const arrayBigInt = [];
@@ -123,7 +122,7 @@ function getArrayBigIntFromBuffArray(arrayBuff) {
 /**
 * Gets proof object given a string hexadecimal encoded
 * @param {String} buffHex - hexadecimal string to parse
-* @returns {Object} - -structure proof
+* @returns {Object} - proof structure
 */
 function parseProof(buffHex) {
   const buffBytes = utils.hexToBytes(buffHex);
@@ -150,9 +149,9 @@ function parseProof(buffHex) {
 }
 
 /**
-* Gets proof object given a string hexadecimal encoded
+* Generates proof object
 * @param {String} buffHex - hexadecimal string to parse
-* @returns {Object} - -structure proof
+* @returns {Object} - structure proof
 */
 function genProofStruct(buffHex) {
   const buffBytes = utils.hexToBytes(buffHex);
@@ -167,6 +166,7 @@ function genProofStruct(buffHex) {
 module.exports = {
   getBit,
   parseProof,
+  genProofStruct,
   getArrayBigIntFromBuffArray,
   getArrayBuffFromArrayBigInt,
   bufferToNodeValue,
