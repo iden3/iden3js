@@ -7,8 +7,8 @@ const { expect } = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 // const testPrivKHex = '289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032';
 const testPrivK = Buffer.from(testPrivKHex.replace('0x', ''), 'hex');
-const idaddr = ethUtil.privateToAddress(testPrivK);
-const idaddrHex = iden3.utils.bytesToHex(idaddr);
+const idAddr = ethUtil.privateToAddress(testPrivK);
+const idAddrHex = iden3.utils.bytesToHex(idAddr);
 const relay = new iden3.Relay('http://127.0.0.1:8000');
 const db = new iden3.Db();
 
@@ -20,7 +20,7 @@ describe('[relay] getRelayRoot()', () => {
 });
 
 describe('[relay] getIDRoot()', () => {
-  it('getIDRoot()', () => relay.getIDRoot(idaddrHex).then((res) => {
+  it('getIDRoot()', () => relay.getIDRoot(idAddrHex).then((res) => {
     // console.log('res.data', res.data);
     expect(res.status).to.be.equal(200);
   }));
@@ -37,7 +37,7 @@ describe('[relay] relay.createID()', () => {
     // console.log('relay.createID', createIDRes.data);
     expect(createIDRes.status).to.be.equal(200);
 
-    return _relay.getID(createIDRes.data.idaddr).then((getIDres) => {
+    return _relay.getID(createIDRes.data.idAddr).then((getIDres) => {
       // console.log('relay.getID', getIDres.data);
       expect(getIDres.status).to.be.equal(200);
     });
@@ -57,7 +57,7 @@ describe('[relay] postBindID()', () => {
 
   it('postVinculateID()', () => {
     const name = 'johndoe';
-    const idBytes = iden3.utils.hexToBytes(id.idaddr);
+    const idBytes = iden3.utils.hexToBytes(id.idAddr);
     const nameBytes = Buffer.from(name);
 
     let msgBytes = Buffer.from([]);
@@ -67,7 +67,7 @@ describe('[relay] postBindID()', () => {
     kc.unlock('pass');
     const signatureObj = kc.sign(key0id, iden3.utils.bytesToHex(msgBytes));
     const bindIDMsg = {
-      ethID: id.idaddr,
+      ethID: id.idAddr,
       name,
       signature: signatureObj.signature,
     };

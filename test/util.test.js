@@ -62,7 +62,7 @@ describe('[util] pow()', () => {
 describe('[util] pow dataBackup', () => {
   it('check pow dataBackup', () => {
     let data = {
-      idaddrhex: '0xa6d0cfcb340d63e092d94f1418ed747e06600ce8',
+      idAddrhex: '0xa6d0cfcb340d63e092d94f1418ed747e06600ce8',
       data: 'ob5+ScOOVN63jQoIuqQabXWYNQV54Wilxt0F9v6lQX9HD6qIJCoNoeb57yZB68akelkq',
       datasignature: '0x9a18e8de5f783c248d274233a2c7df143c89df3463b63ca75cb5eceb912cac197e6a963c85a660d05d97d29359f7ac533e5a12b44a7e1fc5ca16d418e540a6cf1c',
       type: 'testtype',

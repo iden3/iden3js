@@ -6,18 +6,18 @@ const { expect } = chai;
 // new database
 const db = new iden3.Db();
 // hardcoded id address for testing purposes
-const idaddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
+const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
 
 describe('[merkle-tree] empty tree', () => {
   it('should be empty', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
   });
 });
 
 describe('[merkle-tree] addClaim', () => {
   it('add one claim', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
       data: Buffer.from('this is a test claim'),
       indexLength: 15,
@@ -29,7 +29,7 @@ describe('[merkle-tree] addClaim', () => {
 
 describe('[merkle-tree] add two claims', () => {
   it('adding two claims', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
       data: Buffer.from('this is a test claim'),
       indexLength: 15,
@@ -48,7 +48,7 @@ describe('[merkle-tree] add two claims', () => {
 
 describe('[merkle-tree] generateProof', () => {
   it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
       data: Buffer.from('this is a test claim'),
       indexLength: 15,
@@ -73,7 +73,7 @@ describe('[merkle-tree] generateProof', () => {
 
 describe('[merkle-tree] generateProof of emptyLeaf', () => {
   it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
       data: Buffer.from('this is a test claim'),
       indexLength: 15,
@@ -107,7 +107,7 @@ describe('[merkle-tree] generateProof of emptyLeaf', () => {
 
 describe('[merkle-tree] getClaimByHi', () => {
   it('getClaimByHi', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
       data: Buffer.from('this is a test claim'),
       indexLength: 15,
@@ -151,7 +151,7 @@ describe('[merkle-tree] checkProof of Empty Leaf', () => {
 
 describe('[merkle-tree] generateProof and checkProof', () => {
   it('generateProof and checkProof', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
       data: Buffer.from('this is a test claim'),
       indexLength: 15,
@@ -201,7 +201,7 @@ describe('[merkle-tree] generateProof and checkProof', () => {
 
 describe('[merkle-tree] add claims in different orders', () => {
   it('add claims in different orders', () => {
-    const mt1 = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt1 = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim0 = {
       data: Buffer.from('0 this is a test claim'),
       indexLength: 15,
@@ -228,7 +228,7 @@ describe('[merkle-tree] add claims in different orders', () => {
     mt1.addClaim(claim3);
     mt1.addClaim(claim4);
 
-    const mt2 = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt2 = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     mt2.addClaim(claim2);
     mt2.addClaim(claim1);
     mt2.addClaim(claim0);
@@ -240,7 +240,7 @@ describe('[merkle-tree] add claims in different orders', () => {
 
 describe('[merkle-tree] add 100 claims', () => {
   it('add 100 claims', () => {
-    const mt = new iden3.merkleTree.MerkleTree(db, 140, idaddr);
+    const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const numToAdd = 100;
     for (let i = 0; i < numToAdd; i++) {
       const claim = {

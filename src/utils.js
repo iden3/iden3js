@@ -2,6 +2,42 @@ const ethUtil = require('ethereumjs-util');
 const createKeccakHash = require('keccak');
 
 /**
+ * @param  {uint32} u
+ * @returns {Buffer}
+ */
+const uint32ToEthBytes = function (u) { // compatible with Uint32ToEthBytes() go-iden3 version
+  const buf = Buffer.alloc(4);
+  buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
+  return buf;
+};
+
+/**
+ * @param  {Buffer} b
+ * @returns {uint32}
+ */
+const ethBytesToUint32 = function (b) { // compatible with EthBytesToUint32() go-iden3 version
+  return b.readUIntBE(0, 4);
+};
+
+/**
+ * @param  {uint64} u
+ * @returns {Buffer}
+ */
+const uint64ToEthBytes = function (u) { // compatible with Uint64ToEthBytes() go-iden3 version
+  const buf = Buffer.alloc(8);
+  buf.writeUIntBE(u, 0, 8);
+  return buf;
+};
+
+/**
+ * @param  {Buffer} b
+ * @returns {uint64}
+ */
+const ethBytesToUint64 = function (b) { // compatible with EthBytesToUint64() go-iden3 version
+  return b.readUIntBE(0, 8);
+};
+
+/**
  * Create a hash from a Buffer (a byte)
  *
  * @param {Buffer} b - A byte. It's a Buffer to do the hash
@@ -154,4 +190,8 @@ module.exports = {
   addrFromSig,
   checkPoW,
   pow,
+  uint32ToEthBytes,
+  ethBytesToUint32,
+  uint64ToEthBytes,
+  ethBytesToUint64,
 };

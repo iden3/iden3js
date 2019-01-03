@@ -23,17 +23,21 @@ describe('[id-private-folder] id.genericClaim with backup', () => {
   before(() => backup.getPoWDifficulty().then((res) => {
     // difficulty = res.data.powdifficulty;
   }));
+
   before(() => id.authorizeKSignClaim(kc, id.keyOperational, kSign, '', 'appToAuthName', 'authz', 1535208350, 1535208350).then((authRes) => {
     proofOfKSign = authRes.data.proofOfClaim;
     expect(authRes.status).to.be.equal(200);
   }));
 
-  return id.createID().then(idaddr => id.authorizeKSignClaim(kc, id.keyOperational, proofOfKSign, kSign, 'appToAuthName', 'authz', 1535208350, 1535208350).then((authRes) => {
-    proofOfKSign = authRes.data.proofOfClaim;
-    expect(authRes.status).to.be.equal(200);
+  return id.createID()
+    .then(() => id.authorizeKSignClaim(kc, id.keyOperational, proofOfKSign, kSign, 'appToAuthName', 'authz', 1535208350, 1535208350))
+    .then((authRes) => {
+      proofOfKSign = authRes.data.proofOfClaim;
+      expect(authRes.status).to.be.equal(200);
 
-    it('id.genericClaim()', () => id.genericClaim(kc, kSign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data').then((claimDefRes) => {
-      expect(claimDefRes.status).to.be.equal(200);
-    }));
-  }));
+      it('id.genericClaim()', () => id.genericClaim(kc, kSign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data')
+        .then((claimDefRes) => {
+          expect(claimDefRes.status).to.be.equal(200);
+        }));
+    });
 });

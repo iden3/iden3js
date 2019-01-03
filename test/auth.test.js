@@ -53,7 +53,7 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
   const id = new iden3.Id(krec, krev, ko, relay, relayAddr, '');
 
   it('[auth] id.AuthorizeKSignClaim()', () => id.createID().then((res) => {
-    expect(res).to.be.equal(id.idaddr);
+    expect(res).to.be.equal(id.idAddr);
 
     // decode the QR data
     const qrJson = iden3.auth.parseQRhex(qr);
@@ -68,7 +68,7 @@ describe('[auth] authorize the KSign (from the wallet side)', () => {
       expect(authorizeRes.status).to.be.equal(200);
 
       // now send the proof of the claim to the Auth centralized server
-      return iden3.auth.resolv(qrJson.url, id.idaddr, qrJson.challenge, qrJson.signature, qrKSign, ksignProof).then((resolvRes) => {
+      return iden3.auth.resolv(qrJson.url, id.idAddr, qrJson.challenge, qrJson.signature, qrKSign, ksignProof).then((resolvRes) => {
         // console.log(res.data);
         expect(resolvRes.status).to.be.equal(200);
         expect(resolvRes.data.authenticated).to.be.equal(true);
