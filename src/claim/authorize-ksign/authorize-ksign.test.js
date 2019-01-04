@@ -6,10 +6,10 @@ const { expect } = chai;
 
 describe('[Claim Authorize KSign]', () => {
   const versionExample = 1;
-  const eraExample = 1;
+  const signeExample = true;
   const axExample = '0x05050505050505050505050505050506';
   const ayExample = '0x07070707070707070707070707070708';
-  const ClaimAuthorizeKSign = new AuthorizeKSign.AuthorizeKSign(versionExample, eraExample, axExample, ayExample);
+  const ClaimAuthorizeKSign = new AuthorizeKSign.AuthorizeKSign(versionExample, signeExample, axExample, ayExample);
 
   const elementsFromClaim = ClaimAuthorizeKSign.elements();
   const parseClaim = AuthorizeKSign.parseFromElements(elementsFromClaim);
