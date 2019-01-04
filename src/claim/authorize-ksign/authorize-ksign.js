@@ -7,18 +7,18 @@ const utils = require('../../utils');
  * @param  {String} Address identifier
  * @param  {String} Root
  */
-class SetRootKey {
-  constructor(_version = 0, _era = 0, _id = '', _rootKey = '') {
+class AuthorizeKSign {
+  constructor(_version = 0, _signe = false, _ax = '', _ay = '') {
     const versionBuff = Buffer.alloc(4);
-    const eraBuff = Buffer.alloc(4);
-    eraBuff.writeUInt32BE(_era);
+    const signeBuff = Buffer.alloc(1);
+    signeBuff.writeUInt8(_signe);
     versionBuff.writeUInt32BE(_version);
     this.structure = {
-      claimType: utils.hashBytes('iden3.claim.set_root_key').slice(24, 32),
+      claimType: utils.hashBytes('iden3.claim.authorize_k_sign').slice(24, 32),
       version: versionBuff,
-      era: eraBuff,
-      id: utils.hexToBytes(_id),
-      rootKey: utils.hexToBytes(_rootKey),
+      signe: signeBuff,
+      ax: utils.hexToBytes(_ax),
+      ay: utils.hexToBytes(_ay),
     };
   }
 
@@ -35,35 +35,34 @@ class SetRootKey {
     startIndex = endIndex - this.structure.version.length;
     element.e3.fill(this.structure.version, startIndex, endIndex);
     endIndex = startIndex;
-    startIndex = endIndex - this.structure.era.length;
-    element.e3.fill(this.structure.era, startIndex, endIndex);
+    startIndex = endIndex - this.structure.signe.length;
+    element.e3.fill(this.structure.signe, startIndex, endIndex);
+    endIndex = startIndex;
+    startIndex = endIndex - this.structure.ax.length;
+    element.e3.fill(this.structure.ax, startIndex, endIndex);
     // e2 element composition
     endIndex = element.e2.length;
-    startIndex = element.e2.length - this.structure.id.length;
-    element.e2.fill(this.structure.id, startIndex, endIndex);
-    // e1 element composition
-    endIndex = element.e1.length;
-    startIndex = element.e1.length - this.structure.rootKey.length;
-    element.e1.fill(this.structure.rootKey, startIndex, endIndex);
+    startIndex = element.e2.length - this.structure.ay.length;
+    element.e2.fill(this.structure.ay, startIndex, endIndex);
+    // e1 remains as empty value
     // e0 remains as empty value
     return element;
   }
 }
 
 const parseFromElements = function (elements) {
-  const claim = new SetRootKey();
+  const claim = new AuthorizeKSign();
   // Parse e3
   claim.structure.claimType = elements.e3.slice(24, 32);
   claim.structure.version = elements.e3.slice(20, 24);
-  claim.structure.era = elements.e3.slice(16, 20);
+  claim.structure.signe = elements.e3.slice(19, 20);
+  claim.structure.ax = elements.e3.slice(3, 19);
   // Parse e2
-  claim.structure.id = elements.e2.slice(12, 32);
-  // Parse e1
-  claim.structure.rootKey = elements.e1;
+  claim.structure.ay = elements.e2.slice(16, 32);
   return claim;
 };
 
 module.exports = {
-  SetRootKey,
+  AuthorizeKSign,
   parseFromElements,
 };

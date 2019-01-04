@@ -4,12 +4,11 @@ const utils = require('../../utils');
 
 const { expect } = chai;
 
-describe('[Claim SetRootKey]', () => {
-  const versionExample = 0;
-  const eraExample = 0;
-  const idExample = '0x3939393939393939393939393939393939393939';
-  const rootKeyExample = Buffer.alloc(32);
-  rootKeyExample.fill(11, 1, 21, 'hex');
+describe('[Claim Set root key]', () => {
+  const versionExample = 1;
+  const eraExample = 1;
+  const idExample = '0x393939393939393939393939393939393939393A';
+  const rootKeyExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c000000000000000000000000';
   const ClaimSetRootKey = new SetRootKey.SetRootKey(versionExample, eraExample, idExample, rootKeyExample);
 
   const elementsFromClaim = ClaimSetRootKey.elements();
@@ -37,18 +36,16 @@ describe('[Claim SetRootKey]', () => {
   });
   it('Extract bytes from full element', () => {
     const bytesFromElement = elementsFromClaim.bytes();
-    expect(bytesFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b000000000000000000000000003939393939393939393939393939393900000000000000000000000000000000000000000000000000000000e400a1345fb8a750');
+    expect(bytesFromElement).to.be.equal('0x00000000000000000000000000000000000000000000000000000000000000000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c000000000000000000000000000000000000000000000000393939393939393939393939393939393939393a000000000000000000000000000000000000000100000001b111df93ad32c22c');
   });
-  /*
   it('Calculate Hi', () => {
     const hi = elementsFromClaim.hi();
-    const hiResult = ;
+    const hiResult = '0x0a2d38687ea5f987637ded13030b22d1657be60bdb35add74bb53c8d5d126f8f';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = elementsFromClaim.hv();
-    const hvResult = ;
+    const hvResult = '0x0864f0be4ccec8241690157128b1e434d826fbf40f6a2d0ed1486c635bf845e4';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
-  */
 });

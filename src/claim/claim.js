@@ -7,6 +7,9 @@ const helpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 const { bigInt } = snarkjs;
 
+/**
+ * Generic representation of claim fields
+ */
 class Elements {
   constructor() {
     this.e0 = Buffer.alloc(32);
@@ -15,23 +18,33 @@ class Elements {
     this.e3 = Buffer.alloc(32);
   }
 
+  /**
+  * @returns {Buffer} Hash index of the claim element structure
+  */
   hi() {
     const hashArray = [this.e2, this.e3];
-    const hashKey = mimc7.smtHash(hashArray);
+    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
     return helpers.bigIntToBuffer(hashKey);
   }
 
+  /**
+  * @returns {Buffer} Hash value of the claim element structure
+  */
   hv() {
     const hashArray = [this.e0, this.e1];
-    const hashKey = mimc7.smtHash(hashArray);
+    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
     return helpers.bigIntToBuffer(hashKey);
   }
 
+  /**
+  * @returns {Buffer} Hexadecimal byte representation of all claim structure
+  */
   bytes() {
     const concat = [this.e0, this.e1, this.e2, this.e3];
     return utils.bytesToHex(Buffer.concat(concat));
   }
 }
+
 /**
  * @param  {String} namespaceStr
  * @param  {String} typeStr
