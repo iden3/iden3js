@@ -1,14 +1,35 @@
+const snarkjs = require('snarkjs');
 const merkleTree = require('../merkle-tree/merkle-tree');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
+const mimc7 = require('../sparse-merkle-tree/mimc7');
+const helpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 
-class Claim { 
-  hi() {
-    return utils.hashBytes(this.bytes().slice(0, this.claim.baseIndex.indexLength));
+const { bigInt } = snarkjs;
+
+class Elements {
+  constructor() {
+    this.e0 = Buffer.alloc(32);
+    this.e1 = Buffer.alloc(32);
+    this.e2 = Buffer.alloc(32);
+    this.e3 = Buffer.alloc(32);
   }
 
-  ht() {
-    return utils.hashBytes(this.bytes());
+  hi() {
+    const hashArray = [this.e2, this.e3];
+    const hashKey = mimc7.smtHash(hashArray);
+    return helpers.bigIntToBuffer(hashKey);
+  }
+
+  hv() {
+    const hashArray = [this.e0, this.e1];
+    const hashKey = mimc7.smtHash(hashArray);
+    return helpers.bigIntToBuffer(hashKey);
+  }
+
+  bytes() {
+    const concat = [this.e0, this.e1, this.e2, this.e3];
+    return utils.bytesToHex(Buffer.concat(concat));
   }
 }
 /**
@@ -217,7 +238,7 @@ const checkProofOfClaim = function (proofOfClaim, numLevels) {
 };
 
 module.exports = {
-  Claim,
+  Elements,
   GenericClaim,
   parseGenericClaimBytes,
   AuthorizeKSignClaim,
