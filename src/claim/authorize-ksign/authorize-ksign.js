@@ -3,9 +3,9 @@ const utils = require('../../utils');
 
 /**
  * @param  {Uint32} Version
- * @param  {Uint32} Era
- * @param  {String} Address identifier
- * @param  {String} Root
+ * @param  {Bool} Signe
+ * @param  {String} Ax
+ * @param  {String} Ay
  */
 class AuthorizeKSign {
   constructor(_version = 0, _signe = false, _ax = '', _ay = '') {
@@ -23,8 +23,8 @@ class AuthorizeKSign {
   }
 
   /**
-  * @returns {Object Elements} Element representation of the claim
-  */
+   * @returns {Object Elements} Element representation of the claim
+   */
   elements() {
     const element = new Claim.Elements();
     let endIndex = element.e3.length;
@@ -50,6 +50,10 @@ class AuthorizeKSign {
   }
 }
 
+/**
+ * @param  {Object Elements} Representation of the claim
+ * @returns {Claim class} Claim object
+ */
 const parseFromElements = function (elements) {
   const claim = new AuthorizeKSign();
   // Parse e3

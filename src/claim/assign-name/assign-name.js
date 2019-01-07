@@ -3,9 +3,8 @@ const utils = require('../../utils');
 
 /**
  * @param  {Uint32} Version
- * @param  {Uint32} Era
+ * @param  {String} Hash name
  * @param  {String} Address identifier
- * @param  {String} Root
  */
 class AssignName {
   constructor(_version = 0, _hashName = '', _id = '') {
@@ -14,14 +13,14 @@ class AssignName {
     this.structure = {
       claimType: utils.hashBytes('iden3.claim.assign_name').slice(24, 32),
       version: versionBuff,
-      hashName: utils.hashBytes(_hashName),
+      hashName: utils.hashBytes(_hashName).fill(0, 0, 1),
       id: utils.hexToBytes(_id),
     };
   }
 
   /**
-  * @returns {Object Elements} Element representation of the claim
-  */
+   * @returns {Object Elements} Element representation of the claim
+   */
   elements() {
     const element = new Claim.Elements();
     let endIndex = element.e3.length;
@@ -44,6 +43,10 @@ class AssignName {
   }
 }
 
+/**
+ * @param  {Object Elements} Representation of the claim
+ * @returns {Claim class} Claim object
+ */
 const parseFromElements = function (elements) {
   const claim = new AssignName();
   // Parse e3

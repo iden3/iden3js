@@ -8,7 +8,7 @@ describe('[Claim Set root key]', () => {
   const versionExample = 1;
   const eraExample = 1;
   const idExample = '0x393939393939393939393939393939393939393A';
-  const rootKeyExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c000000000000000000000000';
+  const rootKeyExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
   const ClaimSetRootKey = new SetRootKey.SetRootKey(versionExample, eraExample, idExample, rootKeyExample);
 
   const elementsFromClaim = ClaimSetRootKey.elements();
@@ -36,7 +36,10 @@ describe('[Claim Set root key]', () => {
   });
   it('Extract bytes from full element', () => {
     const bytesFromElement = elementsFromClaim.bytes();
-    expect(bytesFromElement).to.be.equal('0x00000000000000000000000000000000000000000000000000000000000000000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c000000000000000000000000000000000000000000000000393939393939393939393939393939393939393a000000000000000000000000000000000000000100000001b111df93ad32c22c');
+    expect(bytesFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
+                                         + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
+                                         + '000000000000000000000000393939393939393939393939393939393939393a'
+                                         + '000000000000000000000000000000000000000100000001b111df93ad32c22c');
   });
   it('Calculate Hi', () => {
     const hi = elementsFromClaim.hi();
@@ -45,7 +48,7 @@ describe('[Claim Set root key]', () => {
   });
   it('Calculate Hv', () => {
     const hv = elementsFromClaim.hv();
-    const hvResult = '0x0864f0be4ccec8241690157128b1e434d826fbf40f6a2d0ed1486c635bf845e4';
+    const hvResult = '0x2e27903d404fcab9363967a4ffe7da6a615f9ce6f55c43661a0297a040d336a4';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

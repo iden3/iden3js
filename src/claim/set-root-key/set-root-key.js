@@ -23,8 +23,8 @@ class SetRootKey {
   }
 
   /**
-  * @returns {Object Elements} Element representation of the claim
-  */
+   * @returns {Object Elements} Element representation of the claim
+   */
   elements() {
     const element = new Claim.Elements();
     let endIndex = element.e3.length;
@@ -50,6 +50,10 @@ class SetRootKey {
   }
 }
 
+/**
+ * @param  {Object Elements} Representation of the claim
+ * @returns {Claim class} Claim object
+ */
 const parseFromElements = function (elements) {
   const claim = new SetRootKey();
   // Parse e3

@@ -6,9 +6,11 @@ const { expect } = chai;
 
 describe('[Claim Set root key]', () => {
   const versionExample = 1;
-  const hashNameExample = '0x0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0b000000000000000000000000';
+  const nameExample = 'example.iden3.eth';
+  const hashNameExample = utils.hashBytes(nameExample);
+  hashNameExample.fill(0, 0, 1);
   const idExample = '0x393939393939393939393939393939393939393A';
-  const ClaimAssignName = new AssignName.AssignName(versionExample, hashNameExample, idExample);
+  const ClaimAssignName = new AssignName.AssignName(versionExample, nameExample, idExample);
 
   const elementsFromClaim = ClaimAssignName.elements();
   const parseClaim = AssignName.parseFromElements(elementsFromClaim);
@@ -31,11 +33,14 @@ describe('[Claim Set root key]', () => {
   });
   it('Extract bytes from full element', () => {
     const bytesFromElement = elementsFromClaim.bytes();
-    expect(bytesFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000393939393939393939393939393939393939393ab3ca9e5e0a3d6845cf0f1be899e8ca1b57036916ae4d784e7e84ff89bfa86eb4000000000000000000000000000000000000000000000001f60d928459d792ed');
+    expect(bytesFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
+                                         + '000000000000000000000000393939393939393939393939393939393939393a'
+                                         + '00d67b05d8e2d1ace8f3e84b8451dd2e9da151578c3c6be23e7af11add5a807a'
+                                         + '000000000000000000000000000000000000000000000001f60d928459d792ed');
   });
   it('Calculate Hi', () => {
     const hi = elementsFromClaim.hi();
-    const hiResult = '0x15891bd6f6d1f72dfa74997cc92ef1cf51f2dfb40e3f9ceeac51435a009c4d67';
+    const hiResult = '0x23966b07b31bad5aebd8af6c72c7650f8ab45886e442f427da6c1bce73dbd2bb';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
