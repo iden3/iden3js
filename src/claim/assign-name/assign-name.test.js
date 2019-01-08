@@ -1,6 +1,7 @@
 const chai = require('chai');
-const AssignName = require('./assign-name');
+const Claim = require('../claim');
 const utils = require('../../utils');
+const CONSTANTS = require('../../constants');
 
 const { expect } = chai;
 
@@ -10,26 +11,34 @@ describe('[Claim Set root key]', () => {
   const hashNameExample = utils.hashBytes(nameExample);
   hashNameExample.fill(0, 0, 1);
   const idExample = '0x393939393939393939393939393939393939393A';
-  const ClaimAssignName = new AssignName.AssignName(versionExample, nameExample, idExample);
+  let assignNameClaim;
 
-  const elementsFromClaim = ClaimAssignName.elements();
-  const parseClaim = AssignName.parseFromElements(elementsFromClaim);
+  let elementsFromClaim;
+  let parsedClaim;
+  // Crear test del claim pero con valores que no van bien y check de que retorne 'null'
+  // Crear test del claim sin 'data' y ver que los valores sean los de default
+  before('Create new assign name claim', () => {
+    assignNameClaim = new Claim.Factory(CONSTANTS.CLAIMS.ASSIGN_NAME.ID, { version: versionExample, nameExample, idExample });
+    expect(assignNameClaim).not.to.be(null);
+    elementsFromClaim = assignNameClaim.createEntry();
+    parsedClaim = Claim.parseAssignName(elementsFromClaim);
+  });
 
   it('Parse claim type', () => {
-    const { claimType } = ClaimAssignName.structure;
-    expect(utils.bytesToHex(claimType)).to.be.equal(utils.bytesToHex(parseClaim.structure.claimType));
+    const { claimType } = assignNameClaim.structure;
+    expect(utils.bytesToHex(claimType)).to.be.equal(utils.bytesToHex(parsedClaim.structure.claimType));
   });
   it('Parse version', () => {
-    const { version } = ClaimAssignName.structure;
-    expect(utils.bytesToHex(version)).to.be.equal(utils.bytesToHex(parseClaim.structure.version));
+    const { version } = assignNameClaim.structure;
+    expect(utils.bytesToHex(version)).to.be.equal(utils.bytesToHex(parsedClaim.structure.version));
   });
   it('Parse hash name', () => {
-    const { hashName } = ClaimAssignName.structure;
-    expect(utils.bytesToHex(hashName)).to.be.equal(utils.bytesToHex(parseClaim.structure.hashName));
+    const { hashName } = assignNameClaim.structure;
+    expect(utils.bytesToHex(hashName)).to.be.equal(utils.bytesToHex(parsedClaim.structure.hashName));
   });
   it('Parse id address', () => {
-    const { id } = ClaimAssignName.structure;
-    expect(utils.bytesToHex(id)).to.be.equal(utils.bytesToHex(parseClaim.structure.id));
+    const { id } = assignNameClaim.structure;
+    expect(utils.bytesToHex(id)).to.be.equal(utils.bytesToHex(parsedClaim.structure.id));
   });
   it('Extract bytes from full element', () => {
     const bytesFromElement = elementsFromClaim.bytes();

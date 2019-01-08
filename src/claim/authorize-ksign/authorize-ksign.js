@@ -1,4 +1,4 @@
-const Claim = require('../claim');
+const Entry = require('../entry/entry');
 const utils = require('../../utils');
 
 /**
@@ -23,9 +23,10 @@ class AuthorizeKSign {
   constructor(_version = 0, _ax = '', _ay = '', _sign = false) {
     const versionBuff = Buffer.alloc(4);
     const signeBuff = Buffer.alloc(1);
+
     signeBuff.writeUInt8(_sign);
     versionBuff.writeUInt32BE(_version);
-    this.structure = {
+    this._structure = {
       claimType: utils.hashBytes('iden3.claim.authorize_k_sign').slice(24, 32),
       version: versionBuff,
       signe: signeBuff,
@@ -35,31 +36,38 @@ class AuthorizeKSign {
   }
 
   /**
+   * Retrieve raw data claim structure
+   */
+  get structure() {
+    return this._structure;
+  }
+
+  /**
    * Code raw data claim structure into an element claim structure
    * @returns {Object} Element representation of the claim
    */
-  elements() {
-    const element = new Claim.Elements();
-    let endIndex = element.e3.length;
-    let startIndex = endIndex - this.structure.claimType.length;
+  createEntry() {
+    const claimEntry = new Entry();
+    let endIndex = claimEntry.elements[3].length;
+    let startIndex = endIndex - this._structure.claimType.length;
     // claim element 3 composition
-    element.e3.fill(this.structure.claimType, startIndex, endIndex);
+    claimEntry.elements[3].fill(this._structure.claimType, startIndex, endIndex);
     endIndex = startIndex;
-    startIndex = endIndex - this.structure.version.length;
-    element.e3.fill(this.structure.version, startIndex, endIndex);
+    startIndex = endIndex - this._structure.version.length;
+    claimEntry.elements[3].fill(this._structure.version, startIndex, endIndex);
     endIndex = startIndex;
-    startIndex = endIndex - this.structure.sign.length;
-    element.e3.fill(this.structure.sign, startIndex, endIndex);
+    startIndex = endIndex - this._structure.sign.length;
+    claimEntry.elements[3].fill(this._structure.sign, startIndex, endIndex);
     endIndex = startIndex;
-    startIndex = endIndex - this.structure.ax.length;
-    element.e3.fill(this.structure.ax, startIndex, endIndex);
+    startIndex = endIndex - this._structure.ax.length;
+    claimEntry.elements[3].fill(this._structure.ax, startIndex, endIndex);
     // claim element 2 composition
-    endIndex = element.e2.length;
-    startIndex = element.e2.length - this.structure.ay.length;
-    element.e2.fill(this.structure.ay, startIndex, endIndex);
+    endIndex = claimEntry.elements[2].length;
+    startIndex = claimEntry.elements[2].length - this._structure.ay.length;
+    claimEntry.elements[2].fill(this._structure.ay, startIndex, endIndex);
     // claim element 1 remains as empty value
     // claim element 0 remains as empty value
-    return element;
+    return claimEntry;
   }
 }
 
@@ -68,19 +76,19 @@ class AuthorizeKSign {
  * @param  {Object} elements - Element representation of the claim
  * @returns {Object} AuthorizeKSign class object
  */
-function parseFromElements(elements) {
+function parseAuthorizeKSign(entry) {
   const claim = new AuthorizeKSign();
   // Parse element 3
-  claim.structure.claimType = elements.e3.slice(24, 32);
-  claim.structure.version = elements.e3.slice(20, 24);
-  claim.structure.signe = elements.e3.slice(19, 20);
-  claim.structure.ax = elements.e3.slice(3, 19);
+  claim.structure.claimType = entry.elements[3].slice(24, 32);
+  claim.structure.version = entry.elements[3].slice(20, 24);
+  claim.structure.signe = entry.elements[3].slice(19, 20);
+  claim.structure.ax = entry.elements[3].slice(3, 19);
   // Parse element 2
-  claim.structure.ay = elements.e2.slice(16, 32);
+  claim.structure.ay = entry.elements[2].slice(16, 32);
   return claim;
 }
 
 module.exports = {
   AuthorizeKSign,
-  parseFromElements,
+  parseAuthorizeKSign,
 };

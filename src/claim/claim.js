@@ -1,54 +1,32 @@
 const merkleTree = require('../merkle-tree/merkle-tree');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
-const mimc7 = require('../sparse-merkle-tree/mimc7');
-const helpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
+const assignNameClaim = require('./assign-name/assign-name');
+const setRootKeyClaim = require('./set-root-key/set-root-key');
+const authorizeKSignClaim = require('./set-root-key/set-root-key');
+const basicClaim = require('./basic/basic');
 
 /**
- * Generic representation of claim elements
- * Claim element structure is as follows: |element 0|element 1|element 2|element 3|
- * Each element contains 253 useful bits enclosed on a 256 bits Buffer
+ * Class to create new claims depending on its type
  */
-class Elements {
+class Factory {
   /**
-   * Initialize claim elements with empty buffer
+   * @param {String} type - Claim to be created
+   * @param {Object} data - Input parameters of the claim
    */
-  constructor() {
-    this.e0 = Buffer.alloc(32);
-    this.e1 = Buffer.alloc(32);
-    this.e2 = Buffer.alloc(32);
-    this.e3 = Buffer.alloc(32);
-  }
-
-  /**
-   * Hash index calculation using mimc7 hash
-   * Hash index is calculated from: |element 1|element 0|
-   * @returns {Buffer} Hash index of the claim element structure
-   */
-  hi() {
-    const hashArray = [this.e2, this.e3];
-    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
-    return helpers.bigIntToBuffer(hashKey);
-  }
-
-  /**
-   * Hash value calculation using mimc7 hash
-   * Hash value is calculated from: |element 3|element 2|
-   * @returns {Buffer} Hash value of the claim element structure
-   */
-  hv() {
-    const hashArray = [this.e0, this.e1];
-    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
-    return helpers.bigIntToBuffer(hashKey);
-  }
-
-  /**
-   * Concats all the elements of the claim and parse it into an hexadecimal string
-   * @returns {String} Hexadecimal string representation of element claim structure
-   */
-  hex() {
-    const concat = [this.e0, this.e1, this.e2, this.e3];
-    return utils.bytesToHex(Buffer.concat(concat));
+  constructor(type, data) {
+    switch (type) {
+      case CONSTANTS.CLAIMS.ASSIGN_NAME.ID:
+        return new assignNameClaim.AssignName(data);
+      case CONSTANTS.CLAIMS.AUTHORIZE_KSIGN.ID:
+        return new authorizeKSignClaim.AuthorizeKSign(...data);
+      case CONSTANTS.CLAIMS.BASIC.ID:
+        return new basicClaim.Basic(...data);
+      case CONSTANTS.CLAIMS.SET_ROOT_KEY.ID:
+        return new setRootKeyClaim.SetRootKey(...data);
+      default:
+        return null;
+    }
   }
 }
 
@@ -258,7 +236,7 @@ const checkProofOfClaim = function (proofOfClaim, numLevels) {
 };
 
 module.exports = {
-  Elements,
+  Factory,
   GenericClaim,
   parseGenericClaimBytes,
   AuthorizeKSignClaim,
