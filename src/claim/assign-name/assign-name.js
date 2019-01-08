@@ -4,7 +4,7 @@ const utils = require('../../utils');
 /**
  * Class representing an assign name claim
  * Assign name claim is used to bind an identity addres with a human readable text
- * Assign name element representation ias as follows:
+ * Assign name element representation is as follows:
  * |element 3|: |empty|version|claim type| - |20 bytes|4 bytes|8 bytes|
  * |element 2|: |hash name| - |32 bytes|
  * |element 1|: |empty|identity| - |12 bytes|20 bytes|

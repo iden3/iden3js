@@ -2,20 +2,23 @@ const Claim = require('../claim');
 const utils = require('../../utils');
 
 /**
- * @param  {Uint32} Version
- * @param  {Uint32} Era
- * @param  {String} Address identifier
- * @param  {String} Root
+ * Class representing a set root key claim
+ * Set root key claim is used to commit a root of a merkle by a given identity
+ * Assign name element representation is as follows:
+ * |element 3|: |empty|era|version|claim type| - |16 bytes|4 bytes|4 bytes|8 bytes|
+ * |element 2|: |empty|identity| - |12 bytes|20 bytes|
+ * |element 1|: |root key| - |32 bytes|
+ * |element 0|: |empty| - |32 bytes|
  */
 class SetRootKey {
   /**
    * Initialize raw claim data structure
    * Bytes are taken according element claim structure
    * Claim type is string used to define this concrete claim. Last 8 bytes of its hash are taken
-   * @param {*} _version 
-   * @param {*} _era 
-   * @param {*} _id 
-   * @param {*} _rootKey 
+   * @param {Uint32} _version - Version assigned to the claim
+   * @param {Uint32} _era - Era assigned to the claim
+   * @param {String} _id - Identity bind to the hash name
+   * @param {String} _rootKey - Root key to commit
    */
   constructor(_version = 0, _era = 0, _id = '', _rootKey = '') {
     const versionBuff = Buffer.alloc(4);

@@ -3,7 +3,7 @@ const utils = require('../../utils');
 
 /**
  * Class representing an authorized Ksign claim
- * Authorized Ksign claim is used to authorize a key for being used afterwards
+ * Authorized Ksign claim is used to authorize a public key for being used afterwards
  * Authorized Ksign element representation is as follows:
  * |element 3|: |empty|Ax|sign|version|claim type| - |3 bytes|16 bytes|1 bytes|4 bytes|8 bytes|
  * |element 2|: |empty|Ay| - |16 bytes|16 bytes|

@@ -5,7 +5,7 @@ const mimc7 = require('../sparse-merkle-tree/mimc7');
 const helpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
- * Generic representation of claim fields
+ * Generic representation of claim elements
  * Claim element structure is as follows: |element 0|element 1|element 2|element 3|
  * Each element contains 253 useful bits enclosed on a 256 bits Buffer
  */
@@ -22,7 +22,7 @@ class Elements {
 
   /**
    * Hash index calculation using mimc7 hash
-   * Hash index is calculated from |element 1|element 0|
+   * Hash index is calculated from: |element 1|element 0|
    * @returns {Buffer} Hash index of the claim element structure
    */
   hi() {
@@ -33,7 +33,7 @@ class Elements {
 
   /**
    * Hash value calculation using mimc7 hash
-   * Hash value is calculated from |element 3|element 2|
+   * Hash value is calculated from: |element 3|element 2|
    * @returns {Buffer} Hash value of the claim element structure
    */
   hv() {
