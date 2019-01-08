@@ -1,16 +1,18 @@
-const snarkjs = require('snarkjs');
 const merkleTree = require('../merkle-tree/merkle-tree');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
 const mimc7 = require('../sparse-merkle-tree/mimc7');
 const helpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 
-const { bigInt } = snarkjs;
-
 /**
  * Generic representation of claim fields
+ * Claim element structure is as follows: |element 0|element 1|element 2|element 3|
+ * Each element contains 253 useful bits enclosed on a 256 bits Buffer
  */
 class Elements {
+  /**
+   * Initialize claim elements with empty buffer
+   */
   constructor() {
     this.e0 = Buffer.alloc(32);
     this.e1 = Buffer.alloc(32);
@@ -19,8 +21,10 @@ class Elements {
   }
 
   /**
-  * @returns {Buffer} Hash index of the claim element structure
-  */
+   * Hash index calculation using mimc7 hash
+   * Hash index is calculated from |element 1|element 0|
+   * @returns {Buffer} Hash index of the claim element structure
+   */
   hi() {
     const hashArray = [this.e2, this.e3];
     const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
@@ -28,8 +32,10 @@ class Elements {
   }
 
   /**
-  * @returns {Buffer} Hash value of the claim element structure
-  */
+   * Hash value calculation using mimc7 hash
+   * Hash value is calculated from |element 3|element 2|
+   * @returns {Buffer} Hash value of the claim element structure
+   */
   hv() {
     const hashArray = [this.e0, this.e1];
     const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
@@ -37,9 +43,10 @@ class Elements {
   }
 
   /**
-  * @returns {Buffer} Hexadecimal byte representation of all claim structure
-  */
-  bytes() {
+   * Concats all the elements of the claim and parse it into an hexadecimal string
+   * @returns {String} Hexadecimal string representation of element claim structure
+   */
+  hex() {
     const concat = [this.e0, this.e1, this.e2, this.e3];
     return utils.bytesToHex(Buffer.concat(concat));
   }
