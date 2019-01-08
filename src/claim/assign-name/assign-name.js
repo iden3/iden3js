@@ -14,7 +14,7 @@ class AssignName {
   /**
    * Initialize raw claim data structure
    * Bytes are taken according element claim structure
-   * Claim type is used to define this concrete claim. Last 8 bytes of its hash are taken
+   * Claim type is string used to define this concrete claim. Last 8 bytes of its hash are taken
    * @param {Uint32} _version - Version assigned to the claim
    * @param {String} _hashName - Hash regarding human readable text
    * @param {String} _id - Identity bind to the hash name
@@ -22,20 +22,12 @@ class AssignName {
   constructor(_version = 0, _hashName = '', _id = '') {
     const versionBuff = Buffer.alloc(4);
     versionBuff.writeUInt32BE(_version);
-    this._structure = {
+    this.structure = {
       claimType: utils.hashBytes('iden3.claim.assign_name').slice(24, 32),
       version: versionBuff,
       hashName: utils.hashBytes(_hashName).fill(0, 0, 1),
       id: utils.hexToBytes(_id),
     };
-  }
-
-  /**
-   * Retrieve raw claim structure
-   * @returns {Object} Raw data claim structure
-   */
-  get structure() {
-    return this._structure;
   }
 
   /**
