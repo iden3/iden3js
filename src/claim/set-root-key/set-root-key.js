@@ -20,18 +20,21 @@ class SetRootKey {
    * @param {String} _id - Identity bind to the hash name
    * @param {String} _rootKey - Root key to commit
    */
-  constructor(_version = 0, _era = 0, _id = '', _rootKey = '') {
+  constructor(data) {
     const versionBuff = Buffer.alloc(4);
     const eraBuff = Buffer.alloc(4);
 
-    versionBuff.writeUInt32BE(_version);
-    eraBuff.writeUInt32BE(_era);
+    const {
+      version, era, id, rootKey,
+    } = data;
+    versionBuff.writeUInt32BE(version);
+    eraBuff.writeUInt32BE(era);
     this._structure = {
       claimType: utils.hashBytes('iden3.claim.set_root_key').slice(24, 32),
       version: versionBuff,
       era: eraBuff,
-      id: utils.hexToBytes(_id),
-      rootKey: utils.hexToBytes(_rootKey),
+      id: utils.hexToBytes(id),
+      rootKey: utils.hexToBytes(rootKey),
     };
   }
 
@@ -77,7 +80,9 @@ class SetRootKey {
  * @returns {Object} SetRootKey class object
  */
 function parseSetRootKey(entry) {
-  const claim = new SetRootKey();
+  const claim = new SetRootKey({
+    version: 0, era: '', id: '', rootKey: '',
+  });
   // Parse element 3
   claim.structure.claimType = entry.elements[3].slice(24, 32);
   claim.structure.version = entry.elements[3].slice(20, 24);
@@ -85,7 +90,7 @@ function parseSetRootKey(entry) {
   // Parse element 2
   claim.structure.id = entry.elements[2].slice(12, 32);
   // Parse element 1
-  claim.structure.rootKey = entry.elements[1];
+  claim.structure.rootKey = entry.elements[1].slice(0, 32);
   return claim;
 }
 

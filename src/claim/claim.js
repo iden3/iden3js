@@ -3,7 +3,7 @@ const utils = require('../utils');
 const CONSTANTS = require('../constants');
 const assignNameClaim = require('./assign-name/assign-name');
 const setRootKeyClaim = require('./set-root-key/set-root-key');
-const authorizeKSignClaim = require('./set-root-key/set-root-key');
+const authorizeKSignClaim = require('./authorize-ksign/authorize-ksign');
 const basicClaim = require('./basic/basic');
 
 /**
@@ -19,16 +19,17 @@ class Factory {
       case CONSTANTS.CLAIMS.ASSIGN_NAME.ID:
         return new assignNameClaim.AssignName(data);
       case CONSTANTS.CLAIMS.AUTHORIZE_KSIGN.ID:
-        return new authorizeKSignClaim.AuthorizeKSign(...data);
+        return new authorizeKSignClaim.AuthorizeKSign(data);
       case CONSTANTS.CLAIMS.BASIC.ID:
-        return new basicClaim.Basic(...data);
+        return new basicClaim.Basic(data);
       case CONSTANTS.CLAIMS.SET_ROOT_KEY.ID:
-        return new setRootKeyClaim.SetRootKey(...data);
+        return new setRootKeyClaim.SetRootKey(data);
       default:
-        return null;
+        return undefined;
     }
   }
 }
+
 
 /**
  * @param  {String} namespaceStr

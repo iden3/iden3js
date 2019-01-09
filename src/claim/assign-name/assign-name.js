@@ -19,17 +19,18 @@ class AssignName {
    * @param {String} _hashName - Hash regarding human readable text
    * @param {String} _id - Identity bind to the hash name
    */
-  //constructor(_version = 0, _hashName = '', _id = '') {
   constructor(data) {
     const versionBuff = Buffer.alloc(4);
 
-    const { versionExample, nameExample, idExample } = data;
-    versionBuff.writeUInt32BE(versionExample);
+    const {
+      version, hashName, id,
+    } = data;
+    versionBuff.writeUInt32BE(version);
     this._structure = {
       claimType: utils.hashBytes('iden3.claim.assign_name').slice(24, 32),
       version: versionBuff,
-      hashName: utils.hashBytes(_hashName).fill(0, 0, 1),
-      id: utils.hexToBytes(_id),
+      hashName: utils.hashBytes(hashName).fill(0, 0, 1),
+      id: utils.hexToBytes(id),
     };
   }
 
@@ -72,7 +73,9 @@ class AssignName {
  * @returns {Object} AssignName class object
  */
 function parseAssignName(entry) {
-  const claim = new AssignName();
+  const claim = new AssignName({
+    version: 0, hashName: '', id: '',
+  });
   // Parse element 3
   claim.structure.claimType = entry.elements[3].slice(24, 32);
   claim.structure.version = entry.elements[3].slice(20, 24);

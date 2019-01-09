@@ -20,18 +20,20 @@ class AuthorizeKSign {
    * @param {String} _ax - Coordinate X of an eliptic curve point
    * @param {String} _ay - Coordinate Y of an eliptic curve point
    */
-  constructor(_version = 0, _ax = '', _ay = '', _sign = false) {
+  constructor(data) {
     const versionBuff = Buffer.alloc(4);
-    const signeBuff = Buffer.alloc(1);
-
-    signeBuff.writeUInt8(_sign);
-    versionBuff.writeUInt32BE(_version);
+    const signBuff = Buffer.alloc(1);
+    const {
+      version, sign, ax, ay,
+    } = data;
+    signBuff.writeUInt8(sign);
+    versionBuff.writeUInt32BE(version);
     this._structure = {
       claimType: utils.hashBytes('iden3.claim.authorize_k_sign').slice(24, 32),
       version: versionBuff,
-      signe: signeBuff,
-      ax: utils.hexToBytes(_ax),
-      ay: utils.hexToBytes(_ay),
+      sign: signBuff,
+      ax: utils.hexToBytes(ax),
+      ay: utils.hexToBytes(ay),
     };
   }
 
@@ -77,11 +79,13 @@ class AuthorizeKSign {
  * @returns {Object} AuthorizeKSign class object
  */
 function parseAuthorizeKSign(entry) {
-  const claim = new AuthorizeKSign();
+  const claim = new AuthorizeKSign({
+    version: 0, ax: '', ay: '', sign: false,
+  });
   // Parse element 3
   claim.structure.claimType = entry.elements[3].slice(24, 32);
   claim.structure.version = entry.elements[3].slice(20, 24);
-  claim.structure.signe = entry.elements[3].slice(19, 20);
+  claim.structure.sign = entry.elements[3].slice(19, 20);
   claim.structure.ax = entry.elements[3].slice(3, 19);
   // Parse element 2
   claim.structure.ay = entry.elements[2].slice(16, 32);

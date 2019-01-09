@@ -12,12 +12,21 @@ class Entry {
    * Initialize claim elements with empty buffer
    */
   constructor() {
-    this._elements = Array.from(Array(4).keys());
-    this._elements.fill(Buffer.alloc(32), 0, this._elements.length);
+    this._elements = [Buffer.alloc(32), Buffer.alloc(32), Buffer.alloc(32), Buffer.alloc(32)];
   }
 
+  /**
+   * Retrieve raw data claim structure
+   */
   get elements() {
     return this._elements;
+  }
+
+  /**
+   * Set raw data claim structure
+   */
+  set elements(value) {
+    this._elements = value;
   }
 
   /**

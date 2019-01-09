@@ -20,15 +20,18 @@ class Basic {
    * @param {String} _index - Generic index data
    * @param {String} _data - Generic data
    */
-  constructor(_version = 0, _index = '', _data = '') {
+  constructor(data) {
     const versionBuff = Buffer.alloc(4);
 
-    versionBuff.writeUInt32BE(_version);
+    const {
+      version, index, extraData,
+    } = data;
+    versionBuff.writeUInt32BE(version);
     this._structure = {
       claimType: utils.hashBytes('iden3.claim.basic').slice(24, 32),
       version: versionBuff,
-      index: utils.hexToBytes(_index),
-      data: utils.hexToBytes(_data),
+      index: utils.hexToBytes(index),
+      extraData: utils.hexToBytes(extraData),
     };
   }
 
@@ -44,7 +47,7 @@ class Basic {
    * @returns {Object} Entry representation of the claim
    */
   createEntry() {
-    const claimEntry = new new Entry();
+    const claimEntry = new Entry();
     let endIndex = claimEntry.elements[3].length;
     let startIndex = endIndex - this.structure.claimType.length;
     // element 3 composition
@@ -69,16 +72,16 @@ class Basic {
 
     // element 1 composition
     // Get first part of the data
-    indexLen = this.structure.data.length;
-    const firstSlotExtra = this.structure.data.slice(indexLen - 31, indexLen);
+    indexLen = this.structure.extraData.length;
+    const firstSlotExtra = this.structure.extraData.slice(indexLen - 31, indexLen);
     endIndex = claimEntry.elements[1].length;
     startIndex = claimEntry.elements[1].length - firstSlotExtra.length;
     claimEntry.elements[1].fill(firstSlotExtra, startIndex, endIndex);
 
     // element 0 composition
     // Get second part of the data
-    indexLen = this.structure.data.length - 31;
-    const secondSlotExtra = this.structure.data.slice(0, indexLen);
+    indexLen = this.structure.extraData.length - 31;
+    const secondSlotExtra = this.structure.extraData.slice(0, indexLen);
     endIndex = claimEntry.elements[0].length;
     startIndex = claimEntry.elements[0].length - secondSlotExtra.length;
     claimEntry.elements[0].fill(secondSlotExtra, startIndex, endIndex);
@@ -92,13 +95,15 @@ class Basic {
  * @returns {Object} SetRootKey class object
  */
 function parseBasicClaim(entry) {
-  const claim = new Basic();
+  const claim = new Basic({
+    version: 0, index: '', extraData: '',
+  });
   // Parse element 3 and element 2
   claim.structure.claimType = entry.elements[3].slice(24, 32);
   claim.structure.version = entry.elements[3].slice(20, 24);
-  claim.structure.index = Buffer.concat([entry.elements[2].slice(1, 32), entry.elements[2].slice(1, 20)]);
+  claim.structure.index = Buffer.concat([entry.elements[2].slice(1, 32), entry.elements[3].slice(1, 20)]);
   // Parse element 2 and element 1
-  claim.structure.data = Buffer.concat([entry.elements[0].slice(1, 32), entry.elements[1].slice(1, 32)]);
+  claim.structure.extraData = Buffer.concat([entry.elements[0].slice(1, 32), entry.elements[1].slice(1, 32)]);
   return claim;
 }
 
