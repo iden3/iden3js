@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "rm -rf tmp && mocha --timeout 20000"
+    "test:unit": "rm -rf tmp && mocha --recursive 'src/**/*.test.js' --timeout 100000 ",
+    "test:int": "rm -rf tmp && mocha --timeout 20000",
+    "test:all": "rm -rf tmp && mocha --recursive --timeout 100000 npm run 'src/**/*.test.js' && mocha --timeout 100000"
   },
   "author": "iden3.io",
   "license": "ISC",
