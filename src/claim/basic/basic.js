@@ -16,9 +16,11 @@ class Basic {
    * Initialize raw claim data structure
    * Bytes are taken according entry claim structure
    * Claim type is string used to define this concrete claim. Last 8 bytes of its hash are taken
-   * @param {Uint32} _version - Version assigned to the claim
-   * @param {String} _index - Generic index data
-   * @param {String} _data - Generic data
+   * @param {Object} data - Input parameters
+   * Data input object contains:
+   * {Uint32} _version - Version assigned to the claim
+   * {String} _index - Generic index data
+   * {String} _data - Generic data
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);
@@ -36,14 +38,15 @@ class Basic {
   }
 
   /**
-   * Retrieve raw data claim structure
+   * Retrieve claim structure
+   * @returns {Object} Raw data claim structure
    */
   get structure() {
     return this._structure;
   }
 
   /**
-   * Code raw data claim structure into an entry claim structure
+   * Code raw data claim object into an entry claim object
    * @returns {Object} Entry representation of the claim
    */
   createEntry() {
@@ -91,7 +94,7 @@ class Basic {
 
 /**
  * Decode field claim structure into raw data claim structure
- * @param  {Object} entry - Entry of the claim
+ * @param {Object} entry - Entry of the claim
  * @returns {Object} SetRootKey class object
  */
 function parseBasicClaim(entry) {

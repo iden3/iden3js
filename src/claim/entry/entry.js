@@ -16,14 +16,16 @@ class Entry {
   }
 
   /**
-   * Retrieve raw data claim structure
+   * Retrieve elements structure
+   * @returns {Array} - Elements structure
    */
   get elements() {
     return this._elements;
   }
 
   /**
-   * Set raw data claim structure
+   * Set elements structure
+   * @param {Array} value - Elements structure
    */
   set elements(value) {
     this._elements = value;

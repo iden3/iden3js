@@ -1,6 +1,6 @@
 const chai = require('chai');
 const Claim = require('../claim');
-const AuthorizeKSign = require('./authorize-ksign');
+const authorizeKSign = require('./authorize-ksign');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
@@ -21,7 +21,7 @@ describe('[Claim Authorize KSign]', () => {
     });
     expect(claimAuthorizeKSign).to.not.be.equal(null);
     entryClaim = claimAuthorizeKSign.createEntry();
-    parsedClaim = AuthorizeKSign.parseAuthorizeKSign(entryClaim);
+    parsedClaim = authorizeKSign.parseAuthorizeKSign(entryClaim);
   });
 
   it('Parse claim type', () => {
@@ -47,9 +47,9 @@ describe('[Claim Authorize KSign]', () => {
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHexadecimal();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
-                                         + '0000000000000000000000000000000000000000000000000000000000000000'
-                                         + '0000000000000000000000000000000007070707070707070707070707070708'
-                                         + '0000000505050505050505050505050505050601000000015714c3724876e56d');
+                                       + '0000000000000000000000000000000000000000000000000000000000000000'
+                                       + '0000000000000000000000000000000007070707070707070707070707070708'
+                                       + '0000000505050505050505050505050505050601000000015714c3724876e56d');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();

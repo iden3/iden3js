@@ -1,6 +1,6 @@
 const chai = require('chai');
 const Claim = require('../claim');
-const Basic = require('./basic');
+const basic = require('./basic');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
@@ -26,7 +26,7 @@ describe('[Claim Set root key]', () => {
     });
     expect(claimBasic).to.not.be.equal(null);
     entryClaim = claimBasic.createEntry();
-    parsedClaim = Basic.parseBasicClaim(entryClaim);
+    parsedClaim = basic.parseBasicClaim(entryClaim);
   });
 
   it('Parse claim type', () => {
@@ -48,9 +48,9 @@ describe('[Claim Set root key]', () => {
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHexadecimal();
     expect(hexFromElement).to.be.equal('0x0056585858585858585858585858585858585858585858585858585858585858'
-                                         + '0058585858585858585858585858585858585858585858585858585858585859'
-                                         + '00292a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a'
-                                         + '002a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2b000000015735944c6eb8f12d');
+                                       + '0058585858585858585858585858585858585858585858585858585858585859'
+                                       + '00292a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a'
+                                       + '002a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2b000000015735944c6eb8f12d');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();

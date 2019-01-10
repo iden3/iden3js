@@ -15,10 +15,12 @@ class SetRootKey {
    * Initialize raw claim data structure
    * Bytes are taken according entry claim structure
    * Claim type is string used to define this concrete claim. Last 8 bytes of its hash are taken
-   * @param {Uint32} _version - Version assigned to the claim
-   * @param {Uint32} _era - Era assigned to the claim
-   * @param {String} _id - Identity bind to the hash name
-   * @param {String} _rootKey - Root key to commit
+   * @param {Object} data - Input parameters
+   * Data input object contains:
+   * {Uint32} _version - Version assigned to the claim
+   * {Uint32} _era - Era assigned to the claim
+   * {String} _id - Identity bind to the hash name
+   * {String} _rootKey - Root key to commit
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);
@@ -39,14 +41,15 @@ class SetRootKey {
   }
 
   /**
-   * Retrieve raw data claim structure
+   * Retrieve claim structure
+   * @returns {Object} Raw data claim structure
    */
   get structure() {
     return this._structure;
   }
 
   /**
-   * Code raw data claim structure into an entry claim structure
+   * Code raw data claim object into an entry claim object
    * @returns {Object} Entry representation of the claim
    */
   createEntry() {
@@ -76,7 +79,7 @@ class SetRootKey {
 
 /**
  * Decode field claim structure into raw data claim structure
- * @param  {Object} entry - Entry of the claim
+ * @param {Object} entry - Entry of the claim
  * @returns {Object} SetRootKey class object
  */
 function parseSetRootKey(entry) {

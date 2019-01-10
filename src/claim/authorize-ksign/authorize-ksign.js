@@ -15,10 +15,12 @@ class AuthorizeKSign {
    * Initialize raw claim data structure
    * Bytes are taken according element claim structure
    * Claim type is a string used to define this concrete claim. Last 8 bytes of its hash are taken
-   * @param {Uint32} _version - Version assigned to the claim
-   * @param {Bool} _sign - Sign of the coordinate X of an eliptic curve point
-   * @param {String} _ax - Coordinate X of an eliptic curve point
-   * @param {String} _ay - Coordinate Y of an eliptic curve point
+   * @param {Object} data - Input parameters
+   * Data input object contains:
+   * {Uint32} _version - Version assigned to the claim
+   * {Bool} _sign - Sign of the coordinate X of an eliptic curve point
+   * {String} _ax - Coordinate X of an eliptic curve point
+   * {String} _ay - Coordinate Y of an eliptic curve point
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);
@@ -38,14 +40,15 @@ class AuthorizeKSign {
   }
 
   /**
-   * Retrieve raw data claim structure
+   * Retrieve claim structure
+   * @returns {Object} Raw data claim structure
    */
   get structure() {
     return this._structure;
   }
 
   /**
-   * Code raw data claim structure into an element claim structure
+   * Code raw data claim object into an entry claim object
    * @returns {Object} Element representation of the claim
    */
   createEntry() {
@@ -75,7 +78,7 @@ class AuthorizeKSign {
 
 /**
  * Decode field claim structure into raw data claim structure
- * @param  {Object} elements - Element representation of the claim
+ * @param {Object} elements - Element representation of the claim
  * @returns {Object} AuthorizeKSign class object
  */
 function parseAuthorizeKSign(entry) {

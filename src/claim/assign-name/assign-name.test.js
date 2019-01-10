@@ -1,6 +1,6 @@
 const chai = require('chai');
 const Claim = require('../claim');
-const AssignName = require('./assign-name');
+const assignName = require('./assign-name');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
@@ -20,7 +20,7 @@ describe('[Claim Set root key]', () => {
     claimAssignName = new Claim.Factory(CONSTANTS.CLAIMS.ASSIGN_NAME.ID, { version: versionExample, hashName: nameExample, id: idExample });
     expect(claimAssignName).to.not.be.equal(null);
     entryClaim = claimAssignName.createEntry();
-    parsedClaim = AssignName.parseAssignName(entryClaim);
+    parsedClaim = assignName.parseAssignName(entryClaim);
   });
 
   it('Parse claim type', () => {
@@ -42,9 +42,9 @@ describe('[Claim Set root key]', () => {
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHexadecimal();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
-                                         + '000000000000000000000000393939393939393939393939393939393939393a'
-                                         + '00d67b05d8e2d1ace8f3e84b8451dd2e9da151578c3c6be23e7af11add5a807a'
-                                         + '000000000000000000000000000000000000000000000001f60d928459d792ed');
+                                       + '000000000000000000000000393939393939393939393939393939393939393a'
+                                       + '00d67b05d8e2d1ace8f3e84b8451dd2e9da151578c3c6be23e7af11add5a807a'
+                                       + '000000000000000000000000000000000000000000000001f60d928459d792ed');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();

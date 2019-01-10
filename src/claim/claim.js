@@ -30,7 +30,6 @@ class Factory {
   }
 }
 
-
 /**
  * @param  {String} namespaceStr
  * @param  {String} typeStr

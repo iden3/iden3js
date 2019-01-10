@@ -1,6 +1,6 @@
 const chai = require('chai');
 const Claim = require('../claim');
-const SetRootKey = require('./set-root-key');
+const setRootKey = require('./set-root-key');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
@@ -21,7 +21,7 @@ describe('[Claim Set root key]', () => {
     });
     expect(claimSetRootKey).to.not.be.equal(null);
     entryClaim = claimSetRootKey.createEntry();
-    parsedClaim = SetRootKey.parseSetRootKey(entryClaim);
+    parsedClaim = setRootKey.parseSetRootKey(entryClaim);
   });
 
   it('Parse claim type', () => {
@@ -47,9 +47,9 @@ describe('[Claim Set root key]', () => {
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHexadecimal();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
-                                         + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
-                                         + '000000000000000000000000393939393939393939393939393939393939393a'
-                                         + '000000000000000000000000000000000000000100000001b111df93ad32c22c');
+                                       + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
+                                       + '000000000000000000000000393939393939393939393939393939393939393a'
+                                       + '000000000000000000000000000000000000000100000001b111df93ad32c22c');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
