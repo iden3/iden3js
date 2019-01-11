@@ -66,28 +66,6 @@ describe('[id] id. AuthorizeKSignClaim() and GenericClaim()', () => {
   });
 });
 
-describe('[id] id.bindID()', () => {
-  const kc = new iden3.KeyContainer('localStorage', db);
-  kc.unlock('pass');
-  const key0id = kc.importKey(testPrivKHex1);
-  const relay = new iden3.Relay('http://127.0.0.1:8000');
-  const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
-
-  before(() => id.createID().then((res) => {}));
-
-  it('bindID()', () => {
-    const name = 'username2';
-
-    kc.unlock('pass');
-    return id.bindID(kc, name).then((bindRes) => {
-      expect(bindRes.status).to.be.equal(200);
-      return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {
-        expect(resolveRes.status).to.be.equal(200);
-      });
-    });
-  });
-});
-
 describe('[id] id localstorage test', () => {
   it('id(localStorage).createID() & bindID()', () => {
     const kc = new iden3.KeyContainer('localStorage', db);

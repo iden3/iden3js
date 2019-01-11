@@ -63,14 +63,15 @@ let mimc7 = function (elements) {
 };
 
 /**
- * Function called from the admin cli, to get the Relay Admin API addGenericClaim
+ * Function called from the admin cli, to post to the Relay Admin API addClaimBasic
+ * Will add the claim directly to the Relay MerkleTree
  */
-let addGenericClaim= function (indexData, data) {
+let addClaimBasic = function (indexData, data) {
 	let d = {
 		indexData: indexData,
 		data: data
 	};
-    axios.post(`${adminurl}/genericClaim`, d).then(function(res) {
+    axios.post(`${adminurl}/claims/basic`, d).then(function(res) {
     	console.log(res.data);
 	return;
     });
@@ -82,5 +83,5 @@ module.exports = {
 	rawimport,
 	claimsdump,
 	mimc7,
-	addGenericClaim,
+	addClaimBasic,
 };
