@@ -1,6 +1,7 @@
 const chai = require('chai');
 const iden3 = require('../index');
 const kcUtils = require('../src/key-container/kc-utils');
+const ethUtil = require('ethereumjs-util');
 
 const { expect } = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
@@ -89,6 +90,13 @@ describe('[key-container] localstoragekc.sign()', () => {
   it('sign', () => {
     expect(signatureObj.signature).to.be.equal('0x5413b44384531e9e92bdd80ff21cea7449441dcfff6f4ed0f90864583e3fcade3d5c8857672b473f71d09355e034dba11bb2ca4aa73c55c534293fdca68941041c');
   });
+	it('verify signature', () => {
+    		const message = ethUtil.toBuffer('test');
+    		const msgHash = ethUtil.hashPersonalMessage(message);
+    		const msgHashHex = iden3.utils.bytesToHex(msgHash);
+    		const verified = iden3.utils.verifySignature(msgHashHex, signatureObj.signature, key0);
+    		expect(verified).to.be.equal(true);
+	});
 });
 
 describe('[key-container] key from mnemonic', () => {
