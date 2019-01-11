@@ -8,14 +8,14 @@ const db = new iden3.Db();
 // hardcoded id address for testing purposes
 const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
 
-describe('[merkle-tree] empty tree', () => {
+describe('[merkle-tree] Empty tree', () => {
   it('should be empty', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
   });
 });
 
-describe('[merkle-tree] addClaim', () => {
+describe('[merkle-tree] Add claim', () => {
   it('add one claim', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
@@ -27,7 +27,7 @@ describe('[merkle-tree] addClaim', () => {
   });
 });
 
-describe('[merkle-tree] add two claims', () => {
+describe('[merkle-tree] Add two claims', () => {
   it('adding two claims', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
@@ -46,7 +46,7 @@ describe('[merkle-tree] add two claims', () => {
   });
 });
 
-describe('[merkle-tree] generateProof', () => {
+describe('[merkle-tree] Generate proof', () => {
   it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
@@ -71,7 +71,7 @@ describe('[merkle-tree] generateProof', () => {
   });
 });
 
-describe('[merkle-tree] generateProof of emptyLeaf', () => {
+describe('[merkle-tree] Generate proof of emptyLeaf', () => {
   it('with only one claim in the MerkleTree, and with two claims in the MerkleTree', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
@@ -105,7 +105,7 @@ describe('[merkle-tree] generateProof of emptyLeaf', () => {
   });
 });
 
-describe('[merkle-tree] getClaimByHi', () => {
+describe('[merkle-tree] Get claim by its index', () => {
   it('getClaimByHi', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
@@ -127,7 +127,7 @@ describe('[merkle-tree] getClaimByHi', () => {
   });
 });
 
-describe('[merkle-tree] checkProof of a Leaf', () => {
+describe('[merkle-tree] Check proof of a leaf', () => {
   it('checkProof', () => {
     const rootHex = '0x7d7c5e8f4b3bf434f3d9d223359c4415e2764dd38de2e025fbf986e976a7ed3d';
     const mpHex = '0x0000000000000000000000000000000000000000000000000000000000000002d45aada6eec346222eaa6b5d3a9260e08c9b62fcf63c72bc05df284de07e6a52';
@@ -138,7 +138,7 @@ describe('[merkle-tree] checkProof of a Leaf', () => {
   });
 });
 
-describe('[merkle-tree] checkProof of Empty Leaf', () => {
+describe('[merkle-tree] Check proof of empty leaf', () => {
   it('checkProof', () => {
     const rootHex = '0x8f021d00c39dcd768974ddfe0d21f5d13f7215bea28db1f1cb29842b111332e7';
     const mpHex = '0x0000000000000000000000000000000000000000000000000000000000000004bf8e980d2ed328ae97f65c30c25520aeb53ff837579e392ea1464934c7c1feb9';
@@ -149,7 +149,7 @@ describe('[merkle-tree] checkProof of Empty Leaf', () => {
   });
 });
 
-describe('[merkle-tree] generateProof and checkProof', () => {
+describe('[merkle-tree] Generate proof and check proof', () => {
   it('generateProof and checkProof', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim = {
@@ -199,7 +199,7 @@ describe('[merkle-tree] generateProof and checkProof', () => {
   });
 });
 
-describe('[merkle-tree] add claims in different orders', () => {
+describe('[merkle-tree] Add claims in different order', () => {
   it('add claims in different orders', () => {
     const mt1 = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const claim0 = {
@@ -238,7 +238,7 @@ describe('[merkle-tree] add claims in different orders', () => {
   });
 });
 
-describe('[merkle-tree] add 100 claims', () => {
+describe('[merkle-tree] Add 100 claims', () => {
   it('add 100 claims', () => {
     const mt = new iden3.merkleTree.MerkleTree(db, 140, idAddr);
     const numToAdd = 100;

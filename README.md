@@ -1,5 +1,8 @@
 # iden3js
+
 Javascript client library of the iden3 system.
+
+[![Build Status](https://travis-ci.org/iden3/iden3js.svg?branch=master)](https://travis-ci.org/iden3/iden3js)
 
 ## Install
 ```
