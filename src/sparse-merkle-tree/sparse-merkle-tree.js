@@ -36,30 +36,27 @@ function setNodeValue(db, key, value, prefix) {
 }
 
 /**
-* Retrieve node hash as Hash[1, hi, ht] in buffer object
+* Retrieve node hash as Hash[1, hi, hv] in buffer object
 * @param {bigInt} hi - Hash index of the claim
-* @param {bigInt} ht - Hash total of the claim
+* @param {bigInt} hv - Hash value of the claim
 * @returns {Buffer} - Key node value
 */
-function getHashFinalNode(hi, ht) {
-  const hashArray = [bigInt(1), hi, ht];
+function getHashFinalNode(hi, hv) {
+  const hashArray = [bigInt(1), hi, hv];
   const hashKey = mimc7.smtHash(hashArray);
   return helpers.bigIntToBuffer(hashKey);
 }
 
 /**
-* Retrieve Hash index and Hash total from claim object
+* Retrieve Hash index and Hash value from claim object
 * @param {Array(bigInt)} claim - Array of bigInt representing claim object
 */
-function getHiHt(claim) {
-  const totalHash = [];
+function getHiHv(claim) {
   const indexGen = claim.slice(2);
-  const middleGen = claim.slice(0, 2);
+  const valueGen = claim.slice(0, 2);
   const hi = mimc7.smtHash(indexGen);
-  const hv = mimc7.smtHash(middleGen);
-  totalHash.push(hv);
-  totalHash.push(hi);
-  return [hi, mimc7.smtHash(totalHash)];
+  const hv = mimc7.smtHash(valueGen);
+  return [hi, hv];
 }
 
 class SparseMerkleTree {
@@ -88,9 +85,9 @@ class SparseMerkleTree {
   */
   addClaim(claim) {
     const currentClaim = claim;
-    const hashes = getHiHt(claim);
+    const hashes = getHiHv(claim);
     const hi = hashes[0];
-    const ht = hashes[1];
+    const hv = hashes[1];
     const hiBinay = helpers.getIndexArray(hi);
 
     // Find last node written
@@ -107,7 +104,7 @@ class SparseMerkleTree {
     }
 
     if (nodeValue === emptyNodeValue) {
-      let nextHash = getHashFinalNode(hi, ht);
+      let nextHash = getHashFinalNode(hi, hv);
       setNodeValue(this.db, nextHash, helpers.getArrayBuffFromArrayBigInt(currentClaim), this.prefix);
       let concat = 0;
       const level = arraySiblings.length - 1;
@@ -141,7 +138,7 @@ class SparseMerkleTree {
       }
       arraySiblings.push(key);
       // Write current branch with new claim added
-      const newHash = getHashFinalNode(hi, ht);
+      const newHash = getHashFinalNode(hi, hv);
       setNodeValue(this.db, newHash, helpers.getArrayBuffFromArrayBigInt(currentClaim), this.prefix);
       // Recalculate nodes until the root
       let concat = 0;
@@ -248,10 +245,10 @@ class SparseMerkleTree {
       buffTmp = Buffer.concat(concat);
     }
     if (checkIndex) {
-      const hashes = getHiHt(totalTmp);
+      const hashes = getHiHv(totalTmp);
       const hiFinal = helpers.bigIntToBuffer(hashes[0]);
-      const htFinal = helpers.bigIntToBuffer(hashes[1]);
-      buffTmp = Buffer.concat([buffTmp, hiFinal, htFinal]);
+      const hvFinal = helpers.bigIntToBuffer(hashes[1]);
+      buffTmp = Buffer.concat([buffTmp, hiFinal, hvFinal]);
     }
     return buffTmp;
   }
@@ -262,15 +259,15 @@ class SparseMerkleTree {
 * @param  {String} rootHex - Hexadecimal string of the merkle tree root
 * @param  {String} proofHex - Hexadecimal string of the merkle tree proof
 * @param  {String} hiHex - Hexadecimal string of the leaf index hash
-* @param  {String} htHex - Hexadecimal string of the leaf total data hash
+* @param  {String} hvHex - Hexadecimal string of the leaf value hash
 * @returns  {Bool} - Result of the merkle tree verification
 */
-function checkProof(rootHex, proofHex, hiHex, htHex) {
+function checkProof(rootHex, proofHex, hiHex, hvHex) {
   const root = utils.hexToBytes(rootHex);
   const proofBuff = helpers.parseProof(proofHex);
   const hi = helpers.bufferToBigInt(utils.hexToBytes(hiHex));
-  const ht = helpers.bufferToBigInt(utils.hexToBytes(htHex));
-  const htBuff = getHashFinalNode(hi, ht);
+  const hv = helpers.bufferToBigInt(utils.hexToBytes(hvHex));
+  const hvBuff = getHashFinalNode(hi, hv);
   const hiBinay = helpers.getIndexArray(hi);
   const { siblings } = proofBuff;
   const arrayFullSiblings = [];
@@ -283,7 +280,7 @@ function checkProof(rootHex, proofHex, hiHex, htHex) {
   let newHash = emptyNodeValue;
   if (flagNonExistence && flagNonDiff) {
     const hiTmp = helpers.bufferToBigInt(proofBuff.metaData.slice(0, 32));
-    const htTmp = helpers.bufferToBigInt(proofBuff.metaData.slice(32, proofBuff.metaData.length));
+    const hvTmp = helpers.bufferToBigInt(proofBuff.metaData.slice(32, proofBuff.metaData.length));
     const hiTmpBinary = helpers.getIndexArray(hiTmp);
     while (!exist && !((pos > hiBinay.length - 1) && (pos > hiTmpBinary.length - 1))) {
       const bitLeaf = (pos > (hiBinay.length - 1)) ? 0 : hiBinay[pos];
@@ -294,7 +291,7 @@ function checkProof(rootHex, proofHex, hiHex, htHex) {
     if (!exist) {
       return false;
     }
-    newHash = getHashFinalNode(hiTmp, htTmp);
+    newHash = getHashFinalNode(hiTmp, hvTmp);
   }
 
   // Second step --> Build structure to calculate root afterwards
@@ -313,7 +310,7 @@ function checkProof(rootHex, proofHex, hiHex, htHex) {
 
   // Third Step --> Calculate root
   let concat;
-  let nextHash = flagNonExistence ? newHash : htBuff;
+  let nextHash = flagNonExistence ? newHash : hvBuff;
   for (let i = arrayFullSiblings.length - 1; i >= 0; i--) {
     const siblingTmp = arrayFullSiblings[i];
     concat = hiBinay[i] ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
@@ -326,5 +323,5 @@ module.exports = {
   checkProof,
   SparseMerkleTree,
   emptyNodeValue,
-  getHiHt,
+  getHiHv,
 };
