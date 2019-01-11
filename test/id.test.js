@@ -29,8 +29,8 @@ describe('[id] id.createID() & id.deployID()', () => {
   const relay = new iden3.Relay('http://127.0.0.1:8000');
   const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
 
-  it('id.createID()', () => id.createID().then((ceateIDRes) => {
-    expect(ceateIDRes).to.be.equal(id.idaddr);
+  it('id.createID()', () => id.createID().then((createIDRes) => {
+    expect(createIDRes).to.be.equal(id.idAddr);
 
     return id.deployID().then((deployIDres) => {
       expect(deployIDres.status).to.be.equal(200);
@@ -77,7 +77,7 @@ describe('[id] id localstorage test', () => {
     const id = new iden3.Id(krec, krev, ko, relay, relayAddr, '');
 
     return id.createID().then((res) => {
-      expect(res).to.be.equal(id.idaddr);
+      expect(res).to.be.equal(id.idAddr);
 
       const name = 'usernametest';
       return id.bindID(kc, name).then((bindRes) => {
@@ -86,7 +86,7 @@ describe('[id] id localstorage test', () => {
         return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {
           // console.log('resolveName', res.data);
           expect(resolveRes.status).to.be.equal(200);
-          expect(resolveRes.data.ethID).to.be.equal(id.idaddr);
+          expect(resolveRes.data.ethID).to.be.equal(id.idAddr);
         });
       });
     });

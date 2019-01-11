@@ -1,5 +1,6 @@
 const claim = require('./claim/claim');
 const merkleTree = require('./merkle-tree/merkle-tree');
+const sparseMerkleTree = require('./sparse-merkle-tree/sparse-merkle-tree');
 const Relay = require('./http/relay');
 const Db = require('./db/db');
 const PrivateFolder = require('./http/private-folder');
@@ -16,6 +17,7 @@ const { Dapp } = dapp;
 module.exports = {
   claim,
   merkleTree,
+  sparseMerkleTree,
   Db,
   PrivateFolder,
   KeyContainer,

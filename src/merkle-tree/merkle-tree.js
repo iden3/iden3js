@@ -16,8 +16,8 @@ function getNodeValue(db, key, prefix) {
   const valueHex = db.get(prefix + keyHex);
 
   return valueHex
-    ? emptyNodeValue
-    : helpers.bufferToNodeValue(utils.hexToBytes(valueHex));
+    ? helpers.bufferToNodeValue(utils.hexToBytes(valueHex))
+    : emptyNodeValue;
 }
 
 /**

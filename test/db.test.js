@@ -17,7 +17,7 @@ describe('[db] db.export db.import', () => {
 
     db.insert('this is the key', 'this is the value');
 
-    const dbExported = db.exportLocalStorage(kc, key0, key0); // keyContainer, idaddr, ksign
+    const dbExported = db.exportLocalStorage(kc, key0, key0); // keyContainer, idAddr, ksign
 
     const db2 = new iden3.Db();
     db2.importLocalStorage(kc, dbExported);

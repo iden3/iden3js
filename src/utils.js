@@ -1,6 +1,43 @@
 const ethUtil = require('ethereumjs-util');
 const createKeccakHash = require('keccak');
 
+
+/**
+ * @param  {uint32} u
+ * @returns {Buffer}
+ */
+const uint32ToEthBytes = function (u) { // compatible with Uint32ToEthBytes() go-iden3 version
+  const buf = Buffer.alloc(4);
+  buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
+  return buf;
+};
+
+/**
+ * @param  {Buffer} b
+ * @returns {uint32}
+ */
+const ethBytesToUint32 = function (b) { // compatible with EthBytesToUint32() go-iden3 version
+  return b.readUIntBE(0, 4);
+};
+
+/**
+ * @param  {uint64} u
+ * @returns {Buffer}
+ */
+const uint64ToEthBytes = function (u) { // compatible with Uint64ToEthBytes() go-iden3 version
+  const buf = Buffer.alloc(8);
+  buf.writeUIntBE(u, 0, 8);
+  return buf;
+};
+
+/**
+ * @param  {Buffer} b
+ * @returns {uint64}
+ */
+const ethBytesToUint64 = function (b) { // compatible with EthBytesToUint64() go-iden3 version
+  return b.readUIntBE(0, 8);
+};
+
 /**
  * Create a hash from a Buffer (a byte)
  *
@@ -142,6 +179,53 @@ const pow = function (data, difficulty) {
   return data;
 };
 
+const claimEntry = (function entriesOfClaim() {
+  /*const e0 = Buffer.alloc(32);
+  const e1 = Buffer.alloc(32);
+  const e2 = Buffer.alloc(32);
+  const e3 = Buffer.alloc(32); */
+  const elements = Array.from(Array(4).keys());
+
+  elements.fill(Buffer.alloc(32), 0, elements.length);
+
+  /**
+   * Hash index calculation using mimc7 hash
+   * Hash index is calculated from: |element 1|element 0|
+   * @returns {Buffer} Hash index of the claim element structure
+   */
+  const hi = function hashIndex() {
+    const hashArray = [elements[2], elements[3]];
+    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
+    return helpers.bigIntToBuffer(hashKey);
+  };
+
+  /**
+   * Hash value calculation using mimc7 hash
+   * Hash value is calculated from: |element 3|element 2|
+   * @returns {Buffer} Hash value of the claim element structure
+   */
+  const hv = function hashValue() {
+    const hashArray = [elements[0], elements[1]];
+    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
+    return helpers.bigIntToBuffer(hashKey);
+  };
+
+  /**
+   * Concats all the elements of the claim and parse it into an hexadecimal string
+   * @returns {String} Hexadecimal string representation of element claim structure
+   */
+  const hex = function toHexadecimal() {
+    return this.bytesToHex(Buffer.concat(elements));
+  };
+
+  return {
+    elements,
+    hex,
+    hi,
+    hv,
+  };
+}());
+
 module.exports = {
   hashBytes,
   bytesToHex,
@@ -154,4 +238,9 @@ module.exports = {
   addrFromSig,
   checkPoW,
   pow,
+  uint32ToEthBytes,
+  ethBytesToUint32,
+  uint64ToEthBytes,
+  ethBytesToUint64,
+  claimEntry,
 };
