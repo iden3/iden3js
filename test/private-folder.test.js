@@ -33,34 +33,34 @@ describe('[private-folder] backup.backupData backup.recoverData backup.recoverDa
     kSign = kc.importKey('0dbabbab11336c9f0dfdf583309d56732b1f8a15d52a7412102f49cf5f344d05');
   });
 
-  it('backupData', () => id.createID().then((idaddr) => {
+  it('backupData', () => id.createID().then(() => {
     return id.authorizeKSignClaim(kc, id.keyOperational, {}, kSign, 'appToAuthName', 'authz', 1535208350, 1535208350).then((authRes) => {
       proofOfKSign = authRes.data.proofOfClaim;
       expect(authRes.status).to.be.equal(200);
 
       setTimeout(() => {
-        backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'this is the test data', relayAddr).then((resp) => {
+        backup.backupData(kc, id.idAddr, kSign, proofOfKSign, 'testtype', 'this is the test data', relayAddr).then((resp) => {
           // console.log("backup", resp.data);
         });
       }, 100);
       setTimeout(() => {
-        backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype2', 'test data 2', relayAddr).then((resp) => {
+        backup.backupData(kc, id.idAddr, kSign, proofOfKSign, 'testtype2', 'test data 2', relayAddr).then((resp) => {
           // console.log("backup", resp.data);
         });
       }, 500);
 
-      backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'test data 3', relayAddr).then((resp) => {
+      backup.backupData(kc, id.idAddr, kSign, proofOfKSign, 'testtype', 'test data 3', relayAddr).then((resp) => {
         // console.log("backup", resp.data);
       });
       setTimeout(() => {
-        return backup.backupData(kc, id.idaddr, kSign, proofOfKSign, 'testtype', 'test data 4', relayAddr).then((resp) => {
+        return backup.backupData(kc, id.idAddr, kSign, proofOfKSign, 'testtype', 'test data 4', relayAddr).then((resp) => {
 
-          return backup.recoverData(id.idaddr).then((resp) => {
+          return backup.recoverData(id.idAddr).then((resp) => {
             const data = resp.data.backups;
             expect(data.length > 3).to.be.equal(true);
 
             console.log('version', backup.version);
-            return backup.recoverDataSinceVersion(id.idaddr, backup.version - 1).then((resp) => {
+            return backup.recoverDataSinceVersion(id.idAddr, backup.version - 1).then((resp) => {
               const data = resp.data.backups;
               // console.log(data);
               // let lastdata = data[0].data;
@@ -77,7 +77,7 @@ describe('[private-folder] backup.backupData backup.recoverData backup.recoverDa
 
 // describe('backup.recoverDataByType', () => {
 //   it('recoverDataByType', () => {
-//     return backup.recoverDataByType(id.idaddr, 'testtype2').then((resp) => {
+//     return backup.recoverDataByType(id.idAddr, 'testtype2').then((resp) => {
 //       let data = resp.data.backups;
 //       let lastdata = data[0].Data;
 //       console.log("l", lastdata);
