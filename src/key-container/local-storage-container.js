@@ -48,12 +48,17 @@ class LocalStorageContainer {
   }
 
   /**
-   * Get mnemonic from private key
-   * @param {Buff} Private key
-   * @return {String} Mnemonic representing the private key
+   * Concatenates signature parameters and hash them to generate a 32 bytes Buffer
+   * @param {Buffer} r - parameter of the eliptic curve signature
+   * @param {Buffer} s - parameter of the eliptic curve signature
+   * @param {Buffer} v - parameter of the eliptic curve signature
+   * @return {Buffer} Hash generated from signature parameters
    */
-  fromPrivToMnemonic(privK) {
-    return bip39.entropyToMnemonic(privK);
+  getEntropyFromSignature(r, s, v) {
+    const vBuff = Buffer.alloc(4);
+    vBuff.writeUInt32BE(v);
+    const concatSignature = Buffer.concat([r, s, vBuff]);
+    return utils.hashBytes(concatSignature).slice(0, 16);
   }
 
   /**
@@ -62,25 +67,17 @@ class LocalStorageContainer {
    * @param {String} source mnemonic
    * @return {String} new mnemonic generated from source mnemonic
    */
-  generateMasterAndRecoveryKey(mnemonic = bip39.generateMnemonic()) {
+  generateIdMasterKey(mnemonic = bip39.generateMnemonic()) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
       console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
     const root = hdkey.fromMasterSeed(mnemonic);
-    const pathIdentity = "m/44'/60'/0'";
-    const pathRecovery = "m/44'/60'/1'";
-    // Identity master
-    const addrNode = root.derive(pathIdentity); // "m/44'/60'/i'"
-    const privKIdentity = addrNode._privateKey;
-    const address = ethUtil.privateToAddress(addrNode._privateKey);
-    const addressHex = utils.bytesToHex(address);
-    const privKHex = utils.bytesToHex(privKIdentity);
-    const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
-    this.db.insert(this.prefix + addressHex, privKHexEncrypted);
-    // Recovery
-    return { addressHex };
+    const signData = ethUtil.ecsign(Buffer.alloc(32), root.privateKey);
+    const genEntropy = this.getEntropyFromSignature(signData.r, signData.s, signData.v);
+    const mnemonicId = bip39.entropyToMnemonic(genEntropy);
+    return mnemonicId;
   }
 
   /**
