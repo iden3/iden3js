@@ -9,15 +9,14 @@ const { expect } = chai;
 describe('[Claim Authorize KSign]', () => {
   const versionExample = 1;
   const signExample = true;
-  const axExample = '0x05050505050505050505050505050506';
-  const ayExample = '0x07070707070707070707070707070708';
+  const ayExample = '0x0505050505050505050505050505050505050505050505050505050505050506';
   let claimAuthorizeKSign;
   let entryClaim;
   let parsedClaim;
 
   before('Create new authorizeKSign claim', () => {
     claimAuthorizeKSign = new Claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN.ID, {
-      version: versionExample, sign: signExample, ax: axExample, ay: ayExample,
+      version: versionExample, sign: signExample, ay: ayExample,
     });
     expect(claimAuthorizeKSign).to.not.be.equal(null);
     entryClaim = claimAuthorizeKSign.createEntry();
@@ -36,10 +35,6 @@ describe('[Claim Authorize KSign]', () => {
     const { sign } = claimAuthorizeKSign.structure;
     expect(utils.bytesToHex(sign)).to.be.equal(utils.bytesToHex(parsedClaim.structure.sign));
   });
-  it('Parse Ax', () => {
-    const { ax } = claimAuthorizeKSign.structure;
-    expect(utils.bytesToHex(ax)).to.be.equal(utils.bytesToHex(parsedClaim.structure.ax));
-  });
   it('Parse Ay', () => {
     const { ay } = claimAuthorizeKSign.structure;
     expect(utils.bytesToHex(ay)).to.be.equal(utils.bytesToHex(parsedClaim.structure.ay));
@@ -48,17 +43,17 @@ describe('[Claim Authorize KSign]', () => {
     const hexFromElement = entryClaim.toHexadecimal();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0000000000000000000000000000000000000000000000000000000000000000'
-                                       + '0000000000000000000000000000000007070707070707070707070707070708'
-                                       + '0000000505050505050505050505050505050601000000015714c3724876e56d');
+                                       + '0505050505050505050505050505050505050505050505050505050505050506'
+                                       + '0000000000000000000000000000000000000001000000010000000000000001');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x18f1032141d6a2abda87e2cf053edcffb5be55ba0dc4c5a9073805c4aa7aee54';
+    const hiResult = '0x2ebf2c9f89d2a81762e9701db839592ef34ea145a3801f669b456655e45b6797';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x15331daa10ae035babcaabb76a80198bc449d32240ebb7f456ff2b03cd69bca4';
+    const hvResult = '0x13580fd5d3ca0f7604a3a50f663cb4fd23c214f1955fa5b3ee9ed5ed06bb70a3';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

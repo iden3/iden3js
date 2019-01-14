@@ -7,7 +7,7 @@ const Web3 = require('web3');
 
 const F = bn128.Fr;
 
-const SEED = 'iden3_mimc';
+const SEED = 'mimc';
 
 function getConstants(seed, nRounds) {
   const cts = new Array(nRounds);

@@ -50,16 +50,16 @@ describe('[Claim Set root key]', () => {
     expect(hexFromElement).to.be.equal('0x0056585858585858585858585858585858585858585858585858585858585858'
                                        + '0058585858585858585858585858585858585858585858585858585858585859'
                                        + '00292a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a'
-                                       + '002a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2b000000015735944c6eb8f12d');
+                                       + '002a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2b000000010000000000000000');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x0d1770cf7af29da78eb31086bfa35a5945f39a8c4fa35edee71ac12a75b4a30b';
+    const hiResult = '0x08bcca6fecfa4e8ce29416e7cea7d69681da88dab06f2708f1f7de9b923249b9';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x14869ce50566e440424a2571816b117d88a2e5e3d10a0abb7f89a89032b9e07f';
+    const hvResult = '0x1458af7076ff255f5337ae8a9d443b9b42c777103453d20f86849012141638dc';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

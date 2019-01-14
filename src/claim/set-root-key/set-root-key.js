@@ -1,9 +1,14 @@
+const snarkjs = require('snarkjs');
 const Entry = require('../entry/entry');
 const utils = require('../../utils');
+const CONSTANTS = require('../../constants');
+
+const { bigInt } = snarkjs;
+const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Class representing a set root key claim
- * Set root key claim is used to commit a root of a merkle by a given identity
+ * Set root key claim is used to commit a root of a merkle by a given identitunity
  * Assign name entry representation is as follows:
  * |element 3|: |empty|era|version|claim type| - |16 bytes|4 bytes|4 bytes|8 bytes|
  * |element 2|: |empty|identity| - |12 bytes|20 bytes|
@@ -14,7 +19,7 @@ class SetRootKey {
   /**
    * Initialize raw claim data structure
    * Bytes are taken according entry claim structure
-   * Claim type is string used to define this concrete claim. Last 8 bytes of its hash are taken
+   * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    * @param {Object} data - Input parameters
    * Data input object contains:
    * {Uint32} _version - Version assigned to the claim
@@ -32,7 +37,7 @@ class SetRootKey {
     versionBuff.writeUInt32BE(version);
     eraBuff.writeUInt32BE(era);
     this._structure = {
-      claimType: utils.hashBytes('iden3.claim.set_root_key').slice(24, 32),
+      claimType: helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.SET_ROOT_KEY.TYPE)).slice(24, 32),
       version: versionBuff,
       era: eraBuff,
       id: utils.hexToBytes(id),

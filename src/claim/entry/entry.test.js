@@ -28,11 +28,11 @@ describe('[Entry]', () => {
   });
   it('Get Hash index', () => {
     const hi = entry.hi();
-    expect(utils.bytesToHex(hi)).to.be.equal('0x2304a2d0b3a4026eacc830273603d35f99c8bd689feeeb7f7042bc8ef6014f4e');
+    expect(utils.bytesToHex(hi)).to.be.equal('0x024b08756692aa832ce78cb50a6f3f74e889fa1b371086a5ef378558f3265af0');
   });
   it('Get Hash value', () => {
     const hv = entry.hv();
-    expect(utils.bytesToHex(hv)).to.be.equal('0x2c6397b84fd6ff87efb46d883aa31b61622c72550ebfdca90c4856f60030a95f');
+    expect(utils.bytesToHex(hv)).to.be.equal('0x040f57b7fa462268882e3c283ecffb68be404d23f7173d86e7f17a45b8d10c52');
   });
   it('Get hexadecimal from entry', () => {
     const entryHex = entry.toHexadecimal();
