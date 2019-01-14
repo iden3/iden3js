@@ -21,6 +21,10 @@ const CLAIMS = {
     ID: 'assignName',
     TYPE: 3,
   },
+  AUTHORIZE_KSIGN_SECP256K1: {
+    ID: 'authorizeKSignSecp256k1',
+    TYPE: 4,
+  },
 };
 
 module.exports = {

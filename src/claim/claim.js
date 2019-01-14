@@ -4,6 +4,7 @@ const CONSTANTS = require('../constants');
 const assignNameClaim = require('./assign-name/assign-name');
 const setRootKeyClaim = require('./set-root-key/set-root-key');
 const authorizeKSignClaim = require('./authorize-ksign/authorize-ksign');
+const authorizeKSignClaimSecp256k1 = require('./authorize-ksign-secp256k1/authorize-ksign-secp256k1');
 const basicClaim = require('./basic/basic');
 
 /**
@@ -24,6 +25,8 @@ class Factory {
         return new basicClaim.Basic(data);
       case CONSTANTS.CLAIMS.SET_ROOT_KEY.ID:
         return new setRootKeyClaim.SetRootKey(data);
+      case CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID:
+        return new authorizeKSignClaimSecp256k1.AuthorizeKSignSecp256k1(data);
       default:
         return undefined;
     }
