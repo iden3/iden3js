@@ -181,6 +181,27 @@ class LocalStorageContainer {
   }
 
   /**
+   * @param  {String} addressHex
+   * @param  {Buffer} message
+   *
+   * @returns {Object} signatureObj
+   */
+  signBuffer(addressHex, message) {
+    if (!this.encryptionKey) {
+      // KeyContainer not unlocked
+      console.error('Error: KeyContainer not unlocked');
+      return 'KeyContainer blocked';
+    }
+    // const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
+    const privKHexEncrypted = this.db.get(this.prefix + addressHex);
+    const msgHash = ethUtil.hashPersonalMessage(message);
+    const privKHex = kcUtils.decrypt(this.encryptionKey, privKHexEncrypted);
+    const sig = ethUtil.ecsign(msgHash, utils.hexToBytes(privKHex));
+
+    return kcUtils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
+  }
+
+  /**
    * @returns {Array}
    */
   listKeys() {

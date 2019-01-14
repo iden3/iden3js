@@ -10,6 +10,7 @@ const dapp = require('./auth/dapp');
 const utils = require('./utils');
 const auth = require('./auth/auth');
 const admin = require('./admin/requests');
+const protocols = require('./protocols/protocols');
 
 const { Auth } = auth;
 const { Dapp } = dapp;
@@ -29,4 +30,5 @@ module.exports = {
   Dapp,
   utils,
   admin,
+  protocols,
 };
