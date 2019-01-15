@@ -48,12 +48,12 @@ describe('[Claim Authorize KSign]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x2ebf2c9f89d2a81762e9701db839592ef34ea145a3801f669b456655e45b6797';
+    const hiResult = '0x2933b00c626c11d1dacadc6bbfbbdd7d008efb3db3565fbadc9dadfc8ac57eff';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x13580fd5d3ca0f7604a3a50f663cb4fd23c214f1955fa5b3ee9ed5ed06bb70a3';
+    const hvResult = '0x1541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

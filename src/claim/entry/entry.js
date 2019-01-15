@@ -38,7 +38,7 @@ class Entry {
    */
   hi() {
     const hashArray = [this._elements[2], this._elements[3]];
-    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
+    const hashKey = mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(hashArray));
     return helpers.bigIntToBuffer(hashKey);
   }
 
@@ -49,7 +49,7 @@ class Entry {
    */
   hv() {
     const hashArray = [this._elements[0], this._elements[1]];
-    const hashKey = mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(hashArray));
+    const hashKey = mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(hashArray));
     return helpers.bigIntToBuffer(hashKey);
   }
 

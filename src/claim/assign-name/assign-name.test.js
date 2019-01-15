@@ -48,12 +48,12 @@ describe('[Claim Set root key]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x1a683948126fa90a02487e55b4d1b3330ce81fdcfb81b74f02ad2ab3026269ac';
+    const hiResult = '0x1b90afca6decbbbeb9422a441731f7c9a666b3ce15307d327f43b2c4506fe29c';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x2885886a50650e0c3292c3fb459c34a272c9bf4680a85d8d89a59135d4db0797';
+    const hvResult = '0x19ff0e5ed571621bbc36bf4c0027dbe097975e11c03841b8c8d773b833b71f84';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });
