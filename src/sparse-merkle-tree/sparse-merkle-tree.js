@@ -43,7 +43,7 @@ function setNodeValue(db, key, value, prefix) {
 */
 function getHashFinalNode(hi, hv) {
   const hashArray = [bigInt(1), hi, hv];
-  const hashKey = mimc7.smtHash(hashArray);
+  const hashKey = mimc7.multiHash(hashArray);
   return helpers.bigIntToBuffer(hashKey);
 }
 
@@ -54,8 +54,8 @@ function getHashFinalNode(hi, hv) {
 function getHiHv(claim) {
   const indexGen = claim.slice(2);
   const valueGen = claim.slice(0, 2);
-  const hi = mimc7.smtHash(indexGen);
-  const hv = mimc7.smtHash(valueGen);
+  const hi = mimc7.multiHash(indexGen);
+  const hv = mimc7.multiHash(valueGen);
   return [hi, hv];
 }
 
@@ -112,7 +112,7 @@ class SparseMerkleTree {
         const bitLeaf = (i > (hiBinay.length - 1)) ? 0 : hiBinay[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-        nextHash = helpers.bigIntToBuffer(mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(concat)));
+        nextHash = helpers.bigIntToBuffer(mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(concat)));
         setNodeValue(this.db, nextHash, concat, this.prefix);
       }
       this.root = nextHash;
@@ -123,7 +123,7 @@ class SparseMerkleTree {
       // get current node value and its hIndex
       const totalTmp = helpers.getArrayBigIntFromBuffArray(nodeValue);
       let hiTmp = totalTmp.slice(2);
-      hiTmp = helpers.getIndexArray(mimc7.smtHash(hiTmp));
+      hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
       // compare position index until find a split
       let compare = false;
       let pos = claimIndex;
@@ -148,7 +148,7 @@ class SparseMerkleTree {
         const bitLeaf = (i > (hiBinay.length - 1)) ? 0 : hiBinay[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-        nextHash = helpers.bigIntToBuffer(mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(concat)));
+        nextHash = helpers.bigIntToBuffer(mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(concat)));
         setNodeValue(this.db, nextHash, concat, this.prefix);
       }
       this.root = nextHash;
@@ -162,7 +162,7 @@ class SparseMerkleTree {
   */
   getClaimByHi(indexHi) {
     // Compute hi of the claim
-    const hi = helpers.getIndexArray(mimc7.smtHash(indexHi));
+    const hi = helpers.getIndexArray(mimc7.multiHash(indexHi));
     // Find last node written
     let key = this.root;
     let nodeValue = getNodeValue(this.db, key, this.prefix);
@@ -183,7 +183,7 @@ class SparseMerkleTree {
   */
   generateProof(indexHi) {
     // Compute hi of the claim
-    const hi = helpers.getIndexArray(mimc7.smtHash(indexHi));
+    const hi = helpers.getIndexArray(mimc7.multiHash(indexHi));
     // Find last node written
     let key = this.root;
     let claimIndex = 0;
@@ -216,7 +216,7 @@ class SparseMerkleTree {
       // get current node value and its hIndex
       totalTmp = helpers.getArrayBigIntFromBuffArray(nodeValue);
       let hiTmp = totalTmp.slice(2);
-      hiTmp = helpers.getIndexArray(mimc7.smtHash(hiTmp));
+      hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
       // Check input index and node index
       let pos = claimIndex;
       while (!checkIndex && !((pos > hi.length - 1) && (pos > hiTmp.length - 1))) {
@@ -314,7 +314,7 @@ function checkProof(rootHex, proofHex, hiHex, hvHex) {
   for (let i = arrayFullSiblings.length - 1; i >= 0; i--) {
     const siblingTmp = arrayFullSiblings[i];
     concat = hiBinay[i] ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-    nextHash = helpers.bigIntToBuffer(mimc7.smtHash(helpers.getArrayBigIntFromBuffArray(concat)));
+    nextHash = helpers.bigIntToBuffer(mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(concat)));
   }
   return Buffer.compare(nextHash, root) === 0;
 }
