@@ -49,16 +49,16 @@ describe('[Claim Set root key]', () => {
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
                                        + '000000000000000000000000393939393939393939393939393939393939393a'
-                                       + '000000000000000000000000000000000000000100000001b111df93ad32c22c');
+                                       + '0000000000000000000000000000000000000001000000010000000000000002');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x0a2d38687ea5f987637ded13030b22d1657be60bdb35add74bb53c8d5d126f8f';
+    const hiResult = '0x0f92abb8209409736929512c2018467a497ed35f409bb90579c62b9a4e0b2aa8';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x2e27903d404fcab9363967a4ffe7da6a615f9ce6f55c43661a0297a040d336a4';
+    const hvResult = '0x0ad7edbf562757b1ad2282c44e2c248f95e9e6b09ba0d32809aa724fbf148e0c';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

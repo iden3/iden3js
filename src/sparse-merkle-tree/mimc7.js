@@ -1,51 +1,56 @@
+const Web3 = require('web3');
 const snarkjs = require('snarkjs');
 
 const { bn128 } = snarkjs;
 const { bigInt } = snarkjs;
 
-const Web3 = require('web3');
-
 const F = bn128.Fr;
 
-const SEED = 'iden3_mimc';
+const SEED = 'mimc';
+const NROUNDS = 91;
 
-function getConstants(seed, nRounds) {
+exports.getIV = (seed) => {
+  if (typeof seed === 'undefined') seed = SEED;
+  const c = Web3.utils.keccak256(`${seed}_iv`);
+  const cn = bigInt(Web3.utils.toBN(c).toString());
+  const iv = cn.mod(F.q);
+  return iv;
+};
+
+exports.getConstants = (seed, nRounds) => {
+  if (typeof seed === 'undefined') seed = SEED;
+  if (typeof nRounds === 'undefined') nRounds = NROUNDS;
   const cts = new Array(nRounds);
   let c = Web3.utils.keccak256(SEED);
   for (let i = 1; i < nRounds; i++) {
     c = Web3.utils.keccak256(c);
 
     const n1 = Web3.utils.toBN(c).mod(Web3.utils.toBN(F.q.toString()));
-    cts[i] = Web3.utils.padLeft(Web3.utils.toHex(n1), 64);
+    const c2 = Web3.utils.padLeft(Web3.utils.toHex(n1), 64);
+    cts[i] = bigInt(Web3.utils.toBN(c2).toString());
   }
-  cts[0] = '0x0000000000000000000000000000000000000000000000000000000000000000';
+  cts[0] = bigInt(0);
   return cts;
-}
+};
 
-function MiMC7Hash(_xIn, _k, nRounds) {
+const cts = exports.getConstants(SEED, 91);
+
+exports.hash = (_xIn, _k) => {
   const xIn = bigInt(_xIn);
   const k = bigInt(_k);
-  const cts = getConstants(SEED, nRounds);
   let r;
-  for (let i = 0; i < nRounds; i++) {
-    const c = bigInt(Web3.utils.toBN(cts[i]).toString());
+  for (let i = 0; i < NROUNDS; i++) {
+    const c = cts[i];
     const t = (i === 0) ? F.add(xIn, k) : F.add(F.add(r, k), c);
-    const t2 = F.square(t);
-    const t4 = F.square(t2);
-    r = F.mul(F.mul(t4, t2), t);
+    r = F.exp(t, 7);
   }
   return F.affine(F.add(r, k));
-}
+};
 
-function smtHash(arr) {
-  let r = bigInt(0);
+exports.multiHash = (arr) => {
+  let r = exports.getIV();
   for (let i = 0; i < arr.length; i++) {
-    r = MiMC7Hash(r, bigInt(arr[i]), 91);
+    r = exports.hash(r, bigInt(arr[i]));
   }
   return r;
-}
-
-module.exports = {
-  smtHash,
-  getConstants,
 };

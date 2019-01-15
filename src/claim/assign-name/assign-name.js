@@ -1,5 +1,10 @@
+const snarkjs = require('snarkjs');
 const Entry = require('../entry/entry');
 const utils = require('../../utils');
+const CONSTANTS = require('../../constants');
+
+const { bigInt } = snarkjs;
+const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Class representing an assign name claim
@@ -14,7 +19,7 @@ class AssignName {
   /**
    * Initialize raw claim data structure
    * Bytes are taken according entry claim structure
-   * Claim type is string used to define this concrete claim. Last 8 bytes of its hash are taken
+   * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    * @param {Object} data - Input parameters
    * Data input object contains:
    * {Uint32} _version - Version assigned to the claim
@@ -29,7 +34,7 @@ class AssignName {
     } = data;
     versionBuff.writeUInt32BE(version);
     this._structure = {
-      claimType: utils.hashBytes('iden3.claim.assign_name').slice(24, 32),
+      claimType: helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.ASSIGN_NAME.TYPE)).slice(24, 32),
       version: versionBuff,
       hashName: utils.hashBytes(hashName).fill(0, 0, 1),
       id: utils.hexToBytes(id),
