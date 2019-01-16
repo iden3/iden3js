@@ -104,7 +104,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   */
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
-  if ((jwsHeader.iat < current) && (current < jwsHeader.exp)) {
+  if (!((jwsHeader.iat < current) && (current < jwsHeader.exp))) {
     return false; // TODO
   }
 
