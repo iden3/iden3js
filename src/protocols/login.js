@@ -13,7 +13,6 @@ const SIGALGV01 = 'ES255';
 * @param {String} sessionId
 * @param {Number} timeout
 * @returns {Object} requestIdenAssert
-*/
 const newRequestIdenAssert = function newRequestIdenAssert(origin, sessionId, timeout) {
   const nonce = 'generate cryptografically random nonce'; // TODO
   return {
@@ -110,6 +109,9 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
 
   const ksign = ''; // TODO get ksign from jwsPayload.proof_ksign.leaf
 
+  // NOTE: verifying a signature is cheaper than verifying a merkle tree proof.
+  // This should go before the verification of proofOfKSigns and
+  // proofOfEthName.
   // verify signature with ksign
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
   const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
@@ -123,6 +125,8 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   }
 
   // TODO verify that signature is by jwsHeader.iss
+
+  // TODO verify proofOfEthName
 
   return true;
 };
@@ -151,40 +155,95 @@ const verifySignedPacket = function verifySignedPacket(signedPacket) {
 // for general purposes
 
 /** Class representing a claim proof */
-class ProofClaim {
+class ProofClaimFull {
   /**
    * Create a ClaimProof
    * @param {Key} rootKey
    * @param {Signature} rootKeySig
+   * @param {[]MtpProof} mtpProofs
+   * @param {[]SetRootAux} setRootAuxs Auxiliary data to build intermediate set root claims
    * @param {Leaf} leaf
-   * @param {[]Proof} proofs
-   * @param {[]EthID} ethids
    */
-  constructor(rootKey, rootKeySig, leaf, proofs, ethids) {
+  constructor(rootKey, rootKeySig, leaf, mtpProofs, setRootAuxs) {
     this.rootKey = rootKey;
     this.rootKeySig = rootKeySig;
-    this.proofs = proofs;
-    this.ethids = ethids;
+    this.mtpProofs = mtpProofs;
+    this.setRootAuxs = setRootAuxs;
     this.leaf = leaf;
+    return this;
   }
+}
+
+const verifyProofClaimFull = function verifyProofClaimFull(proofClaimFull) {
+  // TODO? Verify proofClaimFull.rootKeySig
+  if (proofClaimFull.mtpProofs.length > 2 || proofClaimFull.mtpProofs.length < 1) {
+    return false; // TODO throw error
+  }
+  if (proofClaimFull.mtpProofs.length - 1 != proofClaimFull.setRootAuxs.length)
+
+  var leaf = proofClaimFull.leaf;
+  var rootKey = '';
+  for (var i = 0; i < proofClaimFull.proofs.length; i++) {
+    _mtpEx = proofClaimFull.mtpProofs[i].mtpLeaf
+    _mtpNoEx = proofClaimFull.mtpProofs[i].mtpLeafP1
+    mtpEx = parseClaim(_mtpEx) // TODO
+    mtpNoEx = parseClaim(_mtpNoEx) // TODO
+    var leafNoEx = leaf
+    setClaimVersion(leafNoEx, leaf.version + 1) // TODO
+
+    if (mtpEx.existence != true) {
+      return false; // TODO throw error
+    }
+    if (verifyMtp(mtpEx, leaf) != true) {
+      return false; // TODO throw error
+    }
+    if (mtpNoEx.existence != false) {
+      return false; // TODO throw error
+    }
+    if (verifyMtp(mtpNoEx, leafNoEx) != true) {
+      return false; // TODO throw error
+    }
+
+    rootKey = mtpEx.rootKey;
+    if (i === proofClaimFull.proofs.length-1) {
+      break;
+    }
+    const version = proofClaimFull.setRootAuxs[i].version;
+    const era = proofClaimFull.setRootAuxs[i].era;
+    const ethId = proofClaimFull.setRootAuxs[i].ethId;
+    leaf = newSetRootClaim(version, era, ethId, rootKey);
+  }
+  if (rootKey != proofClaimFull.rootKey) {
+    return false;
+  }
+  if (checkRootKeyInBlockchain(rootKey) != true) { // TODO
+    return false;
+  }
+  return true;
 }
 
 /**
  * Class representing a merkle tree proof of existence of a leaf, a merkle tree
  * proof of non existence of the same leaf with the following version */
-class Proof {
+class MtpProof {
   /**
-   * Create a Proof
+   * Create an MtpProof
    * @param {MerkleTreeProof} mtpLeaf
    * @param {MerkleTreeProof} mtpLeafP1
    * @param {number} version
    * @param {number} era
    */
-  constructor(mtpLeaf, mtpLeafP1, version, era) {
+  constructor(mtpLeaf, mtpLeafP1) {
     this.mtpLeaf = mtpLeaf;
     this.mtpLeafP1 = mtpLeafP1;
-    this.version = version;
-    this.era = era;
+  }
+}
+
+class SetRootAux {
+  constructor(ethId, version, era) {
+    this.ethId = ethId
+    this.version = version
+    this.era = era
   }
 }
 
