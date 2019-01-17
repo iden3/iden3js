@@ -1,6 +1,9 @@
 {
   "name": "iden3",
   "version": "0.0.13",
+  "engines": {
+    "node": "^8"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
