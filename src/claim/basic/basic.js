@@ -23,9 +23,9 @@ class Basic {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    * @param {Object} data - Input parameters
    * Data input object contains:
-   * {Uint32} _version - Version assigned to the claim
-   * {String} _index - Generic index data
-   * {String} _data - Generic data
+   * {Uint32} version - Version assigned to the claim
+   * {String} index - Generic index data
+   * {String} data - Generic data
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);

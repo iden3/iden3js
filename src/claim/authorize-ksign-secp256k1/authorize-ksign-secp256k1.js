@@ -8,10 +8,11 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Class representing an authorized Ksign claim with elliptic curve as secp256k1
+ * This claim aims to use ethereum public key until zkSnarks are implemented using a Jubjub curve
  * Authorized KsignSecp256k1 claim is used to authorize a public key that belongs to elliptic curve secp256k1 for being used afterwards
  * Authorized KsignSecp256k1 element representation is as follows:
- * |element 3|: |empty|public key|version|claim type| - |18 bytes|2 bytes|4 bytes|8 bytes|
- * |element 2|: |empty| - |1 bytes|31 bytes|
+ * |element 3|: |empty|public key[0]|version|claim type| - |18 bytes|2 bytes|4 bytes|8 bytes|
+ * |element 2|: |empty|public key[1]| - |1 bytes|31 bytes|
  * |element 1|: |empty| - |32 bytes|
  * |element 0|: |empty| - |32 bytes|
  */
@@ -22,16 +23,14 @@ class AuthorizeKSignSecp256k1 {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    * @param {Object} data - Input parameters
    * Data input object contains:
-   * {Uint32} _version - Version assigned to the claim
-   * {Bool} _sign - Sign of the coordinate X of an eliptic curve point
-   * {String} _ay - Coordinate Y of an eliptic curve point
+   * {Uint32} version - Version assigned to the claim
+   * {String} pubKeyCompressed - Public key of Secp256k1 elliptic curve in its compressed version
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);
     const {
       version, pubKeyCompressed,
     } = data;
-    // Save pubKey as compressed
     versionBuff.writeUInt32BE(version);
     this._structure = {
       claimType: helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.TYPE)).slice(24, 32),
