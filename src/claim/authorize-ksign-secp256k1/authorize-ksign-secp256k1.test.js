@@ -8,7 +8,7 @@ const CONSTANTS = require('../../constants');
 const { secp256k1 } = ethUtil;
 const { expect } = chai;
 
-describe('[Claim Authorize KSign]', () => {
+describe('[Claim Authorize KSignSecp256k1]', () => {
   let entryClaim;
   let parsedClaim;
   const versionExample = 1;
@@ -17,7 +17,7 @@ describe('[Claim Authorize KSign]', () => {
   const pubKeyCompressedExample = secp256k1.publicKeyCreate(privKeyBuff, true);
   let claimAuthKSignSecp256k1;
 
-  before('Create new authorizeKSignsec9256k1 claim', () => {
+  before('Create new authorizeKSignSecp256k1 claim', () => {
     claimAuthKSignSecp256k1 = new Claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
       version: versionExample, pubKeyCompressed: utils.bytesToHex(pubKeyCompressedExample),
     });
@@ -38,7 +38,7 @@ describe('[Claim Authorize KSign]', () => {
     const { version } = claimAuthKSignSecp256k1.structure;
     expect(utils.bytesToHex(version)).to.be.equal(utils.bytesToHex(parsedClaim.structure.version));
   });
-  it('Parse Public key compressed', () => {
+  it('Parse public key compressed', () => {
     const { pubKeyCompressed } = claimAuthKSignSecp256k1.structure;
     expect(utils.bytesToHex(pubKeyCompressed)).to.be.equal(utils.bytesToHex(parsedClaim.structure.pubKeyCompressed));
   });
