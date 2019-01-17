@@ -41,4 +41,15 @@ describe('[Entry]', () => {
                                  + '0202020202020202020202020202020202020202020202020202020202020202'
                                  + '0303030303030303030303030303030303030303030303030303030303030303');
   });
+  it('Get entry from hexadecimal', () => {
+    const entryHex = '0x0000000000000000000000000000000000000000000000000000000000000000'
+                     + '0101010101010101010101010101010101010101010101010101010101010101'
+                     + '0202020202020202020202020202020202020202020202020202020202020202'
+                     + '0303030303030303030303030303030303030303030303030303030303030303';
+    entry.fromHexadecimal(entryHex);
+    expect(utils.bytesToHex(entry.elements[0])).to.be.equal(utils.bytesToHex(Buffer.alloc(32, 0)));
+    expect(utils.bytesToHex(entry.elements[1])).to.be.equal(utils.bytesToHex(Buffer.alloc(32, 1)));
+    expect(utils.bytesToHex(entry.elements[2])).to.be.equal(utils.bytesToHex(Buffer.alloc(32, 2)));
+    expect(utils.bytesToHex(entry.elements[3])).to.be.equal(utils.bytesToHex(Buffer.alloc(32, 3)));
+  });
 });
