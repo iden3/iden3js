@@ -68,6 +68,7 @@ class Entry {
   fromHexadecimal(entryHex) {
     const entryBuff = utils.hexToBytes(entryHex);
     for (let i = 0; i < this._elements.length; i++) {
+      // Slice buffer into 32 bytes to insert it into an specific element
       this._elements[(this._elements.length - 1) - i] = entryBuff.slice(entryBuff.length - (32 * (i + 1)), entryBuff.length - 32 * i);
     }
   }

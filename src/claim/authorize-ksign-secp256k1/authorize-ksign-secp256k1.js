@@ -60,14 +60,13 @@ class AuthorizeKSignSecp256k1 {
     endIndex = startIndex;
     startIndex = endIndex - this._structure.version.length;
     claimEntry.elements[3].fill(this._structure.version, startIndex, endIndex);
-    let indexLen = this._structure.pubKeyCompressed.length;
+    const indexLen = this._structure.pubKeyCompressed.length;
     const firstSlotPubKey = this._structure.pubKeyCompressed.slice(indexLen - 2, indexLen);
     endIndex = startIndex;
     startIndex = endIndex - firstSlotPubKey.length;
     claimEntry.elements[3].fill(firstSlotPubKey, startIndex, endIndex);
     // claim element 2 composition
-    indexLen = this._structure.pubKeyCompressed.length - 2;
-    const secondSlotPubKey = this._structure.pubKeyCompressed.slice(0, indexLen);
+    const secondSlotPubKey = this._structure.pubKeyCompressed.slice(0, indexLen - 2);
     endIndex = claimEntry.elements[2].length;
     startIndex = claimEntry.elements[2].length - secondSlotPubKey.length;
     claimEntry.elements[2].fill(secondSlotPubKey, startIndex, endIndex);

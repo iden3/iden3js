@@ -72,8 +72,7 @@ class Basic {
 
     // element 2 composition
     // Get second part of the index
-    indexLen = this.structure.index.length - 19;
-    const secondSlotIndex = this.structure.index.slice(0, indexLen);
+    const secondSlotIndex = this.structure.index.slice(0, indexLen - 19);
     endIndex = claimEntry.elements[2].length;
     startIndex = endIndex - secondSlotIndex.length;
     claimEntry.elements[2].fill(secondSlotIndex, startIndex, endIndex);
@@ -88,8 +87,7 @@ class Basic {
 
     // element 0 composition
     // Get second part of the data
-    indexLen = this.structure.extraData.length - 31;
-    const secondSlotExtra = this.structure.extraData.slice(0, indexLen);
+    const secondSlotExtra = this.structure.extraData.slice(0, indexLen - 31);
     endIndex = claimEntry.elements[0].length;
     startIndex = claimEntry.elements[0].length - secondSlotExtra.length;
     claimEntry.elements[0].fill(secondSlotExtra, startIndex, endIndex);
