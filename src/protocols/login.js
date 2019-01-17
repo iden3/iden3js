@@ -1,6 +1,10 @@
 const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
+const Entry = require('../claim/entry/entry');
+
+const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
+const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 const SIGV01 = 'iden3.sig.v0_1';
 const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
@@ -13,6 +17,7 @@ const SIGALGV01 = 'ES255';
 * @param {String} sessionId
 * @param {Number} timeout
 * @returns {Object} requestIdenAssert
+*/
 const newRequestIdenAssert = function newRequestIdenAssert(origin, sessionId, timeout) {
   const nonce = 'generate cryptografically random nonce'; // TODO
   return {
@@ -85,6 +90,9 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethid, et
   return result;
 };
 
+/**
+ * Verify an identity assertio v0.1 signed packet
+ */
 const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, signatureBuffer) {
   // TODO check data structure scheme
 
@@ -131,6 +139,9 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   return true;
 };
 
+/**
+ * Verify a signed packet
+ */
 const verifySignedPacket = function verifySignedPacket(signedPacket) {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
   const jwsHeader64 = signedPacket.split('.')[0];
@@ -154,72 +165,22 @@ const verifySignedPacket = function verifySignedPacket(signedPacket) {
 
 // for general purposes
 
-/** Class representing a claim proof */
+/** Class representing proof of a valid claim, from the claim to the top level
+ * tree root, including proofs of non-existence of the revoked/next version of
+ * each claim.  Includes the top level tree root key signature by the owner of
+ * the top level tree. */
 class ProofClaimFull {
   /**
    * Create a ClaimProof
-   * @param {Key} rootKey
    * @param {Signature} rootKeySig
-   * @param {[]MtpProof} mtpProofs
-   * @param {[]SetRootAux} setRootAuxs Auxiliary data to build intermediate set root claims
    * @param {Leaf} leaf
+   * @param {[]ProofClaim} proofs
    */
-  constructor(rootKey, rootKeySig, leaf, mtpProofs, setRootAuxs) {
-    this.rootKey = rootKey;
-    this.rootKeySig = rootKeySig;
-    this.mtpProofs = mtpProofs;
-    this.setRootAuxs = setRootAuxs;
+  constructor(rootKeySig, leaf, proofs) {
+    this.rootSig = rootKeySig;
     this.leaf = leaf;
-    return this;
+    this.proofs = proofs;
   }
-}
-
-const verifyProofClaimFull = function verifyProofClaimFull(proofClaimFull) {
-  // TODO? Verify proofClaimFull.rootKeySig
-  if (proofClaimFull.mtpProofs.length > 2 || proofClaimFull.mtpProofs.length < 1) {
-    return false; // TODO throw error
-  }
-  if (proofClaimFull.mtpProofs.length - 1 != proofClaimFull.setRootAuxs.length)
-
-  var leaf = proofClaimFull.leaf;
-  var rootKey = '';
-  for (var i = 0; i < proofClaimFull.proofs.length; i++) {
-    _mtpEx = proofClaimFull.mtpProofs[i].mtpLeaf
-    _mtpNoEx = proofClaimFull.mtpProofs[i].mtpLeafP1
-    mtpEx = parseClaim(_mtpEx) // TODO
-    mtpNoEx = parseClaim(_mtpNoEx) // TODO
-    var leafNoEx = leaf
-    setClaimVersion(leafNoEx, leaf.version + 1) // TODO
-
-    if (mtpEx.existence != true) {
-      return false; // TODO throw error
-    }
-    if (verifyMtp(mtpEx, leaf) != true) {
-      return false; // TODO throw error
-    }
-    if (mtpNoEx.existence != false) {
-      return false; // TODO throw error
-    }
-    if (verifyMtp(mtpNoEx, leafNoEx) != true) {
-      return false; // TODO throw error
-    }
-
-    rootKey = mtpEx.rootKey;
-    if (i === proofClaimFull.proofs.length-1) {
-      break;
-    }
-    const version = proofClaimFull.setRootAuxs[i].version;
-    const era = proofClaimFull.setRootAuxs[i].era;
-    const ethId = proofClaimFull.setRootAuxs[i].ethId;
-    leaf = newSetRootClaim(version, era, ethId, rootKey);
-  }
-  if (rootKey != proofClaimFull.rootKey) {
-    return false;
-  }
-  if (checkRootKeyInBlockchain(rootKey) != true) { // TODO
-    return false;
-  }
-  return true;
 }
 
 /**
@@ -228,23 +189,105 @@ const verifyProofClaimFull = function verifyProofClaimFull(proofClaimFull) {
 class MtpProof {
   /**
    * Create an MtpProof
-   * @param {MerkleTreeProof} mtpLeaf
-   * @param {MerkleTreeProof} mtpLeafP1
-   * @param {number} version
-   * @param {number} era
+   * @param {MerkleTreeProof} mtp0
+   * @param {MerkleTreeProof} mtp1
+   * @param {key} root
+   * @param {SetRootAux|null} aux
    */
-  constructor(mtpLeaf, mtpLeafP1) {
-    this.mtpLeaf = mtpLeaf;
-    this.mtpLeafP1 = mtpLeafP1;
+  constructor(mtp0, mtp1, root, aux) {
+    this.mtp0 = mtp0;
+    this.mtp1 = mtp1;
+    this.root = root;
+    this.aux = aux;
   }
 }
 
+/**
+ * Auxiliary data required to build a set root claim
+ */
 class SetRootAux {
   constructor(ethId, version, era) {
-    this.ethId = ethId
-    this.version = version
-    this.era = era
+    this.ethId = ethId;
+    this.ver = version;
+    this.era = era;
   }
+}
+
+// TODO: Move this to claim utils
+const incClaimVersion = function incClaimVersion(claim) {
+  //let entry = new Entry();
+  //entry.fromHexadecimal(claim);
+  const version = claim.elements[3].slice(20, 24).readUInt32BE(0);
+  claim.elements[3].writeUInt32BE(version+1, claim.elements[3].length - 64/8 - 32/8);
+}
+
+// TODO: Move this to merkle-tree utils
+const isMerkleTreeProofExistence = function isMerkleTreeProofExistence(proofHex) {
+  const proofBuff = mtHelpers.parseProof(proofHex);
+  const flagNonExistence = mtHelpers.getBit(proofBuff.flagExistence, 0);
+  return !flagNonExistence;
+}
+
+/**
+ * Verify a ProofClaimFull from the claim to the blockchain root
+ * @param{ProofClaimFull} proof
+ */
+const verifyProofClaimFull = function verifyProofClaimFull(proof) {
+  // TODO? Verify that signature(proof.proofs[0].root) === proof.rootKeySig
+
+  // For now we only allow proof verification of Nameserver (one level) and
+  // Relay (two levels: relay + user)
+  if (proof.proofs.length > 2 || proof.proofs.length < 1) {
+    return false; // TODO throw error
+  }
+
+  let leaf = new Entry();
+  leaf.fromHexadecimal(proof.leaf);
+  var rootKey = '';
+  for (var i = 0; i < proof.proofs.length; i++) {
+    mtpEx = proof.proofs[i].mtp0
+    mtpNoEx = proof.proofs[i].mtp1
+    var leafNoEx = leaf
+    incClaimVersion(leafNoEx)
+    rootKey = proof.proofs[i].root
+
+    if (!isMerkleTreeProofExistence(mtpEx)) {
+      console.trace(mtpEx);
+      return false; // TODO throw error
+    }
+    console.trace(leaf);
+    console.trace(leaf.hi(), leaf.hv());
+    if (smt.checkProof(rootKey, mtpEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
+      console.trace(leaf);
+      return false; // TODO throw error
+    }
+    if (isMerkleTreeProofExistence(mtpNoEx)) {
+      console.trace();
+      return false; // TODO throw error
+    }
+    if (smt.checkProof(rootKey, mtpNoEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
+      console.trace();
+      return false; // TODO throw error
+    }
+
+    if (i === proof.proofs.length-1) {
+      break;
+    }
+    const version = proof.proofs[i].aux.ver;
+    const era = proof.proofs[i].aux.era;
+    const ethId = proof.proofs[i].aux.ethId;
+    leaf = newSetRootClaim(version, era, ethId, rootKey);
+  }
+  if (rootKey !== proof.rootKey) {
+    console.trace();
+    return false;
+  }
+  if (checkRootKeyInBlockchain(rootKey) !== true) { // TODO
+    console.trace();
+    return false;
+  }
+  console.trace();
+  return true;
 }
 
 module.exports = {
@@ -252,7 +295,11 @@ module.exports = {
   signIdenAssertV01,
   // signPacket,
   verifyIdenAssertV01,
-  verifySignedPacket
+  verifySignedPacket,
+  verifyProofClaimFull,
+  ProofClaimFull,
+  MtpProof,
+  SetRootAux
 };
 
 /*

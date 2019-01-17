@@ -1,6 +1,9 @@
+const snarkjs = require('snarkjs');
 const chai = require('chai');
 const iden3 = require('../index');
 
+//const bigInt = require('big-integer');
+const bigInt = snarkjs.bigInt;
 const {expect} = chai;
 
 const db = new iden3.Db();
@@ -60,22 +63,41 @@ describe('[protocol] login', () => {
     console.log("proofOfKSign", res.data);
   }));
 	*/
-
-  it('newRequestIdenAssert', () => {
-    const date = new Date();
-    const unixtime = Math.round((date).getTime() / 1000);
-    const minutes = 20; // will be setted in global consts or in a config file
-    const timeout = unixtime + (minutes * 60);
-
-    const signatureRequest = iden3.protocols.login.newRequestIdenAssert('0xorigin', 'session01', timeout);
-    console.log("signatureRequest:\n", signatureRequest);
-
-    const expirationTime = unixtime + (3600 * 60);
-    console.log(idAddr);
-    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, idAddr, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime);
-    console.log("signedPacket:\n", signedPacket);
-
-    const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
-    expect(verified).to.be.equal(true);
+  it('test bigint', () => {
+    bigInt(8).toString();
+    bigInt(8).shiftLeft(2);
   });
+
+  it('verify ProofClaimFull', () => {
+    const p = proofOfEthName;
+    const pa = p.proofOfClaimAssignName;
+    const proofs = [
+      new iden3.protocols.login.MtpProof(pa.ClaimProof.Proof, pa.ClaimNonRevocationProof.Proof, pa.ClaimProof.Root, null)
+    ];
+    const proof = new iden3.protocols.login.ProofClaimFull(
+                                           pa.Signature,
+                                           pa.ClaimProof.Leaf,
+                                           proofs
+    );
+    const res = iden3.protocols.login.verifyProofClaimFull(proof);
+    expect(res).to.be.equal(true);
+  });
+
+  //it('newRequestIdenAssert', () => {
+  //  const date = new Date();
+  //  const unixtime = Math.round((date).getTime() / 1000);
+  //  const minutes = 20; // will be setted in global consts or in a config file
+  //  const timeout = unixtime + (minutes * 60);
+
+  //  const signatureRequest = iden3.protocols.login.newRequestIdenAssert('0xorigin', 'session01', timeout);
+  //  console.log("signatureRequest:\n", signatureRequest);
+
+  //  const expirationTime = unixtime + (3600 * 60);
+  //  console.log(idAddr);
+  //  const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, idAddr, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime);
+  //  console.log("signedPacket:\n", signedPacket);
+
+  //  const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
+  //  expect(verified).to.be.equal(true);
+  //});
 });
