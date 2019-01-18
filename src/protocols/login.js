@@ -37,7 +37,7 @@ const newRequestIdenAssert = function newRequestIdenAssert(origin, sessionId, ti
 };
 
 /*
-const signPacket = function signPacket(signatureRequest, ethid, kc, ksign, proofOfKSign) {
+const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, proofOfKSign) {
   let result = {};
   // switch que crida a la funció d'omplenar payload
   if (signatureRequest.header.typ != SIGV01) {
@@ -54,12 +54,12 @@ const signPacket = function signPacket(signatureRequest, ethid, kc, ksign, proof
 };
 */
 
-const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethid, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime) {
+const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime) {
   const date = new Date();
   const currentTime = Math.round((date).getTime() / 1000);
   const jwsHeader = {
     typ: SIGV01,
-    iss: ethid,
+    iss: ethAddr,
     iat: currentTime,
     exp: expirationTime,
     alg: SIGALGV01
@@ -104,10 +104,10 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
     if (jwsPayload.proofOfKSign.proofs.length > 2) {
       return false;
     }
-    if (jwsPayload.proofOfKSign.ethids.length !== jwsPayload.proofOfKSign.proofs.length) {
+    if (jwsPayload.proofOfKSign.ethaddrs.length !== jwsPayload.proofOfKSign.proofs.length) {
       return false;
     }
-    // TODO verify proofOfKSign
+    // TODO verify proofOfKSign using verifyProofClaimFull
   */
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
@@ -135,6 +135,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   // TODO verify that signature is by jwsHeader.iss
 
   // TODO verify proofOfEthName
+  // Use verifyProofClaimFull
 
   return true;
 };
@@ -206,8 +207,8 @@ class MtpProof {
  * Auxiliary data required to build a set root claim
  */
 class SetRootAux {
-  constructor(ethId, version, era) {
-    this.ethId = ethId;
+  constructor(ethAddr, version, era) {
+    this.ethAddr = ethAddr;
     this.ver = version;
     this.era = era;
   }
@@ -233,7 +234,7 @@ const isMerkleTreeProofExistence = function isMerkleTreeProofExistence(proofHex)
  * @param{ProofClaimFull} proof
  */
 const verifyProofClaimFull = function verifyProofClaimFull(proof) {
-  // TODO? Verify that signature(proof.proofs[0].root) === proof.rootKeySig
+  // TODO? Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
 
   // For now we only allow proof verification of Nameserver (one level) and
   // Relay (two levels: relay + user)
@@ -247,6 +248,7 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
   for (var i = 0; i < proof.proofs.length; i++) {
     mtpEx = proof.proofs[i].mtp0
     mtpNoEx = proof.proofs[i].mtp1
+    // WARNING: leafNoEx points to the same content of leaf, so modifying leafNoEx modifies leaf!
     //var leafNoEx = leaf
     //incClaimVersion(leafNoEx)
     rootKey = proof.proofs[i].root
@@ -281,8 +283,8 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
     }
     const version = proof.proofs[i].aux.ver;
     const era = proof.proofs[i].aux.era;
-    const ethId = proof.proofs[i].aux.ethId;
-    leaf = newSetRootClaim(version, era, ethId, rootKey);
+    const ethAddr = proof.proofs[i].aux.ethAddr;
+    leaf = newSetRootClaim(version, era, ethAddr, rootKey);
   }
   if (checkRootKeyInBlockchain(rootKey) !== true) { // TODO
     // TODO: maybe check root signature
@@ -318,13 +320,13 @@ verificar paquet firmat:
 		- verificar objecte del tipus iden3.sig.v0_1
 			- verificar JWS_HEADER.alg=='el que toca'
 		- verificar que JWS_PAYLOAD.proof_ksgin.proofs.length<=2
-		- verificar que JWS_PAYLOAD.proof_ksgin.ethids.length=JWS_PAYLOAD.proof_ksgin.proofs.length - 1
+		- verificar que JWS_PAYLOAD.proof_ksgin.ethaddrs.length=JWS_PAYLOAD.proof_ksgin.proofs.length - 1
 		- verificar paràmetres del JWS_HEADER
 			- iat < current < exp
 		- agafar ksign de JWS_PAYLOAD.proof_ksign.leaf
 		- verificar firma amb ksign
 		- verificar que la firma correspon a l' JWT_HEADER.iss
-			- issuer == proof_ksign.ethid 				(PENDENT)
+			- issuer == proof_ksign.ethaddr 				(PENDENT)
 			- verificar validesa de JWS_PAYLOAD.proof_ksign
 				- verificar els 4 merkle proofs
 				- verificar que el root és vàlid per aquell relay

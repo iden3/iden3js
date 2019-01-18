@@ -19,11 +19,11 @@ const ksign = kc.importKey(testPrivKHex);
 const relay = new iden3.Relay('http://127.0.0.1:8000');
 const id = new iden3.Id(ksign, ksign, ksign, relay, relayAddr, '');
 
-const idAddr = '0x52dc5fa952194ad6c3268666fc4e64407a1d457a';
+const usrAddr = '0x52dc5fa952194ad6c3268666fc4e64407a1d457a';
 const ethName = 'usertest@iden3.io';
 const proofOfEthName = {
   claim: '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000052dc5fa952194ad6c3268666fc4e64407a1d457a0032716d1c027e456988fd6c380442cfadc8bfa8c1e08f8037f83121c82a8a59000000000000000000000000000000000000000000000000f60d928459d792ed',
-  ethID: '0x52dc5fa952194ad6c3268666fc4e64407a1d457a',
+  ethAddr: '0x52dc5fa952194ad6c3268666fc4e64407a1d457a',
   proofOfClaimAssignName: {
     ClaimProof: {
       //Leaf: '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000052dc5fa952194ad6c3268666fc4e64407a1d457a0032716d1c027e456988fd6c380442cfadc8bfa8c1e08f8037f83121c82a8a59000000000000000000000000000000000000000000000000f60d928459d792ed',
@@ -143,8 +143,8 @@ describe('[protocol] login', () => {
   //  console.log("signatureRequest:\n", signatureRequest);
 
   //  const expirationTime = unixtime + (3600 * 60);
-  //  console.log(idAddr);
-  //  const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, idAddr, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime);
+  //  console.log(usrAddr);
+  //  const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime);
   //  console.log("signedPacket:\n", signedPacket);
 
   //  const verified = iden3.protocols.login.verifySignedPacket(signedPacket);

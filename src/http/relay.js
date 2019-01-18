@@ -68,7 +68,7 @@ class Relay {
 
     const signatureObj = kc.sign(keyOperational, utils.bytesToHex(msgBytes));
     const bindIDMsg = {
-      ethID: idAddr,
+      ethAddr: idAddr,
       name,
       signature: signatureObj.signature, // for the moment, signature(idAddr+name)
       ksign: keyOperational,

@@ -108,7 +108,7 @@ describe('[id] id localstorage test', () => {
         return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {
           // console.log('resolveName', res.data);
           expect(resolveRes.status).to.be.equal(200);
-          expect(resolveRes.data.ethID).to.be.equal(id.idAddr);
+          expect(resolveRes.data.ethAddr).to.be.equal(id.idAddr);
         });
       });
     });
