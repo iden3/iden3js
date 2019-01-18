@@ -37,6 +37,24 @@ class Db {
   }
 
   /**
+   * Get all keys of the localStorage that match the given prefix
+   * @param {String} prefix - Added to internal database prefix
+   * @returns {Array} Contains all the keys found
+   */
+  listKeys(prefix) {
+    const keyList = [];
+    const localStorageLength = localStorage.length;
+    for (let i = 0, len = localStorageLength; i < len; i++) {
+      // get only the stored data related to identities (that have the prefix)
+      if (localStorage.key(i).indexOf(this.db.prefix + prefix) !== -1) {
+        const key = localStorage.key(i);
+        keyList.push(key);
+      }
+    }
+    return keyList;
+  }
+
+  /**
    * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string.
    *
    * @param  {Object} kc - KeyContainer

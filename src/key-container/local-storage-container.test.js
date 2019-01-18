@@ -13,15 +13,12 @@ describe('[Local-storage-container]', () => {
     localStorage = new LocalStorageContainer(dataBase);
   });
 
-  it('Generate Identity master key from random seed', () => {
+  it('Generate identity master seed and recovery key', () => {
     localStorage.unlock('pass');
-    const IdMnemonic = localStorage.generateMasterAndRecoveryKey();
-    localStorage.lock();
-    const isValidMnemonic = bip39.validateMnemonic(IdMnemonic);
-    expect(isValidMnemonic).to.be.equal(true);
+    const recoveryHex = localStorage.generateIdMasterAndRecoveryKey();
+    localStorage.lock('pass');
   });
 
-  it('Generate Identity master key from known mnemonic', () => {
-    
+  it('List all identities stored', () => {
   });
 });
