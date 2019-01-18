@@ -247,8 +247,8 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
   for (var i = 0; i < proof.proofs.length; i++) {
     mtpEx = proof.proofs[i].mtp0
     mtpNoEx = proof.proofs[i].mtp1
-    var leafNoEx = leaf
-    incClaimVersion(leafNoEx)
+    //var leafNoEx = leaf
+    //incClaimVersion(leafNoEx)
     rootKey = proof.proofs[i].root
 
     if (!isMerkleTreeProofExistence(mtpEx)) {
@@ -258,6 +258,11 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
     console.trace(leaf);
     console.trace(leaf.hi(), leaf.hv());
     if (smt.checkProof(rootKey, mtpEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
+      console.log("rootKey: " + rootKey);
+      console.log("proof: " + mtpEx);
+      console.log("hi: " + utils.bytesToHex(leaf.hi()));
+      console.log("hv: " + utils.bytesToHex(leaf.hv()));
+      console.log("leaf: " + leaf.toHexadecimal());
       console.trace(leaf);
       return false; // TODO throw error
     }
@@ -265,6 +270,7 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
       console.trace();
       return false; // TODO throw error
     }
+    incClaimVersion(leaf)
     if (smt.checkProof(rootKey, mtpNoEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
       console.trace();
       return false; // TODO throw error
@@ -278,11 +284,8 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
     const ethId = proof.proofs[i].aux.ethId;
     leaf = newSetRootClaim(version, era, ethId, rootKey);
   }
-  if (rootKey !== proof.rootKey) {
-    console.trace();
-    return false;
-  }
   if (checkRootKeyInBlockchain(rootKey) !== true) { // TODO
+    // TODO: maybe check root signature
     console.trace();
     return false;
   }
