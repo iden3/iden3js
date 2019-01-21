@@ -52,7 +52,30 @@ class LocalStorageContainer {
    * @returns {Bool} - Lock / unlock
    */
   isUnlock() {
-    return !!this.encryptionKey;
+    return this.encryptionKey;
+  }
+
+  /**
+   * Save a given key - value pair
+   * @param {String} - Key
+   * @param {Object} - Value
+   * @returns {Bool} - True if databe has been written correctly, False otherwise
+   */
+  saveObject(key, value) {
+    this.db.insert(this.prefix + key, JSON.stringify(value));
+  }
+
+  /**
+   * Generates master mnemonic
+   * @param {String} - Mnemonic to store
+   * @returns {Bool} - True if databe has been written correctly, False otherwise
+   */
+  generateMasterSeed(mnemonic = bip39.generateMnemonic()) {
+    if (this.isUnlock()) {
+      this.saveMasterSeed(mnemonic);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -64,23 +87,24 @@ class LocalStorageContainer {
     if (this.isUnlock()) {
       const seedEncrypted = kcUtils.encrypt(this.encryptionKey, masterSeed);
       this.db.insert(`${this.prefix}masterSeed`, seedEncrypted);
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
    * Get master seed
+   * @param {String} pass - Passphrase enter by the user
    * @returns {String} Mnemonic representing the master seed
    */
-  getMasterSeed() {
+  getMasterSeed(pass = this.encryptionKey) {
     if (this.isUnlock()) {
       const seedKey = this.db.listKeys(`${this.prefix}masterSeed`);
-      if (test.length === 0) {
+      if (seedKey.length === 0) {
         return undefined;
       }
       const seedEncrypted = this.db.get(seedKey);
-      return kcUtils.decrypt(this.encryptionKey, seedEncrypted);
+      return kcUtils.decrypt(pass, seedEncrypted);
     }
     return undefined;
   }
@@ -90,46 +114,59 @@ class LocalStorageContainer {
    * @param {String} seed - Master seed
    * @return {Bool} - True if function succeeds otherwise false
    */
-  generateIdSeed(masterSeed) {
+  generateKeySeed(masterSeed) {
     if (this.isUnlock()) {
       const root = hdkey.fromMasterSeed(masterSeed);
-      const pathId = "m/44'/60'/0'";
+      const pathKey = "m/44'/60'/0'";
       // Identity master generation
-      const nodeId = root.derive(pathId);
-      const privKId = nodeId._privateKey;
-      const idSeed = bip39.entropyToMnemonic(privKId);
-      const idSeedEncrypted = kcUtils.encrypt(this.encryptionKey, idSeed);
-      const pathIdSeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(Buffer.alloc(8)));
-      const lenBuff = Buffer.alloc(2);
-      lenBuff.writeUInt16BE(idSeedEncrypted.length);
-      const lenStr = utils.bytesToHex(lenBuff);
-      const fullElementDb = lenStr.concat([idSeedEncrypted, pathIdSeedEncrypted]);
-      this.db.insert(`${this.prefix}idSeed`, fullElementDb);
-      return false;
+      const nodeId = root.derive(pathKey);
+      const privKey = nodeId._privateKey;
+      const keySeed = bip39.entropyToMnemonic(privKey);
+      const keySeedEncrypted = kcUtils.encrypt(this.encryptionKey, keySeed);
+      const path = Buffer.alloc(4);
+      path.writeUInt32BE(0);
+      const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(path));
+      this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
    * Gets identity seed and its current path
    * @return {Object} - Contains identity seed and current path
    */
-  getIdSeed() {
+  getKeySeed() {
     if (this.isUnlock()) {
-      const idSeedKey = this.db.listKeys(`${this.prefix}idSeed`);
-      if (idSeedKey.length === 0) {
+      const keySeedDb = this.db.listKeys(`${this.prefix}keySeed`);
+      if (keySeedDb.length === 0) {
         return undefined;
       }
-      const elementStr = this.db.get(idSeedKey);
-      const lenIdHex = elementStr.substring(0, 6);
-      const lenId = utils.hexToBytes(lenIdHex).readUInt16BE();
-      const idSeedEncrypted = elementStr.substring(6, lenId + 6);
-      const pathIdSeedEncrypted = elementStr.substring(lenId + 7);
-      const idSeed = kcUtils.decrypt(this.encryptionKey, idSeedEncrypted);
-      const pathIdSeed = kcUtils.decrypt(this.encryptionKey, pathIdSeedEncrypted);
-      return { idSeed, pathIdSeed };
+      const { keySeedEncrypted, pathKeySeedEncrypted } = JSON.parse(this.db.get(keySeedDb));
+      const keySeed = kcUtils.decrypt(this.encryptionKey, keySeedEncrypted);
+      const pathKeySeed = kcUtils.decrypt(this.encryptionKey, pathKeySeedEncrypted);
+      const pathKey = (utils.hexToBytes(pathKeySeed)).readUInt32BE();
+      return { keySeed, pathKey };
     }
     return undefined;
+  }
+
+  /**
+   * Gets identity seed and its current path
+   * @return {Object} - Contains identity seed and current path
+   */
+  increaseKeyPath() {
+    if (this.isUnlock()) {
+      const { keySeed, pathKey } = this.getKeySeed();
+      const increasePathKey = pathKey + 1;
+      const pathKeyDb = Buffer.alloc(4);
+      pathKeyDb.writeUInt32BE(increasePathKey);
+      const keySeedEncrypted = kcUtils.encrypt(this.encryptionKey, keySeed);
+      const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKeyDb));
+      this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -137,7 +174,7 @@ class LocalStorageContainer {
    * @param {String} seed - Master seed
    * @return {String} - Public recovery address
    */
-  generateRecoverySeed(masterSeed) {
+  generateRecoveryAddr(masterSeed) {
     if (this.isUnlock()) {
       const root = hdkey.fromMasterSeed(masterSeed);
       const pathRecovery = "m/44'/60'/1'";
@@ -149,6 +186,45 @@ class LocalStorageContainer {
       const privRecoveryHexEncrypted = kcUtils.encrypt(this.encryptionKey, privRecoveryHex);
       this.db.insert(this.prefix + CONSTANTS.IDRECOVERYPREFIX + addressRecoveryHex, privRecoveryHexEncrypted);
       return addressRecoveryHex;
+    }
+    return undefined;
+  }
+
+  /**
+   * Generates a random key from a given key seed and its path
+   * @param {UInt32} keyProfilePath - First path to derive the key
+   * @param {UInt32} keyPath - Second path to derive the key
+   * @returns {String} New key generated
+   */
+  generateSingleKey(keyProfilePath, keyPath) {
+    if (this.isUnlock()) {
+      let path = "m/44'/60'/0'/";
+      path = `${path + keyProfilePath}/${keyPath}`;
+      const { keySeed } = this.getKeySeed();
+      const root = hdkey.fromMasterSeed(keySeed);
+      const addrNode = root.derive(path);
+      const privK = addrNode._privateKey;
+      const address = ethUtil.privateToAddress(addrNode._privateKey);
+      const addressHex = utils.bytesToHex(address);
+      const privKHex = utils.bytesToHex(privK);
+      const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
+      this.db.insert(this.prefix + addressHex, privKHexEncrypted);
+      return addressHex;
+    }
+    return undefined;
+  }
+
+  /**
+   * Gets recovery seed from the data base
+   * @return {String} - Recovery public address and its private address
+   */
+  getRecoveryAddr() {
+    if (this.isUnlock()) {
+      const idSeedKey = this.db.listKeys(this.prefix + CONSTANTS.IDRECOVERYPREFIX);
+      if (idSeedKey.length === 0) {
+        return undefined;
+      }
+      return idSeedKey[0].replace(this.prefix + CONSTANTS.IDRECOVERYPREFIX, '');
     }
     return undefined;
   }
@@ -178,13 +254,18 @@ class LocalStorageContainer {
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
-
       keys.push(addressHex);
-      // localStorage.setItem(this.prefix + addressHex, privKHexEncrypted);
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
+      // Consider key 0 as the operational
+      // Retrieve and save public key from private operational
+      if (i === 0) {
+        const pubK = ethUtil.privateToPublic(addrNode._privateKey);
+        const pubKHex = utils.bytesToHex(pubK);
+        keys.push(pubKHex);
+        this.db.insert(this.prefix + pubKHex, privKHexEncrypted);
+      }
     }
-
-    return { keys, mnemonic };
+    return { keys };
   }
 
   /**

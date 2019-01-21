@@ -1,5 +1,6 @@
 const claim = require('../claim/claim');
-
+const DataBase = require('../db/db');
+const CONSTANTS = require('../constants');
 /**
  * @param  {String} keyRecover
  * @param  {String} keyRevoke
@@ -8,22 +9,60 @@ const claim = require('../claim/claim');
  * @param  {String} implementation
  */
 class Id {
-  constructor(keyRecover, keyRevoke, keyOp, relay, relayAddr, implementation = '', backup = undefined) {
+  constructor(keyRecover, keyRevoke, keyOp, keyOpPub, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
+    const db = new DataBase();
+    this.db = db;
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
     this.keyOperational = keyOp;
+    this.keyOperationalPub = keyOpPub;
     this.relay = relay;
     this.relayAddr = relayAddr; // this can be get from a relay endpoint
     this.idAddr = undefined;
     this.implementation = implementation;
     this.backup = backup;
+    this.prefix = CONSTANTS.IDPREFIX;
+    this.keyProfilePath = keyProfilePath;
+  }
+
+  /**
+   * Save keys associated with this Identity address
+   * @returns {Bool} - Acknowledge
+   */
+  saveKeys() {
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const objectValue = {
+      keyProfilePath: this.keyProfilePath,
+      keyPath: 3,
+      operational: this.keyOperational,
+      recover: this.keyRecover,
+      revoke: this.keyRevoke,
+    };
+    this.db.insert(stringKey, JSON.stringify(objectValue));
+    return true;
+  }
+
+  /**
+   * Create new key for this identity and store it into its
+   * @param {Object} keyContainer - Object containing all the keys created on local storage
+   * @returns {Bool} Acknowledge
+   */
+  createKey(keyContainer, keyLabel) {
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const keyObject = JSON.parse(this.db.get(stringKey));
+    const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath);
+    keyObject.keyPath += 1;
+    keyObject[keyLabel] = newKey;
+    this.db.insert(stringKey, JSON.stringify(keyObject));
+    return newKey;
   }
 
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
-    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke)
+    return this.relay.createID(this.keyOperationalPub, this.keyOperational, this.keyRecover, this.keyRevoke)
       .then((res) => {
         this.idAddr = res.data.idaddr;
+        this.saveKeys();
         return this.idAddr;
       });
   }
