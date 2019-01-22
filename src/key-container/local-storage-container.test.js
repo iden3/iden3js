@@ -31,12 +31,21 @@ describe('[Local-storage-container]', () => {
   it('Save a given master seed and retrieve it from local storage', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.unlock('pass');
-    const ack = keyContainer.saveMasterSeed(mnemonic);
+    const ack = keyContainer.generateMasterSeed(mnemonic);
     if (ack) {
       const seedDb = keyContainer.getMasterSeed();
       keyContainer.lock();
       expect(mnemonic).to.be.equal(seedDb);
     }
+  });
+
+  it('Generate recovery adress and retrieve it from database', () => {
+    keyContainer.unlock('pass');
+    const seedDb = keyContainer.getMasterSeed();
+    const recoveryAddr = keyContainer.generateRecoveryAddr(seedDb);
+    const recoveryAddrFromDatabase = keyContainer.getRecoveryAddr();
+    expect(recoveryAddr).to.be.equal(recoveryAddrFromDatabase);
+    keyContainer.lock();
   });
 
   it('Generate key seed', () => {
@@ -51,19 +60,10 @@ describe('[Local-storage-container]', () => {
     }
   });
 
-  it('Generate recovery adress and retrieve it from database', () => {
-    keyContainer.unlock('pass');
-    const seedDb = keyContainer.getMasterSeed();
-    const recoveryAddr = keyContainer.generateRecoveryAddr(seedDb);
-    const recoveryAddrFromDatabase = keyContainer.getRecoveryAddr();
-    expect(recoveryAddr).to.be.equal(recoveryAddrFromDatabase);
-    keyContainer.lock();
-  });
-
   it('Generate keys {operational, recovery, revoke} from key path 0', () => {
     keyContainer.unlock('pass');
     const { keySeed, pathKey } = keyContainer.getKeySeed();
-    const { keys } = keyContainer.generateKeysMnemonic(keySeed, pathKey);
+    const { keys } = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
     keyContainer.increaseKeyPath();
     const pathKey1 = (keyContainer.getKeySeed()).pathKey;
     expect(pathKey1).to.be.equal(1);
@@ -71,6 +71,12 @@ describe('[Local-storage-container]', () => {
     expect(keys[1]).to.be.not.equal(undefined);
     expect(keys[2]).to.be.not.equal(undefined);
     expect(keys[3]).to.be.not.equal(undefined);
+    keyContainer.lock();
+  });
+
+  it('Generate keys {operational, recovery, revoke} from key path 1', () => {
+    keyContainer.unlock('pass');
+    
     keyContainer.lock();
   });
 

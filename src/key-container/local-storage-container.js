@@ -48,11 +48,14 @@ class LocalStorageContainer {
   }
 
   /**
-   * Check if local storage container is locked
+   * Check if local storage container is unlocked
    * @returns {Bool} - Lock / unlock
    */
   isUnlock() {
-    return this.encryptionKey;
+    if (this.encryptionKey) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -70,7 +73,7 @@ class LocalStorageContainer {
    * @param {String} - Mnemonic to store
    * @returns {Bool} - True if databe has been written correctly, False otherwise
    */
-  generateMasterSeed(mnemonic = bip39.generateMnemonic()) {
+  generateMasterSeed(mnemonic = bip39.generateMnemonic()) { // Check isvalidmnemonic
     if (this.isUnlock()) {
       this.saveMasterSeed(mnemonic);
       return true;
@@ -84,12 +87,8 @@ class LocalStorageContainer {
    * @returns {Bool} - True if databe has been written correctly, False otherwise
    */
   saveMasterSeed(masterSeed) {
-    if (this.isUnlock()) {
-      const seedEncrypted = kcUtils.encrypt(this.encryptionKey, masterSeed);
-      this.db.insert(`${this.prefix}masterSeed`, seedEncrypted);
-      return true;
-    }
-    return false;
+    const seedEncrypted = kcUtils.encrypt(this.encryptionKey, masterSeed);
+    this.db.insert(`${this.prefix}masterSeed`, seedEncrypted);
   }
 
   /**
@@ -236,7 +235,7 @@ class LocalStorageContainer {
    *
    * @returns {Object}
    */
-  generateKeysMnemonic(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivedKeys = 3) {
+  generateKeysFromKeyPath(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivedKeys = 3) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
       // KeyContainer not unlocked
       console.error('Error: KeyContainer not unlocked');

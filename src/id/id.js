@@ -9,7 +9,7 @@ const CONSTANTS = require('../constants');
  * @param  {String} implementation
  */
 class Id {
-  constructor(keyRecover, keyRevoke, keyOp, keyOpPub, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
+  constructor(keyOp, keyOpPub, keyRecover, keyRevoke, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
     this.keyRecover = keyRecover;
@@ -33,10 +33,13 @@ class Id {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const objectValue = {
       keyProfilePath: this.keyProfilePath,
-      keyPath: 3,
-      operational: this.keyOperational,
-      recover: this.keyRecover,
-      revoke: this.keyRevoke,
+      keyPath: 4,
+      keys: {
+        operational: this.keyOperational,
+        operationalPub: this.keyOperationalPub,
+        recover: this.keyRecover,
+        revoke: this.keyRevoke,
+      },
     };
     this.db.insert(stringKey, JSON.stringify(objectValue));
     return true;
@@ -52,9 +55,19 @@ class Id {
     const keyObject = JSON.parse(this.db.get(stringKey));
     const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath);
     keyObject.keyPath += 1;
-    keyObject[keyLabel] = newKey;
+    keyObject.keys[keyLabel] = newKey;
     this.db.insert(stringKey, JSON.stringify(keyObject));
     return newKey;
+  }
+
+  /**
+   * Get all the keys associated to this idenity
+   * @returns {Object} Contains all the keys as an object in a form: { label key - key }
+   */
+  getKeys() {
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const keyObject = JSON.parse(this.db.get(stringKey));
+    return keyObject.keys;
   }
 
   createID() {
