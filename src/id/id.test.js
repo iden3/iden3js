@@ -1,8 +1,7 @@
 const chai = require('chai');
 const Db = require('../db/db');
 const LocalStorageContainer = require('../key-container/local-storage-container');
-const Id = require('./id')
-const utils = require('./../utils');
+const Id = require('./id');
 
 const { expect } = chai;
 
