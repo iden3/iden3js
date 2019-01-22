@@ -13,6 +13,7 @@ describe('[Local-storage-container] Test single functions', () => {
   });
 
   it('Get master seed without generate it one', () => {
+    keyContainer.deleteAll();
     keyContainer.unlock('pass');
     const mnemonic = keyContainer.getMasterSeed();
     expect(mnemonic).to.be.equal(undefined);
