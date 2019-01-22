@@ -73,8 +73,8 @@ class LocalStorageContainer {
    * @param {String} - Mnemonic to store
    * @returns {Bool} - True if databe has been written correctly, False otherwise
    */
-  generateMasterSeed(mnemonic = bip39.generateMnemonic()) { // Check isvalidmnemonic
-    if (this.isUnlock()) {
+  generateMasterSeed(mnemonic = bip39.generateMnemonic()) {
+    if (this.isUnlock() && bip39.validateMnemonic(mnemonic)) {
       this.saveMasterSeed(mnemonic);
       return true;
     }
@@ -99,11 +99,40 @@ class LocalStorageContainer {
   getMasterSeed(pass = this.encryptionKey) {
     if (this.isUnlock()) {
       const seedKey = this.db.listKeys(`${this.prefix}masterSeed`);
+      let mnemonic = '';
       if (seedKey.length === 0) {
         return undefined;
       }
       const seedEncrypted = this.db.get(seedKey);
-      return kcUtils.decrypt(pass, seedEncrypted);
+      try {
+        mnemonic = kcUtils.decrypt(pass, seedEncrypted);
+      } catch (error) {
+        return undefined;
+      }
+      return mnemonic;
+    }
+    return undefined;
+  }
+
+  /**
+   * Creates all the keys needed to create an identuty aftwrwards
+   * @returns {Object} - It contains all the keys generated, undefined otherwise
+   */
+  createKeys() {
+    if (this.isUnlock()) {
+      let objectKeySeed;
+      // Get key seed and generate if it is not already created
+      objectKeySeed = this.getKeySeed();
+      // Generate key seed if it not exist
+      if (objectKeySeed === undefined) {
+        if (this.generateKeySeed(this.getMasterSeed())) {
+          objectKeySeed = this.getKeySeed();
+        }
+      }
+      // Creates keys
+      const { keys } = this.generateKeysFromKeyPath(objectKeySeed.keySeed, objectKeySeed.pathKey);
+      this.increaseKeyPath();
+      return keys;
     }
     return undefined;
   }
@@ -116,15 +145,15 @@ class LocalStorageContainer {
   generateKeySeed(masterSeed) {
     if (this.isUnlock()) {
       const root = hdkey.fromMasterSeed(masterSeed);
-      const pathKey = "m/44'/60'/0'";
+      const pathRoot = "m/44'/60'/0'";
       // Identity master generation
-      const nodeId = root.derive(pathKey);
+      const nodeId = root.derive(pathRoot);
       const privKey = nodeId._privateKey;
       const keySeed = bip39.entropyToMnemonic(privKey);
       const keySeedEncrypted = kcUtils.encrypt(this.encryptionKey, keySeed);
-      const path = Buffer.alloc(4);
-      path.writeUInt32BE(0);
-      const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(path));
+      const pathKey = Buffer.alloc(4);
+      pathKey.writeUInt32BE(0);
+      const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKey));
       this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
       return true;
     }
@@ -232,8 +261,7 @@ class LocalStorageContainer {
    * @param  {String} mnemonic - String with 12 words
    * @param {Number} pathProfile - indicates the penultimate layer of the derivation path, for the different identity profiles
    * @param  {Number} numberOfDerivatedKeys - indicates the last layer of the derivation path, for the different keys of the identity profile
-   *
-   * @returns {Object}
+   * @returns {Object} It contains all the keys generated
    */
   generateKeysFromKeyPath(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivedKeys = 3) {
     if (!this.encryptionKey || mnemonic.constructor !== String) {
