@@ -72,7 +72,7 @@ class Id {
 
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
-    return this.relay.createID(this.keyOperationalPub, this.keyOperational, this.keyRecover, this.keyRevoke)
+    return this.relay.createID(this.keyOperationalPub, this.keyRecover, this.keyRevoke)
       .then((res) => {
         this.idAddr = res.data.idaddr;
         this.saveKeys();

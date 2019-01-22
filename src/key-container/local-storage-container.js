@@ -9,6 +9,8 @@ const kcUtils = require('./kc-utils');
 
 nacl.util = require('tweetnacl-util');
 
+const { secp256k1 } = ethUtil;
+
 if (typeof localStorage === 'undefined' || localStorage === null) {
   const LocalStorage = require('node-localstorage').LocalStorage;
   localStorage = new LocalStorage('./tmp');
@@ -286,10 +288,12 @@ class LocalStorageContainer {
       // Consider key 0 as the operational
       // Retrieve and save public key from private operational
       if (i === 0) {
-        const pubK = ethUtil.privateToPublic(addrNode._privateKey);
-        const pubKHex = utils.bytesToHex(pubK);
-        keys.push(pubKHex);
-        this.db.insert(this.prefix + pubKHex, privKHexEncrypted);
+        // const pubK = ethUtil.privateToPublic(addrNode._privateKey);
+        // const pubKCompressed = secp256k1.publicKeyConvert(pubK);
+        const pubKCompressed = addrNode._publicKey;
+        const pubKCompressedHex = utils.bytesToHex(pubKCompressed);
+        keys.push(pubKCompressedHex);
+        this.db.insert(this.prefix + pubKCompressedHex, privKHexEncrypted);
       }
     }
     return { keys };
