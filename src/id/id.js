@@ -1,5 +1,6 @@
 const claim = require('../claim/claim');
-
+const DataBase = require('../db/db');
+const CONSTANTS = require('../constants');
 /**
  * @param  {String} keyRecover
  * @param  {String} keyRevoke
@@ -8,22 +9,72 @@ const claim = require('../claim/claim');
  * @param  {String} implementation
  */
 class Id {
-  constructor(keyRecover, keyRevoke, keyOp, relay, relayAddr, implementation = '', backup = undefined) {
+  constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
+    const db = new DataBase();
+    this.db = db;
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
-    this.keyOperational = keyOp;
+    this.keyOperationalPub = keyOpPub;
     this.relay = relay;
     this.relayAddr = relayAddr; // this can be get from a relay endpoint
     this.idAddr = undefined;
     this.implementation = implementation;
     this.backup = backup;
+    this.prefix = CONSTANTS.IDPREFIX;
+    this.keyProfilePath = keyProfilePath;
+  }
+
+  /**
+   * Save keys associated with this Identity address
+   * @returns {Bool} - Acknowledge
+   */
+  saveKeys() {
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const objectValue = {
+      keyProfilePath: this.keyProfilePath,
+      keyPath: 4,
+      keys: {
+        operational: this.keyOperational,
+        operationalPub: this.keyOperationalPub,
+        recover: this.keyRecover,
+        revoke: this.keyRevoke,
+      },
+    };
+    this.db.insert(stringKey, JSON.stringify(objectValue));
+    return true;
+  }
+
+  /**
+   * Create new key for this identity and store it into its
+   * @param {Object} keyContainer - Object containing all the keys created on local storage
+   * @returns {Bool} Acknowledge
+   */
+  createKey(keyContainer, keyLabel) {
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const keyObject = JSON.parse(this.db.get(stringKey));
+    const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath);
+    keyObject.keyPath += 1;
+    keyObject.keys[keyLabel] = newKey;
+    this.db.insert(stringKey, JSON.stringify(keyObject));
+    return newKey;
+  }
+
+  /**
+   * Get all the keys associated to this idenity
+   * @returns {Object} Contains all the keys as an object in a form: { label key - key }
+   */
+  getKeys() {
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const keyObject = JSON.parse(this.db.get(stringKey));
+    return keyObject.keys;
   }
 
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
-    return this.relay.createID(this.keyOperational, this.keyRecover, this.keyRevoke)
+    return this.relay.createID(this.keyOperationalPub, this.keyRecover, this.keyRevoke)
       .then((res) => {
         this.idAddr = res.data.idaddr;
+        this.saveKeys();
         return this.idAddr;
       });
   }
@@ -69,21 +120,21 @@ class Id {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  authorizeKSignClaim(kc, kSign, proofOfKSign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    // TODO get proofOfKSign
-
-    const authorizeKSignClaim = new claim.AuthorizeKSignClaim(keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
-    const signatureObj = kc.sign(kSign, authorizeKSignClaim.hex());
+  authorizeKSignClaim(kc, ksign, proofOfKSign) {
+    const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
+      version: 0, pubKeyCompressed: this.keyOperationalPub,
+    });
+    const signatureObj = kc.sign(ksign, authorizeKSignClaim.hex());
     const bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
       signatureHex: signatureObj.signature,
-      kSign,
+      ksign,
     };
     const self = this;
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
-          self.backup.backupData(kc, self.idAddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+          self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
         }
         return res;
       });
@@ -94,7 +145,7 @@ class Id {
    * @param  {String} name
    */
   bindID(kc, name) {
-    return this.relay.bindID(kc, this.idAddr, this.keyOperational, name);
+    return this.relay.bindID(kc, this.idAddr, this.keyOperationalPub, name);
   }
 }
 

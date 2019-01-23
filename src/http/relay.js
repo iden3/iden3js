@@ -30,6 +30,7 @@ class Relay {
    * @returns {Object}
    */
   postClaim(idAddr, bytesSignedMsg) {
+    // 
     return axios.post(`${this.url}/claim/${idAddr}`, bytesSignedMsg);
   }
 
@@ -90,7 +91,7 @@ class Relay {
    */
   createID(op, rec, rev) {
     const keys = {
-      operational: op,
+      operationalpk: op,
       recoverer: rec,
       revokator: rev,
     };
