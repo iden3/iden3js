@@ -72,7 +72,7 @@ describe('[id] new Id()', () => {
     // Check key generated is not random
     expect(kSign).to.be.equal('0xaac4ed37a11e6a9170cb19a6e558913dc3efa6a7');
 
-    await id.authorizeKSignClaim(keyContainer, id.keyOperational, kSign, 'appToAuthName', 'authz', 1535208350, 1535208350)
+    await id.authorizeKSignClaim(keyContainer, id.keyOperationalPub, kSign)
       .then((authRes) => {
         proofOfKSign = authRes.data.proofOfClaim;
         expect(authRes.status).to.be.equal(200);
@@ -87,6 +87,10 @@ describe('[id] new Id()', () => {
   });
 }); // Final describe
 
+// TODO
+// Post claim authorizeKSign256K1 claim with operationalPub --> handle error already claim exist
+// Post claim with any claim and get proofOfClaim --> check proof given by the relay is True
+// Create test for each commit, as well as in Id.js
 /*
 describe('[id] id.bindID()', () => {
   const keyContainer = new iden3.KeyContainer('localStorage', db);

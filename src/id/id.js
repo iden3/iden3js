@@ -120,20 +120,21 @@ class Id {
    * @param  {Number} validUntil
    * @returns {Object}
    */
-  // TODO get proofOfKSign
-  authorizeKSignClaim(kc, kSign, proofOfKSign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    const authorizeKSignClaim = new claim.AuthorizeKSignClaim(keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
-    const signatureObj = kc.sign(kSign, authorizeKSignClaim.hex());
+  authorizeKSignClaim(kc, ksign, proofOfKSign) {
+    const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
+      version: 0, pubKeyCompressed: this.keyOperationalPub,
+    });
+    const signatureObj = kc.sign(ksign, authorizeKSignClaim.hex());
     const bytesSignedMsg = {
       valueHex: authorizeKSignClaim.hex(),
       signatureHex: signatureObj.signature,
-      kSign,
+      ksign,
     };
     const self = this;
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
-          self.backup.backupData(kc, self.idAddr, kSign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+          self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
         }
         return res;
       });

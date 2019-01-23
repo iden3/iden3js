@@ -30,6 +30,7 @@ class Relay {
    * @returns {Object}
    */
   postClaim(idAddr, bytesSignedMsg) {
+    // 
     return axios.post(`${this.url}/claim/${idAddr}`, bytesSignedMsg);
   }
 
