@@ -13,6 +13,7 @@ describe('[id] new Id()', () => {
   const key0id = kc.importKey(testPrivKHex);
   const relay = new iden3.Relay('http://127.0.0.1:8000');
   const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
+	console.log("key", key0id);
 
   it('new Id without privK', () => {
     expect(id.keyRecover).to.be.equal(key0id);
