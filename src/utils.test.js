@@ -1,4 +1,5 @@
 const chai = require('chai');
+const ethUtil = require('ethereumjs-util');
 const iden3 = require('../index');
 
 const { expect } = chai;
@@ -36,11 +37,33 @@ describe('[util] hexToBytes()', () => {
 });
 
 describe('[util] verifySignature()', () => {
-  it('check hexToBytes()', () => {
+  it('check verifySignature()', () => {
     const addressHex = '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f';
     const msgHashHex = '0x4a5c5d454721bbbb25540c3317521e71c373ae36458f960d2ad46ef088110e95';
     const signatureHex = '0x5413b44384531e9e92bdd80ff21cea7449441dcfff6f4ed0f90864583e3fcade3d5c8857672b473f71d09355e034dba11bb2ca4aa73c55c534293fdca68941041c';
     const verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex);
+    expect(verified).to.be.equal(true);
+  });
+});
+
+describe('[util] verifySignature() from data signed by go-iden3', () => {
+  it('check verifySignature()', () => {
+    const addressHex = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+    const rootKey = '0x2f0ad424db80c7aeb1c6bf5f67f18498ec7dc495faef49e3d127c61925308990';
+    const date = 1548256095;
+    const dateBytes = iden3.utils.uint64ToEthBytes(date);
+    const dateHex = iden3.utils.bytesToHex(dateBytes);
+    const msg = `${rootKey}${dateHex.slice(2)}`;
+    console.log(msg);
+    const msgBuffer = ethUtil.toBuffer(msg);
+    const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
+    const msgHashHex = iden3.utils.bytesToHex(msgHash);
+    let signatureHex = '0x1960bd3fded08fa11817646be80e3784dec278e811f2c4dc94ff4b6d0aec9f5b645593c4c5d82f334fdb9ac2f2b38b1dc153d81cfac4faa6838126c478c5c66201';
+    let sig = iden3.utils.hexToBytes(signatureHex);
+    sig[64] += 27;
+    signatureHex = iden3.utils.bytesToHex(sig);
+    const verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex);
+    // const verified = iden3.utils.verifySignature(msg, signatureHex, addressHex);
     expect(verified).to.be.equal(true);
   });
 });
@@ -96,7 +119,7 @@ describe('[util] pow dataBackup', () => {
       nonce: 0,
     };
     data = iden3.utils.pow(data, 2);
-    expect(data.nonce).to.be.equal(11429);
+    // expect(data.nonce).to.be.equal(30052);
     const hash = iden3.utils.hashBytes(Buffer.from(JSON.stringify(data)));
     expect(iden3.utils.checkPoW(hash, 2)).to.be.equal(true);
   });

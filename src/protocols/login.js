@@ -234,7 +234,25 @@ const isMerkleTreeProofExistence = function isMerkleTreeProofExistence(proofHex)
  * @param{ProofClaimFull} proof
  */
 const verifyProofClaimFull = function verifyProofClaimFull(proof) {
-  // TODO? Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
+  // Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
+  const rootK = proof.proofs[proof.proofs.length - 1].root;
+  const date = proof.proofs[proof.proofs.length - 1].date;
+  const dateBytes = iden3.utils.uint64ToEthBytes(date);
+  const dateHex = iden3.utils.bytesToHex(dateBytes);
+  const msg = `${rootK}${dateHex.slice(2)}`;
+  const msgBuffer = ethUtil.toBuffer(msg);
+  const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
+  const msgHashHex = iden3.utils.bytesToHex(msgHash);
+  const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c'; // TODO tmp harcoded
+  let sig = iden3.utils.hexToBytes(proof.rootSig);
+  sig[64] += 27;
+  const signatureHex = iden3.utils.bytesToHex(sig);
+  if (!utils.verifySignature(utils.bytesToHex(msgHash), proof.rootSig, relayAddr)) { // mHex, sigHex, addressHex
+  // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) { // mHex, sigHex, addressHex
+	  console.trace();
+	return false;
+  }
+
 
   // For now we only allow proof verification of Nameserver (one level) and
   // Relay (two levels: relay + user)
@@ -257,8 +275,8 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
       console.trace(mtpEx);
       return false; // TODO throw error
     }
-    console.trace(leaf);
-    console.trace(leaf.hi(), leaf.hv());
+    // console.trace(leaf);
+    // console.trace(leaf.hi(), leaf.hv());
     if (smt.checkProof(rootKey, mtpEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
       console.log("rootKey: " + rootKey);
       console.log("proof: " + mtpEx);
@@ -286,12 +304,7 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof) {
     const ethAddr = proof.proofs[i].aux.ethAddr;
     leaf = newSetRootClaim(version, era, ethAddr, rootKey);
   }
-  if (checkRootKeyInBlockchain(rootKey) !== true) { // TODO
-    // TODO: maybe check root signature
-    console.trace();
-    return false;
-  }
-  console.trace();
+
   return true;
 }
 
