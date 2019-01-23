@@ -32,6 +32,7 @@ describe('[Local-storage-container] Test single functions', () => {
 
   it('Generate known master seed, save it and access with different passphrase', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+
     keyContainer.unlock('pass');
     const ack = keyContainer.generateMasterSeed(mnemonic);
     if (ack) {
@@ -45,6 +46,7 @@ describe('[Local-storage-container] Test single functions', () => {
 
   it('Save a known master seed and retrieve it from local storage', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+
     keyContainer.unlock('pass');
     const ack = keyContainer.generateMasterSeed(mnemonic);
     if (ack) {
@@ -59,6 +61,7 @@ describe('[Local-storage-container] Test single functions', () => {
     const seedDb = keyContainer.getMasterSeed();
     const recoveryAddr = keyContainer.generateRecoveryAddr(seedDb);
     const recoveryAddrFromDatabase = keyContainer.getRecoveryAddr();
+
     expect(recoveryAddr).to.be.equal(recoveryAddrFromDatabase);
     keyContainer.lock();
   });
@@ -70,6 +73,7 @@ describe('[Local-storage-container] Test single functions', () => {
     if (ack) {
       const { keySeed, pathKey } = keyContainer.getKeySeed();
       keyContainer.lock();
+
       expect(pathKey).to.be.equal(0);
       expect(keySeed).to.be.equal('drift true reunion shoulder achieve stereo blame absurd evolve elbow include hospital hint evil goddess child shuffle devote game power salt ensure beyond brush');
     }
@@ -81,6 +85,7 @@ describe('[Local-storage-container] Test single functions', () => {
     const { keys } = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
     keyContainer.increaseKeyPath();
     const pathKey1 = (keyContainer.getKeySeed()).pathKey;
+
     expect(pathKey1).to.be.equal(1);
     expect(keys[0]).to.be.not.equal(undefined);
     expect(keys[1]).to.be.not.equal(undefined);
@@ -94,6 +99,7 @@ describe('[Local-storage-container] Test single functions', () => {
     const keyProfilePath = 0;
     const keyPath = 0;
     const newAddressHex = keyContainer.generateSingleKey(keyProfilePath, keyPath);
+
     expect(newAddressHex).to.be.equal('0xc7d89fe96acdb257b434bf580b8e6eb677d445a9');
     keyContainer.lock();
   });
@@ -105,6 +111,7 @@ describe('[Local-storage-container] Test identity flow', () => {
   before('Create local storage container', () => {
     dataBase = new Db();
     keyContainer = new LocalStorageContainer(dataBase);
+    // Delete all previous { key - values } on local storage
     keyContainer.deleteAll();
   });
 
@@ -115,6 +122,7 @@ describe('[Local-storage-container] Test identity flow', () => {
     if (ack) {
       const keys = keyContainer.createKeys();
       keyContainer.lock();
+
       expect(keys).to.be.not.equal(undefined);
       expect(keys[0]).to.be.equal('0xc7d89fe96acdb257b434bf580b8e6eb677d445a9');
       expect(keys[1]).to.be.equal('0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833');
@@ -126,6 +134,7 @@ describe('[Local-storage-container] Test identity flow', () => {
   it('Check state of key seed and key path', () => {
     keyContainer.unlock('pass');
     const objectKeySeed = keyContainer.getKeySeed();
+
     expect(objectKeySeed.pathKey).to.be.equal(1);
   });
 
@@ -133,6 +142,7 @@ describe('[Local-storage-container] Test identity flow', () => {
     keyContainer.unlock('pass');
     const keys = keyContainer.createKeys();
     keyContainer.lock();
+
     expect(keys).to.be.not.equal(undefined);
     expect(keys[0]).to.be.equal('0x2dc1f223c441412c9e490042360a9eaa96db0829');
     expect(keys[1]).to.be.equal('0x0279f9574efb8f4dbffd07f386bb4736f516bd75824eae7ebda3c87ee18ac3618c');

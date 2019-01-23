@@ -97,6 +97,7 @@ class LocalStorageContainer {
    */
   saveMasterSeed(masterSeed) {
     const seedEncrypted = kcUtils.encrypt(this.encryptionKey, masterSeed);
+
     this.db.insert(`${this.prefix}masterSeed`, seedEncrypted);
   }
 
@@ -109,6 +110,7 @@ class LocalStorageContainer {
     if (this.isUnlock()) {
       const seedKey = this.db.listKeys(`${this.prefix}masterSeed`);
       let mnemonic = '';
+
       if (seedKey.length === 0) {
         return undefined;
       }
@@ -140,6 +142,7 @@ class LocalStorageContainer {
       }
       // Creates keys
       const { keys } = this.generateKeysFromKeyPath(objectKeySeed.keySeed, objectKeySeed.pathKey);
+
       this.increaseKeyPath();
       return keys;
     }
@@ -163,6 +166,7 @@ class LocalStorageContainer {
       const pathKey = Buffer.alloc(4);
       pathKey.writeUInt32BE(0);
       const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKey));
+
       this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
       return true;
     }
@@ -176,6 +180,7 @@ class LocalStorageContainer {
   getKeySeed() {
     if (this.isUnlock()) {
       const keySeedDb = this.db.listKeys(`${this.prefix}keySeed`);
+
       if (keySeedDb.length === 0) {
         return undefined;
       }
@@ -200,6 +205,7 @@ class LocalStorageContainer {
       pathKeyDb.writeUInt32BE(increasePathKey);
       const keySeedEncrypted = kcUtils.encrypt(this.encryptionKey, keySeed);
       const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKeyDb));
+
       this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
       return true;
     }
@@ -221,6 +227,7 @@ class LocalStorageContainer {
       const addressRecoveryHex = utils.bytesToHex(addressRecovery);
       const privRecoveryHex = utils.bytesToHex(privRecovery);
       const privRecoveryHexEncrypted = kcUtils.encrypt(this.encryptionKey, privRecoveryHex);
+
       this.db.insert(this.prefix + CONSTANTS.IDRECOVERYPREFIX + addressRecoveryHex, privRecoveryHexEncrypted);
       return addressRecoveryHex;
     }
@@ -236,8 +243,7 @@ class LocalStorageContainer {
    */
   generateSingleKey(keyProfilePath, keyPath) {
     if (this.isUnlock()) {
-      let path = "m/44'/60'/0'/";
-      path = `${path + keyProfilePath}/${keyPath}`;
+      const path = `m/44'/60'/0'/${keyProfilePath}/${keyPath}`;
       const { keySeed } = this.getKeySeed();
       const root = hdkey.fromMasterSeed(keySeed);
       const addrNode = root.derive(path);
@@ -246,6 +252,7 @@ class LocalStorageContainer {
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
+
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
       return addressHex;
     }
@@ -259,6 +266,7 @@ class LocalStorageContainer {
   getRecoveryAddr() {
     if (this.isUnlock()) {
       const idSeedKey = this.db.listKeys(this.prefix + CONSTANTS.IDRECOVERYPREFIX);
+
       if (idSeedKey.length === 0) {
         return undefined;
       }
@@ -291,6 +299,7 @@ class LocalStorageContainer {
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
       keys.push(addressHex);
+
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
       // Consider key 0 as the operational
       // Retrieve and save public key ( compress format ) from private operational
@@ -298,6 +307,7 @@ class LocalStorageContainer {
         const pubK = addrNode._publicKey;
         const pubKHex = utils.bytesToHex(pubK);
         keys.push(pubKHex);
+
         this.db.insert(this.prefix + pubKHex, privKHexEncrypted);
       }
     }
@@ -315,6 +325,7 @@ class LocalStorageContainer {
       // get only the stored data related to identities (that have the prefix)
       if (localStorage.key(i).indexOf(this.db.prefix + this.prefix + CONSTANTS.IDPREFIX) !== -1) {
         const identity = localStorage.key(i).replace(this.prefix + this.db.prefix, '');
+
         idList.push(identity);
       }
     }
