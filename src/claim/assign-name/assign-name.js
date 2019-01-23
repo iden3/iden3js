@@ -22,9 +22,9 @@ class AssignName {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    * @param {Object} data - Input parameters
    * Data input object contains:
-   * {Uint32} _version - Version assigned to the claim
-   * {String} _hashName - Hash regarding human readable text
-   * {String} _id - Identity bind to the hash name
+   * {Uint32} version - Version assigned to the claim
+   * {String} hashName - Hash regarding human readable text
+   * {String} id - Identity bind to the hash name
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);

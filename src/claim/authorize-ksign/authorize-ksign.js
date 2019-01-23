@@ -22,9 +22,9 @@ class AuthorizeKSign {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    * @param {Object} data - Input parameters
    * Data input object contains:
-   * {Uint32} _version - Version assigned to the claim
-   * {Bool} _sign - Sign of the coordinate X of an eliptic curve point
-   * {String} _ay - Coordinate Y of an eliptic curve point
+   * {Uint32} version - Version assigned to the claim
+   * {Bool} sign - Sign of the coordinate X of an eliptic curve point
+   * {String} ay - Coordinate Y of an eliptic curve point
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);

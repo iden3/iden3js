@@ -23,9 +23,9 @@ class Basic {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    * @param {Object} data - Input parameters
    * Data input object contains:
-   * {Uint32} _version - Version assigned to the claim
-   * {String} _index - Generic index data
-   * {String} _data - Generic data
+   * {Uint32} version - Version assigned to the claim
+   * {String} index - Generic index data
+   * {String} data - Generic data
    */
   constructor(data) {
     const versionBuff = Buffer.alloc(4);
@@ -72,8 +72,7 @@ class Basic {
 
     // element 2 composition
     // Get second part of the index
-    indexLen = this.structure.index.length - 19;
-    const secondSlotIndex = this.structure.index.slice(0, indexLen);
+    const secondSlotIndex = this.structure.index.slice(0, indexLen - 19);
     endIndex = claimEntry.elements[2].length;
     startIndex = endIndex - secondSlotIndex.length;
     claimEntry.elements[2].fill(secondSlotIndex, startIndex, endIndex);
@@ -88,8 +87,7 @@ class Basic {
 
     // element 0 composition
     // Get second part of the data
-    indexLen = this.structure.extraData.length - 31;
-    const secondSlotExtra = this.structure.extraData.slice(0, indexLen);
+    const secondSlotExtra = this.structure.extraData.slice(0, indexLen - 31);
     endIndex = claimEntry.elements[0].length;
     startIndex = claimEntry.elements[0].length - secondSlotExtra.length;
     claimEntry.elements[0].fill(secondSlotExtra, startIndex, endIndex);
