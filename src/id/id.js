@@ -9,12 +9,11 @@ const CONSTANTS = require('../constants');
  * @param  {String} implementation
  */
 class Id {
-  constructor(keyOp, keyOpPub, keyRecover, keyRevoke, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
+  constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
-    this.keyOperational = keyOp;
     this.keyOperationalPub = keyOpPub;
     this.relay = relay;
     this.relayAddr = relayAddr; // this can be get from a relay endpoint
@@ -121,9 +120,8 @@ class Id {
    * @param  {Number} validUntil
    * @returns {Object}
    */
+  // TODO get proofOfKSign
   authorizeKSignClaim(kc, kSign, proofOfKSign, keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil) {
-    // TODO get proofOfKSign
-
     const authorizeKSignClaim = new claim.AuthorizeKSignClaim(keyToAuthorize, applicationName, applicationAuthz, validFrom, validUntil);
     const signatureObj = kc.sign(kSign, authorizeKSignClaim.hex());
     const bytesSignedMsg = {
@@ -146,7 +144,7 @@ class Id {
    * @param  {String} name
    */
   bindID(kc, name) {
-    return this.relay.bindID(kc, this.idAddr, this.keyOperational, name);
+    return this.relay.bindID(kc, this.idAddr, this.keyOperationalPub, name);
   }
 }
 
