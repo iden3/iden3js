@@ -47,12 +47,14 @@ class Id {
   /**
    * Create new key for this identity and store it into its
    * @param {Object} keyContainer - Object containing all the keys created on local storage
+   * @param {String} keyLabel - Label associated with the key or address created
+   * @param {Bool} isPublic - Determines if it is wanted to generate a public key or a public address
    * @returns {Bool} Acknowledge
    */
-  createKey(keyContainer, keyLabel) {
+  createKey(keyContainer, keyLabel, isPublic = false) {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
-    const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath);
+    const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath, isPublic);
     keyObject.keyPath += 1;
     keyObject.keys[keyLabel] = newKey;
     this.db.insert(stringKey, JSON.stringify(keyObject));
@@ -75,7 +77,7 @@ class Id {
       .then((res) => {
         this.idAddr = res.data.idaddr;
         this.saveKeys();
-        return this.idAddr;
+        return { idAddr: this.idAddr, proofOfClaim: res.data.proofOfClaim };
       });
   }
 
@@ -111,30 +113,24 @@ class Id {
   }
 
   /**
-   * @param  {Object} kc
-   * @param  {String} kSign
-   * @param  {String} keyToAuthorize
-   * @param  {String} applicationName
-   * @param  {String} applicationAuthz
-   * @param  {Number} validFrom
-   * @param  {Number} validUntil
-   * @returns {Object}
    */
-  authorizeKSignClaim(kc, ksign, proofOfKSign) {
+  authorizeKSignSecp256k1(kc, ksign, keyClaim) {
     const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
-      version: 0, pubKeyCompressed: this.keyOperationalPub,
+      version: 0, pubKeyCompressed: keyClaim,
     });
-    const signatureObj = kc.sign(ksign, authorizeKSignClaim.hex());
+    const claimHex = (authorizeKSignClaim.createEntry()).toHexadecimal();
+    const signatureObj = kc.sign(ksign, claimHex);
     const bytesSignedMsg = {
-      valueHex: authorizeKSignClaim.hex(),
+      valueHex: claimHex,
       signatureHex: signatureObj.signature,
       ksign,
     };
     const self = this;
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
-        if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
-          self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+        if ((self.backup !== undefined)) { // && (proofOfKSign !== undefined)) {
+          // Private folder future work
+          // self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
         }
         return res;
       });

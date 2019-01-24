@@ -31,10 +31,9 @@ describe('[Identity management]', () => {
       // Save keys and retrieve it
       identity.saveKeys();
       const keysDb = identity.getKeys();
-      expect(keys[0]).to.be.equal(keysDb.operational);
-      expect(keys[1]).to.be.equal(keysDb.operationalPub);
-      expect(keys[2]).to.be.equal(keysDb.recover);
-      expect(keys[3]).to.be.equal(keysDb.revoke);
+      expect(keys[0]).to.be.equal(keysDb.operationalPub);
+      expect(keys[1]).to.be.equal(keysDb.recover);
+      expect(keys[2]).to.be.equal(keysDb.revoke);
       // Create new key for the identity
       const loginKey = identity.createKey(keyContainer, 'login Key');
       // Retrieve keys
@@ -61,10 +60,9 @@ describe('[Identity management]', () => {
       // Save keys and retrieve it
       identity.saveKeys();
       const keysDb = identity.getKeys();
-      expect(keys[0]).to.be.equal(keysDb.operational);
-      expect(keys[1]).to.be.equal(keysDb.operationalPub);
-      expect(keys[2]).to.be.equal(keysDb.recover);
-      expect(keys[3]).to.be.equal(keysDb.revoke);
+      expect(keys[0]).to.be.equal(keysDb.operationalPub);
+      expect(keys[1]).to.be.equal(keysDb.recover);
+      expect(keys[2]).to.be.equal(keysDb.revoke);
       // Create new key for the identity
       const loginKey = identity.createKey(keyContainer, 'login Key');
       // Retrieve keys
