@@ -174,11 +174,13 @@ class ProofClaimFull {
   /**
    * Create a ClaimProof
    * @param {Signature} rootKeySig
+   * @param {Number} date
    * @param {Leaf} leaf
    * @param {[]ProofClaim} proofs
    */
-  constructor(rootKeySig, leaf, proofs) {
+  constructor(rootKeySig, date, leaf, proofs) {
     this.rootSig = rootKeySig;
+    this.date = date;
     this.leaf = leaf;
     this.proofs = proofs;
   }
@@ -235,16 +237,18 @@ const isMerkleTreeProofExistence = function isMerkleTreeProofExistence(proofHex)
  */
 const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
   // Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
-  const rootK = proof.proofs[proof.proofs.length - 1].root;
-	console.log(rootK);
-  const date = proof.proofs[proof.proofs.length - 1].date;
+  let rootK = proof.proofs[proof.proofs.length - 1].root;
+  if (rootK.substr(0, 2) !== '0x') {
+    rootK = '0x' + rootK;
+  }
+  // const date = proof.proofs[proof.proofs.length - 1].Date;
+  const date = proof.date;
   const dateBytes = utils.uint64ToEthBytes(date);
   const dateHex = utils.bytesToHex(dateBytes);
   const msg = `${rootK}${dateHex.slice(2)}`;
   const msgBuffer = ethUtil.toBuffer(msg);
   const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
   const msgHashHex = utils.bytesToHex(msgHash);
-	console.log("h: ", msgHashHex);
   let sig = utils.hexToBytes(proof.rootSig);
   sig[64] += 27;
   const signatureHex = utils.bytesToHex(sig);

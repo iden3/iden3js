@@ -55,11 +55,6 @@ describe('[id] new Id()', () => {
       // Successfull create identity api call to relay
         expect(createIDRes.idAddr).to.be.equal(id.idAddr);
 
-        // console.log(createIDRes.proofOfClaim);
-        const util = require('util')
-        // alternative shortcut
-        console.log(util.inspect(createIDRes.proofOfClaim, false, null, true /* enable colors */))
-
         expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
         await id.deployID()
           .then((deployIDres) => {
@@ -116,6 +111,7 @@ describe('[id] new Id()', () => {
     const name = 'testName';
     await id.bindID(keyContainer, name)
       .then(async (bindRes) => {
+
         expect(bindRes.status).to.be.equal(200);
         await relay.resolveName(`${name}@iden3.io`)
           .then((resolveRes) => {
@@ -188,3 +184,4 @@ describe('[id] id localstorage test', () => {
     });
   });
 });
+*/
