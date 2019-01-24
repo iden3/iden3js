@@ -67,27 +67,33 @@ describe('[id] new Id()', () => {
     keyContainer.lock();
   });
 
-  it('Check authorize key sign claim and generic claim', async () => {
+  it('Check authorize public key sign claim', async () => {
     keyContainer.unlock('pass');
     const keyLabel = 'testKey';
     const keyToAdd = id.createKey(keyContainer, keyLabel, true);
     const keyToAdd2 = id.createKey(keyContainer, keyLabel, true);
     let proofOfKSign = {};
-    // Check key generated is not random
+    // Check public key generated is not random
     expect(keyToAdd).to.be.equal('0x025521b25f396b1f62fcc46ce5b9a6b53684d5649958d83d79b5bb6711aa279105');
-    // Send keyToAdd to the Relay server
+    // Send `keyToAdd` to the Relay server
     await id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, keyToAdd)
-      .then((authRes) => {
+      .then(async (authRes) => {
         proofOfKSign = authRes.data.proofOfClaim;
         expect(authRes.status).to.be.equal(200);
-        expect(proofOfKSign).to.not.be.equal({});
+        expect(proofOfKSign.Leaf).to.not.be.equal('0000000000000000000000000000000000000000000000000000000000000000'
+                                                + '0000000000000000000000000000000000000000000000000000000000000000'
+                                                + '00025521b25f396b1f62fcc46ce5b9a6b53684d5649958d83d79b5bb6711aa27'
+                                                + '000000000000000000000000000000000000c81e000000000000000000000004');
         // use the kSign that have been authorized in the AuthorizeKSignClaimSecp256k1 above
         // to sign a new claim
-        id.authorizeKSignSecp256k1(keyContainer, keyToAdd, keyToAdd2)
+        await id.authorizeKSignSecp256k1(keyContainer, keyToAdd, keyToAdd2)
           .then((authRes2) => {
             proofOfKSign = authRes2.data.proofOfClaim;
             expect(authRes2.status).to.be.equal(200);
-            expect(proofOfKSign).to.not.be.equal({});
+            expect(proofOfKSign.Leaf).to.not.be.equal('0000000000000000000000000000000000000000000000000000000000000000'
+                                                    + '0000000000000000000000000000000000000000000000000000000000000000'
+                                                    + '00039e8e3c1b0a09489e96e755d56db2eee777660d92eec53b25cf1c46cedd17'
+                                                    + '0000000000000000000000000000000000009105000000000000000000000004');
           })
           .catch((error) => {
             console.error(error.response.data.error);
@@ -96,82 +102,26 @@ describe('[id] new Id()', () => {
       .catch((error) => {
         console.error(error.response.data.error);
       });
-  });
-
-  // Bind identity
-  it('Create identity and deploy it', async () => {
-    keyContainer.unlock('pass');
-    await id.createID()
-      .then(async (createIDRes) => {
-      // Successfull create identity api call to relay
-        expect(createIDRes.idAddr).to.be.equal(id.idAddr);
-        expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
-        await id.deployID()
-          .then((deployIDres) => {
-          // Successfull deploy identity api call to relay
-            expect(deployIDres.status).to.be.equal(200);
-          })
-          .catch((error) => {
-            expect(error.response.data.error).to.be.equal('already deployed');
-          });
-      });
     keyContainer.lock();
   });
 
-
-}); // Final describe
-
-// TODO
-// Post claim authorizeKSign256K1 claim with operationalPub --> handle error already claim exist
-// Post claim with any claim and get proofOfClaim --> check proof given by the relay is True
-// Create test for each commit, as well as in Id.js
-/*
-describe('[id] id.bindID()', () => {
-  const keyContainer = new iden3.KeyContainer('localStorage', db);
-  keyContainer.unlock('pass');
-  const key0id = keyContainer.importKey(testPrivKHex1);
-  const relay = new iden3.Relay(relayUrl);
-  const id = new iden3.Id(key0id, key0id, key0id, relay, relayAddr, '');
-
-  before(() => id.KeyContainer().then((res) => {}));
-
-  it('bindID()', () => {
-    const name = 'username2';
-
+  it('Bind identity and check it on resolve name service', async () => {
     keyContainer.unlock('pass');
-    return id.bindID(keyContainer, name).then((bindRes) => {
-      expect(bindRes.status).to.be.equal(200);
-      return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {
-        expect(resolveRes.status).to.be.equal(200);
-      });
-    });
-  });
-});
-
-describe('[id] id localstorage test', () => {
-  it('id(localStorage).KeyContainer() & bindID()', () => {
-    const keyContainer = new iden3.KeyContainer('localStorage', db);
-    keyContainer.unlock('pass');
-    const ko = keyContainer.generateKeyRand();
-    const krec = keyContainer.generateKeyRand();
-    const krev = keyContainer.generateKeyRand();
-    const relay = new iden3.Relay(relayUrl);
-    const id = new iden3.Id(krec, krev, ko, relay, relayAddr, '');
-
-    return id.KeyContainer().then((res) => {
-      expect(res).to.be.equal(id.idAddr);
-
-      const name = 'usernametest';
-      return id.bindID(keyContainer, name).then((bindRes) => {
+    const name = 'testName';
+    await id.bindID(keyContainer, name)
+      .then(async (bindRes) => {
         expect(bindRes.status).to.be.equal(200);
-        // console.log('postVinculateID', res.data);
-        return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {
-          // console.log('resolveName', res.data);
-          expect(resolveRes.status).to.be.equal(200);
-          expect(resolveRes.data.ethID).to.be.equal(id.idAddr);
-        });
+        await relay.resolveName(`${name}@iden3.io`)
+          .then((resolveRes) => {
+            expect(resolveRes.status).to.be.equal(200);
+          })
+          .catch((error) => {
+            console.error(error.message);
+          });
+      })
+      .catch((error) => {
+        console.error(error.message);
       });
-    });
+    keyContainer.lock();
   });
-});
-*/
+}); // Final describe

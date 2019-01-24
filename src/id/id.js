@@ -114,16 +114,16 @@ class Id {
 
   /**
    */
-  authorizeKSignSecp256k1(kc, ksign, keyClaim) {
+  authorizeKSignSecp256k1(kc, ksignpk, keyClaim) {
     const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
       version: 0, pubKeyCompressed: keyClaim,
     });
     const claimHex = (authorizeKSignClaim.createEntry()).toHexadecimal();
-    const signatureObj = kc.sign(ksign, claimHex);
+    const signatureObj = kc.sign(ksignpk, claimHex);
     const bytesSignedMsg = {
       valueHex: claimHex,
       signatureHex: signatureObj.signature,
-      ksign,
+      ksignpk,
     };
     const self = this;
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
