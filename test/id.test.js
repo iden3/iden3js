@@ -1,5 +1,6 @@
 const chai = require('chai');
 const iden3 = require('../index');
+const CONSTANTS = require('../src/constants');
 
 const { expect } = chai;
 const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
@@ -14,6 +15,7 @@ describe('[id] new Id()', () => {
   let id;
   let keys;
   let relay;
+  let proofOfClaimKeyOperational;
   before('Create local storage container and relay object', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
@@ -55,6 +57,7 @@ describe('[id] new Id()', () => {
       // Successfull create identity api call to relay
         expect(createIDRes.idAddr).to.be.equal(id.idAddr);
         expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
+        proofOfClaimKeyOperational = createIDRes.proofOfClaim;
         await id.deployID()
           .then((deployIDres) => {
           // Successfull deploy identity api call to relay
@@ -119,6 +122,24 @@ describe('[id] new Id()', () => {
           .catch((error) => {
             console.error(error.message);
           });
+      })
+      .catch((error) => {
+        console.error(error.message);
+      });
+    keyContainer.lock();
+  });
+
+  it('Check get claim by its index request', async () => {
+    keyContainer.unlock('pass');
+    // Create claim and gets it index
+    const authorizeKSignClaim = new iden3.claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
+      version: 0, pubKeyCompressed: id.keyOperationalPub,
+    });
+    const hi = (authorizeKSignClaim.createEntry()).hi();
+    await relay.getClaimByHi(id.idAddr, iden3.utils.bytesToHex(hi))
+      .then((res) => {
+        // Check leaf claim requested is the same as the claim generated when the identty is created
+        expect(res.data.proofOfClaim.Leaf).to.be.equal(proofOfClaimKeyOperational.Leaf);
       })
       .catch((error) => {
         console.error(error.message);

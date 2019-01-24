@@ -49,7 +49,8 @@ class Relay {
    * @returns {Object} - Http response
    */
   getClaimByHi(idAddr, hi) {
-    return axios.get(`${this.url}/claim/${idAddr}/hi/${hi}`);
+    // return axios.get(`${this.url}/claim_proof/${idAddr}/hi/${hi}`);
+    return axios.get(`${this.url}/claim_proof/idaddr/${idAddr}/hi/${hi}`);
   }
 
   /**

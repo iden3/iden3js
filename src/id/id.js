@@ -71,8 +71,11 @@ class Id {
     return keyObject.keys;
   }
 
+  /**
+   * Send the data to Relay,and get the generated address of the counterfactual
+   * @returns {Object} - Http response
+   */
   createID() {
-    // send the data to Relay,and get the generated address of the counterfactual
     return this.relay.createID(this.keyOperationalPub, this.keyRecover, this.keyRevoke)
       .then((res) => {
         this.idAddr = res.data.idaddr;
@@ -81,6 +84,10 @@ class Id {
       });
   }
 
+  /**
+   * Send to relay a request for deplying identity smart contract
+   * @returns {Object} - Http response
+   */
   deployID() {
     return this.relay.deployID(this.idAddr);
   }
