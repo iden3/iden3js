@@ -113,23 +113,27 @@ class Id {
   }
 
   /**
+   * Send new claim of type authorizeKSignSecp256k1 to the identity merkle tree through the associated relay
+   * @param {Object} - Key container
+   * @param {String} - Key used to sign the claim. This key has to be already authorized on the identity merkle tree
+   * @param {keyClaim} - New key to be authorized and added into the identity merkle tree
    */
-  authorizeKSignSecp256k1(kc, ksign, keyClaim) {
+  authorizeKSignSecp256k1(kc, ksignpk, keyClaim) {
     const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
       version: 0, pubKeyCompressed: keyClaim,
     });
     const claimHex = (authorizeKSignClaim.createEntry()).toHexadecimal();
-    const signatureObj = kc.sign(ksign, claimHex);
+    const signatureObj = kc.sign(ksignpk, claimHex);
     const bytesSignedMsg = {
       valueHex: claimHex,
       signatureHex: signatureObj.signature,
-      ksign,
+      ksignpk,
     };
     const self = this;
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined)) { // && (proofOfKSign !== undefined)) {
-          // Private folder future work
+          // Private folder - future work
           // self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
         }
         return res;
@@ -137,8 +141,9 @@ class Id {
   }
 
   /**
-   * @param  {Object} kc
-   * @param  {String} name
+   * Bind current identity to an address through name resolver service
+   * @param {Object} kc - Key container
+   * @param {String} name - Label to identify the address
    */
   bindID(kc, name) {
     return this.relay.bindID(kc, this.idAddr, this.keyOperationalPub, name);
