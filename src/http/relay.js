@@ -53,20 +53,13 @@ class Relay {
   }
 
   /**
-   * @param  {String} idaddr
-   * @param {String} name
-   * @param {String} signature
-   * @returns {Object}
-   */
-  postBindID(bindIDMsg) {
-    return axios.post(`${this.url}/vinculateid`, bindIDMsg);
-  }
-
-  /**
+   * Construct proper object to bind an identity adress to a label
+   * Name resolver server creates the claim binding { Label - Identity address }
    * @param  {Object} kc - Keycontainer
-   * @param  {String} idaddr
-   * @param  {String} keyOperationalPub
-   * @param  {String} name
+   * @param  {String} idAddr - Identity address
+   * @param  {String} keyOperationalPub - Key used to sign the message sent
+   * @param  {String} name - Label to bind
+   * @return {Object} Http response
    */
   bindID(kc, idAddr, keyOperationalPub, name) {
     const idBytes = utils.hexToBytes(idAddr);
@@ -81,13 +74,15 @@ class Relay {
       ethAddr: idAddr,
       name,
       signature: signatureObj.signature,
-      ksign: keyOperationalPub,
+      ksignpk: keyOperationalPub,
     };
-    return this.postBindID(bindIDMsg);
+    return axios.post(`${this.url}/vinculateid`, bindIDMsg);
   }
 
   /**
-   * @param  {String} name
+   * Search name string into the name resolver and it retrieves the corresponding public address
+   * @param {String} name - Label to search into the name resolver tree
+   * @return {Object} Http response
    */
   resolveName(name) {
     return axios.get(`${this.url}/identities/resolv/${name}`);
@@ -110,7 +105,10 @@ class Relay {
   }
 
   /**
+   * Retrieve information about identity
+   * Information returned is the one necessary to create the counterfactoual
    * @param  {String} idAddr
+   * @returns {Object} Http response
    */
   getID(idAddr) {
     return axios.get(`${this.url}/id/${idAddr}`);

@@ -114,6 +114,7 @@ describe('[id] new Id()', () => {
         await relay.resolveName(`${name}@iden3.io`)
           .then((resolveRes) => {
             expect(resolveRes.status).to.be.equal(200);
+            expect(resolveRes.data.ethAddr).to.be.equal(id.idAddr);
           })
           .catch((error) => {
             console.error(error.message);
@@ -124,4 +125,4 @@ describe('[id] new Id()', () => {
       });
     keyContainer.lock();
   });
-}); // Final describe
+});
