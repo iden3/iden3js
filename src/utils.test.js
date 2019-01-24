@@ -49,16 +49,16 @@ describe('[util] verifySignature()', () => {
 describe('[util] verifySignature() from data signed by go-iden3', () => {
   it('check verifySignature()', () => {
     const addressHex = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-    const rootKey = '0x2f0ad424db80c7aeb1c6bf5f67f18498ec7dc495faef49e3d127c61925308990';
-    const date = 1548256095;
+    const rootKey = '0x083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199';
+    const date = 1548339566;
     const dateBytes = iden3.utils.uint64ToEthBytes(date);
     const dateHex = iden3.utils.bytesToHex(dateBytes);
     const msg = `${rootKey}${dateHex.slice(2)}`;
-    console.log(msg);
     const msgBuffer = ethUtil.toBuffer(msg);
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
     const msgHashHex = iden3.utils.bytesToHex(msgHash);
-    let signatureHex = '0x1960bd3fded08fa11817646be80e3784dec278e811f2c4dc94ff4b6d0aec9f5b645593c4c5d82f334fdb9ac2f2b38b1dc153d81cfac4faa6838126c478c5c66201';
+	  console.log("h: ", msgHashHex);
+    let signatureHex = '0x413028e1577bf5e54b0b2db54e538d7c2df4173465cdeff32d5dbc262c5c6b95241b36f6b904cbccae383cc87f6adb6c9332fbb8af1a1b78ef58b9d9fc0fe34301';
     let sig = iden3.utils.hexToBytes(signatureHex);
     sig[64] += 27;
     signatureHex = iden3.utils.bytesToHex(sig);

@@ -54,6 +54,12 @@ describe('[id] new Id()', () => {
       .then(async (createIDRes) => {
       // Successfull create identity api call to relay
         expect(createIDRes.idAddr).to.be.equal(id.idAddr);
+
+        // console.log(createIDRes.proofOfClaim);
+        const util = require('util')
+        // alternative shortcut
+        console.log(util.inspect(createIDRes.proofOfClaim, false, null, true /* enable colors */))
+
         expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
         await id.deployID()
           .then((deployIDres) => {

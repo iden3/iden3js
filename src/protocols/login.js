@@ -233,21 +233,22 @@ const isMerkleTreeProofExistence = function isMerkleTreeProofExistence(proofHex)
  * Verify a ProofClaimFull from the claim to the blockchain root
  * @param{ProofClaimFull} proof
  */
-const verifyProofClaimFull = function verifyProofClaimFull(proof) {
+const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
   // Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
   const rootK = proof.proofs[proof.proofs.length - 1].root;
+	console.log(rootK);
   const date = proof.proofs[proof.proofs.length - 1].date;
-  const dateBytes = iden3.utils.uint64ToEthBytes(date);
-  const dateHex = iden3.utils.bytesToHex(dateBytes);
+  const dateBytes = utils.uint64ToEthBytes(date);
+  const dateHex = utils.bytesToHex(dateBytes);
   const msg = `${rootK}${dateHex.slice(2)}`;
   const msgBuffer = ethUtil.toBuffer(msg);
   const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
-  const msgHashHex = iden3.utils.bytesToHex(msgHash);
-  const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c'; // TODO tmp harcoded
-  let sig = iden3.utils.hexToBytes(proof.rootSig);
+  const msgHashHex = utils.bytesToHex(msgHash);
+	console.log("h: ", msgHashHex);
+  let sig = utils.hexToBytes(proof.rootSig);
   sig[64] += 27;
-  const signatureHex = iden3.utils.bytesToHex(sig);
-  if (!utils.verifySignature(utils.bytesToHex(msgHash), proof.rootSig, relayAddr)) { // mHex, sigHex, addressHex
+  const signatureHex = utils.bytesToHex(sig);
+  if (!utils.verifySignature(msgHashHex, signatureHex, relayAddr)) { // mHex, sigHex, addressHex
   // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) { // mHex, sigHex, addressHex
 	  console.trace();
 	return false;
