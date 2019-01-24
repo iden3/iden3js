@@ -53,7 +53,8 @@ describe('[id] new Id()', () => {
     await id.createID()
       .then(async (createIDRes) => {
       // Successfull create identity api call to relay
-        expect(createIDRes).to.be.equal(id.idAddr);
+        expect(createIDRes.idAddr).to.be.equal(id.idAddr);
+        expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
         await id.deployID()
           .then((deployIDres) => {
           // Successfull deploy identity api call to relay
@@ -69,24 +70,55 @@ describe('[id] new Id()', () => {
   it('Check authorize key sign claim and generic claim', async () => {
     keyContainer.unlock('pass');
     const keyLabel = 'testKey';
-    const kSign = id.createKey(keyContainer, keyLabel);
+    const keyToAdd = id.createKey(keyContainer, keyLabel, true);
+    const keyToAdd2 = id.createKey(keyContainer, keyLabel, true);
     let proofOfKSign = {};
     // Check key generated is not random
-    expect(kSign).to.be.equal('0xaac4ed37a11e6a9170cb19a6e558913dc3efa6a7');
-
-    await id.authorizeKSignClaim(keyContainer, id.keyOperationalPub, kSign)
+    expect(keyToAdd).to.be.equal('0x025521b25f396b1f62fcc46ce5b9a6b53684d5649958d83d79b5bb6711aa279105');
+    // Send keyToAdd to the Relay server
+    await id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, keyToAdd)
       .then((authRes) => {
         proofOfKSign = authRes.data.proofOfClaim;
         expect(authRes.status).to.be.equal(200);
-
         expect(proofOfKSign).to.not.be.equal({});
-        // use the kSign that have been authorized in the AuthorizeKSignClaim
-        // to sign a new genericClaim
-        id.genericClaim(keyContainer, kSign, proofOfKSign, 'iden3.io', 'default', 'extraindex', 'data').then((claimDefRes) => {
-          expect(claimDefRes.status).to.be.equal(200);
-        });
+        // use the kSign that have been authorized in the AuthorizeKSignClaimSecp256k1 above
+        // to sign a new claim
+        id.authorizeKSignSecp256k1(keyContainer, keyToAdd, keyToAdd2)
+          .then((authRes2) => {
+            proofOfKSign = authRes2.data.proofOfClaim;
+            expect(authRes2.status).to.be.equal(200);
+            expect(proofOfKSign).to.not.be.equal({});
+          })
+          .catch((error) => {
+            console.error(error.response.data.error);
+          });
+      })
+      .catch((error) => {
+        console.error(error.response.data.error);
       });
   });
+
+  // Bind identity
+  it('Create identity and deploy it', async () => {
+    keyContainer.unlock('pass');
+    await id.createID()
+      .then(async (createIDRes) => {
+      // Successfull create identity api call to relay
+        expect(createIDRes.idAddr).to.be.equal(id.idAddr);
+        expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
+        await id.deployID()
+          .then((deployIDres) => {
+          // Successfull deploy identity api call to relay
+            expect(deployIDres.status).to.be.equal(200);
+          })
+          .catch((error) => {
+            expect(error.response.data.error).to.be.equal('already deployed');
+          });
+      });
+    keyContainer.lock();
+  });
+
+
 }); // Final describe
 
 // TODO

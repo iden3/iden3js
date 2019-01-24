@@ -77,7 +77,7 @@ class Id {
       .then((res) => {
         this.idAddr = res.data.idaddr;
         this.saveKeys();
-        return this.idAddr;
+        return { idAddr: this.idAddr, proofOfClaim: res.data.proofOfClaim };
       });
   }
 
@@ -114,21 +114,23 @@ class Id {
 
   /**
    */
-  authorizeKSignClaim(kc, ksign, keyClaim) {
+  authorizeKSignSecp256k1(kc, ksign, keyClaim) {
     const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
-      version: 0, pubKeyCompressed: this.keyOperationalPub,
+      version: 0, pubKeyCompressed: keyClaim,
     });
-    const signatureObj = kc.sign(ksign, authorizeKSignClaim.hex());
+    const claimHex = (authorizeKSignClaim.createEntry()).toHexadecimal();
+    const signatureObj = kc.sign(ksign, claimHex);
     const bytesSignedMsg = {
-      valueHex: authorizeKSignClaim.hex(),
+      valueHex: claimHex,
       signatureHex: signatureObj.signature,
       ksign,
     };
     const self = this;
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
-        if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
-          self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+        if ((self.backup !== undefined)) { // && (proofOfKSign !== undefined)) {
+          // Private folder future work
+          // self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
         }
         return res;
       });
