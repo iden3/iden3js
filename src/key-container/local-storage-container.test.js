@@ -117,7 +117,7 @@ describe('[Local-storage-container] Test identity flow', () => {
       keyContainer.lock();
       expect(keys).to.be.not.equal(undefined);
       expect(keys[0]).to.be.equal('0xc7d89fe96acdb257b434bf580b8e6eb677d445a9');
-      expect(keys[1]).to.be.equal('0xc2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff578335e1f27c4c675f37d4f83ce25bb8068dbbc45fc31ed5608fa0c140357b5e1322d');
+      expect(keys[1]).to.be.equal('0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833');
       expect(keys[2]).to.be.equal('0xf3c9f94e4eaffef676d4fd3b4fc2732044caea91');
       expect(keys[3]).to.be.equal('0xb07079bd6238fa845dc77bbce3ec2edf98ffe735');
     }
@@ -135,7 +135,7 @@ describe('[Local-storage-container] Test identity flow', () => {
     keyContainer.lock();
     expect(keys).to.be.not.equal(undefined);
     expect(keys[0]).to.be.equal('0x2dc1f223c441412c9e490042360a9eaa96db0829');
-    expect(keys[1]).to.be.equal('0x79f9574efb8f4dbffd07f386bb4736f516bd75824eae7ebda3c87ee18ac3618c1931cfd8646e3e004e8fa2b4180eb0ebcd7ae1abf90fb0c6cb20414d6738a034');
+    expect(keys[1]).to.be.equal('0x0279f9574efb8f4dbffd07f386bb4736f516bd75824eae7ebda3c87ee18ac3618c');
     expect(keys[2]).to.be.equal('0xf8c1904635ccc145db913d4a0b382e4ec053dd9b');
     expect(keys[3]).to.be.equal('0xb8adfcddbc5b140469a638671e2fa4e1be8f1a61');
   });

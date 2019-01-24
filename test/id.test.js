@@ -34,7 +34,7 @@ describe('[id] new Id()', () => {
       const { keySeed, pathKey } = keyContainer.getKeySeed();
       // Generate keys for first identity
       const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
-      keys = objectKeys.keys;
+      ({ keys } = objectKeys);
       id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, '', undefined, 0);
     }
     keyContainer.lock();
@@ -47,20 +47,22 @@ describe('[id] new Id()', () => {
     expect(id.relay).to.be.equal(relay);
   });
 
+  // Get proofOfClaim in CreateId
   it('Create identity and deploy it', async () => {
     keyContainer.unlock('pass');
-    await id.createID().then(async (createIDRes) => {
+    await id.createID()
+      .then(async (createIDRes) => {
       // Successfull create identity api call to relay
-      expect(createIDRes).to.be.equal(id.idAddr);
-      await id.deployID()
-        .then((deployIDres) => {
+        expect(createIDRes).to.be.equal(id.idAddr);
+        await id.deployID()
+          .then((deployIDres) => {
           // Successfull deploy identity api call to relay
-          expect(deployIDres.status).to.be.equal(200);
-        })
-        .catch((error) => {
-          expect(error.response.data.error).to.be.equal('already deployed');
-        });
-    });
+            expect(deployIDres.status).to.be.equal(200);
+          })
+          .catch((error) => {
+            expect(error.response.data.error).to.be.equal('already deployed');
+          });
+      });
     keyContainer.lock();
   });
 

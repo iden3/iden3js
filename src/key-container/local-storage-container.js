@@ -224,9 +224,10 @@ class LocalStorageContainer {
    * Generates a random key from a given key seed and its path
    * @param {UInt32} keyProfilePath - First path to derive the key
    * @param {UInt32} keyPath - Second path to derive the key
+   * @param {Bool} isPublic - Indicates if public key or public adress is created
    * @returns {String} New key generated
    */
-  generateSingleKey(keyProfilePath, keyPath) {
+  generateSingleKey(keyProfilePath, keyPath, isPublic) {
     if (this.isUnlock()) {
       let path = "m/44'/60'/0'/";
       path = `${path + keyProfilePath}/${keyPath}`;
@@ -234,7 +235,7 @@ class LocalStorageContainer {
       const root = hdkey.fromMasterSeed(keySeed);
       const addrNode = root.derive(path);
       const privK = addrNode._privateKey;
-      const address = ethUtil.privateToAddress(addrNode._privateKey);
+      const address = isPublic ? addrNode._publicKey : ethUtil.privateToAddress(addrNode._privateKey);
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);

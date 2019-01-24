@@ -47,12 +47,14 @@ class Id {
   /**
    * Create new key for this identity and store it into its
    * @param {Object} keyContainer - Object containing all the keys created on local storage
+   * @param {String} keyLabel - Label associated with the key or address created
+   * @param {Bool} isPublic - Determines if it is wanted to generate a public key or a public address
    * @returns {Bool} Acknowledge
    */
-  createKey(keyContainer, keyLabel) {
+  createKey(keyContainer, keyLabel, isPublic = false) {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
-    const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath);
+    const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath, isPublic);
     keyObject.keyPath += 1;
     keyObject.keys[keyLabel] = newKey;
     this.db.insert(stringKey, JSON.stringify(keyObject));
@@ -111,16 +113,8 @@ class Id {
   }
 
   /**
-   * @param  {Object} kc
-   * @param  {String} kSign
-   * @param  {String} keyToAuthorize
-   * @param  {String} applicationName
-   * @param  {String} applicationAuthz
-   * @param  {Number} validFrom
-   * @param  {Number} validUntil
-   * @returns {Object}
    */
-  authorizeKSignClaim(kc, ksign, proofOfKSign) {
+  authorizeKSignClaim(kc, ksign, keyClaim) {
     const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
       version: 0, pubKeyCompressed: this.keyOperationalPub,
     });
