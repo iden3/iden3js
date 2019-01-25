@@ -126,7 +126,7 @@ function getArrayBigIntFromBuffArray(arrayBuff) {
 */
 function parseProof(buffHex) {
   const buffBytes = utils.hexToBytes(buffHex);
-  const flag = buffBytes.readUInt8();
+  const flag = buffBytes.readUInt8(0);
   const bitDiff = getBit(flag, 1);
   let proofStruct;
   if (bitDiff) {
@@ -156,8 +156,8 @@ function parseProof(buffHex) {
 function genProofStruct(buffHex) {
   const buffBytes = utils.hexToBytes(buffHex);
   return {
-    flagExistence: buffBytes.readUInt8(),
-    siblingsLength: buffBytes.readUInt8(),
+    flagExistence: buffBytes.readUInt8(0),
+    siblingsLength: buffBytes.readUInt8(0),
     siblings: buffBytes.slice(1, buffBytes.length - 2),
     metadataNode: buffBytes.slice(buffBytes.length - 2, buffBytes.length),
   };
