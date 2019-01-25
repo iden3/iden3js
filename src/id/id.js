@@ -1,14 +1,22 @@
 const claim = require('../claim/claim');
 const DataBase = require('../db/db');
 const CONSTANTS = require('../constants');
+
 /**
- * @param  {String} keyRecover
- * @param  {String} keyRevoke
- * @param  {String} keyOp
- * @param  {Object} relay
- * @param  {String} implementation
+ * Class representing a user identity
+ * Manage all possible actions related to identity usage
  */
 class Id {
+  /**
+   * @param  {String} keyOpPub - Operational public key
+   * @param  {String} keyRecover - Recovery address key
+   * @param  {String} keyRevoke - Revoke address key
+   * @param  {Object} relay - Relay associated with the identity
+   * @param  {Object} relayAddr - Relay address
+   * @param  {String} implementation
+   * @param  {String} backup
+   * @param  {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
+   */
   constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
@@ -25,8 +33,7 @@ class Id {
   }
 
   /**
-   * Save keys associated with this Identity address
-   * @returns {Bool} - Acknowledge
+   * Save keys associated with this identity address
    */
   saveKeys() {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
@@ -34,7 +41,6 @@ class Id {
       keyProfilePath: this.keyProfilePath,
       keyPath: 4,
       keys: {
-        operational: this.keyOperational,
         operationalPub: this.keyOperationalPub,
         recover: this.keyRecover,
         revoke: this.keyRevoke,
@@ -70,7 +76,6 @@ class Id {
   getKeys() {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
-
     return keyObject.keys;
   }
 
@@ -79,6 +84,7 @@ class Id {
    * @returns {Object} - Http response
    */
   createID() {
+    // send the data to Relay,and get the generated address of the counterfactual
     return this.relay.createID(this.keyOperationalPub, this.keyRecover, this.keyRevoke)
       .then((res) => {
         this.idAddr = res.data.idaddr;
