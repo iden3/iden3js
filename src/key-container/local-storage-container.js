@@ -93,6 +93,7 @@ class LocalStorageContainer {
    */
   saveMasterSeed(masterSeed) {
     const seedEncrypted = kcUtils.encrypt(this.encryptionKey, masterSeed);
+
     this.db.insert(`${this.prefix}masterSeed`, seedEncrypted);
   }
 
@@ -159,6 +160,7 @@ class LocalStorageContainer {
       const pathKey = Buffer.alloc(4);
       pathKey.writeUInt32BE(0);
       const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKey));
+
       this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
       return true;
     }
@@ -179,6 +181,7 @@ class LocalStorageContainer {
       const keySeed = kcUtils.decrypt(this.encryptionKey, keySeedEncrypted);
       const pathKeySeed = kcUtils.decrypt(this.encryptionKey, pathKeySeedEncrypted);
       const pathKey = (utils.hexToBytes(pathKeySeed)).readUInt32BE();
+
       return { keySeed, pathKey };
     }
     return undefined;
@@ -196,6 +199,7 @@ class LocalStorageContainer {
       pathKeyDb.writeUInt32BE(increasePathKey);
       const keySeedEncrypted = kcUtils.encrypt(this.encryptionKey, keySeed);
       const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKeyDb));
+
       this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
       return true;
     }
@@ -217,6 +221,7 @@ class LocalStorageContainer {
       const addressRecoveryHex = utils.bytesToHex(addressRecovery);
       const privRecoveryHex = utils.bytesToHex(privRecovery);
       const privRecoveryHexEncrypted = kcUtils.encrypt(this.encryptionKey, privRecoveryHex);
+
       this.db.insert(this.prefix + CONSTANTS.IDRECOVERYPREFIX + addressRecoveryHex, privRecoveryHexEncrypted);
       return addressRecoveryHex;
     }
@@ -242,6 +247,7 @@ class LocalStorageContainer {
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
+
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
       return addressHex;
     }
@@ -255,6 +261,7 @@ class LocalStorageContainer {
   getRecoveryAddr() {
     if (this.isUnlock()) {
       const idSeedKey = this.db.listKeys(this.prefix + CONSTANTS.IDRECOVERYPREFIX);
+
       if (idSeedKey.length === 0) {
         return undefined;
       }
@@ -309,6 +316,7 @@ class LocalStorageContainer {
   listIdentities() {
     const idList = [];
     const localStorageLength = localStorage.length;
+
     for (let i = 0, len = localStorageLength; i < len; i++) {
       // get only the stored data related to identities (that have the prefix)
       if (localStorage.key(i).indexOf(this.db.prefix + this.prefix + CONSTANTS.IDPREFIX) !== -1) {
@@ -396,7 +404,6 @@ class LocalStorageContainer {
         keysList.push(key);
       }
     }
-
     return keysList;
   }
 

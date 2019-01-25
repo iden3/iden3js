@@ -76,6 +76,7 @@ class Id {
   getKeys() {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
+
     return keyObject.keys;
   }
 
