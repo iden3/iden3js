@@ -9,6 +9,8 @@ const kcUtils = require('./kc-utils');
 
 nacl.util = require('tweetnacl-util');
 
+const { secp256k1 } = ethUtil;
+
 if (typeof localStorage === 'undefined' || localStorage === null) {
   const LocalStorage = require('node-localstorage').LocalStorage;
   localStorage = new LocalStorage('./tmp');
@@ -62,25 +64,19 @@ class LocalStorageContainer {
   }
 
   /**
-   * Save a given { key - value } pair
+   * Save a given key - value pair
    * @param {String} - Key
    * @param {Object} - Value
    * @returns {Bool} - True if databe has been written correctly, False otherwise
    */
   saveObject(key, value) {
-    try {
-      this.db.insert(this.prefix + key, JSON.stringify(value));
-      return true;
-    } catch (err) {
-      return false;
-    }
+    this.db.insert(this.prefix + key, JSON.stringify(value));
   }
 
   /**
-   * Store the master seed into database as a mnemonic
-   * If no master seed is provided, it generates a random one
-   * @param {String} mnemonic - Mnemonic to store
-   * @returns {Bool} - True if database has been written correctly, False otherwise
+   * Generates master mnemonic
+   * @param {String} - Mnemonic to store
+   * @returns {Bool} - True if databe has been written correctly, False otherwise
    */
   generateMasterSeed(mnemonic = bip39.generateMnemonic()) {
     if (this.isUnlock() && bip39.validateMnemonic(mnemonic)) {
@@ -91,9 +87,9 @@ class LocalStorageContainer {
   }
 
   /**
-   * Encrypts a string and store it under masterSeed label
-   * @param {String} masterSeed - Mnemonic to store
-   * @returns {Bool} - True if database has been written correctly, False otherwise
+   * Save master seed into database
+   * @param {String} - Mnemonic to store
+   * @returns {Bool} - True if databe has been written correctly, False otherwise
    */
   saveMasterSeed(masterSeed) {
     const seedEncrypted = kcUtils.encrypt(this.encryptionKey, masterSeed);
@@ -102,7 +98,7 @@ class LocalStorageContainer {
   }
 
   /**
-   * Get master seed from database in a mnemonic form
+   * Get master seed
    * @param {String} pass - Passphrase enter by the user
    * @returns {String} Mnemonic representing the master seed
    */
@@ -110,7 +106,6 @@ class LocalStorageContainer {
     if (this.isUnlock()) {
       const seedKey = this.db.listKeys(`${this.prefix}masterSeed`);
       let mnemonic = '';
-
       if (seedKey.length === 0) {
         return undefined;
       }
@@ -126,15 +121,15 @@ class LocalStorageContainer {
   }
 
   /**
-   * Creates all the keys needed to create an identity afterwards
+   * Creates all the keys needed to create an identuty aftwrwards
    * @returns {Object} - It contains all the keys generated, undefined otherwise
    */
   createKeys() {
     if (this.isUnlock()) {
       let objectKeySeed;
-      // Get key seed and generate it, if it is not already created
+      // Get key seed and generate if it is not already created
       objectKeySeed = this.getKeySeed();
-      // Generate key seed if it does not exist
+      // Generate key seed if it not exist
       if (objectKeySeed === undefined) {
         if (this.generateKeySeed(this.getMasterSeed())) {
           objectKeySeed = this.getKeySeed();
@@ -142,7 +137,6 @@ class LocalStorageContainer {
       }
       // Creates keys
       const { keys } = this.generateKeysFromKeyPath(objectKeySeed.keySeed, objectKeySeed.pathKey);
-
       this.increaseKeyPath();
       return keys;
     }
@@ -151,8 +145,8 @@ class LocalStorageContainer {
 
   /**
    * Generates identity seed and store it into the database along with its current path
-   * @param {String} masterSeed - Master seed represented as a mnemonic
-   * @return {Bool} - Acknowledge
+   * @param {String} seed - Master seed
+   * @return {Bool} - True if function succeeds otherwise false
    */
   generateKeySeed(masterSeed) {
     if (this.isUnlock()) {
@@ -174,13 +168,12 @@ class LocalStorageContainer {
   }
 
   /**
-   * Gets key chain and its current path
-   * @return {Object} - Contains key chain and its current path
+   * Gets identity seed and its current path
+   * @return {Object} - Contains identity seed and current path
    */
   getKeySeed() {
     if (this.isUnlock()) {
       const keySeedDb = this.db.listKeys(`${this.prefix}keySeed`);
-
       if (keySeedDb.length === 0) {
         return undefined;
       }
@@ -188,14 +181,15 @@ class LocalStorageContainer {
       const keySeed = kcUtils.decrypt(this.encryptionKey, keySeedEncrypted);
       const pathKeySeed = kcUtils.decrypt(this.encryptionKey, pathKeySeedEncrypted);
       const pathKey = (utils.hexToBytes(pathKeySeed)).readUInt32BE();
+
       return { keySeed, pathKey };
     }
     return undefined;
   }
 
   /**
-   * Increase one level on key chain path
-   * @return {Bool} - Acknowledge
+   * Gets identity seed and its current path
+   * @return {Object} - Contains identity seed and current path
    */
   increaseKeyPath() {
     if (this.isUnlock()) {
@@ -214,7 +208,7 @@ class LocalStorageContainer {
 
   /**
    * Generates recovery seed and store it into the database
-   * @param {String} masterSeed - Master seed representes as a memonic
+   * @param {String} seed - Master seed
    * @return {String} - Public recovery address
    */
   generateRecoveryAddr(masterSeed) {
@@ -235,20 +229,21 @@ class LocalStorageContainer {
   }
 
   /**
-   * Generates a key from a given key chain and its path
-   * Key is stored as: { 'public address': 'encrypted(private key)' }
-   * @param {Number} keyChainPath - First path to derive the key
-   * @param {Number} keyPath - Second path to derive the key
-   * @returns {String} Public address key generated
+   * Generates a random key from a given key seed and its path
+   * @param {UInt32} keyProfilePath - First path to derive the key
+   * @param {UInt32} keyPath - Second path to derive the key
+   * @param {Bool} isPublic - Indicates if public key or public adress is created
+   * @returns {String} New key generated
    */
-  generateSingleKey(keyProfilePath, keyPath) {
+  generateSingleKey(keyProfilePath, keyPath, isPublic) {
     if (this.isUnlock()) {
-      const path = `m/44'/60'/0'/${keyProfilePath}/${keyPath}`;
+      let path = "m/44'/60'/0'/";
+      path = `${path + keyProfilePath}/${keyPath}`;
       const { keySeed } = this.getKeySeed();
       const root = hdkey.fromMasterSeed(keySeed);
       const addrNode = root.derive(path);
       const privK = addrNode._privateKey;
-      const address = ethUtil.privateToAddress(addrNode._privateKey);
+      const address = isPublic ? addrNode._publicKey : ethUtil.privateToAddress(addrNode._privateKey);
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
@@ -321,11 +316,11 @@ class LocalStorageContainer {
   listIdentities() {
     const idList = [];
     const localStorageLength = localStorage.length;
+
     for (let i = 0, len = localStorageLength; i < len; i++) {
       // get only the stored data related to identities (that have the prefix)
       if (localStorage.key(i).indexOf(this.db.prefix + this.prefix + CONSTANTS.IDPREFIX) !== -1) {
         const identity = localStorage.key(i).replace(this.prefix + this.db.prefix, '');
-
         idList.push(identity);
       }
     }
@@ -409,7 +404,6 @@ class LocalStorageContainer {
         keysList.push(key);
       }
     }
-
     return keysList;
   }
 
