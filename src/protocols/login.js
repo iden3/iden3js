@@ -80,7 +80,7 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
   const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
 
-  const dataToSign = header64 + "." + payload64;
+  const dataToSign = header64 + '.' + payload64;
 
   // sign data
   const signedObj = kc.sign(ksign, dataToSign);
@@ -105,7 +105,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
   if (!((jwsHeader.iat <= current) && (current <= jwsHeader.exp))) {
-	  console.trace();
+    console.trace();
     return false;
   }
 
@@ -114,12 +114,12 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   // as verifying a signature is cheaper than verifying a merkle tree proof, first we verify signature with ksign
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
   const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
-  const dataSigned = header64 + "." + payload64;
+  const dataSigned = header64 + '.' + payload64;
   const message = ethUtil.toBuffer(dataSigned);
   const msgHash = ethUtil.hashPersonalMessage(message);
   const sigHex = utils.bytesToHex(signatureBuffer);
   if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, jwsPayload.ksign)) { // mHex, sigHex, addressHex
-	  console.trace();
+    console.trace();
     return false;
   }
 
@@ -128,20 +128,20 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   // TODO verify proofOfEthName
 
   // verify proofOfKSign
-    if (jwsPayload.proofOfKSign.proofs.length != 2) {
-	  console.trace();
-      return false;
-    }
-    // if (jwsPayload.proofOfKSign.ethaddrs.length !== jwsPayload.proofOfKSign.proofs.length) {
-    //   return false;
-    // }
+  if (jwsPayload.proofOfKSign.proofs.length != 2) {
+    console.trace();
+    return false;
+  }
+  // if (jwsPayload.proofOfKSign.ethaddrs.length !== jwsPayload.proofOfKSign.proofs.length) {
+  //   return false;
+  // }
 
   // Use verifyProofClaimFull to verify proofOfKSign
   const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-	jwsPayload.proofOfKSign.proofs = jwsPayload.proofOfKSign.proofs;
+  jwsPayload.proofOfKSign.proofs = jwsPayload.proofOfKSign.proofs;
   if (!verifyProofClaimFull(jwsPayload.proofOfKSign, relayAddr)) {
-	  console.trace();
-	  return false;
+    console.trace();
+    return false;
   }
 
   return true;
@@ -228,7 +228,7 @@ const incClaimVersion = function incClaimVersion(claim) {
   //let entry = new Entry();
   //entry.fromHexadecimal(claim);
   const version = claim.elements[3].slice(20, 24).readUInt32BE(0);
-  claim.elements[3].writeUInt32BE(version+1, claim.elements[3].length - 64/8 - 32/8);
+  claim.elements[3].writeUInt32BE(version + 1, claim.elements[3].length - 64 / 8 - 32 / 8);
 }
 
 // TODO: Move this to merkle-tree utils
@@ -260,16 +260,15 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
   sig[64] += 27;
   const signatureHex = utils.bytesToHex(sig);
   if (!utils.verifySignature(msgHashHex, signatureHex, relayAddr)) { // mHex, sigHex, addressHex
-  // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) { // mHex, sigHex, addressHex
-	  console.trace();
-	return false;
+    // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) {  mHex, sigHex, addressHex
+    console.trace();
+    return false;
   }
-
 
   // For now we only allow proof verification of Nameserver (one level) and
   // Relay (two levels: relay + user)
   if (proof.proofs.length > 2 || proof.proofs.length < 1) {
-	  console.trace();
+    console.trace();
     return false;
   }
 
@@ -277,7 +276,7 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
   leaf.fromHexadecimal(proof.leaf);
   var rootKey = '';
   for (var i = 0; i < proof.proofs.length; i++) {
-  // for (var i = proof.proofs.length-1; i>=0; i--) {
+    // for (var i = proof.proofs.length-1; i>=0; i--) {
     mtpEx = proof.proofs[i].mtp0
     mtpNoEx = proof.proofs[i].mtp1
     // WARNING: leafNoEx points to the same content of leaf, so modifying leafNoEx modifies leaf!
@@ -292,11 +291,11 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
     // console.trace(leaf);
     // console.trace(leaf.hi(), leaf.hv());
     if (smt.checkProof(rootKey, mtpEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
-      console.log("rootKey: " + rootKey);
-      console.log("proof: " + mtpEx);
-      console.log("hi: " + utils.bytesToHex(leaf.hi()));
-      console.log("hv: " + utils.bytesToHex(leaf.hv()));
-      console.log("leaf: " + leaf.toHexadecimal());
+      console.log('rootKey: ' + rootKey);
+      console.log('proof: ' + mtpEx);
+      console.log('hi: ' + utils.bytesToHex(leaf.hi()));
+      console.log('hv: ' + utils.bytesToHex(leaf.hv()));
+      console.log('leaf: ' + leaf.toHexadecimal());
       console.trace(leaf);
       return false;
     }
@@ -310,7 +309,7 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
       return false;
     }
 
-    if (i === proof.proofs.length-1) {
+    if (i === proof.proofs.length - 1) {
       break;
     }
     const version = proof.proofs[i].aux.ver;
@@ -318,7 +317,10 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
     const ethAddr = proof.proofs[i].aux.ethAddr;
     // leaf = new iden3.claims.SetRootKey(version, era, ethAddr, rootKey);
     leaf = new claim.Factory(CONSTANTS.CLAIMS.SET_ROOT_KEY.ID, {
-      version: version, era: era, id: ethAddr, rootKey: rootKey,
+      version: version,
+      era: era,
+      id: ethAddr,
+      rootKey: rootKey
     }).createEntry();
   }
 
