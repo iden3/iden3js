@@ -77,6 +77,7 @@ class Relay {
       signature: signatureObj.signature,
       ksignpk: keyOperationalPub,
     };
+
     return axios.post(`${this.url}/vinculateid`, bindIDMsg);
   }
 
@@ -102,6 +103,7 @@ class Relay {
       recoverer: rec,
       revokator: rev,
     };
+
     return axios.post(`${this.url}/id`, keys);
   }
 

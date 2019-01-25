@@ -40,6 +40,7 @@ class Id {
         revoke: this.keyRevoke,
       },
     };
+
     this.db.insert(stringKey, JSON.stringify(objectValue));
     return true;
   }
@@ -55,6 +56,7 @@ class Id {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
     const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath, isPublic);
+
     keyObject.keyPath += 1;
     keyObject.keys[keyLabel] = newKey;
     this.db.insert(stringKey, JSON.stringify(keyObject));
@@ -68,6 +70,7 @@ class Id {
   getKeys() {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
+
     return keyObject.keys;
   }
 
@@ -108,8 +111,8 @@ class Id {
       signatureHex: signatureObj.signature,
       ksign: kSign,
     };
-
     const self = this;
+
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
@@ -137,6 +140,7 @@ class Id {
       ksignpk,
     };
     const self = this;
+
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined)) { // && (proofOfKSign !== undefined)) {

@@ -3,9 +3,6 @@ const iden3 = require('../index');
 const CONSTANTS = require('../src/constants');
 
 const { expect } = chai;
-const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
-const testPrivKHex1 = '9bd38c22848a3ebca7ae8ef915cac93a2d97c57bb2cb6da7160b86ca81598a7b';
-const db = new iden3.Db();
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const relayUrl = 'http://127.0.0.1:8000/api/v0.1';
 
@@ -16,6 +13,7 @@ describe('[id] new Id()', () => {
   let keys;
   let relay;
   let proofOfClaimKeyOperational;
+
   before('Create local storage container and relay object', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
@@ -129,7 +127,7 @@ describe('[id] new Id()', () => {
     keyContainer.lock();
   });
 
-  it('Check get claim by its index request', async () => {
+  it('Check request claim proof by its index request', async () => {
     keyContainer.unlock('pass');
     // Create claim and gets it index
     const authorizeKSignClaim = new iden3.claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
