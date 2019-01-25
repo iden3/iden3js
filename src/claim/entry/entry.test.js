@@ -52,4 +52,13 @@ describe('[Entry]', () => {
     expect(utils.bytesToHex(entry.elements[2])).to.be.equal(utils.bytesToHex(Buffer.alloc(32, 2)));
     expect(utils.bytesToHex(entry.elements[3])).to.be.equal(utils.bytesToHex(Buffer.alloc(32, 3)));
   });
+  it('.fromHexadecimal equivalent to .toHexadecimal', () => {
+	  let originalLeafHex = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff50000000000000000000000000000000000007833000000000000000000000004';
+	let leaf = new Entry();
+	leaf.fromHexadecimal(originalLeafHex);
+	  leaf.hi();
+	  leaf.hv();
+	expect(leaf.toHexadecimal()).to.be.equal(originalLeafHex);
+  });
 });
+

@@ -27,39 +27,39 @@ const proofOfEthName = {
   ethAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22',
   name: 'testName',
   proofOfClaimAssignName: {
-    Date: 1548347303,
-    Leaf: '00000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b471a1bdbd3b8ac98f3715507449f3a8e1f3b22008c8efcda9e563cf153563941b60fc5ac88336fc58d361eb0888686fadb99760000000000000000000000000000000000000000000000000000000000000003',
-    Proofs: [{
-      Aux: null,
-      Mtp0: '0001000000000000000000000000000000000000000000000000000000000001083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199',
-      Mtp1: '03010000000000000000000000000000000000000000000000000000000000010fef40cc16896de64be5a0f827799555344fd3d9aade9b65d95ecfbcac3e5a73182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
-      Root: '1b6feefde6e76c1e9d98d30fa0993a7a7b35f5b2580a757c9a57ee383dc50b96'
+    date: 1548347303,
+    leaf: '00000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b471a1bdbd3b8ac98f3715507449f3a8e1f3b22008c8efcda9e563cf153563941b60fc5ac88336fc58d361eb0888686fadb99760000000000000000000000000000000000000000000000000000000000000003',
+    proofs: [{
+      aux: null,
+      mtp0: '0001000000000000000000000000000000000000000000000000000000000001083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199',
+      mtp1: '03010000000000000000000000000000000000000000000000000000000000010fef40cc16896de64be5a0f827799555344fd3d9aade9b65d95ecfbcac3e5a73182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+      root: '1b6feefde6e76c1e9d98d30fa0993a7a7b35f5b2580a757c9a57ee383dc50b96'
     }],
-    Signature: '4e0c47fe90f3438df2ed520101b214ce3f0088dafec479c997d970097119d8ba10493cf247c428b5819c8c025b9c3f5501d9e15a1f036ea54ed09ae0a754fb9700'
+    signature: '4e0c47fe90f3438df2ed520101b214ce3f0088dafec479c997d970097119d8ba10493cf247c428b5819c8c025b9c3f5501d9e15a1f036ea54ed09ae0a754fb9700'
   }
 };
 
 const proofOfKSign = {
-  Date: 1548339566,
-  Leaf: '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff50000000000000000000000000000000000007833000000000000000000000004',
-  Proofs: [{
-      Aux: {
-        Version: 0,
-        Era: 0,
-        EthAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22'
+  date: 1548426397,
+  leaf: '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff50000000000000000000000000000000000007833000000000000000000000004',
+  proofs: [{
+      aux: {
+        version: 0,
+        era: 0,
+        ethAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22'
       },
-      Mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
-      Mtp1: '030000000000000000000000000000000000000000000000000000000000000028f8267fb21e8ce0cdd9888a6e532764eb8d52dd6c1e354157c78b7ea281ce801541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed',
-      Root: '1d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922'
+      mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
+      mtp1: '030000000000000000000000000000000000000000000000000000000000000028f8267fb21e8ce0cdd9888a6e532764eb8d52dd6c1e354157c78b7ea281ce801541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed',
+      root: '1d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922'
     },
     {
-      Aux: null,
-      Mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
-      Mtp1: '0300000000000000000000000000000000000000000000000000000000000000182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
-      Root: '083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199'
+      aux: null,
+      mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
+      mtp1: '0300000000000000000000000000000000000000000000000000000000000000182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+      root: '083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199'
     }
   ],
-  Signature: '413028e1577bf5e54b0b2db54e538d7c2df4173465cdeff32d5dbc262c5c6b95241b36f6b904cbccae383cc87f6adb6c9332fbb8af1a1b78ef58b9d9fc0fe34301'
+  signature: '000c3f2ecd731905c8ce1e05de6a1edd09fe06611fef1cd700d3a84537bf6dc21e7b8f158f252cc583542c449b824cbf21080b9c5b46d27c036ceb32f51c2d2801'
 };
 
 
@@ -112,36 +112,29 @@ describe('[protocol] login', () => {
     expect(res).to.be.equal(true);
   });
 
-  it('verify ProofClaimFull', () => {
-    const p = proofOfEthName.proofOfClaimAssignName;
-    const proofs = [
-      new iden3.protocols.login.MtpProof(p.Proofs[0].Mtp0, p.Proofs[0].Mtp1, p.Proofs[0].Root, null)
-    ];
-    const proof = new iden3.protocols.login.ProofClaimFull(
-                                           p.Signature,
-	    				   p.Date,
-                                           p.Leaf,
-                                           proofs
-    );
-    const res = iden3.protocols.login.verifyProofClaimFull(proof, relayAddr);
+  it('verify ProofClaimFull (proofOfClaimAssignName & proofOfKSign)', () => {
+    const res = iden3.protocols.login.verifyProofClaimFull(proofOfEthName.proofOfClaimAssignName, relayAddr);
     expect(res).to.be.equal(true);
+
+    const v = iden3.protocols.login.verifyProofClaimFull(proofOfKSign, relayAddr);
+    expect(v).to.be.equal(true);
   });
 
-  //it('newRequestIdenAssert', () => {
-  //  const date = new Date();
-  //  const unixtime = Math.round((date).getTime() / 1000);
-  //  const minutes = 20; // will be setted in global consts or in a config file
-  //  const timeout = unixtime + (minutes * 60);
+  it('newRequestIdenAssert', () => {
+   const date = new Date();
+   const unixtime = Math.round((date).getTime() / 1000);
+   const minutes = 20; // will be setted in global consts or in a config file
+   const timeout = unixtime + (minutes * 60);
 
-  //  const signatureRequest = iden3.protocols.login.newRequestIdenAssert('0xorigin', 'session01', timeout);
-  //  console.log("signatureRequest:\n", signatureRequest);
+   const signatureRequest = iden3.protocols.login.newRequestIdenAssert('0xorigin', 'session01', timeout);
 
-  //  const expirationTime = unixtime + (3600 * 60);
-  //  console.log(usrAddr);
-  //  const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime);
-  //  console.log("signedPacket:\n", signedPacket);
+    const res = iden3.protocols.login.verifyProofClaimFull(proofOfKSign, relayAddr);
+    expect(res).to.be.equal(true);
 
-  //  const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
-  //  expect(verified).to.be.equal(true);
-  //});
+   const expirationTime = unixtime + (3600 * 60);
+   const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr, ethName, kc, ksign, proofOfKSign, proofOfEthName, expirationTime);
+
+   const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
+   expect(verified).to.be.equal(true);
+  });
 });

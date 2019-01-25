@@ -55,6 +55,9 @@ describe('[id] new Id()', () => {
       // Successfull create identity api call to relay
         expect(createIDRes.idAddr).to.be.equal(id.idAddr);
 
+	      const util = require('util');
+		console.log(util.inspect(createIDRes, {depth: null}));
+
         expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
         await id.deployID()
           .then((deployIDres) => {

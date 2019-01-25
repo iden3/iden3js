@@ -1,6 +1,8 @@
 const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
+const claim = require('../claim/claim');
+const CONSTANTS = require('../constants');
 const Entry = require('../claim/entry/entry');
 
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
@@ -41,14 +43,14 @@ const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, pro
   let result = {};
   // switch que crida a la funció d'omplenar payload
   if (signatureRequest.header.typ != SIGV01) {
-    return; // TODO
+    return;
   }
   switch (signatureRequest.body.type) {
     case IDENASSERTV01:
       result = signIdenAssertV01(signatureRequest, kc, ksign, proofOfKSign);
       break;
     default:
-      return; // TODO
+      return;
   }
   return result;
 };
@@ -97,45 +99,50 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   // TODO check data structure scheme
 
   if (jwsHeader.alg !== SIGALGV01) {
-    return false; // TODO
+    return false;
   }
-  /*
-    // TODO uncoment when the proofOfKSign is ready
-    if (jwsPayload.proofOfKSign.proofs.length > 2) {
-      return false;
-    }
-    if (jwsPayload.proofOfKSign.ethaddrs.length !== jwsPayload.proofOfKSign.proofs.length) {
-      return false;
-    }
-    // TODO verify proofOfKSign using verifyProofClaimFull
-  */
+
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
-  if (!((jwsHeader.iat < current) && (current < jwsHeader.exp))) {
-    return false; // TODO
+  if (!((jwsHeader.iat <= current) && (current <= jwsHeader.exp))) {
+	  console.trace();
+    return false;
   }
 
-  const ksign = ''; // TODO get ksign from jwsPayload.proof_ksign.leaf
+  const ksign = ''; // TODO get ksign from jwsPayload.proofOfKSign.Leaf
 
-  // NOTE: verifying a signature is cheaper than verifying a merkle tree proof.
-  // This should go before the verification of proofOfKSigns and
-  // proofOfEthName.
-  // verify signature with ksign
+  // as verifying a signature is cheaper than verifying a merkle tree proof, first we verify signature with ksign
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
   const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
   const dataSigned = header64 + "." + payload64;
   const message = ethUtil.toBuffer(dataSigned);
   const msgHash = ethUtil.hashPersonalMessage(message);
   const sigHex = utils.bytesToHex(signatureBuffer);
-  console.log('verifySignature', utils.verifySignature(utils.bytesToHex(msgHash), sigHex, jwsPayload.ksign));
   if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, jwsPayload.ksign)) { // mHex, sigHex, addressHex
+	  console.trace();
     return false;
   }
 
   // TODO verify that signature is by jwsHeader.iss
 
   // TODO verify proofOfEthName
-  // Use verifyProofClaimFull
+
+  // verify proofOfKSign
+    if (jwsPayload.proofOfKSign.proofs.length != 2) {
+	  console.trace();
+      return false;
+    }
+    // if (jwsPayload.proofOfKSign.ethaddrs.length !== jwsPayload.proofOfKSign.proofs.length) {
+    //   return false;
+    // }
+
+  // Use verifyProofClaimFull to verify proofOfKSign
+  const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+	jwsPayload.proofOfKSign.proofs = jwsPayload.proofOfKSign.proofs;
+  if (!verifyProofClaimFull(jwsPayload.proofOfKSign, relayAddr)) {
+	  console.trace();
+	  return false;
+  }
 
   return true;
 };
@@ -179,7 +186,7 @@ class ProofClaimFull {
    * @param {[]ProofClaim} proofs
    */
   constructor(rootKeySig, date, leaf, proofs) {
-    this.rootSig = rootKeySig;
+    this.signature = rootKeySig;
     this.date = date;
     this.leaf = leaf;
     this.proofs = proofs;
@@ -249,7 +256,7 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
   const msgBuffer = ethUtil.toBuffer(msg);
   const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
   const msgHashHex = utils.bytesToHex(msgHash);
-  let sig = utils.hexToBytes(proof.rootSig);
+  let sig = utils.hexToBytes(proof.signature);
   sig[64] += 27;
   const signatureHex = utils.bytesToHex(sig);
   if (!utils.verifySignature(msgHashHex, signatureHex, relayAddr)) { // mHex, sigHex, addressHex
@@ -262,13 +269,15 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
   // For now we only allow proof verification of Nameserver (one level) and
   // Relay (two levels: relay + user)
   if (proof.proofs.length > 2 || proof.proofs.length < 1) {
-    return false; // TODO throw error
+	  console.trace();
+    return false;
   }
 
   let leaf = new Entry();
   leaf.fromHexadecimal(proof.leaf);
   var rootKey = '';
   for (var i = 0; i < proof.proofs.length; i++) {
+  // for (var i = proof.proofs.length-1; i>=0; i--) {
     mtpEx = proof.proofs[i].mtp0
     mtpNoEx = proof.proofs[i].mtp1
     // WARNING: leafNoEx points to the same content of leaf, so modifying leafNoEx modifies leaf!
@@ -278,7 +287,7 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
 
     if (!isMerkleTreeProofExistence(mtpEx)) {
       console.trace(mtpEx);
-      return false; // TODO throw error
+      return false;
     }
     // console.trace(leaf);
     // console.trace(leaf.hi(), leaf.hv());
@@ -289,16 +298,16 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
       console.log("hv: " + utils.bytesToHex(leaf.hv()));
       console.log("leaf: " + leaf.toHexadecimal());
       console.trace(leaf);
-      return false; // TODO throw error
+      return false;
     }
     if (isMerkleTreeProofExistence(mtpNoEx)) {
       console.trace();
-      return false; // TODO throw error
+      return false;
     }
     incClaimVersion(leaf)
     if (smt.checkProof(rootKey, mtpNoEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
       console.trace();
-      return false; // TODO throw error
+      return false;
     }
 
     if (i === proof.proofs.length-1) {
@@ -307,7 +316,10 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
     const version = proof.proofs[i].aux.ver;
     const era = proof.proofs[i].aux.era;
     const ethAddr = proof.proofs[i].aux.ethAddr;
-    leaf = newSetRootClaim(version, era, ethAddr, rootKey);
+    // leaf = new iden3.claims.SetRootKey(version, era, ethAddr, rootKey);
+    leaf = new claim.Factory(CONSTANTS.CLAIMS.SET_ROOT_KEY.ID, {
+      version: version, era: era, id: ethAddr, rootKey: rootKey,
+    }).createEntry();
   }
 
   return true;
