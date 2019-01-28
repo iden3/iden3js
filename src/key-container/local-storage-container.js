@@ -180,7 +180,7 @@ class LocalStorageContainer {
       const { keySeedEncrypted, pathKeySeedEncrypted } = JSON.parse(this.db.get(keySeedDb));
       const keySeed = kcUtils.decrypt(this.encryptionKey, keySeedEncrypted);
       const pathKeySeed = kcUtils.decrypt(this.encryptionKey, pathKeySeedEncrypted);
-      const pathKey = (utils.hexToBytes(pathKeySeed)).readUInt32BE();
+      const pathKey = (utils.hexToBytes(pathKeySeed)).readUInt32BE(0);
 
       return { keySeed, pathKey };
     }

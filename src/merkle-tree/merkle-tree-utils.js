@@ -84,16 +84,16 @@ function nodeValueToBuffer(nodeValue) {
 * @returns {Object} - New object containing node value data
 */
 function bufferToNodeValue(nodeValueBuffer) {
-  return nodeValueBuffer.readUInt8() // flag to check
+  return nodeValueBuffer.readUInt8(0) // flag to check
     ? {
-      flag: nodeValueBuffer.readUInt8(),
+      flag: nodeValueBuffer.readUInt8(0),
       data: {
         data: nodeValueBuffer.slice(5, nodeValueBuffer.length),
         indexLength: nodeValueBuffer.readUInt32LE(1),
       },
     }
     : {
-      flag: nodeValueBuffer.readUInt8(),
+      flag: nodeValueBuffer.readUInt8(0),
       data: [nodeValueBuffer.slice(1, 33), nodeValueBuffer.slice(33, nodeValueBuffer.length)],
     };
 }

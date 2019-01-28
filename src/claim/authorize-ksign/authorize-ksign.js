@@ -78,7 +78,7 @@ class AuthorizeKSign {
 
 /**
  * Decode field claim structure into raw data claim structure
- * @param {Object} elements - Element representation of the claim
+ * @param {Object} entry - Element representation of the claim
  * @returns {Object} AuthorizeKSign class object
  */
 function parseAuthorizeKSign(entry) {
