@@ -1,14 +1,22 @@
 const claim = require('../claim/claim');
 const DataBase = require('../db/db');
 const CONSTANTS = require('../constants');
+
 /**
- * @param  {String} keyRecover
- * @param  {String} keyRevoke
- * @param  {String} keyOp
- * @param  {Object} relay
- * @param  {String} implementation
+ * Class representing a user identity
+ * Manage all possible actions related to identity usage
  */
 class Id {
+  /**
+   * @param  {String} keyOpPub - Operational public key
+   * @param  {String} keyRecover - Recovery address key
+   * @param  {String} keyRevoke - Revoke address key
+   * @param  {Object} relay - Relay associated with the identity
+   * @param  {Object} relayAddr - Relay address
+   * @param  {String} implementation
+   * @param  {String} backup
+   * @param  {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
+   */
   constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
@@ -25,8 +33,7 @@ class Id {
   }
 
   /**
-   * Save keys associated with this Identity address
-   * @returns {Bool} - Acknowledge
+   * Save keys associated with this identity address
    */
   saveKeys() {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
@@ -34,12 +41,12 @@ class Id {
       keyProfilePath: this.keyProfilePath,
       keyPath: 4,
       keys: {
-        operational: this.keyOperational,
         operationalPub: this.keyOperationalPub,
         recover: this.keyRecover,
         revoke: this.keyRevoke,
       },
     };
+
     this.db.insert(stringKey, JSON.stringify(objectValue));
     return true;
   }
@@ -55,6 +62,7 @@ class Id {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
     const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath, isPublic);
+
     keyObject.keyPath += 1;
     keyObject.keys[keyLabel] = newKey;
     this.db.insert(stringKey, JSON.stringify(keyObject));
@@ -68,9 +76,14 @@ class Id {
   getKeys() {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
     const keyObject = JSON.parse(this.db.get(stringKey));
+
     return keyObject.keys;
   }
 
+  /**
+   * Send the data to Relay,and get the generated address of the counterfactual
+   * @returns {Object} - Http response
+   */
   createID() {
     // send the data to Relay,and get the generated address of the counterfactual
     return this.relay.createID(this.keyOperationalPub, this.keyRecover, this.keyRevoke)
@@ -81,6 +94,10 @@ class Id {
       });
   }
 
+  /**
+   * Send to relay a request for deplying identity smart contract
+   * @returns {Object} - Http response
+   */
   deployID() {
     return this.relay.deployID(this.idAddr);
   }
@@ -101,8 +118,8 @@ class Id {
       signatureHex: signatureObj.signature,
       ksign: kSign,
     };
-
     const self = this;
+
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
@@ -130,6 +147,7 @@ class Id {
       ksignpk,
     };
     const self = this;
+
     return this.relay.postClaim(this.idAddr, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined)) { // && (proofOfKSign !== undefined)) {

@@ -49,7 +49,8 @@ class Relay {
    * @returns {Object} - Http response
    */
   getClaimByHi(idAddr, hi) {
-    return axios.get(`${this.url}/claim/${idAddr}/hi/${hi}`);
+    // return axios.get(`${this.url}/claim_proof/${idAddr}/hi/${hi}`);
+    return axios.get(`${this.url}/claim_proof/idaddr/${idAddr}/hi/${hi}`);
   }
 
   /**
@@ -76,6 +77,7 @@ class Relay {
       signature: signatureObj.signature,
       ksignpk: keyOperationalPub,
     };
+
     return axios.post(`${this.url}/vinculateid`, bindIDMsg);
   }
 
@@ -101,6 +103,7 @@ class Relay {
       recoverer: rec,
       revokator: rev,
     };
+
     return axios.post(`${this.url}/id`, keys);
   }
 

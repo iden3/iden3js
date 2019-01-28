@@ -29,10 +29,12 @@ class LocalStorageContainer {
    * @param  {String} passphrase
    */
   unlock(passphrase) {
-    this.encryptionKey = kcUtils.passToKey(passphrase, 'salt'); // unlock key container
+    // unlock key container
+    this.encryptionKey = kcUtils.passToKey(passphrase, 'salt');
     const self = this;
     this.timer = setTimeout(() => {
-      self.encryptionKey = ''; // key container locked again
+      // key container locked again
+      self.encryptionKey = '';
     }, 30000);
   }
 
@@ -46,7 +48,8 @@ class LocalStorageContainer {
     }
     const self = this;
     clearTimeout(this.timer);
-    self.encryptionKey = ''; // key container locked
+    // key container locked
+    self.encryptionKey = '';
   }
 
   /**
@@ -90,6 +93,7 @@ class LocalStorageContainer {
    */
   saveMasterSeed(masterSeed) {
     const seedEncrypted = kcUtils.encrypt(this.encryptionKey, masterSeed);
+
     this.db.insert(`${this.prefix}masterSeed`, seedEncrypted);
   }
 
@@ -156,6 +160,7 @@ class LocalStorageContainer {
       const pathKey = Buffer.alloc(4);
       pathKey.writeUInt32BE(0);
       const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKey));
+
       this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
       return true;
     }
@@ -175,7 +180,8 @@ class LocalStorageContainer {
       const { keySeedEncrypted, pathKeySeedEncrypted } = JSON.parse(this.db.get(keySeedDb));
       const keySeed = kcUtils.decrypt(this.encryptionKey, keySeedEncrypted);
       const pathKeySeed = kcUtils.decrypt(this.encryptionKey, pathKeySeedEncrypted);
-      const pathKey = (utils.hexToBytes(pathKeySeed)).readUInt32BE();
+      const pathKey = (utils.hexToBytes(pathKeySeed)).readUInt32BE(0);
+
       return { keySeed, pathKey };
     }
     return undefined;
@@ -193,6 +199,7 @@ class LocalStorageContainer {
       pathKeyDb.writeUInt32BE(increasePathKey);
       const keySeedEncrypted = kcUtils.encrypt(this.encryptionKey, keySeed);
       const pathKeySeedEncrypted = kcUtils.encrypt(this.encryptionKey, utils.bytesToHex(pathKeyDb));
+
       this.db.insert(`${this.prefix}keySeed`, JSON.stringify({ keySeedEncrypted, pathKeySeedEncrypted }));
       return true;
     }
@@ -214,6 +221,7 @@ class LocalStorageContainer {
       const addressRecoveryHex = utils.bytesToHex(addressRecovery);
       const privRecoveryHex = utils.bytesToHex(privRecovery);
       const privRecoveryHexEncrypted = kcUtils.encrypt(this.encryptionKey, privRecoveryHex);
+
       this.db.insert(this.prefix + CONSTANTS.IDRECOVERYPREFIX + addressRecoveryHex, privRecoveryHexEncrypted);
       return addressRecoveryHex;
     }
@@ -239,6 +247,7 @@ class LocalStorageContainer {
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
+
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
       return addressHex;
     }
@@ -246,12 +255,13 @@ class LocalStorageContainer {
   }
 
   /**
-   * Gets recovery seed from the data base
-   * @return {String} - Recovery public address and its private address
+   * Gets recovery address from the data base
+   * @return {String} - Recovery public address
    */
   getRecoveryAddr() {
     if (this.isUnlock()) {
       const idSeedKey = this.db.listKeys(this.prefix + CONSTANTS.IDRECOVERYPREFIX);
+
       if (idSeedKey.length === 0) {
         return undefined;
       }
@@ -262,13 +272,12 @@ class LocalStorageContainer {
 
   /**
    * @param  {String} mnemonic - String with 12 words
-   * @param {Number} pathProfile - indicates the penultimate layer of the derivation path, for the different identity profiles
-   * @param  {Number} numberOfDerivatedKeys - indicates the last layer of the derivation path, for the different keys of the identity profile
+   * @param {Number} pathProfile - Indicates the penultimate layer of the derivation path, for the different identity profiles
+   * @param  {Number} numberOfDerivatedKeys - Indicates the last layer of the derivation path, for the different keys of the identity profile
    * @returns {Object} It contains all the keys generated
    */
   generateKeysFromKeyPath(mnemonic = bip39.generateMnemonic(), pathProfile = 0, numberOfDerivedKeys = 3) {
-    if (!this.encryptionKey || mnemonic.constructor !== String) {
-      // KeyContainer not unlocked
+    if (!this.isUnlock() || !bip39.validateMnemonic(mnemonic)) {
       console.error('Error: KeyContainer not unlocked');
       return undefined;
     }
@@ -285,16 +294,16 @@ class LocalStorageContainer {
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
       keys.push(addressHex);
+
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
       // Consider key 0 as the operational
-      // Retrieve and save public key from private operational
+      // Retrieve and save public key ( compress format ) from private operational
       if (i === 0) {
-        // const pubK = ethUtil.privateToPublic(addrNode._privateKey);
-        // const pubKCompressed = secp256k1.publicKeyConvert(pubK);
-        const pubKCompressed = addrNode._publicKey;
-        const pubKCompressedHex = utils.bytesToHex(pubKCompressed);
-        keys.push(pubKCompressedHex);
-        this.db.insert(this.prefix + pubKCompressedHex, privKHexEncrypted);
+        const pubK = addrNode._publicKey;
+        const pubKHex = utils.bytesToHex(pubK);
+        keys.push(pubKHex);
+
+        this.db.insert(this.prefix + pubKHex, privKHexEncrypted);
       }
     }
     return { keys };
@@ -307,6 +316,7 @@ class LocalStorageContainer {
   listIdentities() {
     const idList = [];
     const localStorageLength = localStorage.length;
+
     for (let i = 0, len = localStorageLength; i < len; i++) {
       // get only the stored data related to identities (that have the prefix)
       if (localStorage.key(i).indexOf(this.db.prefix + this.prefix + CONSTANTS.IDPREFIX) !== -1) {
@@ -415,7 +425,6 @@ class LocalStorageContainer {
         keysList.push(key);
       }
     }
-
     return keysList;
   }
 
