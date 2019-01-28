@@ -118,6 +118,15 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   }
 
   // TODO check jwsPayload.ksign with jwsPayload.proofOfKSign.Leaf
+  // get ClaimAuthorizeKSign from jwsPayload.proofOfKSign.leaf
+  const claimAuthorizeKSign = claim.parseAuthorizeKSignClaim(jwsPayload.proofOfKSign.leaf);
+  if (claimAuthorizeKSign.extraIndex.keyToAuthorize!==jwsPayload.ksign) {
+	console.trace();
+ 	return false; 
+  }
+
+  // TODO check that jwsPayload.form.proofOfEthName == jwsPayload.form.ethName == jwsHeader.iss
+  // get ClaimAssignName from jwsPayload.form.proofOfEthName.leaf
 
   // check verify signature with jwsPayload.ksign
   // as verifying a signature is cheaper than verifying a merkle tree proof, first we verify signature with ksign
@@ -136,14 +145,12 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
 
   const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
-  // TODO check that jwsPayload.form.proofOfEthName == jwsPayload.form.ethName
 
   // verify proofOfEthName
   if (!proofs.verifyProofClaimFull(jwsPayload.form.proofOfEthName.proofOfClaimAssignName, relayAddr)) {
  	return false; 
   }
 
-  // TODO check that jwsPayload.proofOfKSign ksign == ksign
 
   // check jwsPayload.proofOfKSign
   if (!proofs.verifyProofClaimFull(jwsPayload.proofOfKSign, relayAddr)) {
