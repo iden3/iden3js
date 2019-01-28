@@ -88,7 +88,7 @@ function parseAssignName(entry) {
   claim.structure.claimType = entry.elements[3].slice(24, 32);
   claim.structure.version = entry.elements[3].slice(20, 24);
   // Parse element 2
-  claim.structure.hashName = entry.elements[2].slice(0, 32);
+  claim.structure.hashName = entry.elements[2].slice(1, 32);
   // Parse element 1
   claim.structure.id = entry.elements[1].slice(12, 32);
   return claim;

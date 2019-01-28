@@ -1,7 +1,11 @@
+const crypto = require('crypto');
+
 const ethUtil = require('ethereumjs-util');
+const { secp256k1 } = ethUtil;
 
 const utils = require('../utils');
 const claim = require('../claim/claim');
+const claimUtils = require('../claim/claim-utils');
 const CONSTANTS = require('../constants');
 const Entry = require('../claim/entry/entry');
 const proofs = require('./proofs');
@@ -22,7 +26,7 @@ const SIGALGV01 = 'ES255';
 * @returns {Object} requestIdenAssert
 */
 const newRequestIdenAssert = function newRequestIdenAssert(origin, sessionId, timeout) {
-  const nonce = 'generate cryptografically random nonce'; // TODO
+  const nonce = crypto.randomBytes(32).toString('base64');
   return {
     header: {
       typ: SIGV01
@@ -75,7 +79,14 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
     form: {
       ethName: ethName,
       proofOfEthName: proofOfEthName, // proofOfClaimAssignName
-    }
+    },
+    // identity: {
+    //   operational: ,
+    //   recovery:,
+    //   revoke:,
+    //   relayer:,
+    //   impl:,
+    // }
   };
 
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
@@ -97,7 +108,7 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
  * Verify an identity assertio v0.1 signed packet
  */
 const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, signatureBuffer) {
-  // TODO check data structure scheme
+  // TODO AFTER MILESTONE check data structure scheme
 
   // check if jwsHeader.alg is iden3.sig.v0_1 (SIGALGV01)
   if (jwsHeader.alg !== SIGALGV01) {
@@ -117,16 +128,34 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
     return false;
   }
 
-  // TODO check jwsPayload.ksign with jwsPayload.proofOfKSign.Leaf
+  // check jwsPayload.ksign with jwsPayload.proofOfKSign.Leaf
   // get ClaimAuthorizeKSign from jwsPayload.proofOfKSign.leaf
-  const claimAuthorizeKSign = claim.parseAuthorizeKSignClaim(jwsPayload.proofOfKSign.leaf);
-  if (claimAuthorizeKSign.extraIndex.keyToAuthorize!==jwsPayload.ksign) {
-	console.trace();
+  let entry = new Entry();
+  entry.fromHexadecimal(jwsPayload.proofOfKSign.leaf);
+  const claimAuthorizeKSign = claimUtils.newClaimFromEntry(entry);
+  const pubK = claimAuthorizeKSign.structure.pubKeyCompressed;
+  const addr = ethUtil.pubToAddress(pubK, true);
+  const addrHex = utils.bytesToHex(addr);
+  if (addrHex!==jwsPayload.ksign) {
  	return false; 
   }
 
-  // TODO check that jwsPayload.form.proofOfEthName == jwsPayload.form.ethName == jwsHeader.iss
+  // check that jwsPayload.form.proofOfEthName == jwsPayload.form.ethName == jwsHeader.iss
   // get ClaimAssignName from jwsPayload.form.proofOfEthName.leaf
+  entry = new Entry();
+  entry.fromHexadecimal(jwsPayload.form.proofOfEthName.proofOfClaimAssignName.leaf);
+  const claimAssignName = claimUtils.newClaimFromEntry(entry);
+  const nameWithoutDomain = jwsPayload.form.proofOfEthName.name.split("@")[0];
+  const hashName = utils.hashBytes(nameWithoutDomain);
+  // check jwsPayload.form.proofOfEthName.proofOfClaimAssignName.leaf {hashName} === hash(jwsPayload.form.proofOfEthName.name
+  if (utils.bytesToHex(claimAssignName.structure.hashName)!==utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
+    return false; 
+  }
+  // check claimAssignName.structure.id = jwsHeader.iss
+  if (utils.bytesToHex(claimAssignName.structure.id)!==jwsHeader.iss) {
+    return false;
+  }
+  
 
   // check verify signature with jwsPayload.ksign
   // as verifying a signature is cheaper than verifying a merkle tree proof, first we verify signature with ksign
@@ -141,10 +170,13 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
     return false;
   }
 
-  // TODO verify that signature is by jwsHeader.iss
+
+  // TODO AFTER MILESTONE verify identity address from counterfactual
+  // TODO AFTER MILESTONE check counterfactual address from jwsPayload.identity, address == jwsHeader.iss
+  // TODO AFTER MILESTONE check jwsPayload.identity.relay == hardcoded relay address
+
 
   const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-
 
   // verify proofOfEthName
   if (!proofs.verifyProofClaimFull(jwsPayload.form.proofOfEthName.proofOfClaimAssignName, relayAddr)) {

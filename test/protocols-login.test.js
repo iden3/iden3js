@@ -40,10 +40,10 @@ describe('[protocol] login', () => {
   });
 
   it('verify ProofClaimFull (proofOfClaimAssignName & proofOfKSign)', () => {
-    const assignNameVerified = iden3.protocols.login.verifyProofClaimFull(proofOfEthName.proofOfClaimAssignName, relayAddr);
+    const assignNameVerified = iden3.protocols.verifyProofClaimFull(proofOfEthName.proofOfClaimAssignName, relayAddr);
     expect(assignNameVerified).to.be.equal(true);
 
-    const ksignVerified = iden3.protocols.login.verifyProofClaimFull(proofOfKSign, relayAddr);
+    const ksignVerified = iden3.protocols.verifyProofClaimFull(proofOfKSign, relayAddr);
     expect(ksignVerified).to.be.equal(true);
   });
 
@@ -55,11 +55,11 @@ describe('[protocol] login', () => {
 
     const signatureRequest = iden3.protocols.login.newRequestIdenAssert('0xorigin', 'session01', timeout);
 
-    const res = iden3.protocols.login.verifyProofClaimFull(proofOfKSign, relayAddr);
+    const res = iden3.protocols.verifyProofClaimFull(proofOfKSign, relayAddr);
     expect(res).to.be.equal(true);
 
     const expirationTime = unixtime + (3600 * 60);
-    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, kc, ksign, proofOfKSign, proofOfEthName, expirationTime);
+    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofOfEthName, kc, ksign, proofOfKSign, expirationTime);
 
     const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
     expect(verified).to.be.equal(true);
