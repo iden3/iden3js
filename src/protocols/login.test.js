@@ -9,17 +9,19 @@ const { expect } = chai;
 
 const db = new iden3.Db();
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
+// const testPrivKHex = 'da7079f082a1ced80c5dee3bf00752fd67f75321a637e5d5073ce1489af062d8';
 
 const kc = new iden3.KeyContainer('localStorage', db);
 kc.unlock('pass');
 // const ksign = kc.importKey(testPrivKHex);
 
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+kc.unlock('pass');
 kc.generateMasterSeed(mnemonic);
-// const mnemonicDb = kc.getMasterSeed();
+const mnemonicDb = kc.getMasterSeed();
 // kc.unlock('pass');
 // console.log(kc.isUnlock());
+const ack = kc.generateKeySeed(mnemonicDb);
 const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
 ({ keys } = objectKeys);

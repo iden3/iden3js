@@ -15,6 +15,7 @@ const relay = new iden3.Relay('http://127.0.0.1:8000/api/v0.1');
 
 kc.generateMasterSeed(mnemonic);
 const mnemonicDb = kc.getMasterSeed();
+const ack = kc.generateKeySeed(mnemonicDb);
 const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
 ({ keys } = objectKeys);
@@ -32,9 +33,9 @@ describe('[protocol] login', () => {
   before(() => {
     return id.bindID(kc, name).then((bindRes) => {
       expect(bindRes.status).to.be.equal(200);
+      proofOfEthName = bindRes.data;
       return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {
         expect(resolveRes.status).to.be.equal(200);
-        proofOfEthName = resolveRes.data;
       });
     });
   });
