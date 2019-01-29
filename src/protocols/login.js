@@ -120,8 +120,9 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
     return false;
   }
 
-  // check if jwsHeader.type is IDENASSERTV01
-  if (jwsHeader.type !== IDENASSERTV01) {
+  // check if jwsHeader.typ is SIGV01 // TODO confirm that must be SIGV01
+  if (jwsHeader.typ !== SIGV01) {
+	  console.trace();
     return false;
   }
 
