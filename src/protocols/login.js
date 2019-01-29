@@ -16,6 +16,7 @@ const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 const SIGV01 = 'iden3.sig.v0_1';
 const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
 const SIGALGV01 = 'ES255';
+const NONCEDELTATIMEOUT = 2 * 60; // two minutes
 
 /**
 * New RequestIdenAssert
@@ -25,8 +26,9 @@ const SIGALGV01 = 'ES255';
 * @param {Number} timeout
 * @returns {Object} requestIdenAssert
 */
-const newRequestIdenAssert = function newRequestIdenAssert(origin, sessionId, timeout) {
+const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, sessionId, deltatimeout) {
   const nonce = crypto.randomBytes(32).toString('base64');
+  const timeout = nonceDB.add(nonce, deltatimeout);
   return {
     header: {
       typ: SIGV01
@@ -110,12 +112,17 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
  * @param {Object} jwsPayload
  * @param {Buffer} signatureBuffer
  */
-const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, signatureBuffer) {
+const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, jwsHeader, jwsPayload, signatureBuffer) {
   // TODO AFTER MILESTONE check data structure scheme
 
   // check if jwsHeader.alg is iden3.sig.v0_1 (SIGALGV01)
   if (jwsHeader.alg !== SIGALGV01) {
     return false;
+  }
+
+  // check jwsPayload.data.challege valid
+  if (!nonceDB.searchAndDelete(jwsPayload.data.challenge)) {
+  	return false;
   }
 
   // check that jwsPayload.proofOfKSign.proofs.length < 2
@@ -197,7 +204,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
  * Verify a signed packet
  * @param {String} signedPacket
  */
-const verifySignedPacket = function verifySignedPacket(signedPacket) {
+const verifySignedPacket = function verifySignedPacket(nonceDB, signedPacket) {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
   const jwsHeader64 = signedPacket.split('.')[0];
   const jwsPayload64 = signedPacket.split('.')[1];
@@ -210,7 +217,7 @@ const verifySignedPacket = function verifySignedPacket(signedPacket) {
   // switch over jwsHeader.typ
   switch (jwsHeader.typ) {
     case SIGV01:
-      verified = verifyIdenAssertV01(jwsHeader, jwsPayload, signatureBuffer);
+      verified = verifyIdenAssertV01(nonceDB, jwsHeader, jwsPayload, signatureBuffer);
       break;
     default:
       return false;

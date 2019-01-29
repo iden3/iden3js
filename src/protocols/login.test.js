@@ -112,20 +112,23 @@ describe('[protocol] interns', () => {
 
 describe('[protocol] login flow', () => {
   it('newRequestIdenAssert & signIdenAssertV01 & verifySignedPacket', () => {
-    const date = new Date();
-    const unixtime = Math.round((date).getTime() / 1000);
-    const minutes = 20; // signatureRequest will be valid between next 20 minutes
-    const timeout = unixtime + (minutes * 60);
+    // const date = new Date();
+    // const unixtime = Math.round((date).getTime() / 1000);
+    // const minutes = 20; // signatureRequest will be valid between next 20 minutes
+    // const timeout = unixtime + (minutes * 60);
 
     // login backend:
-    const signatureRequest = iden3.protocols.login.newRequestIdenAssert('0xorigin', 'session01', timeout);
+    const nonceDB = new iden3.protocols.NonceDB();
+    const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, '0xorigin', 'session01', iden3.protocols.login.NONCEDELTATIMEOUT);
 
+    const date = new Date();
+    const unixtime = Math.round((date).getTime() / 1000);
     const expirationTime = unixtime + (3600 * 60);
     // identity wallet:
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr, ethName, proofOfEthName, kc, ksign, proofOfKSign, expirationTime);
 
     // login backend:
-    const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
+    const verified = iden3.protocols.login.verifySignedPacket(nonceDB, signedPacket);
     expect(verified).to.be.equal(true);
   });
 });

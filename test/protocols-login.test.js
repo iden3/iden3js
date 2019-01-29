@@ -49,20 +49,18 @@ describe('[protocol] login', () => {
   });
 
   it('newRequestIdenAssert', () => {
+    const nonceDB = new iden3.protocols.NonceDB();
+    const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, '0xorigin', 'session01', iden3.protocols.login.NONCEDELTATIMEOUT);
+
     const date = new Date();
     const unixtime = Math.round((date).getTime() / 1000);
-    const minutes = 20; // will be setted in global consts or in a config file
-    const timeout = unixtime + (minutes * 60);
-
-    const signatureRequest = iden3.protocols.login.newRequestIdenAssert('0xorigin', 'session01', timeout);
-
     const res = iden3.protocols.verifyProofClaimFull(proofOfKSign, relayAddr);
     expect(res).to.be.equal(true);
 
     const expirationTime = unixtime + (3600 * 60);
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofOfEthName, kc, ksign, proofOfKSign, expirationTime);
 
-    const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
+    const verified = iden3.protocols.login.verifySignedPacket(nonceDB, signedPacket);
     expect(verified).to.be.equal(true);
   });
 });
