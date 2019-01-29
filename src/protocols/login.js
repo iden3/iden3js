@@ -120,6 +120,11 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
     return false;
   }
 
+  // check if jwsHeader.type is IDENASSERTV01
+  if (jwsHeader.type !== IDENASSERTV01) {
+    return false;
+  }
+
   // check origin
   if (jwsPayload.data.origin!==origin) {
   	return false;
@@ -130,15 +135,15 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   	return false;
   }
 
-  // check that jwsPayload.proofOfKSign.proofs.length < 2
+  // check that jwsPayload.proofOfKSign.proofs.length <= 2
   if (jwsPayload.proofOfKSign.proofs.length>2) {
     return false;
   }
 
-  // check times iat < current < exp
+  // check times iat <= current < exp
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
-  if (!((jwsHeader.iat <= current) && (current <= jwsHeader.exp))) {
+  if (!((jwsHeader.iat <= current) && (current < jwsHeader.exp))) {
     return false;
   }
 

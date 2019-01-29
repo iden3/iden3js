@@ -36,8 +36,7 @@ describe('[Claim-utils]', () => {
 
   it('Parse entry into claim assign name', () => {
     const nameExample = 'example.iden3.eth';
-    const hashNameExample = utils.hashBytes(nameExample);
-    hashNameExample.fill(0, 0, 1);
+    const hashNameExample = utils.hashBytes(nameExample).slice(1, 32);
     const entryHex = '0x0000000000000000000000000000000000000000000000000000000000000000'
                      + '000000000000000000000000393939393939393939393939393939393939393a'
                      + '00d67b05d8e2d1ace8f3e84b8451dd2e9da151578c3c6be23e7af11add5a807a'
