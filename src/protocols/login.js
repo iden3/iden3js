@@ -28,7 +28,7 @@ const NONCEDELTATIMEOUT = 2 * 60; // two minutes
 */
 const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, sessionId, deltatimeout) {
   const nonce = crypto.randomBytes(32).toString('base64');
-  const timeout = nonceDB.add(nonce, deltatimeout);
+  const nonceObj = nonceDB.add(nonce, deltatimeout);
   return {
     header: {
       typ: SIGV01
@@ -37,7 +37,7 @@ const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, sess
       type: IDENASSERTV01,
       data: {
         challenge: nonce,
-        timeout: timeout,
+        timeout: nonceObj.timestamp,
         origin: origin,
         sessionId: sessionId
       }

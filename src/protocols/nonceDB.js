@@ -16,10 +16,12 @@ class NonceDB {
 	 * @param {Number} timeout, in unixtime format
 	 */
 	_add(nonce, timeout) {
-	  this.nonces.push({
+	  const nonceObj = {
 	    nonce: nonce,
 	    timestamp: timeout
-	  });
+	  };
+	  this.nonces.push(nonceObj);
+	  return nonceObj;
 	};
 
 	/**
@@ -32,8 +34,8 @@ class NonceDB {
 	    	const date = new Date();
 	    	const timestamp = Math.round((date).getTime() / 1000);
 		const timeout = timestamp + delta;
-		this._add(nonce, timeout);
-		return timeout;
+		const nonceObj = this._add(nonce, timeout);
+		return nonceObj;
 	};
 
 	/**

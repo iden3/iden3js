@@ -2,15 +2,21 @@
 
 ## Login
 
+### Define new NonceDB
+```js
+const nonceDB = new iden3.protocols.NonceDB();
+```
+
 ### Generate New Request of Identity Assert
 - input
+	- `nonceDB`: NonceDB class object
 	- `originAddr`: address of the emitter of the request, in Hex representation
 	- `sessionId`: id of the session
-	- `timeout`: unixtime format, valid until that date
+	- `timeout`: unixtime format, valid until that date. Usually used the `iden3.protocols.login.NONCEDELTATIMEOUT`, as is defined inside iden3js library
 - output
 	- `signatureRequest`: `Object`
 ```js
-const signatureRequest = iden3.protocols.login.newRequestIdenAssert(originAddr, sessionId, timeout);
+const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, originAddr, sessionId, iden3.protocols.login.NONCEDELTATIMEOUT);
 ```
 
 ### Sign Packet
@@ -32,9 +38,10 @@ const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, u
 
 ### Verify Signed Packet
 - input
+	- `nonceDB`: NonceDB class object
 	- `signedPacket`: object generated in the `signIdenAssertV01` function
 - output
 	- `verified`: `bool` that indicates if is verified or not
 ```js
-const verified = iden3.protocols.login.verifySignedPacket(signedPacket);
+const verified = iden3.protocols.login.verifySignedPacket(nonceDB, signedPacket);
 ```
