@@ -21,13 +21,14 @@ const NONCEDELTATIMEOUT = 2 * 60; // two minutes
 /**
 * New RequestIdenAssert
 * for login purposes
+* @param {Object} nonceDB
 * @param {String} origin
-* @param {String} sessionId
-* @param {Number} timeout
+* @param {Number} deltatimeout
 * @returns {Object} requestIdenAssert
 */
-const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, sessionId, deltatimeout) {
+const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, deltatimeout) {
   const nonce = crypto.randomBytes(32).toString('base64');
+  // const nonce = crypto.randomBytes(32).toString('hex');
   const nonceObj = nonceDB.add(nonce, deltatimeout);
   return {
     header: {
@@ -39,7 +40,6 @@ const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, sess
         challenge: nonce,
         timeout: nonceObj.timestamp,
         origin: origin,
-        sessionId: sessionId
       }
     }
   };
@@ -112,12 +112,17 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
  * @param {Object} jwsPayload
  * @param {Buffer} signatureBuffer
  */
-const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, jwsHeader, jwsPayload, signatureBuffer) {
+const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer) {
   // TODO AFTER MILESTONE check data structure scheme
 
   // check if jwsHeader.alg is iden3.sig.v0_1 (SIGALGV01)
   if (jwsHeader.alg !== SIGALGV01) {
     return false;
+  }
+
+  // check origin
+  if (jwsPayload.data.origin!==origin) {
+  	return false;
   }
 
   // check jwsPayload.data.challege valid
@@ -204,7 +209,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, jwsHeader, jws
  * Verify a signed packet
  * @param {String} signedPacket
  */
-const verifySignedPacket = function verifySignedPacket(nonceDB, signedPacket) {
+const verifySignedPacket = function verifySignedPacket(nonceDB, origin, signedPacket) {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
   const jwsHeader64 = signedPacket.split('.')[0];
   const jwsPayload64 = signedPacket.split('.')[1];
@@ -217,7 +222,7 @@ const verifySignedPacket = function verifySignedPacket(nonceDB, signedPacket) {
   // switch over jwsHeader.typ
   switch (jwsHeader.typ) {
     case SIGV01:
-      verified = verifyIdenAssertV01(nonceDB, jwsHeader, jwsPayload, signatureBuffer);
+      verified = verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
       break;
     default:
       return false;

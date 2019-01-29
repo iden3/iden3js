@@ -2,6 +2,36 @@
 
 ## Login
 
+```
+Wallet                                   Service
+  +                                         +
+  |           signatureRequest              |
+  | <-------------------------------------+ |
+  |                                         |
+  | +---+                                   |
+  |     |                                   |
+  |     |sign packet                        |
+  |     |                                   |
+  | <---+                                   |
+  |              signedPacket               |
+  | +-------------------------------------> |
+  |                                         |
+  |                                  +---+  |
+  |                      verify      |      |
+  |                      signedPacket|      |
+  |                                  |      |
+  |                                  +--->  |
+  |                                         |
+  |                 ok                      |
+  | <-------------------------------------+ |
+  |                                         |
+  |                                         |
+  |                                         |
+  +                                         +
+```
+
+
+
 ### Define new NonceDB
 ```js
 const nonceDB = new iden3.protocols.NonceDB();
@@ -10,14 +40,15 @@ const nonceDB = new iden3.protocols.NonceDB();
 ### Generate New Request of Identity Assert
 - input
 	- `nonceDB`: NonceDB class object
-	- `originAddr`: address of the emitter of the request, in Hex representation
-	- `sessionId`: id of the session
+	- `originAddr`: domain of the emitter of the request
 	- `timeout`: unixtime format, valid until that date. Usually used the `iden3.protocols.login.NONCEDELTATIMEOUT`, as is defined inside iden3js library
 - output
 	- `signatureRequest`: `Object`
 ```js
-const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, originAddr, sessionId, iden3.protocols.login.NONCEDELTATIMEOUT);
+const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, iden3.protocols.login.NONCEDELTATIMEOUT);
 ```
+
+Also, the `nonce` value can be getted from `signatureRequest.body.data.challenge`.
 
 ### Sign Packet
 - input
