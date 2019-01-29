@@ -6,20 +6,20 @@ const { secp256k1 } = ethUtil;
 const utils = require('../utils');
 const claim = require('../claim/claim');
 const claimUtils = require('../claim/claim-utils');
-const CONSTANTS = require('../constants');
+const CONSTANTS = require('../constants'); // iden3 constants
 const Entry = require('../claim/entry/entry');
 const proofs = require('./proofs');
-
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
+// Constants of the login protocol
 const SIGV01 = 'iden3.sig.v0_1';
 const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
 const SIGALGV01 = 'ES255';
 
-// for login purposes
 /**
 * New RequestIdenAssert
+* for login purposes
 * @param {String} origin
 * @param {String} sessionId
 * @param {Number} timeout
@@ -44,9 +44,9 @@ const newRequestIdenAssert = function newRequestIdenAssert(origin, sessionId, ti
 };
 
 /*
+// TODO AFTER MILESTONE
 const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, proofOfKSign) {
   let result = {};
-  // switch que crida a la funció d'omplenar payload
   if (signatureRequest.header.typ != SIGV01) {
     return;
   }
@@ -75,12 +75,12 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
     type: IDENASSERTV01,
     data: signatureRequest.body.data,
     ksign: ksign,
-    proofOfKSign: proofOfKSign, // proofOfClaimAssignName
+    proofOfKSign: proofOfKSign,
     form: {
       ethName: ethName,
-      proofOfEthName: proofOfEthName, // proofOfClaimAssignName
+      proofOfEthName: proofOfEthName,
     },
-    // identity: {
+    // identity: { // TODO AFTER MILESTONE
     //   operational: ,
     //   recovery:,
     //   revoke:,
@@ -106,6 +106,9 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
 
 /**
  * Verify an identity assertio v0.1 signed packet
+ * @param {Object} jwsHeader
+ * @param {Object} jwsPayload
+ * @param {Buffer} signatureBuffer
  */
 const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, signatureBuffer) {
   // TODO AFTER MILESTONE check data structure scheme
@@ -124,7 +127,6 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
   if (!((jwsHeader.iat <= current) && (current <= jwsHeader.exp))) {
-    console.trace();
     return false;
   }
 
@@ -166,7 +168,6 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
   const msgHash = ethUtil.hashPersonalMessage(message);
   const sigHex = utils.bytesToHex(signatureBuffer);
   if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, jwsPayload.ksign)) { // mHex, sigHex, addressHex
-    console.trace();
     return false;
   }
 
@@ -194,6 +195,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(jwsHeader, jwsPayload, 
 
 /**
  * Verify a signed packet
+ * @param {String} signedPacket
  */
 const verifySignedPacket = function verifySignedPacket(signedPacket) {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
@@ -225,29 +227,3 @@ module.exports = {
   verifySignedPacket,
 };
 
-/*
-- crear paquet per firmar
-	- request de firma específic per login
-
-- sign
-
-verificar paquet firmat:
-- switch
-	- header.typ=='iden3.sig.v0_1`
-		- parse JWS_PAYLOAD i JWS_HEADER
-		- verificar objecte del tipus iden3.sig.v0_1
-			- verificar JWS_HEADER.alg=='el que toca'
-		- verificar que JWS_PAYLOAD.proof_ksgin.proofs.length<=2
-		// ja no, per la nova estructura de dades - verificar que JWS_PAYLOAD.proof_ksgin.ethaddrs.length=JWS_PAYLOAD.proof_ksgin.proofs.length - 1
-		- verificar paràmetres del JWS_HEADER
-			- iat < current < exp
-		- agafar ksign de JWS_PAYLOAD.proof_ksign.leaf
-		- verificar firma amb ksign
-		- verificar que la firma correspon a l' JWT_HEADER.iss
-			- issuer == proof_ksign.ethaddr 				(PENDENT)
-			- verificar validesa de JWS_PAYLOAD.proof_ksign
-				- verificar els 4 merkle proofs
-				- verificar que el root és vàlid per aquell relay
-					- o mirant la blockchain
-					- o mirant que estigui firmat pel relay
-*/
