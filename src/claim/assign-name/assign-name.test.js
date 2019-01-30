@@ -6,11 +6,9 @@ const CONSTANTS = require('../../constants');
 
 const { expect } = chai;
 
-describe('[Claim Set root key]', () => {
+describe('[Claim Assign Name]', () => {
   const versionExample = 1;
   const nameExample = 'example.iden3.eth';
-  const hashNameExample = utils.hashBytes(nameExample);
-  hashNameExample.fill(0, 0, 1);
   const idExample = '0x393939393939393939393939393939393939393A';
   let claimAssignName;
   let entryClaim;
@@ -33,7 +31,7 @@ describe('[Claim Set root key]', () => {
   });
   it('Parse hash name', () => {
     const { hashName } = claimAssignName.structure;
-    expect(utils.bytesToHex(hashName)).to.be.equal(utils.bytesToHex(parsedClaim.structure.hashName));
+    expect(utils.bytesToHex(hashName.slice(1, 32))).to.be.equal(utils.bytesToHex(parsedClaim.structure.hashName));
   });
   it('Parse id address', () => {
     const { id } = claimAssignName.structure;

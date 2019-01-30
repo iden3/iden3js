@@ -67,7 +67,7 @@ describe('[relay] postBindID()', () => {
     kc.unlock('pass');
     const signatureObj = kc.sign(key0id, iden3.utils.bytesToHex(msgBytes));
     const bindIDMsg = {
-      ethID: id.idAddr,
+      ethAddr: id.idAddr,
       name,
       signature: signatureObj.signature,
     };
