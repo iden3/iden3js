@@ -49,8 +49,9 @@ describe('[protocol] login', () => {
   });
 
   it('newRequestIdenAssert', () => {
+    const origin = 'domain.io';
     const nonceDB = new iden3.protocols.NonceDB();
-    const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, '0xorigin', 'session01', iden3.protocols.login.NONCEDELTATIMEOUT);
+    const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, 2 * 60);
 
     const date = new Date();
     const unixtime = Math.round((date).getTime() / 1000);
@@ -60,7 +61,14 @@ describe('[protocol] login', () => {
     const expirationTime = unixtime + (3600 * 60);
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofOfEthName, kc, ksign, proofOfKSign, expirationTime);
 
-    const verified = iden3.protocols.login.verifySignedPacket(nonceDB, signedPacket);
-    expect(verified).to.be.equal(true);
+    const nonce = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
+    expect(nonce).to.be.not.equal(undefined);
+
+    // check that the nonce returned when deleting the nonce of the signedPacket, is the same
+    // than the nonce of the signatureRequest
+    expect(nonce.nonce).to.be.equal(signatureRequest.body.data.challenge);
+
+    // nonce must not be more in the nonceDB
+    expect(nonceDB.search(nonce.nonce)).to.be.equal(undefined);
   });
 });
