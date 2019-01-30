@@ -68,6 +68,12 @@ describe('[id] new Id()', () => {
     keyContainer.lock();
   });
 
+  it('relay.getID()', async () => {
+    await relay.getID(id.idAddr).then((getIDres) => {
+      expect(getIDres.status).to.be.equal(200);
+    });
+  });
+
   it('Check authorize public key sign claim', async () => {
     keyContainer.unlock('pass');
     const keyLabel = 'testKey';
