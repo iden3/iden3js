@@ -40,12 +40,12 @@ const nonceDB = new iden3.protocols.NonceDB();
 ### Generate New Request of Identity Assert
 - input
 	- `nonceDB`: NonceDB class object
-	- `originAddr`: domain of the emitter of the request
-	- `timeout`: unixtime format, valid until that date. Usually used the `iden3.protocols.login.NONCEDELTATIMEOUT`, as is defined inside iden3js library
+	- `origin`: domain of the emitter of the request
+	- `timeout`: unixtime format, valid until that date. We can use for example 2 minutes (`2*60` seconds)
 - output
 	- `signatureRequest`: `Object`
 ```js
-const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, iden3.protocols.login.NONCEDELTATIMEOUT);
+const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, 2*60);
 ```
 
 The `nonce` of the `signatureRequest` can be getted from:
@@ -80,9 +80,10 @@ const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, u
 ### Verify Signed Packet
 - input
 	- `nonceDB`: NonceDB class object
+	- `origin`: domain of the emitter of the request
 	- `signedPacket`: object generated in the `signIdenAssertV01` function
 - output
 	- `nonce`: nonce object of the signedPacket, that has been just deleted from the nonceDB when the signedPacket is verified. If the verification fails, the nonce will be `undefined`
 ```js
-const verified = iden3.protocols.login.verifySignedPacket(nonceDB, signedPacket);
+const verified = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
 ```

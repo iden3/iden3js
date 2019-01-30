@@ -4,19 +4,14 @@ const ethUtil = require('ethereumjs-util');
 const {secp256k1} = ethUtil;
 
 const utils = require('../utils');
-// const claim = require('../claim/claim');
 const claimUtils = require('../claim/claim-utils');
-// const CONSTANTS = require('../constants'); // iden3 constants
 const Entry = require('../claim/entry/entry');
 const proofs = require('./proofs');
-// const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
-// const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 // Constants of the login protocol
 const SIGV01 = 'iden3.sig.v0_1';
 const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
 const SIGALGV01 = 'ES255';
-const NONCEDELTATIMEOUT = 2 * 60; // two minutes
 
 /**
 * New RequestIdenAssert
@@ -63,6 +58,18 @@ const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, pro
 };
 */
 
+/**
+ * Sign signatureRequest
+ * @param {Object} signatureRequest
+ * @param {String} ethAddr
+ * @param {String} ethName
+ * @param {Object} proofOfEthName
+ * @param {Object} kc
+ * @param {String} ksign
+ * @param {Object} proofOfKSign
+ * @param {Number} expirationTime
+ * @returns {String} signedPacket
+ */
 const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, ethName, proofOfEthName, kc, ksign, proofOfKSign, expirationTime) {
   const date = new Date();
   const currentTime = Math.round((date).getTime() / 1000);
@@ -108,9 +115,12 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
 
 /**
  * Verify an identity assertio v0.1 signed packet
+ * @param {Object} nonceDB
+ * @param {String} origin
  * @param {Object} jwsHeader
  * @param {Object} jwsPayload
  * @param {Buffer} signatureBuffer
+ * @returns {Object} nonce
  */
 const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer) {
   // TODO AFTER MILESTONE check data structure scheme
@@ -208,7 +218,10 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
 
 /**
  * Verify a signed packet
+ * @param {Object} nonceDB
+ * @param {String} origin
  * @param {String} signedPacket
+ * @returns {Object} nonce
  */
 const verifySignedPacket = function verifySignedPacket(nonceDB, origin, signedPacket) {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
@@ -223,12 +236,12 @@ const verifySignedPacket = function verifySignedPacket(nonceDB, origin, signedPa
   // switch over jwsHeader.typ
   switch (jwsHeader.typ) {
     case SIGV01:
-      verified = verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
+      nonce = verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
       break;
     default:
       return false;
   }
-  return verified;
+  return nonce;
 };
 
 module.exports = {
