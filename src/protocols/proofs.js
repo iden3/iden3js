@@ -95,14 +95,12 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
   const signatureHex = utils.bytesToHex(sig);
   if (!utils.verifySignature(msgHashHex, signatureHex, relayAddr)) { // mHex, sigHex, addressHex
     // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) {  mHex, sigHex, addressHex
-    console.trace();
     return false;
   }
 
   // For now we only allow proof verification of Nameserver (one level) and
   // Relay (two levels: relay + user)
   if (proof.proofs.length > 2 || proof.proofs.length < 1) {
-    console.trace();
     return false;
   }
 
@@ -119,27 +117,16 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
     rootKey = proof.proofs[i].root;
 
     if (!isMerkleTreeProofExistence(mtpEx)) {
-      console.trace(mtpEx);
       return false;
     }
-    // console.trace(leaf);
-    // console.trace(leaf.hi(), leaf.hv());
     if (smt.checkProof(rootKey, mtpEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
-      console.log('rootKey: ' + rootKey);
-      console.log('proof: ' + mtpEx);
-      console.log('hi: ' + utils.bytesToHex(leaf.hi()));
-      console.log('hv: ' + utils.bytesToHex(leaf.hv()));
-      console.log('leaf: ' + leaf.toHexadecimal());
-      console.trace(leaf);
       return false;
     }
     if (isMerkleTreeProofExistence(mtpNoEx)) {
-      console.trace();
       return false;
     }
     incClaimVersion(leaf)
     if (smt.checkProof(rootKey, mtpNoEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
-      console.trace();
       return false;
     }
 
