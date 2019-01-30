@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+const web3 = new Web3();
 const snarkjs = require('snarkjs');
 
 const { bn128 } = snarkjs;
@@ -11,8 +12,8 @@ const NROUNDS = 91;
 
 exports.getIV = (seed) => {
   if (typeof seed === 'undefined') seed = SEED;
-  const c = Web3.utils.keccak256(`${seed}_iv`);
-  const cn = bigInt(Web3.utils.toBN(c).toString());
+  const c = web3.utils.keccak256(`${seed}_iv`);
+  const cn = bigInt(web3.utils.toBN(c).toString());
   const iv = cn.mod(F.q);
   return iv;
 };
@@ -21,13 +22,13 @@ exports.getConstants = (seed, nRounds) => {
   if (typeof seed === 'undefined') seed = SEED;
   if (typeof nRounds === 'undefined') nRounds = NROUNDS;
   const cts = new Array(nRounds);
-  let c = Web3.utils.keccak256(SEED);
+  let c = web3.utils.keccak256(SEED);
   for (let i = 1; i < nRounds; i++) {
-    c = Web3.utils.keccak256(c);
+    c = web3.utils.keccak256(c);
 
-    const n1 = Web3.utils.toBN(c).mod(Web3.utils.toBN(F.q.toString()));
-    const c2 = Web3.utils.padLeft(Web3.utils.toHex(n1), 64);
-    cts[i] = bigInt(Web3.utils.toBN(c2).toString());
+    const n1 = web3.utils.toBN(c).mod(web3.utils.toBN(F.q.toString()));
+    const c2 = web3.utils.padLeft(web3.utils.toHex(n1), 64);
+    cts[i] = bigInt(web3.utils.toBN(c2).toString());
   }
   cts[0] = bigInt(0);
   return cts;
