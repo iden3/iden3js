@@ -58,19 +58,19 @@ class SetRootAux {
 }
 
 // TODO: Move this to claim utils
-const incClaimVersion = function incClaimVersion(claim) {
+const incClaimVersion = function incClaimVersion(cl) {
   //let entry = new Entry();
   //entry.fromHexadecimal(claim);
-  const version = claim.elements[3].slice(20, 24).readUInt32BE(0);
-  claim.elements[3].writeUInt32BE(version + 1, claim.elements[3].length - 64 / 8 - 32 / 8);
-}
+  const version = cl.elements[3].slice(20, 24).readUInt32BE(0);
+  cl.elements[3].writeUInt32BE(version + 1, cl.elements[3].length - 64 / 8 - 32 / 8);
+};
 
 // TODO: Move this to merkle-tree utils
 const isMerkleTreeProofExistence = function isMerkleTreeProofExistence(proofHex) {
   const proofBuff = mtHelpers.parseProof(proofHex);
   const flagNonExistence = mtHelpers.getBit(proofBuff.flagExistence, 0);
   return !flagNonExistence;
-}
+};
 
 /**
  * Verify a ProofClaimFull from the claim to the blockchain root
@@ -108,15 +108,15 @@ const verifyProofClaimFull = function verifyProofClaimFull(proof, relayAddr) {
 
   let leaf = new Entry();
   leaf.fromHexadecimal(proof.leaf);
-  var rootKey = '';
-  for (var i = 0; i < proof.proofs.length; i++) {
+  let rootKey = '';
+  for (let i = 0; i < proof.proofs.length; i++) {
     // for (var i = proof.proofs.length-1; i>=0; i--) {
-    mtpEx = proof.proofs[i].mtp0
-    mtpNoEx = proof.proofs[i].mtp1
+    const mtpEx = proof.proofs[i].mtp0;
+    const mtpNoEx = proof.proofs[i].mtp1;
     // WARNING: leafNoEx points to the same content of leaf, so modifying leafNoEx modifies leaf!
     //var leafNoEx = leaf
     //incClaimVersion(leafNoEx)
-    rootKey = proof.proofs[i].root
+    rootKey = proof.proofs[i].root;
 
     if (!isMerkleTreeProofExistence(mtpEx)) {
       console.trace(mtpEx);
@@ -165,5 +165,5 @@ module.exports = {
   verifyProofClaimFull,
   ProofClaimFull,
   MtpProof,
-  SetRootAux,
+  SetRootAux
 };

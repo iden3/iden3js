@@ -1,16 +1,16 @@
 const crypto = require('crypto');
 
 const ethUtil = require('ethereumjs-util');
-const { secp256k1 } = ethUtil;
+const {secp256k1} = ethUtil;
 
 const utils = require('../utils');
-const claim = require('../claim/claim');
+// const claim = require('../claim/claim');
 const claimUtils = require('../claim/claim-utils');
-const CONSTANTS = require('../constants'); // iden3 constants
+// const CONSTANTS = require('../constants'); // iden3 constants
 const Entry = require('../claim/entry/entry');
 const proofs = require('./proofs');
-const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
-const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
+// const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
+// const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 // Constants of the login protocol
 const SIGV01 = 'iden3.sig.v0_1';
@@ -23,7 +23,7 @@ const NONCEDELTATIMEOUT = 2 * 60; // two minutes
 * for login purposes
 * @param {Object} nonceDB
 * @param {String} origin
-* @param {Number} deltatimeout
+* @param {Number} deltatimeout, in seconds units
 * @returns {Object} requestIdenAssert
 */
 const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, deltatimeout) {
@@ -39,7 +39,7 @@ const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, delt
       data: {
         challenge: nonce,
         timeout: nonceObj.timestamp,
-        origin: origin,
+        origin: origin
       }
     }
   };
@@ -80,9 +80,9 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
     proofOfKSign: proofOfKSign,
     form: {
       ethName: ethName,
-      proofOfEthName: proofOfEthName,
+      proofOfEthName: proofOfEthName
     },
-    // identity: { // TODO AFTER MILESTONE
+    // identity: {  TODO AFTER MILESTONE
     //   operational: ,
     //   recovery:,
     //   revoke:,
@@ -120,24 +120,24 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
     return false;
   }
 
-  // check if jwsHeader.typ is SIGV01 // TODO confirm that must be SIGV01
+  // check if jwsHeader.typ is SIGV01  TODO confirm that must be SIGV01
   if (jwsHeader.typ !== SIGV01) {
-	  console.trace();
     return false;
   }
 
   // check origin
-  if (jwsPayload.data.origin!==origin) {
-  	return false;
+  if (jwsPayload.data.origin !== origin) {
+    return false;
   }
 
   // check jwsPayload.data.challege valid
-  if (!nonceDB.searchAndDelete(jwsPayload.data.challenge)) {
-  	return false;
+  const nonceVerified = nonceDB.searchAndDelete(jwsPayload.data.challenge);
+  if (nonceVerified === undefined) {
+    return false;
   }
 
   // check that jwsPayload.proofOfKSign.proofs.length <= 2
-  if (jwsPayload.proofOfKSign.proofs.length>2) {
+  if (jwsPayload.proofOfKSign.proofs.length > 2) {
     return false;
   }
 
@@ -156,8 +156,8 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   const pubK = claimAuthorizeKSign.structure.pubKeyCompressed;
   const addr = ethUtil.pubToAddress(pubK, true);
   const addrHex = utils.bytesToHex(addr);
-  if (addrHex!==jwsPayload.ksign) {
- 	return false; 
+  if (addrHex !== jwsPayload.ksign) {
+    return false;
   }
 
   // check that jwsPayload.form.proofOfEthName == jwsPayload.form.ethName == jwsHeader.iss
@@ -165,17 +165,15 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   entry = new Entry();
   entry.fromHexadecimal(jwsPayload.form.proofOfEthName.proofOfClaimAssignName.leaf);
   const claimAssignName = claimUtils.newClaimFromEntry(entry);
-  const nameWithoutDomain = jwsPayload.form.proofOfEthName.name.split("@")[0];
-  const hashName = utils.hashBytes(nameWithoutDomain);
+  const nameWithoutDomain = jwsPayload.form.proofOfEthName.name.split('@')[0];
   // check jwsPayload.form.proofOfEthName.proofOfClaimAssignName.leaf {hashName} === hash(jwsPayload.form.proofOfEthName.name
-  if (utils.bytesToHex(claimAssignName.structure.hashName)!==utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
-    return false; 
-  }
-  // check claimAssignName.structure.id = jwsHeader.iss
-  if (utils.bytesToHex(claimAssignName.structure.id)!==jwsHeader.iss) {
+  if (utils.bytesToHex(claimAssignName.structure.hashName) !== utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
     return false;
   }
-  
+  // check claimAssignName.structure.id = jwsHeader.iss
+  if (utils.bytesToHex(claimAssignName.structure.id) !== jwsHeader.iss) {
+    return false;
+  }
 
   // check verify signature with jwsPayload.ksign
   // as verifying a signature is cheaper than verifying a merkle tree proof, first we verify signature with ksign
@@ -189,26 +187,23 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
     return false;
   }
 
-
   // TODO AFTER MILESTONE verify identity address from counterfactual
   // TODO AFTER MILESTONE check counterfactual address from jwsPayload.identity, address == jwsHeader.iss
   // TODO AFTER MILESTONE check jwsPayload.identity.relay == hardcoded relay address
-
 
   const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
   // verify proofOfEthName
   if (!proofs.verifyProofClaimFull(jwsPayload.form.proofOfEthName.proofOfClaimAssignName, relayAddr)) {
- 	return false; 
+    return false;
   }
-
 
   // check jwsPayload.proofOfKSign
   if (!proofs.verifyProofClaimFull(jwsPayload.proofOfKSign, relayAddr)) {
     return false;
   }
 
-  return true;
+  return nonceVerified.nonce;
 };
 
 /**
@@ -236,7 +231,6 @@ const verifySignedPacket = function verifySignedPacket(nonceDB, origin, signedPa
   return verified;
 };
 
-
 module.exports = {
   newRequestIdenAssert,
   signIdenAssertV01,
@@ -244,4 +238,3 @@ module.exports = {
   verifyIdenAssertV01,
   verifySignedPacket,
 };
-

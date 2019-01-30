@@ -48,7 +48,17 @@ const nonceDB = new iden3.protocols.NonceDB();
 const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, iden3.protocols.login.NONCEDELTATIMEOUT);
 ```
 
-Also, the `nonce` value can be getted from `signatureRequest.body.data.challenge`.
+The `nonce` of the `signatureRequest` can be getted from:
+```js
+const nonce = signatureRequest.body.data.challenge;
+// nonce is the string containing the nonce value
+```
+
+We can add auxiliar data to the `nonce` in the `nonceDB` only one time:
+```js
+const added = nodeDB.addAuxToNonce(nonce, auxdata);
+// added is a bool confirming if the aux data had been added
+```
 
 ### Sign Packet
 - input
@@ -72,7 +82,7 @@ const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, u
 	- `nonceDB`: NonceDB class object
 	- `signedPacket`: object generated in the `signIdenAssertV01` function
 - output
-	- `verified`: `bool` that indicates if is verified or not
+	- `nonce`: nonce object of the signedPacket, that has been just deleted from the nonceDB when the signedPacket is verified. If the verification fails, the nonce will be `undefined`
 ```js
 const verified = iden3.protocols.login.verifySignedPacket(nonceDB, signedPacket);
 ```

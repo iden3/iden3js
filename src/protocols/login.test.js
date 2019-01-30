@@ -1,5 +1,5 @@
 const chai = require('chai');
-const { expect } = chai;
+const {expect} = chai;
 
 const iden3 = require('../index');
 const snarkjs = require('snarkjs');
@@ -23,9 +23,8 @@ const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
 ({ keys } = objectKeys);
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/v0.1');
-let id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, '', undefined, 0);
+// let id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, '', undefined, 0);
 const ksign = keys[0];
-
 
 const usrAddr = '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22';
 const ethName = 'usertest@iden3.io';
@@ -114,13 +113,16 @@ describe('[protocol] login flow', () => {
   it('newRequestIdenAssert & signIdenAssertV01 & verifySignedPacket', () => {
     // const date = new Date();
     // const unixtime = Math.round((date).getTime() / 1000);
-    // const minutes = 20; // signatureRequest will be valid between next 20 minutes
+    // const minutes = 20;  signatureRequest will be valid between next 20 minutes
     // const timeout = unixtime + (minutes * 60);
 
     const origin = 'domain.io';
     // login backend:
     const nonceDB = new iden3.protocols.NonceDB();
-    const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, iden3.protocols.login.NONCEDELTATIMEOUT);
+    const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, 2 * 60);
+
+    // check that the nonce is in the nonceDB
+    expect(nonceDB.search(signatureRequest.body.data.challenge)).to.be.not.equal(undefined);
 
     const date = new Date();
     const unixtime = Math.round((date).getTime() / 1000);
@@ -129,7 +131,14 @@ describe('[protocol] login flow', () => {
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr, ethName, proofOfEthName, kc, ksign, proofOfKSign, expirationTime);
 
     // login backend:
-    const verified = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
-    expect(verified).to.be.equal(true);
+    const nonce = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
+    expect(nonce).to.be.not.equal(undefined);
+
+    // check that the nonce returned when deleting the nonce of the signedPacket, is the same
+    // than the nonce of the signatureRequest
+    expect(nonce.nonce).to.be.equal(signatureRequest.body.data.challenge);
+
+    // nonce must not be more in the nonceDB
+    expect(nonceDB.search(nonce.nonce)).to.be.equal(undefined);
   });
 });
