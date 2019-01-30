@@ -232,14 +232,14 @@ const verifySignedPacket = function verifySignedPacket(nonceDB, origin, signedPa
   const jwsPayload = JSON.parse(Buffer.from(jwsPayload64, 'base64').toString('ascii'));
   const signatureBuffer = Buffer.from(signature64, 'base64');
 
-  let verified = false;
+  let nonce = undefined;
   // switch over jwsHeader.typ
   switch (jwsHeader.typ) {
     case SIGV01:
       nonce = verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
       break;
     default:
-      return false;
+      return nonce;
   }
   return nonce;
 };
