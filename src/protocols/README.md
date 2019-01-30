@@ -1,6 +1,6 @@
 # iden3js - protocols
 
-## Login
+## Login (Identity Assertion)
 
 ```
 Wallet                                   Service

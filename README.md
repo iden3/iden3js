@@ -123,6 +123,10 @@ id.authorizeKSignClaim(kc, id.keyOperational, qrKSign, 'appToAuthName', 'authz',
 });
 ```
 
+## Login protocol documentation
+
+https://github.com/iden3/iden3js/blob/master/src/protocols/README.md
+
 ## Usage
 
 ### Import
