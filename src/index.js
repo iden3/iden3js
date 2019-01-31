@@ -1,6 +1,7 @@
 const claim = require('./claim/claim');
 const merkleTree = require('./merkle-tree/merkle-tree');
 const sparseMerkleTree = require('./sparse-merkle-tree/sparse-merkle-tree');
+const smtUtils = require('./sparse-merkle-tree/sparse-merkle-tree-utils');
 const Relay = require('./http/relay');
 const Db = require('./db/db');
 const PrivateFolder = require('./http/private-folder');
@@ -20,6 +21,7 @@ module.exports = {
   claim,
   merkleTree,
   sparseMerkleTree,
+  smtUtils,
   Db,
   PrivateFolder,
   KeyContainer,
