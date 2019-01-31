@@ -30,7 +30,7 @@ Wallet                                   Service
   +                                         +
 ```
 
-
+Read the login protocol specification [here](login_spec.md).
 
 ### Define new NonceDB
 ```js
@@ -87,3 +87,7 @@ const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, u
 ```js
 const verified = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
 ```
+
+### Apendix
+
+See the [login specification document](login_spec.md) for information about the protocol design.
