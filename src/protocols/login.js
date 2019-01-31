@@ -65,7 +65,7 @@ const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, pro
  * @param {String} ethName
  * @param {Object} proofOfEthName
  * @param {Object} kc
- * @param {String} ksign
+ * @param {String} ksign - public key in hex format
  * @param {Object} proofOfKSign
  * @param {Number} expirationTime
  * @returns {String} signedPacket
@@ -127,35 +127,35 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
 
   // check if jwsHeader.alg is iden3.sig.v0_1 (SIGALGV01)
   if (jwsHeader.alg !== SIGALGV01) {
-    return false;
+    return undefined;
   }
 
   // check if jwsHeader.typ is SIGV01  TODO confirm that must be SIGV01
   if (jwsHeader.typ !== SIGV01) {
-    return false;
+    return undefined;
   }
 
   // check origin
   if (jwsPayload.data.origin !== origin) {
-    return false;
+    return undefined;
   }
 
   // check jwsPayload.data.challege valid
   const nonceVerified = nonceDB.searchAndDelete(jwsPayload.data.challenge);
   if (nonceVerified === undefined) {
-    return false;
+    return undefined;
   }
 
   // check that jwsPayload.proofOfKSign.proofs.length <= 2
   if (jwsPayload.proofOfKSign.proofs.length > 2) {
-    return false;
+    return undefined;
   }
 
   // check times iat <= current < exp
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
   if (!((jwsHeader.iat <= current) && (current < jwsHeader.exp))) {
-    return false;
+    return undefined;
   }
 
   // check jwsPayload.ksign with jwsPayload.proofOfKSign.Leaf
@@ -164,10 +164,9 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   entry.fromHexadecimal(jwsPayload.proofOfKSign.leaf);
   const claimAuthorizeKSign = claimUtils.newClaimFromEntry(entry);
   const pubK = claimAuthorizeKSign.structure.pubKeyCompressed;
-  const addr = ethUtil.pubToAddress(pubK, true);
-  const addrHex = utils.bytesToHex(addr);
-  if (addrHex !== jwsPayload.ksign) {
-    return false;
+  const pubKHex = utils.bytesToHex(pubK);
+  if (pubKHex !== jwsPayload.ksign) {
+    return undefined;
   }
 
   // check that jwsPayload.form.proofOfEthName == jwsPayload.form.ethName == jwsHeader.iss
@@ -178,11 +177,11 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   const nameWithoutDomain = jwsPayload.form.proofOfEthName.name.split('@')[0];
   // check jwsPayload.form.proofOfEthName.proofOfClaimAssignName.leaf {hashName} === hash(jwsPayload.form.proofOfEthName.name
   if (utils.bytesToHex(claimAssignName.structure.hashName) !== utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
-    return false;
+    return undefined;
   }
   // check claimAssignName.structure.id = jwsHeader.iss
   if (utils.bytesToHex(claimAssignName.structure.id) !== jwsHeader.iss) {
-    return false;
+    return undefined;
   }
 
   // check verify signature with jwsPayload.ksign
@@ -193,8 +192,10 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   const message = ethUtil.toBuffer(dataSigned);
   const msgHash = ethUtil.hashPersonalMessage(message);
   const sigHex = utils.bytesToHex(signatureBuffer);
-  if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, jwsPayload.ksign)) { // mHex, sigHex, addressHex
-    return false;
+  const ksignAddr = ethUtil.pubToAddress(jwsPayload.ksign, true);
+  const ksignAddrHex = utils.bytesToHex(ksignAddr);
+  if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, ksignAddrHex)) { // mHex, sigHex, addressHex
+    return undefined;
   }
 
   // TODO AFTER MILESTONE verify identity address from counterfactual
@@ -205,12 +206,12 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
 
   // verify proofOfEthName
   if (!proofs.verifyProofClaimFull(jwsPayload.form.proofOfEthName.proofOfClaimAssignName, relayAddr)) {
-    return false;
+    return undefined;
   }
 
   // check jwsPayload.proofOfKSign
   if (!proofs.verifyProofClaimFull(jwsPayload.proofOfKSign, relayAddr)) {
-    return false;
+    return undefined;
   }
 
   return nonceVerified.nonce;
