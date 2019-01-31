@@ -24,7 +24,7 @@ const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
 ({ keys } = objectKeys);
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/v0.1');
 // let id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, '', undefined, 0);
-const ksign = keys[0];
+const ksign = keys[1]; // public key in hex format
 
 const usrAddr = '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22';
 const ethName = 'usertest@iden3.io';
@@ -140,5 +140,9 @@ describe('[protocol] login flow', () => {
 
     // nonce must not be more in the nonceDB
     expect(nonceDB.search(nonce.nonce)).to.be.equal(undefined);
+    
+    // check that an already checked signedPacket is not more longer available to be verified
+    const nonceF = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
+    expect(nonceF).to.be.equal(undefined);
   });
 });
