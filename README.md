@@ -171,8 +171,7 @@ const iden3 = require('iden3');
   let kc = new iden3.KeyContainer('localStorage');
 
   ```
-
-Usage:
+- usage:
 ```js
 // unlock the KeyContainer for the next 30 seconds
 let passphrase = 'this is a test passphrase';
@@ -220,26 +219,30 @@ kc.unlock(passphrase);
 
 // new relay
 const relay = new iden3.Relay('http://127.0.0.1:5000');
-// create identity with a set of keys
-const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
-
+const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+// create identity object with a set of keys
+const keyPath = 0;
+const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, keyPath);
 ```
 
 #### id.createID
-Creates the counterfactual contract through the `Relay`, and gets the identity address.
+Creates the counterfactual contract through the `Relay`, and gets the identity address
+When an identity is created, all its keys are automatically stored
 ```js
 id.createID().then(res => {
-  console.log(res);
+  console.log(res.data);
 });
 ```
 
-Output:
+- Output:
 ```js
+// Return object: - idAddr: Address identity identifier
+//                - proofOfClam: Structure of the claim emitted by the relay authorizing its key public operational
 {
-  idaddr : '0x46b57a3f315f99a6de39406310f5bd0db03326c1'
+  idAddr,
+  proofOfClaim
 }
 ```
-
 #### id.deployID
 Deploys the counterfactual smart contract of identity to the blockchain.
 ```js
@@ -248,50 +251,82 @@ id.deployID().then(res => {
 });
 ```
 
-Output:
+- Output:
 ```js
+// Return object: - idAddr: Address identity identifier
+//                - tx: transaction identifier of the deploying identity smart contract on the blockchain
 {
-  idaddr: '0x8435ebb41634c05019be1710be0007fa0d92861f',
-  tx: '0x403859ccc701eb358d3a25c908c33de733cbb2d0ebc1c7738eed4908cc8cf5c4'
+  idAddr,
+  tx
+}
+```
+
+#### id.getID
+```js
+relay.getID(id.idAddr).then((res) => {
+  console.log(res.data);
+});
+```
+- Output:
+```js
+// Return object: - idAddr: Address identity identifier
+//                - localDb: contins necessary informatin to create counterfactoual
+//                - onchain: information regarding smart ntract deployed on the blockchain
+{
+  idAddr,
+  localDb,
+  onchain,
 }
 ```
 
 #### id.bindID
-Vinculates a name to the identity.
-Internally, signs the idaddr+name, and sends it to the `Relay`, that will perform an AssignNameClaim vinculating the identity address with the name.
+Vinculates a label to an identity.
+It sends required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with label
 
 ```js
+const name = 'testName';
 id.bindID(kc, name).then(res => {
   console.log(res.data);
 });
 ```
 
-Output:
+- Output:
 ```js
+// Return object: - claimasigname: hexadecimal representation of claim data
+//                - ethAddr: ethereum addres to bind to the label
+//                - name: label binded to the ethereum address
+//                - proofOfClaimAssignName: full proof of existance of the claim issued by the name-resolved
 {
-  ethAddr: '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f',
-  name: 'username',
-  signature: '0xeda8b278eae69cd8c4863380f0af5cfe8360481790d8ea5c188705b552bc0d5e1384efb627db5b423d4a163ad02ca23a2f05eea5dc787ac5837789aa95f50f101b'
+  claimasigname,
+  ethAddr,
+  name,
+  proofOfClaimAssignName
 }
 ```
 
 #### id.authorizeKSignClaim
 ```js
-// perform a new AuthorizeKSignClaim, sign it, and post it to the Relay
-let keyToAuth = kc.generateKey();
-id.authorizeKSignClaim(kc, key0id, keyToAuth, 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
-  //
+// generate new key from identity and add issue a claim to relay in order to authorize new key
+const keyLabel = 'testKey';
+const newKey = id.createKey(keyContainer, keyLabel, true);
+
+// send claim to relay signed by operational key in order to authorize a second key 'newKey'
+id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
+  .then((res) => {
+    console.error(res.data);
+  })
+  .catch((error) => {
+    console.error(error.response.data.error);
+  });
 });
 ```
-
-#### id.genericClaim
+- Output:
 ```js
-// perform a new genericClaim, sign it, and post it to the Relay
-id.genericClaim(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
-  //
-});
+// Return object: - proofOfClaim: full proof of existence of the claim issued by the relay
+{
+  proofOfClaim
+}
 ```
-
 
 ### Claims
 
@@ -602,31 +637,6 @@ Response, `ProofOfClaim`:
   }
 }
 ```
-
-
-### GET relay.getID
-```js
-relay.getID('0x46b57a3f315f99a6de39406310f5bd0db03326c1')
-  .then(res => {
-    console.log('res.data', res.data);
-  });
-```
-Output:
-```js
-{
-  IDAddr: '0x46b57a3f315f99a6de39406310f5bd0db03326c1',
-  LocalDb: {
-    Operational: '0x970e8128ab834e8eac17ab8e3812f010678cf791',
-    Relayer: '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c',
-    Recoverer: '0x970e8128ab834e8eac17ab8e3812f010678cf791',
-    Revokator: '0x970e8128ab834e8eac17ab8e3812f010678cf791',
-    Impl: '0x2623ed1533d47d56f912300ae40f83b9370cead6'
-  },
-  Onchain: null
-}
-```
-
-
 
 #### relay.resolveName
 ```js
