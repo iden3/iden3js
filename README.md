@@ -24,103 +24,132 @@ const kc = new iden3.KeyContainer('localStorage', db);
 let passphrase = 'this is a test passphrase';
 kc.unlock(passphrase);
 
-// generate new keys
-let keys = kc.generateKeysMnemonic();
+// generate master seed
+const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+kc.generateMasterSeed(mnemonic);
+
+// Generate keys for first identity
+const { keys } = keyContainer.createKeys();
+
 /*
-keys =
-{
   keys: [
-    '0x94f1d9fdf01abec15ba9c473dbb87f9931986a86',
-    '0xa50970867092c1ae769fc24d5f5151c7b87ff715',
-    '0x1526824c893cb894d18f0cc400c24d96340a4341'
-  ],
-  mnemonic: 'blanket kick genre rubber better helmet youth slush acid select brick setup'
-}
+    '0xc7d89fe96acdb257b434bf580b8e6eb677d445a9',
+    '0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833',
+    '0xf3c9f94e4eaffef676d4fd3b4fc2732044caea91',
+    '0xb07079bd6238fa845dc77bbce3ec2edf98ffe735'
+  ];
 */
-let keyRecover = keys.keys[0];
-let keyRevoke = keys.keys[1];
-let keyOp = keys.keys[2];
+// It should be noted that 'keys' are in form of ethereum addresses except
+// key[1] that is a pubic key in its compressed form
+let keyAddressOp = keys[0];
+let keyPublicOp = keys[1];
+let keyRecover = keys[2];
+let keyRevoke = keys[3];
 
-
-// also we can import an already existing seed
-let seed = 'blanket kick genre rubber better helmet youth slush acid select brick setup';
-let keys = kc.generateKeysMnemonic(seed);
-
-// For more info and details about mnemonic, see section Usage>KeyContainer
-
-
-// Also, we have other 2 methods to create keys, kc.importKey and kc.generateKeyRand:
-
-// import privkey
-let key0id = kc.importKey('privKHex');
-// key0id is the address of the imported key, will be used as key identifier
-
-// generate key random
-let key1id = kc.generateKeyRand();
-// key1id is the address of the generated key, will be used as key identifier
-
+// For more info and details about mnemonic, see section Usage > KeyContainer
 
 // create a new relay object
-const relay = new iden3.Relay('http://127.0.0.1:5000');
+const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+const relayUrl = 'http://127.0.0.1:8000/api/v0.1';
+const relay = new iden3.Relay(relayUrl);
 
 // create a new id object
-let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
+const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
 
-// create the counterfactoual contract through the relay, get the identity address as response
-id.createID().then(res => {
-  console.log(res);
-  console.log(id.idaddr); // res == id.idaddr
-});
-
-// bind the identity address to a name. Internally, signs the idaddr+name, and sends it to the relay, that will perform an AssignNameClaim vinculating the identity address with the name.
-id.bindID(kc, 'username').then(res => {
-  console.log(res.data);
-});
-
-// generate new key that will be the one authorized by the other key
-let ksign = kc.generateKeyRand();
-
-let unixtime = Math.round(+new Date()/1000);
-// create new AuthorizeKSignClaim, sign it, and send it to the Relay
-id.authorizeKSignClaim(kc, keyOp, ksign, 'appToAuthName', 'authz', unixtime, unixtime).then(res => {
-  let proofOfKSign = res.data.proofOfClaim;
-});
-
-// create new genericClaim, sign it and send it to the Relay
-id.genericClaim(kc, ksign, 'iden3.io', 'default', 'extraindex', 'data').then(res => {
-  let proofOfClaim = res.data.proofOfClaim;
-});
-
-
-// having a proof of a leaf, we can check it
-let verified = iden3.merkleTree.checkProof(rootHex, mpHex, hiHex, htHex, numLevels);
-// verified == true
-
-// having a proofOfClaim, let's check it
-let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
-// verified == true
-
-
-
-// centralized authentication
-// once have the QR data scanned, or the hex QR data copied
-let qrJson = iden3.auth.parseQRhex(qrHex);
-let qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
-// perform the AuthorizeKSignClaim over the qrKSign
-id.authorizeKSignClaim(kc, id.keyOperational, qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
-  let ksignProof = res.data.proofOfClaim;
-
-  // send the challenge, signature, KSign, and KSignProof to the qr url, that is the url of the backend of the centralized auth
-  iden3.auth.resolv(qrJson.url, id.keyOperational, qrJson.challenge, qrJson.signature, qrKSign, ksignProof).then(res => {
-    console.log('centralized auth success, the website will refresh with the jwt');
-  })
-  .catch(function (error) {
-    console.log(error);
+// generates the counterfactoual contract through the relay, get the identity address as response
+let proofOfKsign = {};
+id.createID()
+  .then((res) => {
+    // Successfull create identity api call to relay
+    console.log(res.idAddr); // Identity counterfactoual address
+    console.log(res.proofOfClaim); // Proof of claim regarding authorization of key public operational
+    proofOfKsign = res.proofOfClaim;
+    })
+    .catch((error) => {
+    console.error(error.response.data.error);
   });
-})
-.catch(function (error) {
-  console.log(error);
+
+// creates identity smart contract on the ethereum blockchain testnet 
+id.deployID()
+  .then((deployIDres) => {
+  // Successfull deploy identity api call to relay
+    expect(deployIDres.status).to.be.equal(200);
+  })
+  .catch((error) => {
+    // If identity is already deployed, throws an error
+    expect(error.response.data.error).to.be.equal('already deployed');
 });
+
+// generate new key from identity and add issue a claim to relay in order to authorize new key
+const keyLabel = 'testKey';
+const newKey = id.createKey(keyContainer, keyLabel, true);
+
+// send claim to relay signed by operational key in order to authorize a second key 'newKey'
+id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
+  .then((authRes) => {
+    proofOfKSign = authRes.data.proofOfClaim;
+  })
+  .catch((error) => {
+    console.error(error.response.data.error);
+  });
+
+// bind the identity address to a label. It send required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with label
+let proofOfEthName = {}; 
+const name = 'testName';
+id.bindID(keyContainer, name)
+  .then( (bindRes) => {
+    expect(bindRes.status).to.be.equal(200);
+    proofOfEthName = bindRes.data;
+  })
+  .catch((error) => {
+    console.error(error.message);
+  });
+
+// request idenity address to name-resolver ( currently name-resolver service is inside relay) from a given label
+relay.resolveName(`${name}@iden3.io`)
+  .then((resolveRes) => {
+    const idAddress = resolveRes.data.ethAddr;
+  })
+  .catch((error) => {
+    console.error(error.message);
+  });
+
+// get fresh proof of claim
+// create claim authorized key from operational public key
+const authorizeKSignClaim = new iden3.claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
+  version: 0, pubKeyCompressed: id.keyOperationalPub,
+});
+const hi = (authorizeKSignClaim.createEntry()).hi();
+// Ask relay to get proof of claim
+relay.getClaimByHi(id.idAddr, iden3.utils.bytesToHex(hi))
+  .then((res) => {
+    const proofOfClaimKSign = res.data.proofOfClaim.Leaf;
+  })
+  .catch((error) => {
+    console.error(error.message);
+  });
+
+// centralized login
+
+// Define new nonce database
+const nonceDB = new iden3.protocols.NonceDB();
+// Define domain of the centralized application
+const origin = 'domain.io';
+// centralized application will generate a request of identity login
+// this request will be send to the identity to sign it. Afterwards, request will be send it back to the centralized application
+
+// centralized application generates package that has to be send to the identity
+const timeout = 2 * 60;
+const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, timeout);
+// identity gets the packge, sign it and send it back to the backend centralized application
+const date = new Date();
+const unixtime = Math.round((date).getTime() / 1000);
+const expirationTime = unixtime + (3600 * 60);
+const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofOfEthName, kc, id.keyOperationalPub, proofOfKSign, expirationTime);
+
+// backend checks 
+const nonce = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
+console.log(nonce);
 ```
 
 ## Login protocol documentation
@@ -145,60 +174,39 @@ const iden3 = require('iden3');
 
 Usage:
 ```js
-// unlock the KeyContainer
+// unlock the KeyContainer for the next 30 seconds
 let passphrase = 'this is a test passphrase';
 kc.unlock(passphrase);
 
-// we can generate a new mnemonic just calling:
-let keys = kc.generateKeysMnemonic();
+// generate master seed
+const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+kc.generateMasterSeed(mnemonic);
+
+// Also, master seed can be generated randomly if no mnemonic is specified
+kc.generateMasterSeed();
+
+// functions above stores seed mnemonic into local storage
+// it can be retrieved through:
+const mnemonicDb = keyContainer.getMasterSeed();
+
+// Generate keys for first identity
+const { keys } = keyContainer.createKeys();
 /*
-this returns:
-keys =
-{
-  keys: [ // addresses of the keys
-    '0x94f1d9fdf01abec15ba9c473dbb87f9931986a86',
-    '0xa50970867092c1ae769fc24d5f5151c7b87ff715',
-    '0x1526824c893cb894d18f0cc400c24d96340a4341'
-  ],
-  mnemonic: 'blanket kick genre rubber better helmet youth slush acid select brick setup'
-}
+  keys: [
+    '0xc7d89fe96acdb257b434bf580b8e6eb677d445a9',
+    '0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833',
+    '0xf3c9f94e4eaffef676d4fd3b4fc2732044caea91',
+    '0xb07079bd6238fa845dc77bbce3ec2edf98ffe735'
+  ];
 */
+// Each time 'keyContainer.createKeys()' is called, a new set of keys for an identity is created
 
-// also we can import an already existing seed
-let seed = 'blanket kick genre rubber better helmet youth slush acid select brick setup';
-let keys = kc.generateKeysMnemonic(seed);
-
-/*
-And we can specify the diferent identity profiles that we want to derivate from that seed.
-We can specify which identity profile we want to derivate, and how many keys we want to generate
-*/
-
-// for example, for our first identity0, we want 4 different keys, so will call the method specifying that we want the identity profile 0, and 4 keys:
-let keys_id0 = kc.generateKeysMnemonic(seed, 0, 4);
-// for the idenity1, we want 2 keys:
-let keys_id1 = kc.generateKeysMnemonic(seed, 1, 2);
-// and for the identity2 we want 5 keys:
-let keys_id2 = kc.generateKeysMnemonic(seed, 2, 5);
-
-// by default, if we don't specify the path profile and the number of keys, the function returns 3 keys for the path profile 0.
-
-
-// Also, we have other 2 methods to create keys, kc.importKey and kc.generateKeyRand:
-
-// import key
-let key0id = kc.importKey('privKHex');
-// key0id is the address of the imported key, will be used as key identifier
-
-// generate key
-let key1id = kc.generateKeyRandom();
-// key1id is the address of the generated key, will be used as key identifier
-
-
-// sign using key0id
-let signature = kc.sign(key0id, 'test');
-
-// get an array with the address identifiers of the keys stored in the KeyContainer
-let keysList = kc.listKeys();
+// It should be noted that 'keys' are in form of ethereum addresses except
+// key[1] that is a pubic key in its compressed form
+let keyAddressOp = keys[0];
+let keyPublicOp = keys[1];
+let keyRecover = keys[2];
+let keyRevoke = keys[3];
 ```
 
 ### Id
@@ -210,15 +218,11 @@ let kc = new iden3.KeyContainer();
 let passphrase = 'this is a test passphrase';
 kc.unlock(passphrase);
 
-// generate new keys
-let keyRecover = kc.generateKey();
-let keyRevoke = kc.generateKey();
-let keyOp = kc.generateKey();
-
 // new relay
 const relay = new iden3.Relay('http://127.0.0.1:5000');
-// create key
-let id = new iden3.Id(keyRecover, keyRevoke, keyOp, relay, '');
+// create identity with a set of keys
+const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
+
 ```
 
 #### id.createID
