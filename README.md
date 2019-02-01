@@ -329,66 +329,103 @@ id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
 ```
 
 ### Claims
-
-#### Generic Claim
+ - Generic claim representation: `Entry`
+ - Claim Types:
+   - Basic
+   - Authorize Key to sign
+   - Set root key
+   - Assign name
+   - Authorize key to sign (type key is secp256k1
+   
+#### Entry
 ```js
-// new GenericClaim
-let claim = new iden3.claim.GenericClaim('iden3.io', 'default', 'extra index data', 'extra data');
-/*
-claim:
-{
-  baseIndex: {
-    namespace: < Buffer 3 c fc 3 a 1 e db f6 91 31 6 f ec 9 b 75 97 0 f bf b2 b0 e8 d8 ed fc 6 e c7 62 8 d b7 7 c 49 69 40 30 74 > ,
-    type: < Buffer cf ee 7 c 08 a9 8 f 4 b 56 5 d 12 4 c 7 e 4 e 28 ac c5 2 e 1 b c7 80 e3 88 7 d b0 > ,
-    indexLength: 66,
-    version: 0
-  },
-  extraIndex: {
-    data: < Buffer 63 31 >
-  },
-  data: < Buffer >
-}
-*/
-// methods of the GenericClaim
-claim.bytes(); // claim in Buffer representation
-claim.hi(); // Hash of the index of the claim in Buffer representation
-claim.ht(); // Hash of the claim in Buffer representation
-
-// parse GenericClaim from Buffer
-let claimParsed = iden3.claim.parseGenericClaimBytes(claim.bytes());
+/**
+ * Generic representation of claim elements
+ * Entry element structure is as follows: |element 0|element 1|element 2|element 3|
+ * Each element contains 253 useful bits enclosed on a 256 bits Buffer
+ */
+let entry = new iden3.Claim.Entry();
+```
+- Entry Methods:
+```js
+entry.hi(); // Hash index is calculated from: |element 1|element 0|
+entry.hv(); // Hash value is calculated from: |element 3|element 2|
+entry.toHexadecimal(); // Concats all the elements of the entry and parse it into an hexadecimal string
+entry.fromHexadecimal(); // String deserialization into entry element structure
 ```
 
-#### authorizeKSignClaim
-
+#### Basic claim
 ```js
-// new AuthorizeKSignClaim
-let authorizeKSignClaim = new iden3.claim.AuthorizeKSignClaim('0x101d2fa51f8259df207115af9eaa73f3f4e52e60',
-                  'appToAuthName', 'authz', 1535208350, 1535208350);
+const versionExample = 1;
+const indexExample = Buffer.alloc(50);
+indexExample.fill(41, 0, 1);
+indexExample.fill(42, 1, 49);
+indexExample.fill(43, 49, 50);
+const dataExample = Buffer.alloc(62);
+dataExample.fill(86, 0, 1);
+dataExample.fill(88, 1, 61);
+dataExample.fill(89, 61, 62);
+// new basic claim
+const claimBasic = new iden3.Claim.Factory(CONSTANTS.CLAIMS.BASIC.ID, {
+      version: versionExample, index: utils.bytesToHex(indexExample), extraData: utils.bytesToHex(dataExample),
+    });
 /*
-authorizeKSignClaim:
+claim.structure:
 {
-  baseIndex: {
-    namespace: < Buffer 3 c fc 3 a 1 e db f6 91 31 6 f ec 9 b 75 97 0 f bf b2 b0 e8 d8 ed fc 6 e c7 62 8 d b7 7 c 49 69 40 30 74 > ,
-    type: < Buffer 35 3 f 86 7 e f7 25 41 1 d e0 5 e 3 d 4 b 0 a 01 c3 7 c f7 ad 24 bc c2 13 14 1 a > ,
-    indexLength: 84,
-    version: 0
-  },
-  extraIndex: {
-    keyToAuthorize: '0x101d2fa51f8259df207115af9eaa73f3f4e52e60'
-  },
-  application: < Buffer 20 77 bb 3 f 04 00 dd 62 42 1 c 97 22 05 36 fd 6 e d2 be 29 22 8 e 8 d b1 31 5 e 8 c 6 d 75 25 f4 bd f4 > ,
-  applicationAuthz: < Buffer da d9 96 6 a 2 e 73 71 f0 a2 4 b 19 29 ed 76 5 c 0 e 7 a 3 f 2 b 46 65 a7 6 a 19 d5 81 73 30 8 b b3 40 62 > ,
-  validFrom: 1535208350,
-  validUntil: 1535208350
-}
+  claimType,
+  version,
+  index,
+  extraData,
+};
+ * Basic entry representation is as follows:
+ * |element 3|: |empty|index[0]|version|claim type| - |1 byte|19 bytes|4 bytes|8 bytes|
+ * |element 2|: |empty|index[1]| - |1 bytes|31 bytes|
+ * |element 1|: |empty|data[0]| - |1 bytes|31 bytes|
+ * |element 0|: |empty|data[1]| - |1 bytes|31 bytes|
 */
-// methods of the AuthorizeKSignClaim
-authorizeKSignClaim.bytes(); // claim in Buffer representation
-authorizeKSignClaim.hi(); // Hash of the index of the claim in Buffer representation
-authorizeKSignClaim.ht(); // Hash of the index of the claim in Buffer representation
+// methods of the Basic claim
+claimBasic.createEtry(); // Code raw data claim object into an entry claim object
+// parse Entry into Basic claim
+let entry = new Entry();
+entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entry
+let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
+```
 
-// parse AuthorizeKSignClaim from Buffer
-let authorizeKSignClaimParsed = iden3.claim.parseAuthorizeKSignClaim(authorizeKSignClaim.bytes());
+##### Basic claim
+```js
+const versionExample = 1;
+const indexExample = Buffer.alloc(50);
+indexExample.fill(41, 0, 1);
+indexExample.fill(42, 1, 49);
+indexExample.fill(43, 49, 50);
+const dataExample = Buffer.alloc(62);
+dataExample.fill(86, 0, 1);
+dataExample.fill(88, 1, 61);
+dataExample.fill(89, 61, 62);
+// new basic claim
+const claimBasic = new iden3.Claim.Factory(CONSTANTS.CLAIMS.BASIC.ID, {
+      version: versionExample, index: utils.bytesToHex(indexExample), extraData: utils.bytesToHex(dataExample),
+    });
+/*
+claim.structure:
+{
+  claimType,
+  version,
+  index,
+  extraData,
+};
+ * Basic entry representation is as follows:
+ * |element 3|: |empty|index[0]|version|claim type| - |1 byte|19 bytes|4 bytes|8 bytes|
+ * |element 2|: |empty|index[1]| - |1 bytes|31 bytes|
+ * |element 1|: |empty|data[0]| - |1 bytes|31 bytes|
+ * |element 0|: |empty|data[1]| - |1 bytes|31 bytes|
+*/
+// methods of the Basic claim
+claimBasic.createEtry(); // Code raw data claim object into an entry claim object
+// parse Entry into Basic claim
+let entry = new Entry();
+entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entry
+let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
 ```
 
 #### checkProofOfClaim

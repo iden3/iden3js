@@ -6,7 +6,7 @@ const CONSTANTS = require('../../constants');
 
 const { expect } = chai;
 
-describe('[Claim Set root key]', () => {
+describe('[Claim Basic]', () => {
   const versionExample = 1;
   const indexExample = Buffer.alloc(50);
   indexExample.fill(41, 0, 1);

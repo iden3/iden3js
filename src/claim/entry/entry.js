@@ -4,7 +4,7 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Generic representation of claim elements
- * Claim element structure is as follows: |element 0|element 1|element 2|element 3|
+ * Entry element structure is as follows: |element 0|element 1|element 2|element 3|
  * Each element contains 253 useful bits enclosed on a 256 bits Buffer
  */
 export class Entry {
@@ -54,7 +54,7 @@ export class Entry {
   }
 
   /**
-   * Concats all the elements of the claim and parse it into an hexadecimal string
+   * Concats all the elements of the entry and parse it into an hexadecimal string
    * @returns {String} Hexadecimal string representation of element claim structure
    */
   toHexadecimal() {
