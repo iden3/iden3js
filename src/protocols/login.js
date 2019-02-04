@@ -214,6 +214,8 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
     return undefined;
   }
 
+  nonceVerified.nonce.ethName = jwsPayload.form.proofOfEthName.name;
+  nonceVerified.nonce.ethAddr = jwsHeader.iss;
   return nonceVerified.nonce;
 };
 
