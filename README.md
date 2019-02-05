@@ -152,10 +152,6 @@ const nonce = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPa
 console.log(nonce);
 ```
 
-## Login protocol documentation
-
-https://github.com/iden3/iden3js/blob/master/src/protocols/README.md
-
 ## Usage
 
 ### Import
@@ -771,6 +767,9 @@ Output:
   ethAddr: '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f'
 }
 ```
+## Login protocol documentation
+
+https://github.com/iden3/iden3js/blob/master/src/protocols/README.md
 
 ## Tests
 To run all tests, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.
