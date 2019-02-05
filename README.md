@@ -116,7 +116,7 @@ relay.resolveName(`${name}@iden3.io`)
 
 // get fresh proof of claim
 // create claim authorized key from operational public key
-const authorizeKSignClaim = new iden3.claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
+const authorizeKSignClaim = new iden3.claim.Factory(iden3.constants.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
   version: 0, pubKeyCompressed: id.keyOperationalPub,
 });
 const hi = (authorizeKSignClaim.createEntry()).hi();
@@ -366,7 +366,7 @@ dataExample.fill(86, 0, 1);
 dataExample.fill(88, 1, 61);
 dataExample.fill(89, 61, 62);
 // new basic claim
-const claimBasic = new iden3.Claim.Factory(CONSTANTS.CLAIMS.BASIC.ID, {
+const claimBasic = new iden3.Claim.Factory(iden3.constants.CLAIMS.BASIC.ID, {
       version: versionExample, index: utils.bytesToHex(indexExample), extraData: utils.bytesToHex(dataExample),
     });
 /*
@@ -384,51 +384,138 @@ claim.structure:
  * |element 0|: |empty|data[1]| - |1 bytes|31 bytes|
 */
 // methods of the Basic claim
-claimBasic.createEtry(); // Code raw data claim object into an entry claim object
+claimBasic.createEntry(); // Code raw data claim object into an entry claim object
 // parse Entry into Basic claim
 let entry = new Entry();
 entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entry
 let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
 ```
 
-##### Basic claim
+##### Authorize KSign claim
 ```js
 const versionExample = 1;
-const indexExample = Buffer.alloc(50);
-indexExample.fill(41, 0, 1);
-indexExample.fill(42, 1, 49);
-indexExample.fill(43, 49, 50);
-const dataExample = Buffer.alloc(62);
-dataExample.fill(86, 0, 1);
-dataExample.fill(88, 1, 61);
-dataExample.fill(89, 61, 62);
-// new basic claim
-const claimBasic = new iden3.Claim.Factory(CONSTANTS.CLAIMS.BASIC.ID, {
-      version: versionExample, index: utils.bytesToHex(indexExample), extraData: utils.bytesToHex(dataExample),
-    });
+const signExample = true;
+const ayExample = '0x0505050505050505050505050505050505050505050505050505050505050506';
+// new authorize ksign claim
+const claimAuthorizeKSign = new Claim.Factory(iden3.constants.CLAIMS.AUTHORIZE_KSIGN.ID, {
+  version: versionExample, sign: signExample, ay: ayExample,
+});
 /*
 claim.structure:
 {
   claimType,
   version,
-  index,
-  extraData,
+  sign,
+  ay,
 };
- * Basic entry representation is as follows:
- * |element 3|: |empty|index[0]|version|claim type| - |1 byte|19 bytes|4 bytes|8 bytes|
- * |element 2|: |empty|index[1]| - |1 bytes|31 bytes|
- * |element 1|: |empty|data[0]| - |1 bytes|31 bytes|
- * |element 0|: |empty|data[1]| - |1 bytes|31 bytes|
-*/
-// methods of the Basic claim
-claimBasic.createEtry(); // Code raw data claim object into an entry claim object
-// parse Entry into Basic claim
+ * Authorized Ksign element representation is as follows:
+ * |element 3|: |empty|sign|version|claim type| - |19 bytes|1 bytes|4 bytes|8 bytes|
+ * |element 2|: |Ay| - |32 bytes|
+ * |element 1|: |empty| - |32 bytes|
+ * |element 0|: |empty| - |32 bytes|
+ */
+// methods of the authorize Sign claim
+claimAuthorizeKSign.createEntry(); // Code raw data claim object into an entry claim object
+// parse Entry into authorize kSign claim
 let entry = new Entry();
 entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entry
 let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
 ```
 
-#### checkProofOfClaim
+##### Set root key claim
+```js
+const versionExample = 1;
+const eraExample = 1;
+const idExample = '0x393939393939393939393939393939393939393A';
+const rootKeyExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
+// new set root key ksign claim
+const claimSetRootKey = new Claim.Factory(iden3.constants.CLAIMS.SET_ROOT_KEY.ID, {
+  version: versionExample, era: eraExample, id: idExample, rootKey: rootKeyExample,
+});
+/*
+claim.structure:
+{
+  claimType,
+  version,
+  er,
+  id,
+  rootKey,
+};
+ * Set root key name entry representation is as follows:
+ * |element 3|: |empty|era|version|claim type| - |16 bytes|4 bytes|4 bytes|8 bytes|
+ * |element 2|: |empty|identity| - |12 bytes|20 bytes|
+ * |element 1|: |root key| - |32 bytes|
+ * |element 0|: |empty| - |32 bytes|
+ */
+// methods of the set root key claim
+claimSetRootKey.createEntry(); // Code raw data claim object into an entry claim object
+// parse Entry into set root key claim
+let entry = new Entry();
+entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entry
+let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
+```
+
+##### Assign name claim
+```js
+const versionExample = 1;
+const nameExample = 'example.iden3.eth';
+const idExample = '0x393939393939393939393939393939393939393A';
+// new set root key ksign claim
+const claimAssignName = new Claim.Factory(CONSTANTS.CLAIMS.ASSIGN_NAME.ID, {
+  version: versionExample, hashName: nameExample, id: idExample 
+});
+/*
+claim.structure:
+{
+  claimType,
+  version,
+  hashName,
+  id,
+};
+ * Assign name entry representation is as follows:
+ * |element 3|: |empty|version|claim type| - |20 bytes|4 bytes|8 bytes|
+ * |element 2|: |hash name| - |32 bytes|
+ * |element 1|: |empty|identity| - |12 bytes|20 bytes|
+ * |element 0|: |empty| - |32 bytes|
+ */
+// methods of the set root key claim
+claimAssignName.createEntry(); // Code raw data claim object into an entry claim object
+// parse Entry into set root key claim
+let entry = new Entry();
+entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entry
+let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
+```
+
+##### Assign name claim
+```js
+const versionExample = 1;
+const pubKeyCompressedExample = '0x036d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd4d593A';
+// new authorize kSign secp256k1 claim
+const claimAuthKSignSecp256k1 = new Claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
+  version: versionExample, pubKeyCompressed: utils.bytesToHex(pubKeyCompressedExample),
+});
+/*
+claim.structure:
+{
+  claimType,
+  version,
+  pubKeyCompressed,
+};
+ * Authorized KsignSecp256k1 element representation is as follows:
+ * |element 3|: |empty|public key[0]|version|claim type| - |18 bytes|2 bytes|4 bytes|8 bytes|
+ * |element 2|: |empty|public key[1]| - |1 bytes|31 bytes|
+ * |element 1|: |empty| - |32 bytes|
+ * |element 0|: |empty| - |32 bytes|
+ */
+// methods of the authorize ksign secp256k1
+claimAuthKSignSecp256k1.createEntry(); // Code raw data claim object into an entry claim object
+// parse Entry into set root key claim
+let entry = new Entry();
+entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entry
+let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
+```
+
+#### checkProofOfClaim //TODO:
 This function checks the data structure of `proofOfClaim` and returns true if all the proofs are correct.
 Internally, it usees the `iden3.merkleTree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
 
@@ -470,32 +557,27 @@ let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
 // verified === true
 ```
 
-### Merkletree
+### Sparse merkletree
 
 #### Merkle tree initialization
 Three parameters as an inputs:
 - db --> where to store key-value merkle tree nodes
-- numLevels --> number of levels of the merkle tree
 - idaddr --> used as key prefix at the time to store key nodes
 ```js
 // new database
 const db = new iden3.Db();
 // hardcoded id address for multi identity purposes
-const idaddr = "";
-// number of merkle tree levels
-const numLevels = 140;
+const idaddr = '';
 // new merkle tree class instance
-let mt = new iden3.merkleTree.MerkleTree(db,numLevels,idaddr);
+let mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idaddr);
 ```
 
 #### Add claim
-Add a leaf into the merkle tree. Note the leaf object structure containing `data` and `indexLength` in order to compute total hash and index hash
+Add a leaf into the sparse merkle tree. Note the leaf object structure containing 4 `bigInt` fields.
+This structure is retrieved directly from and `Entry`
 ```js
 // Create data leaf structure
-let leaf = {
-        data: Buffer.from('this is a test leaf'),
-        indexLength: 15
-      };
+const leaf = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
 
 // Add leaf to the merkle tree
 mt.addClaim(leaf);
@@ -503,17 +585,18 @@ mt.addClaim(leaf);
 #### Get leaf data by hash Index
 Look for a index leaf on the merkle tree ans retrieves its data
 ```js
-// compute hash index of the leaf
-const hashIndex = iden3.utils.hashBytes(leaf.data.slice(0, leaf.indexLength));
+// hash index is calculated from two last elements of the Entry structure
+// it can be done as follows:
+const entry = new iden3.Claim.Entry();
 // retrieve data of the leaf
-let dataLeaf = mt.getClaimByHi(hashIndex);
+const totalClaim = mt.getClaimByHi(entry.hi());
 ```
 
 #### Generate Proof
 Generates an array with all the siblings needed in order to proof that a certain leaf is on a merkle tree.
 ```js
 // get leafProof for a given leaf index
-const leafProof = mt.generateProof(hashIndex);
+const leafProof = mt.generateProof(entry.hi());
 // code `leafProof` into a string
 let leafProofHex = iden3.utils.bytesToHex(leafProof);
 ```
@@ -522,40 +605,32 @@ let leafProofHex = iden3.utils.bytesToHex(leafProof);
 Checks the `Merkle Proof` of a `Leaf`.
 ##### Proof-of-existence
 ```js
-// retrieve merkle tree root and code it into a string
-let rootHex = iden3.utils.bytesToHex(mt.root);
-// code hash index into a string
-let hashIndexHex = iden3.utils.bytesToHex(hashIndex);
-// compute total hash of the leaf and code it into a string
-let hashTotalHex = iden3.utils.bytesToHex(iden3.utils.hashBytes(leaf.data));
-// check if a leaf is on the merkle tree
-let verified = iden3.merkleTree.checkProof(rootHex, leafProofHex, hashIndexHex, hashTotalHex, 140);
+const proof = mt.generateProof(leaf.slice(2));
+const hashes = iden3.sparseMerkleTree.getHiHv(leaf);
+const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
+const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
+const rootHex = iden3.utils.bytesToHex(mt.root);
+const proofHex = iden3.utils.bytesToHex(proof);
+const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
 ```
 ##### Proof-of-non-existence
 Generates `leafProof` of a leaf that is not on the merkle tree and check if it is on the merkle tree.
 ```js
-// create leaf data structure
-let leaf2 = {
-        data: Buffer.from('this is a second test leaf'),
-        indexLength: 15
-      }
-// compute hash index
-const hashIndex2 = iden3.utils.hashBytes(leaf2.data.slice(0, leaf2.indexLength));
-// generate leaf proof
-const profLeaf2 = mt.generateProof(hashIndex2);
-// code leaf proof into a string
-let profLeaf2Hex = iden3.utils.bytesToHex(profLeaf2);
-// code hash index into a string
-let hashIndex2Hex = iden3.utils.bytesToHex(hashIndex2);
-// compute total hash index and code it into a string
-let hashTotal2Hex = iden3.utils.bytesToHex(iden3.utils.hashBytes(leaf2.data)); 
-// check if a leaf is on the merkle tree
-let verifiedRandom = iden3.merkleTree.checkProof(rootHex, profLeaf2Hex, hashIndex2Hex, hashTotal2Hex, 140);
+// create new leaf data structure
+const proofClaim2 = [bigInt(0), bigInt(0), bigInt(0), bigInt(4)];
+const proof = mt.generateProof(proofClaim2.slice(2));
+
+const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim2);
+const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
+const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
+const rootHex = iden3.utils.bytesToHex(mt.root);
+const proofHex = iden3.utils.bytesToHex(proof);
+const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
 ```
-The complete example can be found in [`merkle-tree.example.js`](https://github.com/iden3/iden3js/blob/master/examples/merkle-tree.example.js).
+The complete example can be found in [`merkle-tree.example.js`] //TODO:(https://github.com/iden3/iden3js/blob/master/examples/merkle-tree.example.js).
 
 
-### Utils
+### Utils //TODO: complete functions
 ```js
 // hash Buffer
 let hash = iden3.utils.hashBytes(b);
@@ -568,7 +643,7 @@ let verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex)
 // verified: true
 ```
 
-
+// TODO: update calls
 ### Relay http
 Connectors to interact with the relay API REST.
 
@@ -691,79 +766,6 @@ Output:
 }
 ```
 
-### Auth
-```js
-// once have the QR data scanned, or the hex QR data copied
-let qrJson = iden3.auth.parseQRhex(qrHex);
-let qrKSign = iden3.utils.addrFromSig(qrJson.challenge, qrJson.signature);
-// perform the AuthorizeKSignClaim over the qrKSign
-id.authorizeKSignClaim(kc, id.keyOperational, qrKSign, 'appToAuthName', 'authz', unixtimeFrom, unixtimeUntil).then(res => {
-  let ksignProof = res.data.proofOfClaim;
-
-  // send the challenge, signature, KSign, and KSignProof to the qr url, that is the url of the backend of the centralized auth
-  iden3.auth.resolv(qrJson.url, id.keyOperational, qrJson.challenge, qrJson.signature, qrKSign, ksignProof).then(res => {
-    alert('centralized auth success, the website will refresh with the jwt');
-  })
-  .catch(function (error) {
-    alert(error);
-  });
-})
-.catch(function (error) {
-  alert(error);
-});
-```
-
-## Centralized Apps integration
-The following instructions are for centralized apps, to integrate the iden3 system for authentication.
-
-Once having a `centrauth` backend running ( https://github.com/iden3/go-iden3 ).
-
-Include the `iden3js` library:
-```js
-const iden3 = require('iden3');
-```
-
-Or in the html include:
-```html
-<script src="iden3js-bundle.js"></script>
-```
-
-Add in the html the div that will contain the QR:
-```html
-<div id="qrcodediv"></div>
-
-<!-- and optionally, the textarea to place the qr data in hex format -->
-<textarea id="qrHex" rows="4" cols="30" readonly="readonly"></textarea>
-```
-
-
-In the js:
-```js
-let passphrase = 'this is a test passphrase';
-const authurl = 'http://IPcentrauth:5000';
-const authwsurl = 'ws://IPcentrauth:5000';
-
-let kc = new iden3.KeyContainer('localstorage');
-kc.unlock(passphrase);
-
-let ksign = kc.generateKey();
-
-let auth = new iden3.Auth(kc, ksign, authurl, authwsurl, function(authData) {
-  // callback that will be called when the websocket gets the token, after the backend checks the authentication (challenge, signature, KSign, KSignProof, etc)
-  alert('✔️ Logged in');
-  /*
-    authData = {
-      "success": true,
-      "token": "xxxxxxxx"
-    }
-  */
-});
-auth.printQr('qrcodediv');
-
-let qrHex = auth.qrHex(); // optional, to show the qr hex data
-document.getElementById("qrHex").value = qrHex; // optional, to show the qr hex data
-```
-
 ## Tests
 To run all tests, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.
 
@@ -776,7 +778,6 @@ To generate the browserify bundle:
 ```
 browserify index.js --standalone iden3 > iden3js-bundle.js
 ```
-
 
 ### WARNING
 All code here is experimental and WIP

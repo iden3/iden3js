@@ -10,7 +10,7 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 /**
  * Class representing a set root key claim
  * Set root key claim is used to commit a root of a merkle by a given identity
- * Assign name entry representation is as follows:
+ * Set root key name entry representation is as follows:
  * |element 3|: |empty|era|version|claim type| - |16 bytes|4 bytes|4 bytes|8 bytes|
  * |element 2|: |empty|identity| - |12 bytes|20 bytes|
  * |element 1|: |root key| - |32 bytes|
