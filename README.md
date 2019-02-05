@@ -564,73 +564,79 @@ Three parameters as an inputs:
 - db --> where to store key-value merkle tree nodes
 - idaddr --> used as key prefix at the time to store key nodes
 ```js
-// new database
+// New database
 const db = new iden3.Db();
-// hardcoded id address for multi identity purposes
-const idaddr = '';
-// new merkle tree class instance
-let mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idaddr);
+// Hardcoded id address for multi identity purposes
+const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
+// New merkle tree class instance
+const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr);
 ```
 
 #### Add claim
-Add a leaf into the sparse merkle tree. Note the leaf object structure containing 4 `bigInt` fields.
-This structure is retrieved directly from and `Entry`
+Add a leaf into the sparse merkle tree. Note the leaf object structure containing 4 `bigInt` fields
 ```js
+// Add leaf
 // Create data leaf structure
 const leaf = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-
 // Add leaf to the merkle tree
 mt.addClaim(leaf);
 ```
 #### Get leaf data by hash Index
 Look for a index leaf on the merkle tree ans retrieves its data
 ```js
-// hash index is calculated from two last elements of the Entry structure
-// it can be done as follows:
-const entry = new iden3.Claim.Entry();
-// retrieve data of the leaf
-const totalClaim = mt.getClaimByHi(entry.hi());
+// Get leaf data by hash Index
+// Retrieve data of the leaf
+const leafData = mt.getClaimByHi(leaf.slice(2));
 ```
 
 #### Generate Proof
 Generates an array with all the siblings needed in order to proof that a certain leaf is on a merkle tree.
 ```js
-// get leafProof for a given leaf index
-const leafProof = mt.generateProof(entry.hi());
-// code `leafProof` into a string
-let leafProofHex = iden3.utils.bytesToHex(leafProof);
+// Get leafProof for a given leaf index
+const leafProof = mt.generateProof(leaf.slice(2));
+// Code `leafProof` into a hexadecimal string
+const leafProofHex = iden3.utils.bytesToHex(leafProof);
 ```
 
 #### CheckProof
 Checks the `Merkle Proof` of a `Leaf`.
 ##### Proof-of-existence
 ```js
-const proof = mt.generateProof(leaf.slice(2));
+// CheckProof
+// Proof-of-existencee
+// Retrieve merkle tree root and code it into a string
+const rootHex = iden3.utils.bytesToHex(mt.root);
+// Code hash index into a hexadecimal string
+// Compute total hash of the leaf and code it into an hexadecimal string
 const hashes = iden3.sparseMerkleTree.getHiHv(leaf);
 const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
 const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
-const rootHex = iden3.utils.bytesToHex(mt.root);
-const proofHex = iden3.utils.bytesToHex(proof);
-const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
+// Check if a leaf is on the merkle tree
+const verified = iden3.sparseMerkleTree.checkProof(rootHex, leafProofHex, hiHex, hvHex);
 ```
 ##### Proof-of-non-existence
 Generates `leafProof` of a leaf that is not on the merkle tree and check if it is on the merkle tree.
 ```js
-// create new leaf data structure
-const proofClaim2 = [bigInt(0), bigInt(0), bigInt(0), bigInt(4)];
-const proof = mt.generateProof(proofClaim2.slice(2));
-
-const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim2);
-const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
-const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
-const rootHex = iden3.utils.bytesToHex(mt.root);
-const proofHex = iden3.utils.bytesToHex(proof);
-const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
+// CheckProof
+// Proof-of-non-existence
+// create leaf2 data structure
+const leaf2 = [bigInt(1), bigInt(2), bigInt(3), bigInt(4)];
+// Code hash index into a hexadecimal string
+// Compute total hash of the leaf and code it into an hexadecimal string
+const hashes2 = iden3.sparseMerkleTree.getHiHv(leaf2);
+const hiHex2 = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes2[0]));
+const hvHex2 = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes2[1]));
+// Get leafProof for a given leaf index
+const leafProof2 = mt.generateProof(leaf2.slice(2));
+// Code `leafProof` into a hexadecimal string
+const leafProofHex2 = iden3.utils.bytesToHex(leafProof2);
+// Check if a leaf is on the merkle tree
+const verified2 = iden3.sparseMerkleTree.checkProof(rootHex, leafProofHex2, hiHex2, hvHex2);
 ```
-The complete example can be found in [`merkle-tree.example.js`] //TODO:(https://github.com/iden3/iden3js/blob/master/examples/merkle-tree.example.js).
+The complete example can be found in [`sparse-merkle-tree.example.js`](https://github.com/iden3/iden3js/blob/master/examples/sparse-merkle-tree.example.js).
 
 
-### Utils //TODO: complete functions
+### Utils
 ```js
 // hash Buffer
 let hash = iden3.utils.hashBytes(b);
