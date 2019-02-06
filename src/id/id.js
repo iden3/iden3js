@@ -52,7 +52,7 @@ class Id {
   }
 
   /**
-   * Create new key for this identity and store it into its
+   * Create new key for this identity and store it
    * @param {Object} keyContainer - Object containing all the keys created on local storage
    * @param {String} keyLabel - Label associated with the key or address created
    * @param {Bool} isPublic - Determines if it is wanted to generate a public key or a public address
@@ -81,11 +81,10 @@ class Id {
   }
 
   /**
-   * Send the data to Relay,and get the generated address of the counterfactual
+   * Send the data to Relay and gets the generated address of the counterfactual
    * @returns {Object} - Http response
    */
   createID() {
-    // send the data to Relay,and get the generated address of the counterfactual
     return this.relay.createID(this.keyOperationalPub, this.keyRecover, this.keyRevoke)
       .then((res) => {
         this.idAddr = res.data.idAddr;

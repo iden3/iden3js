@@ -122,6 +122,7 @@ id.createID()
     console.error(error.message);
   });
 ```
+Example can be found in [`iden3-basic-usage.example.js`](https://github.com/iden3/iden3js/blob/master/examples/iden3-basic-usage.example.js)
 
 ## Centralized login
 In the next links, one can be found an example of `iden3` implementation as well as the login protocol explained in detail
@@ -142,6 +143,8 @@ const iden3 = require('iden3');
 - new KeyContainer using localStorage
   ```js
   // new key container
+  // new database
+  const db = new iden3.Db();
   let keyContainer = new iden3.KeyContainer('localStorage');
 
   ```
@@ -156,14 +159,14 @@ const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rall
 keyContainer.generateMasterSeed(mnemonic);
 
 // Also, master seed can be generated randomly if no mnemonic is specified
-keyContainer.generateMasterSeed();
+// keyContainer.generateMasterSeed();
 
 // functions above stores seed mnemonic into local storage
 // it can be retrieved through:
 const mnemonicDb = keyContainer.getMasterSeed();
 
 // Generate keys for first identity
-const { keys } = keyContainer.createKeys();
+const keys = keyContainer.createKeys();
 /*
   keys: [
     '0xc7d89fe96acdb257b434bf580b8e6eb677d445a9',
@@ -174,31 +177,44 @@ const { keys } = keyContainer.createKeys();
 */
 // Each time 'keyContainer.createKeys()' is called, a new set of keys for an identity is created
 
+// Retrieve key seed and its current derivation path
+const { keySeed, pathKey } = keyContainer.getKeySeed();
+
 // It should be noted that 'keys' are in form of ethereum addresses except
 // key[1] that is a pubic key in its compressed form
-let keyAddressOp = keys[0];
-let keyPublicOp = keys[1];
-let keyRecover = keys[2];
-let keyRevoke = keys[3];
+const keyAddressOp = keys[0];
+const keyPublicOp = keys[1];
+const keyRecover = keys[2];
+const keyRevoke = keys[3];
 ```
 
-### Id
+### Identity
 ```js
-// new key container
-let kc = new iden3.KeyContainer();
-
-// unlock the KeyContainer for the next 30 seconds
-let passphrase = 'this is a test passphrase';
-kc.unlock(passphrase);
+const db = new iden3.Db();
+const keyContainer = new iden3.KeyContainer('localStorage', db);
+const passphrase = 'pass';
+keyContainer.unlock(passphrase);
 
 // new relay
-const relay = new iden3.Relay('http://127.0.0.1:5000');
+const relay = new iden3.Relay('http://127.0.0.1:8000/api/v0.1');
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+const relay = new iden3.Relay(relayUrl);
+
 // create identity object with a set of keys
 const keyPath = 0;
 const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, keyPath);
 ```
-
+#### id.createKey
+```js
+// Create new key for this identity and bind it to a label
+const labelKey = 'test key'
+const loginKey = id.createKey(keyContainer, labelKey);
+```
+#### id.getKeys
+```js
+// Retrieve all keys that have been created for this identity
+const keysIdentity = id.getKeys();
+```
 #### id.createID
 Creates the counterfactual contract through the `Relay`, and gets the identity address
 When an identity is created, all its keys are automatically stored
@@ -235,7 +251,7 @@ id.deployID().then(res => {
 }
 ```
 
-#### id.getID
+#### id.getID //TODO: move to relay section
 ```js
 relay.getID(id.idAddr).then((res) => {
   console.log(res.data);
@@ -255,7 +271,7 @@ relay.getID(id.idAddr).then((res) => {
 
 #### id.bindID
 Vinculates a label to an identity.
-It sends required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with label
+It sends required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with a label
 
 ```js
 const name = 'testName';
@@ -278,7 +294,7 @@ id.bindID(kc, name).then(res => {
 }
 ```
 
-#### id.authorizeKSignClaim
+#### id.authorizeKSignSecp256k1
 ```js
 // generate new key from identity and add issue a claim to relay in order to authorize new key
 const keyLabel = 'testKey';
@@ -288,9 +304,6 @@ const newKey = id.createKey(keyContainer, keyLabel, true);
 id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
   .then((res) => {
     console.error(res.data);
-  })
-  .catch((error) => {
-    console.error(error.response.data.error);
   });
 });
 ```
@@ -489,7 +502,7 @@ entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entr
 let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
 ```
 
-#### checkProofOfClaim //TODO:
+#### checkProofOfClaim //TODO: proofs.js
 This function checks the data structure of `proofOfClaim` and returns true if all the proofs are correct.
 Internally, it usees the `iden3.merkleTree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
 
@@ -607,7 +620,7 @@ const leafProofHex2 = iden3.utils.bytesToHex(leafProof2);
 // Check if a leaf is on the merkle tree
 const verified2 = iden3.sparseMerkleTree.checkProof(rootHex, leafProofHex2, hiHex2, hvHex2);
 ```
-The complete example can be found in [`sparse-merkle-tree.example.js`](https://github.com/iden3/iden3js/blob/master/examples/sparse-merkle-tree.example.js).
+The complete example can be found in [`sparse-merkle-tree.example.js`](https://github.com/iden3/iden3js/blob/master/examples/sparse-merkle-tree.example.js)
 
 
 ### Utils
@@ -623,7 +636,8 @@ let verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex)
 // verified: true
 ```
 
-// TODO: update calls
+// TODO: update calls to relay
+// TODO: Split Reay / Name-Resolver
 ### Relay http
 Connectors to interact with the relay API REST.
 
@@ -747,16 +761,23 @@ Output:
 ```
 
 ## Tests
-To run all tests, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.
-
+To run unitary test:
+```js
+npm run test:unit
 ```
-npm test
+To run integration test, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.
+```
+npm run test:int
+```
+To run all test, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.
+```
+npm run test:all
 ```
 
 ## Browserify bundle
 To generate the browserify bundle:
 ```
-browserify index.js --standalone iden3 > iden3js-bundle.js
+npm run browserify
 ```
 
 ### WARNING
