@@ -13,7 +13,8 @@
     "build": "babel src/ -d lib/",
     "prepublish": "npm run build",
     "flow": "flow",
-    "browserify": "browserify index.js --standalone iden3 > iden3js-bundle.js"
+    "browserify": "browserify index.js --standalone iden3 > iden3js-bundle.js",
+    "lint": "eslint ./src"
   },
   "author": "iden3.io",
   "license": "ISC",

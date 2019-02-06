@@ -1,10 +1,10 @@
 // @flow
 import { describe, it } from 'mocha';
-import { NonceDB } from './nonceDB';
+import { NonceDB, type NonceResult } from './nonceDB';
 
 const chai = require('chai');
 
-const { expect } = chai;
+const { expect, assert } = chai;
 
 // const crypto = require('crypto');
 
@@ -67,8 +67,8 @@ describe('[protocol] nonce', () => {
       param1: 1,
       param2: 2,
     })).to.be.equal(true);
-    const result = nonceDB.search('asdf0');
-    if (result == null) { return; }
+    const result = (nonceDB.search('asdf0'): any); // This is a type casting
+    expect(result).to.not.be.equal(undefined);
     expect(result.nonce.aux.param1).to.be.equal(1);
   });
   it('nonce searchAndDelete', () => {
@@ -79,9 +79,8 @@ describe('[protocol] nonce', () => {
       param1: 1,
       param2: 2,
     });
-    const result = nonceDB.searchAndDelete('asdf3');
-    // TODO: assert(result != null);
-    if (result == null) { return; }
+    const result = (nonceDB.searchAndDelete('asdf3'): any);
+    expect(result).to.not.be.equal(undefined);
     expect(result.nonce.aux.param1).to.be.equal(1);
   });
 });
