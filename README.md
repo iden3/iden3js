@@ -10,26 +10,32 @@ npm install --save iden3
 ```
 https://www.npmjs.com/package/iden3
 
-## Basic example
+## Basic usage
 ```js
 // import iden3js
 const iden3 = require('iden3');
 
+// Simulate local storage locally
+if (typeof localStorage === 'undefined' || localStorage === null) {
+  const LocalStorage = require('node-localstorage').LocalStorage;
+  localStorage = new LocalStorage('./tmp');
+}
+
 // new database
 const db = new iden3.Db();
 // new key container using localStorage
-const kc = new iden3.KeyContainer('localStorage', db);
+const keyContainer = new iden3.KeyContainer('localStorage', db);
 
 // unlock the KeyContainer for the next 30 seconds
-let passphrase = 'this is a test passphrase';
-kc.unlock(passphrase);
+let passphrase = 'pass';
+keyContainer.unlock(passphrase);
 
 // generate master seed
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
-kc.generateMasterSeed(mnemonic);
+keyContainer.generateMasterSeed(mnemonic);
 
 // Generate keys for first identity
-const { keys } = keyContainer.createKeys();
+const keys  = keyContainer.createKeys();
 
 /*
   keys: [
@@ -54,103 +60,75 @@ const relayUrl = 'http://127.0.0.1:8000/api/v0.1';
 const relay = new iden3.Relay(relayUrl);
 
 // create a new id object
-const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
+let id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
 
 // generates the counterfactoual contract through the relay, get the identity address as response
 let proofOfKsign = {};
+
+console.log('Create Identity');
 id.createID()
-  .then((res) => {
+  .then((createIdRes) => {
     // Successfull create identity api call to relay
-    console.log(res.idAddr); // Identity counterfactoual address
-    console.log(res.proofOfClaim); // Proof of claim regarding authorization of key public operational
-    proofOfKsign = res.proofOfClaim;
-    })
+    console.log(createIdRes.idAddr); // Identity counterfactoual address
+    console.log(createIdRes.proofOfClaim); // Proof of claim regarding authorization of key public operational
+    proofOfKsign = createIdRes.proofOfClaim;
+
+    console.log('Create and authorize new key for address');
+    // generate new key from identity and issue a claim to relay in order to authorize new key
+    const keyLabel = 'testKey';
+    const newKey = id.createKey(keyContainer, keyLabel, true);
+    id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
+      .then((authRes) => {
+        proofOfKSign = authRes.data.proofOfClaim;
+        console.log(proofOfKSign);
+      })
     .catch((error) => {
-    console.error(error.response.data.error);
-  });
+      console.error(error.message);
+    });
 
-// creates identity smart contract on the ethereum blockchain testnet 
-id.deployID()
-  .then((deployIDres) => {
-  // Successfull deploy identity api call to relay
-    expect(deployIDres.status).to.be.equal(200);
-  })
-  .catch((error) => {
-    // If identity is already deployed, throws an error
-    expect(error.response.data.error).to.be.equal('already deployed');
-});
+    console.log('Bind label to an identity');
+    // bind the identity address to a label. It send required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with label
+    const name = 'testName';
+    id.bindID(keyContainer, name)
+      .then( (bindRes) => {
+        console.log(bindRes.data);
+        // request idenity address to name-resolver ( currently name-resolver service is inside relay) from a given label
+        relay.resolveName(`${name}@iden3.io`)
+          .then((resolveRes) => {
+            const idAddress = resolveRes.data.ethAddr;
+            console.log(`${name}@iden3.io associated with addres:` + idAddress);
+          })
+          .catch((error) => {
+            console.error(error.message);
+          });
+      })
+      .catch((error) => {
+        console.error(error.message);
+      });
 
-// generate new key from identity and add issue a claim to relay in order to authorize new key
-const keyLabel = 'testKey';
-const newKey = id.createKey(keyContainer, keyLabel, true);
-
-// send claim to relay signed by operational key in order to authorize a second key 'newKey'
-id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
-  .then((authRes) => {
-    proofOfKSign = authRes.data.proofOfClaim;
-  })
-  .catch((error) => {
-    console.error(error.response.data.error);
-  });
-
-// bind the identity address to a label. It send required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with label
-let proofOfEthName = {}; 
-const name = 'testName';
-id.bindID(keyContainer, name)
-  .then( (bindRes) => {
-    expect(bindRes.status).to.be.equal(200);
-    proofOfEthName = bindRes.data;
-  })
-  .catch((error) => {
-    console.error(error.message);
-  });
-
-// request idenity address to name-resolver ( currently name-resolver service is inside relay) from a given label
-relay.resolveName(`${name}@iden3.io`)
-  .then((resolveRes) => {
-    const idAddress = resolveRes.data.ethAddr;
+    console.log('Deploy identity smart contract');
+    // creates identity smart contract on the ethereum blockchain testnet 
+    id.deployID()
+      .then((deployIdRes) => {
+        // Successfull deploy identity api call to relay
+        console.log(deployIdRes.status);
+      })
+      .catch(() => {
+        // If identity is already deployed, throws an error
+        console.log('Identity already deployed');
+      });
   })
   .catch((error) => {
     console.error(error.message);
   });
-
-// get fresh proof of claim
-// create claim authorized key from operational public key
-const authorizeKSignClaim = new iden3.claim.Factory(iden3.constants.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
-  version: 0, pubKeyCompressed: id.keyOperationalPub,
-});
-const hi = (authorizeKSignClaim.createEntry()).hi();
-// Ask relay to get proof of claim
-relay.getClaimByHi(id.idAddr, iden3.utils.bytesToHex(hi))
-  .then((res) => {
-    const proofOfClaimKSign = res.data.proofOfClaim.Leaf;
-  })
-  .catch((error) => {
-    console.error(error.message);
-  });
-
-// centralized login
-
-// Define new nonce database
-const nonceDB = new iden3.protocols.NonceDB();
-// Define domain of the centralized application
-const origin = 'domain.io';
-// centralized application will generate a request of identity login
-// this request will be send to the identity to sign it. Afterwards, request will be send it back to the centralized application
-
-// centralized application generates package that has to be send to the identity
-const timeout = 2 * 60;
-const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, timeout);
-// identity gets the packge, sign it and send it back to the backend centralized application
-const date = new Date();
-const unixtime = Math.round((date).getTime() / 1000);
-const expirationTime = unixtime + (3600 * 60);
-const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofOfEthName, kc, id.keyOperationalPub, proofOfKSign, expirationTime);
-
-// backend checks 
-const nonce = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
-console.log(nonce);
 ```
+
+## Centralized login
+In the next links, one can be found an example of `iden3` implementation as well as the login protocol explained in detail
+### Login protocol documentation
+https://github.com/iden3/iden3js/blob/master/src/protocols/README.md
+### Demo centralized application
+https://github.com/iden3/centralized-login-demo
 
 ## Usage
 
@@ -164,21 +142,21 @@ const iden3 = require('iden3');
 - new KeyContainer using localStorage
   ```js
   // new key container
-  let kc = new iden3.KeyContainer('localStorage');
+  let keyContainer = new iden3.KeyContainer('localStorage');
 
   ```
 - usage:
 ```js
 // unlock the KeyContainer for the next 30 seconds
-let passphrase = 'this is a test passphrase';
-kc.unlock(passphrase);
+let passphrase = 'pass';
+keyContainer.unlock(passphrase);
 
 // generate master seed
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
-kc.generateMasterSeed(mnemonic);
+keyContainer.generateMasterSeed(mnemonic);
 
 // Also, master seed can be generated randomly if no mnemonic is specified
-kc.generateMasterSeed();
+keyContainer.generateMasterSeed();
 
 // functions above stores seed mnemonic into local storage
 // it can be retrieved through:
@@ -767,9 +745,6 @@ Output:
   ethAddr: '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f'
 }
 ```
-## Login protocol documentation
-
-https://github.com/iden3/iden3js/blob/master/src/protocols/README.md
 
 ## Tests
 To run all tests, needs to have a running [Relay](https://github.com/iden3/go-iden3) node.
