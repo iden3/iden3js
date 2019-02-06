@@ -1,9 +1,10 @@
-const NonceDB = require('./nonceDB');
+// @flow
+const nonceDB = require('./nonceDB');
 const login = require('./login');
 const proofs = require('./proofs');
 
 module.exports = {
-  NonceDB,
+  nonceDB,
   login,
-  verifyProofClaimFull: proofs.verifyProofClaimFull
+  verifyProofClaimFull: proofs.verifyProofClaim,
 };

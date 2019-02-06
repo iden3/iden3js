@@ -1,8 +1,12 @@
+// @flow
+import { describe, it } from 'mocha';
+import { NonceDB } from './nonceDB';
+
 const chai = require('chai');
-const {expect} = chai;
+
+const { expect } = chai;
 
 // const crypto = require('crypto');
-const NonceDB = require('./nonceDB');
 
 describe('[protocol] nonce', () => {
   it('nonce', () => {
@@ -12,7 +16,7 @@ describe('[protocol] nonce', () => {
 
     for (let i = 0; i < 10; i++) {
       // const randnonce = crypto.randomBytes(32).toString('base64');
-      const randnonce = 'asdf' + i;
+      const randnonce = `asdf${i}`;
       nonceDB.add(randnonce, 5);
     }
 
@@ -29,8 +33,8 @@ describe('[protocol] nonce', () => {
 
     for (let i = 0; i < 10; i++) {
       // const randnonce = crypto.randomBytes(32).toString('base64');
-      const randnonce = 'asdf' + i;
-      timeout++;
+      const randnonce = `asdf${i}`;
+      timeout += 1;
       nonceDB._add(randnonce, timeout);
     }
 
@@ -51,19 +55,21 @@ describe('[protocol] nonce', () => {
     expect(nonceDB.search('asdf0')).to.be.not.equal(undefined);
     expect(nonceDB.addAuxToNonce('asdf0', {
       param1: 1,
-      param2: 2
+      param2: 2,
     })).to.be.equal(true);
     // check that one aux can be added only one time in a nonce in the nonceDB
     expect(nonceDB.addAuxToNonce('asdf0', {
       param1: 1,
-      param2: 2
+      param2: 2,
     })).to.be.equal(false);
     expect(nonceDB.addAuxToNonce('asdf0', 'auxdata')).to.be.equal(false);
     expect(nonceDB.addAuxToNonce('asdf1', {
       param1: 1,
-      param2: 2
+      param2: 2,
     })).to.be.equal(true);
-    expect(nonceDB.search('asdf0').nonce.aux.param1).to.be.equal(1);
+    const result = nonceDB.search('asdf0');
+    if (result == null) { return; }
+    expect(result.nonce.aux.param1).to.be.equal(1);
   });
   it('nonce searchAndDelete', () => {
     const nonceDB = new NonceDB();
@@ -71,8 +77,11 @@ describe('[protocol] nonce', () => {
     nonceDB.add('asdf3', 1000);
     nonceDB.addAuxToNonce('asdf3', {
       param1: 1,
-      param2: 2
+      param2: 2,
     });
-    expect(nonceDB.searchAndDelete('asdf3').nonce.aux.param1).to.be.equal(1);
+    const result = nonceDB.searchAndDelete('asdf3');
+    // TODO: assert(result != null);
+    if (result == null) { return; }
+    expect(result.nonce.aux.param1).to.be.equal(1);
   });
 });

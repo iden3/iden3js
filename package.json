@@ -7,9 +7,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:unit": "rm -rf tmp && mocha --recursive 'src/**/*.test.js' --timeout 100000 ",
-    "test:int": "rm -rf tmp && mocha --timeout 20000",
-    "test:all": "rm -rf tmp && mocha --recursive --timeout 100000 npm run 'src/**/*.test.js' && mocha --timeout 100000"
+    "test:unit": "rm -rf tmp && mocha --require mock-local-storage --recursive 'lib/**/*.test.js' --timeout 100000",
+    "test:int": "rm -rf tmp && mocha --require mock-local-storage --timeout 20000",
+    "test:all": "npm run test:unit && npm run test:int",
+    "build": "babel src/ -d lib/",
+    "prepublish": "npm run build",
+    "flow": "flow",
+    "browserify": "browserify index.js --standalone iden3 > iden3js-bundle.js"
   },
   "author": "iden3.io",
   "license": "ISC",
@@ -35,11 +39,25 @@
     "web3": "1.0.0-beta.33"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-syntax-flow": "^6.18.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
+    "browserify": "^16.2.3",
+    "bufferutil": "^4.0.1",
     "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-flowtype": "^3.2.1",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-mocha": "^5.2.0",
+    "flow-bin": "^0.92.0",
+    "flow-typed": "^2.5.1",
+    "mock-local-storage": "^1.1.8",
     "node-localstorage": "^1.3.1",
+    "utf-8-validate": "^5.0.2",
     "ws": "^5.2.2"
   }
 }

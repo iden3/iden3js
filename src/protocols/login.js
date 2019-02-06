@@ -1,18 +1,35 @@
-const crypto = require('crypto');
+// @flow
 
+import { type NonceObj, NonceDB } from './nonceDB';
+
+const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
-const {secp256k1} = ethUtil;
 
 const utils = require('../utils');
 const claimUtils = require('../claim/claim-utils');
 const Entry = require('../claim/entry/entry');
 const proofs = require('./proofs');
+// const NonceDB = require('./nonceDB');
+const kCont = require('../key-container/key-container');
 
 // Constants of the login protocol
 const SIGV01 = 'iden3.sig.v0_1';
 const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
 const SIGALGV01 = 'ES255';
 
+type RequestIdenAssert = {
+  header: {
+    typ: string,
+  },
+  body: {
+    type: string,
+    data: {
+      challenge: string,
+      timeout: number,
+      origin: string,
+    }
+  }
+};
 /**
 * New RequestIdenAssert
 * for login purposes
@@ -21,22 +38,22 @@ const SIGALGV01 = 'ES255';
 * @param {Number} deltatimeout, in seconds units
 * @returns {Object} requestIdenAssert
 */
-const newRequestIdenAssert = function newRequestIdenAssert(nonceDB, origin, deltatimeout) {
+const newRequestIdenAssert = function newRequestIdenAssert(nonceDB: NonceDB, origin: string, deltatimeout: number): RequestIdenAssert {
   const nonce = crypto.randomBytes(32).toString('base64');
   // const nonce = crypto.randomBytes(32).toString('hex');
   const nonceObj = nonceDB.add(nonce, deltatimeout);
   return {
     header: {
-      typ: SIGV01
+      typ: SIGV01,
     },
     body: {
       type: IDENASSERTV01,
       data: {
         challenge: nonce,
         timeout: nonceObj.timestamp,
-        origin: origin
-      }
-    }
+        origin,
+      },
+    },
   };
 };
 
@@ -58,6 +75,22 @@ const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, pro
 };
 */
 
+type JwsHeader = {
+    typ: string,
+    iss: string,
+    iat: number,
+    exp: number,
+    alg: string,
+};
+
+type JwsPayload = {
+  type: string,
+  data: any,
+  ksign: string,
+  proofOfKSign: proofs.ProofClaim,
+  form: any,
+};
+
 /**
  * Sign signatureRequest
  * @param {Object} signatureRequest
@@ -70,7 +103,9 @@ const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, pro
  * @param {Number} expirationTime
  * @returns {String} signedPacket
  */
-const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, ethName, proofOfEthName, kc, ksign, proofOfKSign, expirationTime) {
+const signIdenAssertV01 = function signIdenAssertV01(signatureRequest: any, ethAddr: string,
+  ethName: string, proofOfEthName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
+  proofOfKSign: proofs.ProofClaim, expirationTime: number): string {
   const date = new Date();
   const currentTime = Math.round((date).getTime() / 1000);
   const jwsHeader = {
@@ -78,16 +113,16 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
     iss: ethAddr,
     iat: currentTime,
     exp: expirationTime,
-    alg: SIGALGV01
+    alg: SIGALGV01,
   };
   const jwsPayload = {
     type: IDENASSERTV01,
     data: signatureRequest.body.data,
-    ksign: ksign,
-    proofOfKSign: proofOfKSign,
+    ksign,
+    proofOfKSign,
     form: {
-      ethName: ethName,
-      proofOfEthName: proofOfEthName
+      ethName,
+      proofOfEthName,
     },
     // identity: {  TODO AFTER MILESTONE
     //   operational: ,
@@ -101,7 +136,7 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
   const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
 
-  const dataToSign = header64 + '.' + payload64;
+  const dataToSign = `${header64}.${payload64}`;
 
   // sign data
   const signedObj = kc.sign(ksign, dataToSign);
@@ -109,8 +144,14 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
   const signatureBuffer = utils.hexToBytes(signatureHex);
   const signature64 = signatureBuffer.toString('base64');
 
-  const result = dataToSign + '.' + signature64;
+  const result = `${dataToSign}.${signature64}`;
   return result;
+};
+
+export type NonceVerified = {
+  nonce: NonceObj,
+  ethName: string,
+  ethAddr: string,
 };
 
 /**
@@ -122,7 +163,8 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest, ethAddr, 
  * @param {Buffer} signatureBuffer
  * @returns {Object} nonce
  */
-const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer) {
+const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
+  jwsHeader: JwsHeader, jwsPayload: JwsPayload, signatureBuffer: Buffer): ?NonceVerified {
   // TODO AFTER MILESTONE check data structure scheme
 
   // check if jwsHeader.alg is iden3.sig.v0_1 (SIGALGV01)
@@ -142,7 +184,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
 
   // check jwsPayload.data.challege valid
   const nonceVerified = nonceDB.searchAndDelete(jwsPayload.data.challenge);
-  if (nonceVerified === undefined) {
+  if (nonceVerified == null) {
     return undefined;
   }
 
@@ -188,7 +230,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   // as verifying a signature is cheaper than verifying a merkle tree proof, first we verify signature with ksign
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
   const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
-  const dataSigned = header64 + '.' + payload64;
+  const dataSigned = `${header64}.${payload64}`;
   const message = ethUtil.toBuffer(dataSigned);
   const msgHash = ethUtil.hashPersonalMessage(message);
   const sigHex = utils.bytesToHex(signatureBuffer);
@@ -205,18 +247,22 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
   const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
   // verify proofOfEthName
-  if (!proofs.verifyProofClaimFull(jwsPayload.form.proofOfEthName.proofOfClaimAssignName, relayAddr)) {
+  if (!proofs.verifyProofClaim(jwsPayload.form.proofOfEthName.proofOfClaimAssignName, relayAddr)) {
     return undefined;
   }
 
   // check jwsPayload.proofOfKSign
-  if (!proofs.verifyProofClaimFull(jwsPayload.proofOfKSign, relayAddr)) {
+  if (!proofs.verifyProofClaim(jwsPayload.proofOfKSign, relayAddr)) {
     return undefined;
   }
 
-  nonceVerified.nonce.ethName = jwsPayload.form.proofOfEthName.name;
-  nonceVerified.nonce.ethAddr = jwsHeader.iss;
-  return nonceVerified.nonce;
+  // nonceVerified.nonce.ethName = jwsPayload.form.proofOfEthName.name;
+  // nonceVerified.nonce.ethAddr = jwsHeader.iss;
+  return {
+    nonce: nonceVerified.nonce,
+    ethName: jwsPayload.form.proofOfEthName.name,
+    ethAddr: jwsHeader.iss,
+  };
 };
 
 /**
@@ -226,7 +272,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB, origin, jwsHea
  * @param {String} signedPacket
  * @returns {Object} nonce
  */
-const verifySignedPacket = function verifySignedPacket(nonceDB, origin, signedPacket) {
+const verifySignedPacket = function verifySignedPacket(nonceDB: NonceDB, origin: string, signedPacket: string): ?NonceVerified {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
   const jwsHeader64 = signedPacket.split('.')[0];
   const jwsPayload64 = signedPacket.split('.')[1];
@@ -235,16 +281,13 @@ const verifySignedPacket = function verifySignedPacket(nonceDB, origin, signedPa
   const jwsPayload = JSON.parse(Buffer.from(jwsPayload64, 'base64').toString('ascii'));
   const signatureBuffer = Buffer.from(signature64, 'base64');
 
-  let nonce = undefined;
   // switch over jwsHeader.typ
   switch (jwsHeader.typ) {
     case SIGV01:
-      nonce = verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
-      break;
+      return verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
     default:
-      return nonce;
+      return undefined;
   }
-  return nonce;
 };
 
 module.exports = {

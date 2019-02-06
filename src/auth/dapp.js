@@ -113,7 +113,7 @@ class Dapp {
   async recv_wallet(message) {
     status(`wallet got ${message}`, true);
 
-    const [op, args] = message.split('|');
+    let [op, args] = message.split('|');
     if (op === 'call') {
       ksignaddr = '0xee602447b5a75cf4f25367f5d199b860844d10c4';
       ksignpvk = ethutil.toBuffer('0x8A85AAA2A8CE0D24F66D3EAA7F9F501F34992BACA0FF942A8EDF7ECE6B91F713');

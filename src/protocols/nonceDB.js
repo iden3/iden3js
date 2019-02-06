@@ -1,7 +1,22 @@
+// @flow
+
+export type NonceObj = {
+  nonce: string,
+  timestamp: number,
+  aux: any,
+};
+
+export type NonceResult = {
+    nonce: NonceObj,
+    index: number,
+};
+
 /**
 * Class representing the NonceDB
 */
-class NonceDB {
+export class NonceDB {
+  nonces: Array<NonceObj>;
+
   /**
 * Initialize NonceDB
 */
@@ -15,11 +30,11 @@ class NonceDB {
 * @param {String} nonce
 * @param {Number} timeout, in unixtime format
 */
-  _add(nonce, timeout) {
+  _add(nonce: string, timeout: number): NonceObj {
     const nonceObj = {
-      nonce: nonce,
+      nonce,
       timestamp: timeout,
-      aux: undefined
+      aux: undefined,
     };
     this.nonces.push(nonceObj);
     return nonceObj;
@@ -31,7 +46,7 @@ class NonceDB {
 * @param {String} nonce
 * @param {Number} delta, in seconds unit
 */
-  add(nonce, delta) {
+  add(nonce: string, delta: number): NonceObj {
     const date = new Date();
     const timestamp = Math.round((date).getTime() / 1000);
     const timeout = timestamp + delta;
@@ -45,7 +60,7 @@ class NonceDB {
 * @param {Object} aux
 * @param {bool}
 */
-  addAuxToNonce(nonce, aux) {
+  addAuxToNonce(nonce: string, aux: any): boolean {
     for (let i = 0; i < this.nonces.length; i++) {
       if (this.nonces[i].nonce === nonce) {
         if (this.nonces[i].aux !== undefined) {
@@ -64,13 +79,13 @@ class NonceDB {
 * @param {String} nonce
 * @returns {Object}
 */
-  search(nonce) {
+  search(nonce: string): ?NonceResult {
     this.deleteOld();
     for (let i = 0; i < this.nonces.length; i++) {
       if (this.nonces[i].nonce === nonce) {
         return {
           nonce: this.nonces[i],
-          index: i
+          index: i,
         };
       }
     }
@@ -82,9 +97,9 @@ class NonceDB {
 * @param {String} nonce
 * @returns {bool}
 */
-  searchAndDelete(nonce) {
+  searchAndDelete(nonce: string): ?NonceResult {
     const n = this.search(nonce);
-    if (n === undefined) {
+    if (n == null) {
       return undefined;
     }
     this.nonces.splice(n.index, 1);
@@ -95,9 +110,9 @@ class NonceDB {
 * Delete element in NonceDB
 * @param {String} nonce
 */
-  deleteElem(nonce) {
+  deleteElem(nonce: string) {
     const n = this.search(nonce);
-    if (n === undefined) {
+    if (n == null) {
       return;
     }
     this.nonces.splice(n.index, 1);
@@ -107,8 +122,8 @@ class NonceDB {
 * Delete nonces with timestamp older than the given
 * @param {Number} timestamp - if not specified will get current time
 */
-  deleteOld(timestamp) {
-    if (timestamp === undefined) {
+  deleteOld(timestamp: ?number) {
+    if (timestamp == null) {
       const date = new Date();
       timestamp = Math.round((date).getTime() / 1000);
     }
@@ -120,5 +135,3 @@ class NonceDB {
     }
   }
 }
-
-module.exports = NonceDB;
