@@ -11,10 +11,10 @@ nacl.util = require('tweetnacl-util');
 
 const { secp256k1 } = ethUtil;
 
-if (typeof localStorage === 'undefined' || localStorage === null) {
-  const LocalStorage = require('node-localstorage').LocalStorage;
-  localStorage = new LocalStorage('./tmp');
-}
+// if (typeof localStorage === 'undefined' || localStorage === null) {
+//   const LocalStorage = require('node-localstorage').LocalStorage;
+//   localStorage = new LocalStorage('./tmp');
+// }
 
 class LocalStorageContainer {
   constructor(db) {

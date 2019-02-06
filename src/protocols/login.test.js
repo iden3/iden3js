@@ -1,12 +1,17 @@
-const chai = require('chai');
-const {expect} = chai;
+// @flow
 
-const iden3 = require('../index');
+import { describe, it } from 'mocha';
+
+const chai = require('chai');
+
+const { expect } = chai;
+
 const snarkjs = require('snarkjs');
+const iden3 = require('../index');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 const Entry = require('../claim/entry/entry');
 
-const bigInt = snarkjs.bigInt;
+const { bigInt } = snarkjs;
 
 const db = new iden3.Db();
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
@@ -18,11 +23,11 @@ const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rall
 kc.unlock('pass');
 kc.generateMasterSeed(mnemonic);
 const mnemonicDb = kc.getMasterSeed();
-const ack = kc.generateKeySeed(mnemonicDb);
+kc.generateKeySeed(mnemonicDb);
 const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
-({ keys } = objectKeys);
-const relay = new iden3.Relay('http://127.0.0.1:8000/api/v0.1');
+const { keys } = objectKeys;
+// const relay = new iden3.Relay('http://127.0.0.1:8000/api/v0.1');
 // let id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, '', undefined, 0);
 const ksign = keys[1]; // public key in hex format
 
@@ -42,11 +47,11 @@ const proofOfEthName = {
         aux: null,
         mtp0: '0001000000000000000000000000000000000000000000000000000000000001083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199',
         mtp1: '03010000000000000000000000000000000000000000000000000000000000010fef40cc16896de64be5a0f827799555344fd3d9aade9b65d95ecfbcac3e5a73182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
-        root: '1b6feefde6e76c1e9d98d30fa0993a7a7b35f5b2580a757c9a57ee383dc50b96'
-      }
+        root: '1b6feefde6e76c1e9d98d30fa0993a7a7b35f5b2580a757c9a57ee383dc50b96',
+      },
     ],
-    signature: '4e0c47fe90f3438df2ed520101b214ce3f0088dafec479c997d970097119d8ba10493cf247c428b5819c8c025b9c3f5501d9e15a1f036ea54ed09ae0a754fb9700'
-  }
+    signature: '4e0c47fe90f3438df2ed520101b214ce3f0088dafec479c997d970097119d8ba10493cf247c428b5819c8c025b9c3f5501d9e15a1f036ea54ed09ae0a754fb9700',
+  },
 };
 
 const proofOfKSign = {
@@ -57,19 +62,19 @@ const proofOfKSign = {
       aux: {
         version: 0,
         era: 0,
-        ethAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22'
+        ethAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22',
       },
       mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
       mtp1: '030000000000000000000000000000000000000000000000000000000000000028f8267fb21e8ce0cdd9888a6e532764eb8d52dd6c1e354157c78b7ea281ce801541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed',
-      root: '1d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922'
+      root: '1d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922',
     }, {
       aux: null,
       mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
       mtp1: '0300000000000000000000000000000000000000000000000000000000000000182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
-      root: '083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199'
-    }
+      root: '083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199',
+    },
   ],
-  signature: '000c3f2ecd731905c8ce1e05de6a1edd09fe06611fef1cd700d3a84537bf6dc21e7b8f158f252cc583542c449b824cbf21080b9c5b46d27c036ceb32f51c2d2801'
+  signature: '000c3f2ecd731905c8ce1e05de6a1edd09fe06611fef1cd700d3a84537bf6dc21e7b8f158f252cc583542c449b824cbf21080b9c5b46d27c036ceb32f51c2d2801',
 };
 
 describe('[protocol] interns', () => {
@@ -118,7 +123,7 @@ describe('[protocol] login flow', () => {
 
     const origin = 'domain.io';
     // login backend:
-    const nonceDB = new iden3.protocols.NonceDB();
+    const nonceDB = new iden3.protocols.nonceDB.NonceDB();
     const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, 2 * 60);
 
     // check that the nonce is in the nonceDB
@@ -128,22 +133,23 @@ describe('[protocol] login flow', () => {
     const unixtime = Math.round((date).getTime() / 1000);
     const expirationTime = unixtime + (3600 * 60);
     // identity wallet:
-    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr, ethName, proofOfEthName, kc, ksign, proofOfKSign, expirationTime);
+    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr,
+      ethName, proofOfEthName, kc, ksign, proofOfKSign, expirationTime);
 
     // login backend:
-    const nonce = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
-    expect(nonce).to.be.not.equal(undefined);
+    const nonceVerified = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
+    expect(nonceVerified).to.be.not.equal(undefined);
 
     // check that the nonce returned when deleting the nonce of the signedPacket, is the same
     // than the nonce of the signatureRequest
-    expect(nonce.nonce).to.be.equal(signatureRequest.body.data.challenge);
+    expect(nonceVerified.nonce.nonce).to.be.equal(signatureRequest.body.data.challenge);
 
     // nonce must not be more in the nonceDB
-    expect(nonceDB.search(nonce.nonce)).to.be.equal(undefined);
+    expect(nonceDB.search(nonceVerified.nonce)).to.be.equal(undefined);
 
-    expect(nonce.ethName + '@iden3.io').to.be.equal(ethName);
-    expect(nonce.ethAddr).to.be.equal(usrAddr);
-    
+    expect(`${nonceVerified.ethName}@iden3.io`).to.be.equal(ethName);
+    expect(nonceVerified.ethAddr).to.be.equal(usrAddr);
+
     // check that an already checked signedPacket is not more longer available to be verified
     const nonceF = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
     expect(nonceF).to.be.equal(undefined);

@@ -50,7 +50,7 @@ describe('[protocol] login', () => {
 
   it('newRequestIdenAssert', () => {
     const origin = 'domain.io';
-    const nonceDB = new iden3.protocols.NonceDB();
+    const nonceDB = new iden3.protocols.nonceDB.NonceDB();
     const signatureRequest = iden3.protocols.login.newRequestIdenAssert(nonceDB, origin, 2 * 60);
 
     const date = new Date();

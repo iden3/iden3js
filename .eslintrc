@@ -1,12 +1,17 @@
 {
-  "extends": "airbnb-base",
+  "parser": "babel-eslint",
+  "extends": [
+    "airbnb-base",
+    "plugin:flowtype/recommended"
+  ],
   "env": {
     "browser": true,
     "node": true,
     "mocha": true
   },
   "plugins": [
-    "mocha"
+    "mocha",
+    "flowtype"
   ],
   "rules": {
     "mocha/no-exclusive-tests": "error",
@@ -19,6 +24,8 @@
     "class-methods-use-this": [0],
     "no-bitwise": [0],
     "no-param-reassign": "off",
-    "no-console": [2, { "allow": ["warn", "error"] }]
+    "no-console": [2, { "allow": ["warn", "error"] }],
+    "import/prefer-default-export": [0],
+    "lines-between-class-members": [ "error", "always", { "exceptAfterSingleLine": true }]
   }
 }
