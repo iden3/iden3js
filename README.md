@@ -204,79 +204,86 @@ const relay = new iden3.Relay(relayUrl);
 const keyPath = 0;
 const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, keyPath);
 ```
-#### id.createKey
-```js
-// Create new key for this identity and bind it to a label
-const labelKey = 'test key'
-const loginKey = id.createKey(keyContainer, labelKey);
-```
-#### id.getKeys
-```js
-// Retrieve all keys that have been created for this identity
-const keysIdentity = id.getKeys();
-```
 #### id.createID
 Creates the counterfactual contract through the `Relay`, and gets the identity address
 When an identity is created, all its keys are automatically stored
 ```js
 id.createID().then(res => {
-  console.log(res.data);
+  console.log(res.idAddr);
+  console.log(res.proofOfClaim);
 });
 ```
-
-- Output:
 ```js
-// Return object: - idAddr: Address identity identifier
-//                - proofOfClam: Structure of the claim emitted by the relay authorizing its key public operational
-{
-  idAddr,
-  proofOfClaim
+// Return : - idAddr: Address identity identifier
+//          - proofOfClam: Structure of the claim emitted by the relay authorizing its key public operational
+idAddr = 0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22;
+proofOfClaim = {
+  Date: 1549531663,
+  Leaf:'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff50000000000000000000000000000000000007833000000000000000000000004',
+  Proofs: [{
+    Aux: {
+      Era: 0,
+      EthAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22',
+      version: 0
+    }
+    Mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
+    Mtp1: '030000000000000000000000000000000000000000000000000000000000000028f8267fb21e8ce0cdd9888a6e532764eb8d52dd6c1e354157c78b7ea281ce801541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed',
+    Root: '1d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922',
+  } , {
+    Aux: null
+    Mtp0: '0000000000000000000000000000000000000000000000000000000000000000',
+    Mtp1: '0300000000000000000000000000000000000000000000000000000000000000182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+    Root: '083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199',
+
+  }], 
+  Signature:'440ec709297ecb6a7f7a200719c29d96025a893aef7318cebdcec401e3c8b3b711358f5a3c14394dc120b067ade86d7eca0c79be580d35934cc36dc246be6ec000',
 }
 ```
+#### id.createKey
+```js
+// Create new key for this identity and bind it to a label
+const labelKey = 'test key'
+const loginKey = id.createKey(keyContainer, labelKey);
+console.log(loginKey);
+```
+
+```js
+// Return : New key created
+loginKey = '0xaac4ed37a11e6a9170cb19a6e558913dc3efa6a7';
+```
+#### id.getKeys
+```js
+// Retrieve all keys that have been created for this identity
+const keysIdentity = id.getKeys();
+console.log(keysIdentity);
+```
+```js
+// Return : Object containing all the keys associated with the identity
+{
+  operationalPub:"0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833",
+  recover:"0xf3c9f94e4eaffef676d4fd3b4fc2732044caea91",
+  revoke:"0xb07079bd6238fa845dc77bbce3ec2edf98ffe735",
+  test key:"0xaac4ed37a11e6a9170cb19a6e558913dc3efa6a7",
+}
+```
+
 #### id.deployID
 Deploys the counterfactual smart contract of identity to the blockchain.
 ```js
 id.deployID().then(res => {
   console.log(res.data);
 });
-```
-
-- Output:
-```js
 // Return object: - idAddr: Address identity identifier
 //                - tx: transaction identifier of the deploying identity smart contract on the blockchain
-{
-  idAddr,
-  tx
-}
 ```
-
-#### id.getID //TODO: move to relay section
-```js
-relay.getID(id.idAddr).then((res) => {
-  console.log(res.data);
-});
-```
-- Output:
-```js
-// Return object: - idAddr: Address identity identifier
-//                - localDb: contins necessary informatin to create counterfactoual
-//                - onchain: information regarding smart ntract deployed on the blockchain
-{
-  idAddr,
-  localDb,
-  onchain,
-}
-```
-
 #### id.bindID
 Vinculates a label to an identity.
 It sends required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with a label
 
 ```js
 const name = 'testName';
-id.bindID(kc, name).then(res => {
-  console.log(res.data);
+id.bindID(kc, name).then(bindRes => {
+  console.log(bindRes.data);
 });
 ```
 
@@ -287,10 +294,20 @@ id.bindID(kc, name).then(res => {
 //                - name: label binded to the ethereum address
 //                - proofOfClaimAssignName: full proof of existance of the claim issued by the name-resolved
 {
-  claimasigname,
-  ethAddr,
-  name,
-  proofOfClaimAssignName
+  claimasigname: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b471a1bdbd3b8ac98f3715507449f3a8e1f3b22008c8efcda9e563cf153563941b60fc5ac88336fc58d361eb0888686fadb99760000000000000000000000000000000000000000000000000000000000000003',
+  ethAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22', 
+  name: 'testName',
+  proofOfClaimAssignName: {
+    Date:1549532610,
+    Leaf:'00000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b471a1bdbd3b8ac98f3715507449f3a8e1f3b22008c8efcda9e563cf153563941b60fc5ac88336fc58d361eb0888686fadb99760000000000000000000000000000000000000000000000000000000000000003',
+    Proofs:[{
+      Aux: null,
+      Mtp0:'0001000000000000000000000000000000000000000000000000000000000001083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199',
+      Mtp1:'03010000000000000000000000000000000000000000000000000000000000010fef40cc16896de64be5a0f827799555344fd3d9aade9b65d95ecfbcac3e5a73182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+      Root:'1b6feefde6e76c1e9d98d30fa0993a7a7b35f5b2580a757c9a57ee383dc50b96',
+    }],
+    Signature:'1e6d15ef907000937577aa06437ee2a1230713be20ff09d7628ce4dc6c902c11274f34d4ae0f9e9fc2e67cf21abe5da7f11748fc243f4013faa42e53e9c81e3e01',
+  }
 }
 ```
 
@@ -301,20 +318,36 @@ const keyLabel = 'testKey';
 const newKey = id.createKey(keyContainer, keyLabel, true);
 
 // send claim to relay signed by operational key in order to authorize a second key 'newKey'
-id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
+id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, loginKey)
   .then((res) => {
     console.error(res.data);
   });
-});
 ```
 - Output:
 ```js
 // Return object: - proofOfClaim: full proof of existence of the claim issued by the relay
-{
-  proofOfClaim
+proofOfClaim = {
+  Date: 1549534168,
+  Leaf:'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000aac4ed37a11e6a9170cb19a6e558913dc3ef000000000000000000000000000000000000a6a7000000000000000000000004',
+  Proofs: [{
+    Aux: {
+      Era: 0,
+      EthAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22',
+      version: 1
+    }
+    Mtp0: '00010000000000000000000000000000000000000000000000000000000000011d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922',
+    Mtp1: '03010000000000000000000000000000000000000000000000000000000000011d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c39221c8bdcd862752abf2dd32d16c9c3acfa20ea93cecc64d169c4550ca3e9bca20b1541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed',
+    Root: '21c6e1a81851f4017139ae8ddfbd5e894376fdd14c73cecf2a81939bae78595b',
+  } , {
+    Aux: null
+    Mtp0: '0007000000000000000000000000000000000000000000000000000000000041083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f81990fef40cc16896de64be5a0f827799555344fd3d9aade9b65d95ecfbcac3e5a73',
+    Mtp1: '0301000000000000000000000000000000000000000000000000000000000001081b6542453a651f2b0fea8b639a8823809f7fc032c051a644d1a8b559ba0322182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+    Root: '1560e7b6983491305c6522c4227b98fbf26753b6a7fcb97ffb0ef7d98b271e99',
+
+  }], 
+  Signature:'3cedbb3d6eab5ce9a1f8bb436a080f7ec5ede3526fdcfa094fee33cbbd414d0c6d41a6650f4fdda27a66d51d87d18b4cae0adbd695ccdb152dae65a998ba61f101',
 }
 ```
-
 ### Claims
  - Generic claim representation: `Entry`
  - Claim Types:
@@ -322,7 +355,7 @@ id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
    - Authorize Key to sign
    - Set root key
    - Assign name
-   - Authorize key to sign (type key is secp256k1
+   - Authorize key to sign secp256k1
    
 #### Entry
 ```js
@@ -502,9 +535,9 @@ entry.fromHexadecimal(leaf); // Leaf is an hexadecimal representation of an Entr
 let claimBasicParsed = iden3.claim.claimUtils.newClaimFromEntry(entry);
 ```
 
-#### checkProofOfClaim //TODO: proofs.js
+#### checkProofOfClaim
 This function checks the data structure of `proofOfClaim` and returns true if all the proofs are correct.
-Internally, it usees the `iden3.merkleTree.checkProof()` function, for each one of the proofs that are contained inside `proofOfClaim` data object.
+Internally, it usees the `iden3.sparseMerkleTree.checkProof()` function, for each one of the proofs that are contained inside `proofClaim` data object.
 
 Checks the full `proof` of a `claim`. This means check the:
 - `Merkle Proof` of the `claim`
@@ -513,34 +546,29 @@ Checks the full `proof` of a `claim`. This means check the:
 - `Merkle Proof` of the non revocation of the `SetRootClaim`
 
 ```js
-let proofOfClaimStr = `
-{
-  "ClaimProof": {
-    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074353f867ef725411de05e3d4b0a01c37cf7ad24bcc213141a0000005400000000970e8128ab834e8eac17ab8e3812f010678cf7912077bb3f0400dd62421c97220536fd6ed2be29228e8db1315e8c6d7525f4bdf4dad9966a2e7371f0a24b1929ed765c0e7a3f2b4665a76a19d58173308bb34062000000005b816b9e000000005b816b9e",
-    "Proof": "0x00000000000000000000000000000000000000000000000000000000000000052d3cbe677b6e4048e0db5a3d550e5f1bb2252c099a990137ac644ddfff9553dde5d128f57df872a6ab1c768ab3da7fc08faa153d4ac40c33471d25be32b38132",
-    "Root": "0xb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101"
-  },
-  "SetRootClaimProof": {
-    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000003bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9fb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101",
-    "Proof": "0x000000000000000000000000000000000000000000000000000000000000000b7d2ff8e70da77ef7559614425aa33021eb88752f63a690911c031a1fae273f9393b3f57a79800ca02cd1ac3a555d9dbb7d5869251d51d34e01d7de4ab811e9753cb6d37abb4eae8eeea11cbae9a96a021e2d157340721884763fc2ac33313ecd",
-    "Root": "0x33f1e9b3ed86317369938d5bb04ba23e5f5de65da07c3a9368ffe19121e7a6c6"
-  },
-  "ClaimNonRevocationProof": {
-    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074353f867ef725411de05e3d4b0a01c37cf7ad24bcc213141a0000005400000001970e8128ab834e8eac17ab8e3812f010678cf7912077bb3f0400dd62421c97220536fd6ed2be29228e8db1315e8c6d7525f4bdf4dad9966a2e7371f0a24b1929ed765c0e7a3f2b4665a76a19d58173308bb34062000000005b816b9e000000005b816b9e",
-    "Proof": "0x0000000000000000000000000000000000000000000000000000000000000003df560419165ec6b3299f04ac93510999379987ff25b0799a738ad0d078c9b9d6f912e7e2fab90f745aab5874a5e4f7657921b271378ea05ee9b0f25d69f87a3c",
-    "Root": "0xb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101"
-  },
-  "SetRootClaimNonRevocationProof": {
-    "Leaf": "0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc60000005400000004bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9fb98333b2c502fc156d0ee7779d77aa9063fcbc6ed41e5c3e8b9900f379523101",
-    "Proof": "0x000000000000000000000000000000000000000000000000000000000000000b615fadf56023c4ef72c3d455f0e6b6f9ace467e751e9b8e350fe0401368faf4801d4499dba57c843cd6c64fb07975d506e27b5e68166493618405a4bbf2b256eaf677f70fad9050c9d8e77b727fe6d29187c054cd47cfb3fcc10b2a4cbf08f8c",
-    "Root": "0x33f1e9b3ed86317369938d5bb04ba23e5f5de65da07c3a9368ffe19121e7a6c6"
-  },
-  "Date": 1539008518,
-  "Signature": "0x19074094d44fc77bc020d6c51c2e3f71fb45ede33b05202553d785cfce7d702411b98a4d0980d35383dfbe1d5b9779ee3b8f6295c27969bcf45156cdf6382b6201"
+let proofOfClaim = {
+  Date: 1549534168,
+  Leaf:'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000aac4ed37a11e6a9170cb19a6e558913dc3ef000000000000000000000000000000000000a6a7000000000000000000000004',
+  Proofs: [{
+    Aux: {
+      Era: 0,
+      EthAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22',
+      version: 1
+    }
+    Mtp0: '00010000000000000000000000000000000000000000000000000000000000011d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922',
+    Mtp1: '03010000000000000000000000000000000000000000000000000000000000011d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c39221c8bdcd862752abf2dd32d16c9c3acfa20ea93cecc64d169c4550ca3e9bca20b1541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed',
+    Root: '21c6e1a81851f4017139ae8ddfbd5e894376fdd14c73cecf2a81939bae78595b',
+  } , {
+    Aux: null
+    Mtp0: '0007000000000000000000000000000000000000000000000000000000000041083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f81990fef40cc16896de64be5a0f827799555344fd3d9aade9b65d95ecfbcac3e5a73',
+    Mtp1: '0301000000000000000000000000000000000000000000000000000000000001081b6542453a651f2b0fea8b639a8823809f7fc032c051a644d1a8b559ba0322182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+    Root: '1560e7b6983491305c6522c4227b98fbf26753b6a7fcb97ffb0ef7d98b271e99',
+
+  }], 
+  Signature:'3cedbb3d6eab5ce9a1f8bb436a080f7ec5ede3526fdcfa094fee33cbbd414d0c6d41a6650f4fdda27a66d51d87d18b4cae0adbd695ccdb152dae65a998ba61f101',
 }
-`;
-let proofOfClaim = JSON.parse(proofOfClaimStr);
-let verified = iden3.claim.checkProofOfClaim(proofOfClaim, 140);
+let proofOfClaim = JSON.parse(proofClaim);
+let verified = iden3.protocols.verifyProofClaimFull(proofOfClaim, relayAddr);
 // verified === true
 ```
 
@@ -635,17 +663,47 @@ let buff = iden3.utils.hexToBytes(hex); // returns a Buffer from a Heximal repre
 let verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex);
 // verified: true
 ```
-
-// TODO: update calls to relay
-// TODO: Split Reay / Name-Resolver
 ### Relay http
 Connectors to interact with the relay API REST.
 
 #### Create Relay object
 ```js
-const relay = new iden3.Relay('http://127.0.0.1:5000');
+// new relay
+const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+const relay = new iden3.Relay('http://127.0.0.1:8000/api/v0.1');
 ```
-
+#### relay.getID
+```js
+relay.getID(id.idAddr).then((res) => {
+  console.log(res.data);
+});
+```
+- Output:
+```js
+// Return object: - idAddr: Address identity identifier
+//                - localDb: contins necessary informatin to create counterfactoual
+//                - onchain: information regarding smart contract deployed on the blockchain
+{
+  IDAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22',
+  LocalDb: {
+    Impl:'0x66d0c2f85f1b717168cbb508afd1c46e07227130',
+    Operational:'0xc7d89fe96acdb257b434bf580b8e6eb677d445a9',
+    OperationalPk:'0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833',
+    Recoverer:'0xf3c9f94e4eaffef676d4fd3b4fc2732044caea91',
+    Relayer:'0xe0fbce58cfaa72812103f003adce3f284fe5fc7c',
+    Revokator:'0xb07079bd6238fa845dc77bbce3ec2edf98ffe735',
+  },
+  onchain: {
+    Codehash:'0x4fec321ffcfdd48cdbe4d02553acb18ddb04cd5c6a78bcaf86e87834b1f3d0ee',
+    Impl:'0x66d0c2f85f1b717168cbb508afd1c46e07227130',
+    LastNonce:0,
+    Recoverer:'0xf3c9f94e4eaffef676d4fd3b4fc2732044caea91',
+    RecovererProp:'0x0000000000000000000000000000000000000000',
+    Relay:'0xe0fbce58cfaa72812103f003adce3f284fe5fc7c',
+    Revoker:'0xb07079bd6238fa845dc77bbce3ec2edf98ffe735',
+  },
+}
+```
 #### relay.getRelayRoot
 ```js
 relay.getRelayRoot()
@@ -654,11 +712,13 @@ relay.getRelayRoot()
   });
 ```
 
-Response:
+- Output:
 ```js
+// Return object: - contractRoot: Address of the relay smart contract
+//                - root: Current root of the relay merkle tree
 {
-  contractRoot: '0x6e4659fedd8ff00b14e487d6d5f537646f07bde944d935d51bd9de807d6fc1c9',
-  root: '0x0000000000000000000000000000000000000000000000000000000000000000'
+  contractRoot: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  root: '0x1560e7b6983491305c6522c4227b98fbf26753b6a7fcb97ffb0ef7d98b271e99'
 }
 ```
 
@@ -669,78 +729,49 @@ relay.getIDRoot(id.kc.addressHex())
     console.log('res.data', res.data);
   });
 ```
-Response:
+- Output:
 ```js
+// Return object: - idRoot: Root of the identity merkle tree
+//                - idRootProof: Proof of SetRootClaim that relay merkle tree contains identity root merkle tree
+//                - root: Root of the relay merkle tree
 {
   idRoot: '0x0000000000000000000000000000000000000000000000000000000000000000',
   idRootProof: '0x0000000000000000000000000000000000000000000000000000000000000000',
   root: '0x0000000000000000000000000000000000000000000000000000000000000000'
 }
 ```
-
-#### relay.genericClaim
-Creates a new AuthorizeKSignClaim, signs it, and sends it to the Relay.
-```js
-relay.genericClaim(id.kc, ksign, 'iden3.io', 'default', 'data of the claim').then(res => {
-  // console.log('res.data', res.data);
-  expect(res.status).to.be.equal(200);
-});
-```
-
-#### relay.authorizeKSignClaim
-Creates a new authorizeKSignClaim, signs it, and sends it to the Relay.
-```js
-relay.authorizeKSignClaim(id.kc, keyid, kSign.addressHex(), 'appToAuthName', 'authz', 1535208350, 1535208350).then(res => {
-  // console.log('res.data', res.data);
-  expect(res.status).to.be.equal(200);
-});
-```
-
-#### relay.postClaim
-Sends to the Relay a signed Claim.
-```js
-relay.postClaim(idaddr, bytesSignedMsg)
-  .then(res => {
-    console.log('res.data', res.data);
-  });
-```
-
-The response is the `ProofOfClaim`, same as returned in relay.getClaimByHi().
-
 #### relay.getClaimByHi
 ```js
-relay.getClaimByHi(idaddr, hi)
+let leaf = new iden3.claims.Entry();
+leaf.fromHexadecimal(proofOfClaim.Leaf);
+
+relay.getClaimByHi(id.idAddr, iden.utils.bytesToHex(leaf.hi()))
   .then(res => {
     console.log('res.data', res.data);
   });
 ```
-Response, `ProofOfClaim`:
 ```js
-{
-  claimProof: {
-    Leaf: '0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074353f867ef725411de05e3d4b0a01c37cf7ad24bcc213141a05ed7726d7932a1f00000000bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f2077bb3f0400dd62421c97220536fd6ed2be29228e8db1315e8c6d7525f4bdf4dad9966a2e7371f0a24b1929ed765c0e7a3f2b4665a76a19d58173308bb34062000000005b816b9e000000005b816b9e',
-    Hi: '0x438a26007910a723fedf030efd08fed2d374634eb8866ce595c139ea341daa43',
-    Proof: '0x0000000000000000000000000000000000000000000000000000000000000000',
-    Root: '0xd1d3ebd84f46ec73767a2fe89930f33eef96ddf18c35e03faf03a98c8e6bf207'
-  },
-  setRootClaimProof: {
-    Leaf: '0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c49694030749b9a76a0132a0814192c05c9321efc30c7286f6187f18fc6b6858214fe963e0e00000000bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9fd1d3ebd84f46ec73767a2fe89930f33eef96ddf18c35e03faf03a98c8e6bf207',
-    Hi: '0xbadb12c663dc83678de0709619fb8c67f939b7a2c5c658a6305fa4841e62e392',
-    Proof: '0x0000000000000000000000000000000000000000000000000000000000000000',
-    Root: '0xfd89568c4dfe0b22be91c810421dcf02ac7ca42bc005461886a443fb6e0ead78'
-  },
-  claimNonRevocationProof: {
-    Leaf: '0x0000000000000000000000000000000000000000000000000000000000000000',
-    Hi: '0x1d4221032dae2392d162cf09030f5ad9fb135380a49bb1e8caf549aaea42b53f',
-    Proof: '0x0000000000000000000000000000000000000000000000000000000000000004ce587b2d039c876de24e8b7fbdeb4cf6b84d542a60cdef47cf0ab29c631fba26',
-    Root: '0xd1d3ebd84f46ec73767a2fe89930f33eef96ddf18c35e03faf03a98c8e6bf207'
-  },
-  setRootClaimNonRevocationProof: {
-    Leaf: '0x0000000000000000000000000000000000000000000000000000000000000000',
-    Hi: '0x28f5ee91e756ec1a3d1ea9ca2a68b5dde6ded3ea98effeadcefbff9a352aa434',
-    Proof: '0x0000000000000000000000000000000000000000000000000000000000000002b8193081f59feef7baab60cd827267371b2e6495cd2efab189370e0e2ea5819c',
-    Root: '0xfd89568c4dfe0b22be91c810421dcf02ac7ca42bc005461886a443fb6e0ead78'
-  }
+// Return object: - proofOfClaim: Proof of claim for the claim asked
+proofOfClaim = {
+  Date: 1549534168,
+  Leaf:'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000aac4ed37a11e6a9170cb19a6e558913dc3ef000000000000000000000000000000000000a6a7000000000000000000000004',
+  Proofs: [{
+    Aux: {
+      Era: 0,
+      EthAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22',
+      version: 1
+    }
+    Mtp0: '00010000000000000000000000000000000000000000000000000000000000011d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c3922',
+    Mtp1: '03010000000000000000000000000000000000000000000000000000000000011d9d41171c4b621ff279e2acb84d8ab45612fef53e37225bdf67e8ad761c39221c8bdcd862752abf2dd32d16c9c3acfa20ea93cecc64d169c4550ca3e9bca20b1541a6b5aa9bf7d9be3d5cb0bcc7cacbca26242016a0feebfc19c90f2224baed',
+    Root: '21c6e1a81851f4017139ae8ddfbd5e894376fdd14c73cecf2a81939bae78595b',
+  } , {
+    Aux: null
+    Mtp0: '0007000000000000000000000000000000000000000000000000000000000041083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f81990fef40cc16896de64be5a0f827799555344fd3d9aade9b65d95ecfbcac3e5a73',
+    Mtp1: '0301000000000000000000000000000000000000000000000000000000000001081b6542453a651f2b0fea8b639a8823809f7fc032c051a644d1a8b559ba0322182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+    Root: '1560e7b6983491305c6522c4227b98fbf26753b6a7fcb97ffb0ef7d98b271e99',
+
+  }], 
+  Signature:'3cedbb3d6eab5ce9a1f8bb436a080f7ec5ede3526fdcfa094fee33cbbd414d0c6d41a6650f4fdda27a66d51d87d18b4cae0adbd695ccdb152dae65a998ba61f101',
 }
 ```
 
@@ -752,11 +783,25 @@ relay.resolveName('username@iden3.io')
   });
 ```
 
-Output:
+- Output:
 ```js
+// Return object: - claim: Hexadecimal representation of the assign name claim
+//                - ethAddr: Ethereum address associated with the name asked
+//                - proofOfClaimAssignName: Proof of the claim requested
 {
-  claim: '0x3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074b7ae3d3a2056c54f48763999f3ff99caffaaba3bab58cae900000080000000008a440962fb17f0fe928a3d930137743fe63b8f4c0ce5a5da63991310103d9aef3cfc3a1edbf691316fec9b75970fbfb2b0e8d8edfc6ec7628db77c4969403074bc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f',
-  ethAddr: '0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f'
+  claim: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b471a1bdbd3b8ac98f3715507449f3a8e1f3b22008c8efcda9e563cf153563941b60fc5ac88336fc58d361eb0888686fadb99760000000000000000000000000000000000000000000000000000000000000003',
+  ethAddr: '0x7b471a1bdbd3b8ac98f3715507449f3a8e1f3b22'.
+  proofOfClaimAssignName: {
+    Date: 1549539788,
+    Leaf: '00000000000000000000000000000000000000000000000000000000000000000000000000000000000000007b471a1bdbd3b8ac98f3715507449f3a8e1f3b22008c8efcda9e563cf153563941b60fc5ac88336fc58d361eb0888686fadb99760000000000000000000000000000000000000000000000000000000000000003',
+    Proofs:[{
+      Aux: null,
+      Mtp0: '0007000000000000000000000000000000000000000000000000000000000041083dbb7700313075a2b8fe34b0188ff44784e3dc60987ed9277b59fad48f8199200d11c36880f3f48060bc8f09855aeefc9bb1e1374556d02c3f059293df4abe',
+      Mtp1: '0301000000000000000000000000000000000000000000000000000000000001081b6542453a651f2b0fea8b639a8823809f7fc032c051a644d1a8b559ba0322182adc955c46e6629ac74027ded0c843c7c65e8c3c4f12f77add56500f9f402e25451237d9133b0f5c1386b7b822f382cb14c5fff612a913956ef5436fb6208a',
+      Root: '1560e7b6983491305c6522c4227b98fbf26753b6a7fcb97ffb0ef7d98b271e99',
+    }]
+    Signature:'0b17f53111f890222d8139e0a400f9dbf900dabdc450759ac9ab19fb9f239f704d250cd3116b6f74905ffccd8754182d3de2e1fc4ac7a35b0db6fe660198422000',
+  },
 }
 ```
 
@@ -777,7 +822,7 @@ npm run test:all
 ## Browserify bundle
 To generate the browserify bundle:
 ```
-npm run browserify
+npm run browserifygit 
 ```
 
 ### WARNING
