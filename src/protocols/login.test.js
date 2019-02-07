@@ -1,6 +1,6 @@
 // @flow
 
-import { describe, it } from 'mocha';
+import { describe, it, after } from 'mocha';
 
 const chai = require('chai');
 
@@ -21,6 +21,7 @@ kc.unlock('pass');
 
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
 kc.unlock('pass');
+after(() => { kc.lock(); });
 kc.generateMasterSeed(mnemonic);
 const mnemonicDb = kc.getMasterSeed();
 kc.generateKeySeed(mnemonicDb);
