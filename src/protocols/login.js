@@ -38,7 +38,7 @@ type RequestIdenAssert = {
 * @param {Number} deltatimeout, in seconds units
 * @returns {Object} requestIdenAssert
 */
-const newRequestIdenAssert = function newRequestIdenAssert(nonceDB: NonceDB, origin: string, deltatimeout: number): RequestIdenAssert {
+function newRequestIdenAssert(nonceDB: NonceDB, origin: string, deltatimeout: number): RequestIdenAssert {
   const nonce = crypto.randomBytes(32).toString('base64');
   // const nonce = crypto.randomBytes(32).toString('hex');
   const nonceObj = nonceDB.add(nonce, deltatimeout);
@@ -55,11 +55,11 @@ const newRequestIdenAssert = function newRequestIdenAssert(nonceDB: NonceDB, ori
       },
     },
   };
-};
+}
 
 /*
 // TODO AFTER MILESTONE
-const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, proofOfKSign) {
+function signPacket(signatureRequest, usrAddr, kc, ksign, proofOfKSign) {
   let result = {};
   if (signatureRequest.header.typ != SIGV01) {
     return;
@@ -72,7 +72,7 @@ const signPacket = function signPacket(signatureRequest, usrAddr, kc, ksign, pro
       return;
   }
   return result;
-};
+}
 */
 
 type JwsHeader = {
@@ -103,7 +103,7 @@ type JwsPayload = {
  * @param {Number} expirationTime
  * @returns {String} signedPacket
  */
-const signIdenAssertV01 = function signIdenAssertV01(signatureRequest: any, ethAddr: string,
+function signIdenAssertV01(signatureRequest: any, ethAddr: string,
   ethName: string, proofOfEthName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
   proofOfKSign: proofs.ProofClaim, expirationTime: number): string {
   const date = new Date();
@@ -146,7 +146,7 @@ const signIdenAssertV01 = function signIdenAssertV01(signatureRequest: any, ethA
 
   const result = `${dataToSign}.${signature64}`;
   return result;
-};
+}
 
 export type NonceVerified = {
   nonce: NonceObj,
@@ -163,7 +163,7 @@ export type NonceVerified = {
  * @param {Buffer} signatureBuffer
  * @returns {Object} nonce
  */
-const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
+function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
   jwsHeader: JwsHeader, jwsPayload: JwsPayload, signatureBuffer: Buffer): ?NonceVerified {
   // TODO AFTER MILESTONE check data structure scheme
 
@@ -263,7 +263,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB: NonceDB, origi
     ethName: jwsPayload.form.proofOfEthName.name,
     ethAddr: jwsHeader.iss,
   };
-};
+}
 
 /**
  * Verify a signed packet
@@ -272,7 +272,7 @@ const verifyIdenAssertV01 = function verifyIdenAssertV01(nonceDB: NonceDB, origi
  * @param {String} signedPacket
  * @returns {Object} nonce
  */
-const verifySignedPacket = function verifySignedPacket(nonceDB: NonceDB, origin: string, signedPacket: string): ?NonceVerified {
+function verifySignedPacket(nonceDB: NonceDB, origin: string, signedPacket: string): ?NonceVerified {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
   const jwsHeader64 = signedPacket.split('.')[0];
   const jwsPayload64 = signedPacket.split('.')[1];
@@ -288,7 +288,7 @@ const verifySignedPacket = function verifySignedPacket(nonceDB: NonceDB, origin:
     default:
       return undefined;
   }
-};
+}
 
 module.exports = {
   newRequestIdenAssert,

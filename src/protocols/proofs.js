@@ -72,25 +72,25 @@ class ProofClaim {
 }
 
 // TODO: Move this to claim utils
-const incClaimVersion = function incClaimVersion(cl: Entry) {
+function incClaimVersion(cl: Entry) {
   // let entry = new Entry();
   // entry.fromHexadecimal(claim);
   const version = cl.elements[3].slice(20, 24).readUInt32BE(0);
   cl.elements[3].writeUInt32BE(version + 1, cl.elements[3].length - 64 / 8 - 32 / 8);
-};
+}
 
 // TODO: Move this to merkle-tree utils
-const isMerkleTreeProofExistence = function isMerkleTreeProofExistence(proofHex: string): boolean {
+function isMerkleTreeProofExistence(proofHex: string): boolean {
   const proofBuff = mtHelpers.parseProof(proofHex);
   const flagNonExistence = mtHelpers.getBit(proofBuff.flagExistence, 0);
   return !flagNonExistence;
-};
+}
 
 /**
  * Verify a ProofClaim from the claim to the blockchain root
  * @param{ProofClaim} proof
  */
-const verifyProofClaim = function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
+function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
   // Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
   let rootK = proof.proofs[proof.proofs.length - 1].root;
   if (rootK.substr(0, 2) !== '0x') {
@@ -161,7 +161,7 @@ const verifyProofClaim = function verifyProofClaim(proof: ProofClaim, relayAddr:
   }
 
   return true;
-};
+}
 
 module.exports = {
   verifyProofClaim,

@@ -8,9 +8,9 @@ const web3 = new Web3();
 * @param {String} path - Path of the json file
 * @returns {String} - bytecode
 */
-const encodeParam = function encodeParam(dataType, data) {
+function encodeParam(dataType, data) {
   return web3.eth.abi.encodeParameter(dataType, data);
-};
+}
 
 /**
 * Converts an int to uint256
@@ -27,11 +27,11 @@ function numberToUint256(value) {
 * @param {String} path - Path of the json file
 * @returns {String} - bytecode
 */
-const readContractFile = function readContractFile(path) {
+function readContractFile(path) {
   const contentRaw = fs.readFileSync(path);
   const content = JSON.parse(contentRaw.toString());
   return content.bytecode;
-};
+}
 
 /**
 * Calculate counterfactual idAddr of the identity
@@ -44,9 +44,9 @@ const readContractFile = function readContractFile(path) {
 * @param {String} byteCode - Full bytecode concatenated with the constructor parameters of the smart contract
 * @returns {String} - idAddr, the computed eth address of the counterfactual contract
 */
-const buildCreate2Address = function buildCreate2Address(creatorAddr, salt, byteCode) {
+function buildCreate2Address(creatorAddr, salt, byteCode) {
   return `0x${web3.utils.sha3(`0x${['ff', creatorAddr, numberToUint256(salt), web3.utils.sha3(byteCode)].map(x => x.replace(/0x/, '')).join('')}`).slice(-40)}`.toLowerCase();
-};
+}
 
 /**
 * Calculate counterfactual idAddr of the identity
@@ -59,7 +59,7 @@ const buildCreate2Address = function buildCreate2Address(creatorAddr, salt, byte
 * @param {String} bytecode - Bytecode of the IDen3DelegateProxy contract
 * @returns {String} - idAddr, the computed eth address of the counterfactual contract
 */
-const calculateIDAddress = function calculateIDAddress(kop, krec, krev, relayAddr, iden3implAddr, iden3deployerAddr, bytecode) {
+function calculateIDAddress(kop, krec, krev, relayAddr, iden3implAddr, iden3deployerAddr, bytecode) {
   const bytecodefull = `${bytecode}${
     encodeParam('address', kop).slice(2)}${
     encodeParam('address', relayAddr).slice(2)}${
@@ -68,7 +68,7 @@ const calculateIDAddress = function calculateIDAddress(kop, krec, krev, relayAdd
     encodeParam('address', iden3implAddr).slice(2)}`;
   const salt = 0;
   return buildCreate2Address(iden3deployerAddr, salt, bytecodefull);
-};
+}
 
 module.exports = {
   encodeParam,
