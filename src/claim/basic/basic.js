@@ -1,5 +1,6 @@
+import { Entry } from '../entry/entry';
+
 const snarkjs = require('snarkjs');
-const Entry = require('../entry/entry');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 

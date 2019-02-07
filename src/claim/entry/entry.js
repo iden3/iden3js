@@ -7,7 +7,7 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
  * Claim element structure is as follows: |element 0|element 1|element 2|element 3|
  * Each element contains 253 useful bits enclosed on a 256 bits Buffer
  */
-class Entry {
+export class Entry {
   /**
    * Initialize claim elements with empty buffer
    */
@@ -73,5 +73,4 @@ class Entry {
     }
   }
 }
-
-module.exports = Entry;
+// module.exports = Entry;

@@ -1,8 +1,9 @@
 // @flow
+import { Entry } from '../claim/entry/entry';
+
 const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
-const Entry = require('../claim/entry/entry');
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 const claim = require('../claim/claim');

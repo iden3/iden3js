@@ -1,13 +1,13 @@
 // @flow
 
 import { type NonceObj, NonceDB } from './nonceDB';
+import { Entry } from '../claim/entry/entry';
 
 const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
 const claimUtils = require('../claim/claim-utils');
-const Entry = require('../claim/entry/entry');
 const proofs = require('./proofs');
 // const NonceDB = require('./nonceDB');
 const kCont = require('../key-container/key-container');
