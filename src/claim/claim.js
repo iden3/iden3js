@@ -89,7 +89,7 @@ class GenericClaim {
  * @param  {Buffer} bytes
  * @returns  {Object} claim
  */
-const parseGenericClaimBytes = function (b) {
+function parseGenericClaimBytes(b) {
   const c = new GenericClaim();
   c.claim = {
     baseIndex: {
@@ -104,7 +104,7 @@ const parseGenericClaimBytes = function (b) {
     data: b.slice(utils.ethBytesToUint32(b.slice(56, 60)), b.length),
   };
   return c;
-};
+}
 
 /**
  * @param  {String} namespaceStr
@@ -176,7 +176,7 @@ class AuthorizeKSignClaim {
  * @param  {Buffer} b - bytes
  * @returns {Object} claim
  */
-const parseAuthorizeKSignClaim = function (b) {
+function parseAuthorizeKSignClaim(b) {
   const validFromBytes = b.slice(148, 156);
   const validFrom = utils.ethBytesToUint64(validFromBytes);
   const validUntilBytes = b.slice(156, 164);
@@ -200,23 +200,23 @@ const parseAuthorizeKSignClaim = function (b) {
   };
 
   return c;
-};
+}
 
 /**
  * @param  {Buffer} b
  * @returns {Buffer}
  */
-const hiFromClaimBytes = function (b) {
+function hiFromClaimBytes(b) {
   const indexLength = utils.ethBytesToUint32(b.slice(56, 60));
   return utils.hashBytes(b.slice(0, indexLength));
-};
+}
 
 /**
  * @param  {Object} proofOfClaim
  * @param  {Number} numLevels
  * @returns {Boolean}
  */
-const checkProofOfClaim = function (proofOfClaim, numLevels) {
+function checkProofOfClaim(proofOfClaim, numLevels) {
   let ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
   let hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
   const vClaimProof = merkleTree.checkProof(proofOfClaim.ClaimProof.Root, proofOfClaim.ClaimProof.Proof, hi, ht, numLevels);
@@ -236,7 +236,7 @@ const checkProofOfClaim = function (proofOfClaim, numLevels) {
     proofOfClaim.SetRootClaimNonRevocationProof.Proof, hi, ht, numLevels);
 
   return !!(vClaimProof && vSetRootClaimProof && vClaimNonRevocationProof && vSetRootClaimNonRevocationProof);
-};
+}
 
 module.exports = {
   Factory,
