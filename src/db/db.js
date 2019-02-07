@@ -79,18 +79,58 @@ class Db {
   }
 
   /**
-   * Decrypts the encrypted packed data by the exportLocalStorage function, and saves it into localStorage.
-   *
+   * Decrypts the encrypted packed data and saves it into localStorage
    * @param  {Object} kc - KeyContainer
-   * @param  {String} encryptedDB
+   * @param  {String} Database encrypted
    */
-  importLocalStorage(kc, encryptedDB) {
-    const dbExpStr = kcUtils.decrypt(kc.encryptionKey, encryptedDB);
+  importLocalStorage(kc, dbEncrypted) {
+    const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncrypted);
     const dbExp = JSON.parse(dbExpStr);
 
     Object.keys(dbExp).forEach((key) => {
       localStorage.setItem(key, dbExp[key]);
     });
+  }
+
+  /**
+   * Gets all the localStorage data and packs it into an encrpyted string
+   * @param  {Object} kc - KeyContainer
+   * @returns {String} - Encrypted packed data
+   */
+  exportWallet(kc) {
+    if (kc.isUnlock()) {
+      try {
+        const lsStr = JSON.stringify(localStorage);
+
+        return kcUtils.encrypt(kc.encryptionKey, lsStr); // encrypted wallet data
+      } catch (error) {
+        return undefined;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Decrypts the encrypted database packed data and saves it into localStorage
+   * @param  {Object} kc - KeyContainer
+   * @param  {String} Database encrypted
+   * @returns {Bool} - True if database is imported correctly, otherwise False
+   */
+  importWallet(kc, dbEncrypted) {
+    if (kc.isUnlock()) {
+      try {
+        const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncrypted);
+        const dbExp = JSON.parse(dbExpStr);
+
+        Object.keys(dbExp).forEach((key) => {
+          localStorage.setItem(key, dbExp[key]);
+        });
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+    return false;
   }
 }
 
