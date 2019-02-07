@@ -1,5 +1,6 @@
 const fs = require('fs');
 const Web3 = require('web3');
+
 const web3 = new Web3();
 
 /**
@@ -59,11 +60,12 @@ const buildCreate2Address = function buildCreate2Address(creatorAddr, salt, byte
 * @returns {String} - idAddr, the computed eth address of the counterfactual contract
 */
 const calculateIDAddress = function calculateIDAddress(kop, krec, krev, relayAddr, iden3implAddr, iden3deployerAddr, bytecode) {
-  const bytecodefull = `${bytecode}${encodeParam('address', kop).slice(2)}${
-                          encodeParam('address', relayAddr).slice(2)}${
-                          encodeParam('address', krec).slice(2)}${
-                          encodeParam('address', krev).slice(2)}${
-                          encodeParam('address', iden3implAddr).slice(2)}`;
+  const bytecodefull = `${bytecode}${
+    encodeParam('address', kop).slice(2)}${
+    encodeParam('address', relayAddr).slice(2)}${
+    encodeParam('address', krec).slice(2)}${
+    encodeParam('address', krev).slice(2)}${
+    encodeParam('address', iden3implAddr).slice(2)}`;
   const salt = 0;
   return buildCreate2Address(iden3deployerAddr, salt, bytecodefull);
 };

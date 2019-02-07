@@ -57,9 +57,10 @@ describe('[util] verifySignature() from data signed by go-iden3', () => {
     const msgBuffer = ethUtil.toBuffer(msg);
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
     const msgHashHex = iden3.utils.bytesToHex(msgHash);
-	  console.log("h: ", msgHashHex);
+    // eslint-disable-next-line no-console
+    console.log('h: ', msgHashHex);
     let signatureHex = '0x413028e1577bf5e54b0b2db54e538d7c2df4173465cdeff32d5dbc262c5c6b95241b36f6b904cbccae383cc87f6adb6c9332fbb8af1a1b78ef58b9d9fc0fe34301';
-    let sig = iden3.utils.hexToBytes(signatureHex);
+    const sig = iden3.utils.hexToBytes(signatureHex);
     sig[64] += 27;
     signatureHex = iden3.utils.bytesToHex(sig);
     const verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex);
@@ -73,13 +74,15 @@ describe('[util] verifySignature() from data signed by go-iden3', () => {
     const dateBytes = iden3.utils.uint64ToEthBytes(date);
     const dateHex = iden3.utils.bytesToHex(dateBytes);
     const msg = `${rootKey}${dateHex.slice(2)}`;
-	  console.log("msg: ", msg);
+    // eslint-disable-next-line no-console
+    console.log('msg: ', msg);
     const msgBuffer = ethUtil.toBuffer(msg);
     const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
     const msgHashHex = iden3.utils.bytesToHex(msgHash);
-	  console.log("h: ", msgHashHex);
+    // eslint-disable-next-line no-console
+    console.log('h: ', msgHashHex);
     let signatureHex = '0x4e0c47fe90f3438df2ed520101b214ce3f0088dafec479c997d970097119d8ba10493cf247c428b5819c8c025b9c3f5501d9e15a1f036ea54ed09ae0a754fb9700';
-    let sig = iden3.utils.hexToBytes(signatureHex);
+    const sig = iden3.utils.hexToBytes(signatureHex);
     sig[64] += 27;
     signatureHex = iden3.utils.bytesToHex(sig);
     const verified = iden3.utils.verifySignature(msgHashHex, signatureHex, addressHex);

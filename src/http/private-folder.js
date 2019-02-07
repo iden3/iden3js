@@ -1,4 +1,4 @@
-const nacl = require('tweetnacl');
+// const nacl = require('tweetnacl');
 const axios = require('axios');
 const utils = require('../utils');
 const kcUtils = require('../key-container/kc-utils');

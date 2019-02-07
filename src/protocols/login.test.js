@@ -1,6 +1,7 @@
 // @flow
 
 import { describe, it, after } from 'mocha';
+import { Entry } from '../claim/entry/entry';
 
 const chai = require('chai');
 
@@ -9,7 +10,6 @@ const { expect } = chai;
 const snarkjs = require('snarkjs');
 const iden3 = require('../index');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
-const Entry = require('../claim/entry/entry');
 
 const { bigInt } = snarkjs;
 

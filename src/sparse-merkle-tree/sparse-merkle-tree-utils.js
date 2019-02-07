@@ -1,5 +1,8 @@
+import { Entry } from '../claim/entry/entry';
+
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
+// const Entry = require('../claim/entry/entry');
 
 const { bigInt } = snarkjs;
 
@@ -169,13 +172,12 @@ function genProofStruct(buffHex) {
  * @param {Object} claimsDump - array of hex strings containing the claimsDump
  */
 function importClaimsDump(mt, claimsDump) {
-    const Entry = require('../claim/entry/entry');
-    for(let i=0; i<claimsDump.length; i++) {
-	const e = new Entry();
-	e.fromHexadecimal(claimsDump[i]);
-	const t = getArrayBigIntFromBuffArray(e.elements);
-    	mt.addClaim(t);
-    }
+  for (let i = 0; i < claimsDump.length; i++) {
+    const e = new Entry();
+    e.fromHexadecimal(claimsDump[i]);
+    const t = getArrayBigIntFromBuffArray(e.elements);
+    mt.addClaim(t);
+  }
 }
 
 module.exports = {
