@@ -13,12 +13,12 @@ const CONSTANTS = require('../constants');
  * Auxiliary data required to build a set root claim
  */
 class SetRootAux {
-  ethAddr: string;
+  idAddr: string;
   ver: number;
   era: number;
 
-  constructor(ethAddr: string, version: number, era: number) {
-    this.ethAddr = ethAddr;
+  constructor(idAddr: string, version: number, era: number) {
+    this.idAddr = idAddr;
     this.ver = version;
     this.era = era;
   }
@@ -150,12 +150,12 @@ function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
     if (proof.proofs[i].aux == null) {
       return false;
     }
-    const { ver, era, ethAddr } = proof.proofs[i].aux;
-    // leaf = new iden3.claims.SetRootKey(version, era, ethAddr, rootKey);
+    const { ver, era, idAddr } = proof.proofs[i].aux;
+    // leaf = new iden3.claims.SetRootKey(version, era, idAddr, rootKey);
     leaf = new claim.Factory(CONSTANTS.CLAIMS.SET_ROOT_KEY.ID, {
       ver,
       era,
-      id: ethAddr,
+      id: idAddr,
       rootKey,
     }).createEntry();
   }

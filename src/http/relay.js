@@ -29,7 +29,7 @@ class Relay {
    * @returns {Object} - Http response
    */
   getIDRoot(idAddr) {
-    return axios.get(`${this.url}/claim/${idAddr}/root`);
+    return axios.get(`${this.url}/ids/${idAddr}/root`);
   }
 
   /**
@@ -39,7 +39,7 @@ class Relay {
    * @returns {Object} - Http response
    */
   postClaim(idAddr, bytesSignedMsg) {
-    return axios.post(`${this.url}/claim/${idAddr}`, bytesSignedMsg);
+    return axios.post(`${this.url}/ids/${idAddr}/claims`, bytesSignedMsg);
   }
 
   /**
@@ -50,7 +50,7 @@ class Relay {
    */
   getClaimByHi(idAddr, hi) {
     // return axios.get(`${this.url}/claim_proof/${idAddr}/hi/${hi}`);
-    return axios.get(`${this.url}/claim_proof/idaddr/${idAddr}/hi/${hi}`);
+    return axios.get(`${this.url}/ids/${idAddr}/claims/${hi}/proof`);
   }
 
   /**
@@ -72,13 +72,13 @@ class Relay {
 
     const signatureObj = kc.sign(keyOperationalPub, utils.bytesToHex(msgBytes));
     const bindIDMsg = {
-      ethAddr: idAddr,
+      idAddr,
       name,
       signature: signatureObj.signature,
-      ksignpk: keyOperationalPub,
+      kSignPk: keyOperationalPub,
     };
 
-    return axios.post(`${this.url}/vinculateid`, bindIDMsg);
+    return axios.post(`${this.url}/names`, bindIDMsg);
   }
 
   /**
@@ -87,7 +87,7 @@ class Relay {
    * @return {Object} Http response
    */
   resolveName(name) {
-    return axios.get(`${this.url}/identities/resolv/${name}`);
+    return axios.get(`${this.url}/names/${name}`);
   }
 
   /**
@@ -104,7 +104,7 @@ class Relay {
       revokator: rev,
     };
 
-    return axios.post(`${this.url}/id`, keys);
+    return axios.post(`${this.url}/ids`, keys);
   }
 
   /**
@@ -114,7 +114,7 @@ class Relay {
    * @returns {Object} Http response
    */
   getID(idAddr) {
-    return axios.get(`${this.url}/id/${idAddr}`);
+    return axios.get(`${this.url}/ids/${idAddr}`);
   }
 
   /**
@@ -122,7 +122,7 @@ class Relay {
    * @param  {String} idAddr - Identity address
    */
   deployID(idAddr) {
-    return axios.post(`${this.url}/id/${idAddr}/deploy`);
+    return axios.post(`${this.url}/ids/${idAddr}/deploy`);
   }
 }
 
