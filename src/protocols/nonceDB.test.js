@@ -1,10 +1,10 @@
 // @flow
 import { describe, it } from 'mocha';
-import { NonceDB, type NonceResult } from './nonceDB';
+import { NonceDB } from './nonceDB';
 
 const chai = require('chai');
 
-const { expect, assert } = chai;
+const { expect } = chai;
 
 // const crypto = require('crypto');
 

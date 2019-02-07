@@ -9,7 +9,7 @@ const kcUtils = require('./kc-utils');
 
 nacl.util = require('tweetnacl-util');
 
-const { secp256k1 } = ethUtil;
+// const { secp256k1 } = ethUtil;
 
 // if (typeof localStorage === 'undefined' || localStorage === null) {
 //   const LocalStorage = require('node-localstorage').LocalStorage;
