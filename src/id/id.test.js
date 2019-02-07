@@ -16,6 +16,7 @@ describe('[Identity management]', () => {
   it('Generate first identity', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.unlock('pass');
+    after(() => { keyContainer.lock(); });
     // Generate key master in key container
     keyContainer.generateMasterSeed(mnemonic);
     const mnemonicDb = keyContainer.getMasterSeed();
@@ -45,6 +46,7 @@ describe('[Identity management]', () => {
   it('Key generation', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.unlock('pass');
+    after(() => { keyContainer.lock(); });
     // Generate key master in key container
     keyContainer.generateMasterSeed(mnemonic);
     const mnemonicDb = keyContainer.getMasterSeed();
