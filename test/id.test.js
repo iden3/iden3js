@@ -4,7 +4,7 @@ const CONSTANTS = require('../src/constants');
 
 const { expect } = chai;
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-const relayUrl = 'http://127.0.0.1:8000/api/v0.1';
+const relayUrl = 'http://127.0.0.1:8000/api/unstable';
 
 describe('[id] new Id()', () => {
   let dataBase;
@@ -12,7 +12,7 @@ describe('[id] new Id()', () => {
   let id;
   let keys;
   let relay;
-  let proofOfClaimKeyOperational;
+  let proofClaimKeyOperational;
 
   before('Create local storage container and relay object', () => {
     dataBase = new iden3.Db();
@@ -47,15 +47,16 @@ describe('[id] new Id()', () => {
     expect(id.relay).to.be.equal(relay);
   });
 
-  // Get proofOfClaim in CreateId
+  // Get proofClaim in CreateId
   it('Create identity and deploy it', async () => {
     keyContainer.unlock('pass');
     await id.createID()
       .then(async (createIDRes) => {
       // Successfull create identity api call to relay
         expect(createIDRes.idAddr).to.be.equal(id.idAddr);
-        expect(createIDRes.proofOfClaim).to.be.not.equal(undefined);
-        proofOfClaimKeyOperational = createIDRes.proofOfClaim;
+        expect(createIDRes.idAddr).to.be.not.equal(undefined);
+        expect(createIDRes.proofClaim).to.be.not.equal(undefined);
+        proofClaimKeyOperational = createIDRes.proofClaim;
         await id.deployID()
           .then((deployIDres) => {
           // Successfull deploy identity api call to relay
@@ -67,7 +68,6 @@ describe('[id] new Id()', () => {
       });
     keyContainer.lock();
   });
-
   it('relay.getID()', async () => {
     await relay.getID(id.idAddr).then((getIDres) => {
       expect(getIDres.status).to.be.equal(200);
@@ -79,15 +79,15 @@ describe('[id] new Id()', () => {
     const keyLabel = 'testKey';
     const keyToAdd = id.createKey(keyContainer, keyLabel, true);
     const keyToAdd2 = id.createKey(keyContainer, keyLabel, true);
-    let proofOfKSign = {};
+    let proofKSign = {};
     // Check public key generated is not random
     expect(keyToAdd).to.be.equal('0x025521b25f396b1f62fcc46ce5b9a6b53684d5649958d83d79b5bb6711aa279105');
     // Send `keyToAdd` to the Relay server
     await id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, keyToAdd)
       .then(async (authRes) => {
-        proofOfKSign = authRes.data.proofOfClaim;
+        proofKSign = authRes.data.proofClaim;
         expect(authRes.status).to.be.equal(200);
-        expect(proofOfKSign.Leaf).to.not.be.equal('0000000000000000000000000000000000000000000000000000000000000000'
+        expect(proofKSign.leaf).to.not.be.equal('0000000000000000000000000000000000000000000000000000000000000000'
                                                 + '0000000000000000000000000000000000000000000000000000000000000000'
                                                 + '00025521b25f396b1f62fcc46ce5b9a6b53684d5649958d83d79b5bb6711aa27'
                                                 + '000000000000000000000000000000000000c81e000000000000000000000004');
@@ -95,9 +95,9 @@ describe('[id] new Id()', () => {
         // to sign a new claim
         await id.authorizeKSignSecp256k1(keyContainer, keyToAdd, keyToAdd2)
           .then((authRes2) => {
-            proofOfKSign = authRes2.data.proofOfClaim;
+            proofKSign = authRes2.data.proofClaim;
             expect(authRes2.status).to.be.equal(200);
-            expect(proofOfKSign.Leaf).to.not.be.equal('0000000000000000000000000000000000000000000000000000000000000000'
+            expect(proofKSign.leaf).to.not.be.equal('0000000000000000000000000000000000000000000000000000000000000000'
                                                     + '0000000000000000000000000000000000000000000000000000000000000000'
                                                     + '00039e8e3c1b0a09489e96e755d56db2eee777660d92eec53b25cf1c46cedd17'
                                                     + '0000000000000000000000000000000000009105000000000000000000000004');
@@ -121,7 +121,7 @@ describe('[id] new Id()', () => {
         await relay.resolveName(`${name}@iden3.io`)
           .then((resolveRes) => {
             expect(resolveRes.status).to.be.equal(200);
-            expect(resolveRes.data.ethAddr).to.be.equal(id.idAddr);
+            expect(resolveRes.data.idAddr).to.be.equal(id.idAddr);
           })
           .catch((error) => {
             console.error(error.message);
@@ -143,7 +143,7 @@ describe('[id] new Id()', () => {
     await relay.getClaimByHi(id.idAddr, iden3.utils.bytesToHex(hi))
       .then((res) => {
         // Check leaf claim requested is the same as the claim generated when the identty is created
-        expect(res.data.proofOfClaim.Leaf).to.be.equal(proofOfClaimKeyOperational.Leaf);
+        expect(res.data.proofClaim.leaf).to.be.equal(proofClaimKeyOperational.leaf);
       })
       .catch((error) => {
         console.error(error.message);

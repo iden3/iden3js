@@ -1,4 +1,3 @@
-const merkleTree = require('../merkle-tree/merkle-tree');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
 const assignNameClaim = require('./assign-name/assign-name');
@@ -211,33 +210,6 @@ function hiFromClaimBytes(b) {
   return utils.hashBytes(b.slice(0, indexLength));
 }
 
-/**
- * @param  {Object} proofOfClaim
- * @param  {Number} numLevels
- * @returns {Boolean}
- */
-function checkProofOfClaim(proofOfClaim, numLevels) {
-  let ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
-  let hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimProof.Leaf)));
-  const vClaimProof = merkleTree.checkProof(proofOfClaim.ClaimProof.Root, proofOfClaim.ClaimProof.Proof, hi, ht, numLevels);
-
-  ht = utils.bytesToHex(utils.hashBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
-  hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimProof.Leaf)));
-  const vSetRootClaimProof = merkleTree.checkProof(proofOfClaim.SetRootClaimProof.Root,
-    proofOfClaim.SetRootClaimProof.Proof, hi, ht, numLevels);
-
-  ht = utils.bytesToHex(merkleTree.emptyNodeValue);
-  hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.ClaimNonRevocationProof.Leaf)));
-  const vClaimNonRevocationProof = merkleTree.checkProof(proofOfClaim.ClaimNonRevocationProof.Root,
-    proofOfClaim.ClaimNonRevocationProof.Proof, hi, ht, numLevels);
-
-  hi = utils.bytesToHex(hiFromClaimBytes(utils.hexToBytes(proofOfClaim.SetRootClaimNonRevocationProof.Leaf)));
-  const vSetRootClaimNonRevocationProof = merkleTree.checkProof(proofOfClaim.SetRootClaimNonRevocationProof.Root,
-    proofOfClaim.SetRootClaimNonRevocationProof.Proof, hi, ht, numLevels);
-
-  return !!(vClaimProof && vSetRootClaimProof && vClaimNonRevocationProof && vSetRootClaimNonRevocationProof);
-}
-
 module.exports = {
   Factory,
   GenericClaim,
@@ -245,5 +217,4 @@ module.exports = {
   AuthorizeKSignClaim,
   parseAuthorizeKSignClaim,
   hiFromClaimBytes,
-  checkProofOfClaim,
 };
