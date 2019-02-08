@@ -7,7 +7,7 @@ const Db = require('./db/db');
 const PrivateFolder = require('./http/private-folder');
 const KeyContainer = require('./key-container/key-container');
 const Id = require('./id/id');
-const dapp = require('./auth/dapp');
+// const dapp = require('./auth/dapp');
 const utils = require('./utils');
 const auth = require('./auth/auth');
 const admin = require('./admin/requests');
@@ -15,7 +15,7 @@ const protocols = require('./protocols/protocols');
 const counterfactual = require('./eth/counterfactual');
 
 const { Auth } = auth;
-const { Dapp } = dapp;
+// const { Dapp } = dapp;
 
 module.exports = {
   claim,
@@ -29,8 +29,8 @@ module.exports = {
   Relay,
   auth,
   Auth,
-  dapp,
-  Dapp,
+  // dapp,
+  // Dapp,
   utils,
   admin,
   protocols,
