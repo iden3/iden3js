@@ -1,8 +1,11 @@
 {
-  "name": "iden3",
+  "name": "@iden3/iden3",
   "version": "0.0.17",
   "engines": {
     "node": "^8"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "description": "",
   "main": "index.js",
