@@ -1,6 +1,6 @@
 {
   "name": "@iden3/iden3",
-  "version": "0.0.17",
+  "version": "0.0.20",
   "engines": {
     "node": "^8"
   },
@@ -14,10 +14,11 @@
     "test:int": "rm -rf tmp && mocha --require babel-core/register --require mock-local-storage --timeout 20000",
     "build-test:int": "npm run build && npm run test:int",
     "test:all": "npm run test:unit && npm run test:int",
-    "build": "babel src/ -d lib/",
-    "prepublish": "npm run build",
+    "build": "babel --ignore '**/*.test.js' src/ -d lib/",
     "flow": "flow",
     "browserify": "browserify index.js --standalone iden3 > iden3js-bundle.js",
+    "copy-prepublish": "cp package.json README.md LICENSE lib",
+    "build-publish": "npm run build && npm run copy-prepublish && npm publish lib",
     "lint": "eslint ./src"
   },
   "author": "iden3.io",
