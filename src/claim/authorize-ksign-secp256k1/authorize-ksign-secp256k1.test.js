@@ -1,9 +1,10 @@
+// @flow
+import { describe, it, before } from 'mocha';
+
 const chai = require('chai');
 const ethUtil = require('ethereumjs-util');
-const Claim = require('../claim');
 const authorizeKSignSecp256k1 = require('./authorize-ksign-secp256k1');
 const utils = require('../../utils');
-const CONSTANTS = require('../../constants');
 
 const { secp256k1 } = ethUtil;
 const { expect } = chai;
@@ -18,12 +19,11 @@ describe('[Claim Authorize KSignSecp256k1]', () => {
   let claimAuthKSignSecp256k1;
 
   before('Create new authorizeKSignSecp256k1 claim', () => {
-    claimAuthKSignSecp256k1 = new Claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
-      version: versionExample, pubKeyCompressed: utils.bytesToHex(pubKeyCompressedExample),
-    });
+    claimAuthKSignSecp256k1 = authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(versionExample,
+      utils.bytesToHex(pubKeyCompressedExample));
     expect(claimAuthKSignSecp256k1).to.not.be.equal(null);
-    entryClaim = claimAuthKSignSecp256k1.createEntry();
-    parsedClaim = authorizeKSignSecp256k1.parseAuthorizeKSignSecp256k1(entryClaim);
+    entryClaim = claimAuthKSignSecp256k1.toEntry();
+    parsedClaim = authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.newFromEntry(entryClaim);
   });
 
   it('Check public key compressed', () => {
@@ -31,19 +31,16 @@ describe('[Claim Authorize KSignSecp256k1]', () => {
   });
 
   it('Parse claim type', () => {
-    const { claimType } = claimAuthKSignSecp256k1.structure;
-    expect(utils.bytesToHex(claimType)).to.be.equal(utils.bytesToHex(parsedClaim.structure.claimType));
+    expect(utils.bytesToHex(claimAuthKSignSecp256k1.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
   });
   it('Parse version', () => {
-    const { version } = claimAuthKSignSecp256k1.structure;
-    expect(utils.bytesToHex(version)).to.be.equal(utils.bytesToHex(parsedClaim.structure.version));
+    expect(utils.bytesToHex(claimAuthKSignSecp256k1.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
   });
   it('Parse public key compressed', () => {
-    const { pubKeyCompressed } = claimAuthKSignSecp256k1.structure;
-    expect(utils.bytesToHex(pubKeyCompressed)).to.be.equal(utils.bytesToHex(parsedClaim.structure.pubKeyCompressed));
+    expect(utils.bytesToHex(claimAuthKSignSecp256k1.pubKeyCompressed)).to.be.equal(utils.bytesToHex(parsedClaim.pubKeyCompressed));
   });
   it('Extract bytes from full element', () => {
-    const hexFromElement = entryClaim.toHexadecimal();
+    const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0000000000000000000000000000000000000000000000000000000000000000'
                                        + '00036d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd'

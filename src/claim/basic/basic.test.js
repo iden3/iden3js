@@ -1,8 +1,9 @@
+// @flow
+import { describe, it, before } from 'mocha';
+
 const chai = require('chai');
-const Claim = require('../claim');
 const basic = require('./basic');
 const utils = require('../../utils');
-const CONSTANTS = require('../../constants');
 
 const { expect } = chai;
 
@@ -21,32 +22,26 @@ describe('[Claim Basic]', () => {
   let parsedClaim;
 
   before('Create new basic claim', () => {
-    claimBasic = new Claim.Factory(CONSTANTS.CLAIMS.BASIC.ID, {
-      version: versionExample, index: utils.bytesToHex(indexExample), extraData: utils.bytesToHex(dataExample),
-    });
+    claimBasic = basic.Basic.new(versionExample, utils.bytesToHex(indexExample), utils.bytesToHex(dataExample));
     expect(claimBasic).to.not.be.equal(null);
     entryClaim = claimBasic.createEntry();
-    parsedClaim = basic.parseBasicClaim(entryClaim);
+    parsedClaim = basic.Basic.newFromEntry(entryClaim);
   });
 
   it('Parse claim type', () => {
-    const { claimType } = claimBasic.structure;
-    expect(utils.bytesToHex(claimType)).to.be.equal(utils.bytesToHex(parsedClaim.structure.claimType));
+    expect(utils.bytesToHex(claimBasic.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
   });
   it('Parse version', () => {
-    const { version } = claimBasic.structure;
-    expect(utils.bytesToHex(version)).to.be.equal(utils.bytesToHex(parsedClaim.structure.version));
+    expect(utils.bytesToHex(claimBasic.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
   });
   it('Parse index slot', () => {
-    const { index } = claimBasic.structure;
-    expect(utils.bytesToHex(index)).to.be.equal(utils.bytesToHex(parsedClaim.structure.index));
+    expect(utils.bytesToHex(claimBasic.index)).to.be.equal(utils.bytesToHex(parsedClaim.index));
   });
   it('Parse extra data slot', () => {
-    const { extraData } = claimBasic.structure;
-    expect(utils.bytesToHex(extraData)).to.be.equal(utils.bytesToHex(parsedClaim.structure.extraData));
+    expect(utils.bytesToHex(claimBasic.extraData)).to.be.equal(utils.bytesToHex(parsedClaim.extraData));
   });
   it('Extract bytes from full element', () => {
-    const hexFromElement = entryClaim.toHexadecimal();
+    const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0056585858585858585858585858585858585858585858585858585858585858'
                                        + '0058585858585858585858585858585858585858585858585858585858585859'
                                        + '00292a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a'

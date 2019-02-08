@@ -1,12 +1,12 @@
+// @flow
 const ethUtil = require('ethereumjs-util');
 const createKeccakHash = require('keccak');
-
 
 /**
  * @param  {uint32} u
  * @returns {Buffer}
  */
-function uint32ToEthBytes(u) { // compatible with Uint32ToEthBytes() go-iden3 version
+function uint32ToEthBytes(u: number): Buffer { // compatible with Uint32ToEthBytes() go-iden3 version
   const buf = Buffer.alloc(4);
   buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
   return buf;
@@ -16,7 +16,7 @@ function uint32ToEthBytes(u) { // compatible with Uint32ToEthBytes() go-iden3 ve
  * @param  {Buffer} b
  * @returns {uint32}
  */
-function ethBytesToUint32(b) { // compatible with EthBytesToUint32() go-iden3 version
+function ethBytesToUint32(b: Buffer): number { // compatible with EthBytesToUint32() go-iden3 version
   return b.readUIntBE(0, 4);
 }
 
@@ -24,7 +24,7 @@ function ethBytesToUint32(b) { // compatible with EthBytesToUint32() go-iden3 ve
  * @param  {uint64} u
  * @returns {Buffer}
  */
-function uint64ToEthBytes(u) { // compatible with Uint64ToEthBytes() go-iden3 version
+function uint64ToEthBytes(u: number): Buffer { // compatible with Uint64ToEthBytes() go-iden3 version
   const buf = Buffer.alloc(8);
   buf.writeUIntBE(u, 0, 8);
   return buf;
@@ -34,7 +34,7 @@ function uint64ToEthBytes(u) { // compatible with Uint64ToEthBytes() go-iden3 ve
  * @param  {Buffer} b
  * @returns {uint64}
  */
-function ethBytesToUint64(b) { // compatible with EthBytesToUint64() go-iden3 version
+function ethBytesToUint64(b: Buffer): number { // compatible with EthBytesToUint64() go-iden3 version
   return b.readUIntBE(0, 8);
 }
 
@@ -44,7 +44,7 @@ function ethBytesToUint64(b) { // compatible with EthBytesToUint64() go-iden3 ve
  * @param {Buffer} b - A byte. It's a Buffer to do the hash
  * @returns {PromiseLike<ArrayBuffer>} - A hash created with keccak256
  */
-function hashBytes(b) {
+function hashBytes(b: Buffer): any {
   return createKeccakHash('keccak256').update(b).digest();
 }
 
@@ -53,7 +53,7 @@ function hashBytes(b) {
  * @param {Buffer} buff - Buffer to decode
  * @returns {String} - Decoded Buffer in UTF-16
  */
-function bytesToHex(buff) {
+function bytesToHex(buff: Buffer): string {
   return `0x${buff.toString('hex')}`;
 }
 
@@ -62,7 +62,7 @@ function bytesToHex(buff) {
  * @param {String} hex - Hexadecimal string to parse to a Buffer of bytes
  * @returns {Buffer} - A new Buffer
  */
-function hexToBytes(hex) {
+function hexToBytes(hex: string): Buffer {
   if (hex.substr(0, 2) === '0x') {
     return Buffer.from(hex.substr(2), 'hex');
   }
@@ -74,7 +74,7 @@ function hexToBytes(hex) {
  * @param  {String} str
  * @returns {String}
  */
-function strToHex(str) {
+function strToHex(str: string): string {
   const arr = [];
 
   for (let i = 0, l = str.length; i < l; i++) {
@@ -89,7 +89,7 @@ function strToHex(str) {
  * @param  {String} hex
  * @returns {String}
  */
-function hexToStr(hex) {
+function hexToStr(hex: string): string {
   const _hex = hex.toString().substring(2);
   const _hexLength = _hex.length;
   let str = '';
@@ -105,7 +105,7 @@ function hexToStr(hex) {
  * @param  {Object} dataJson
  * @returns {String}
  */
-function jsonToQr(dataJson) {
+function jsonToQr(dataJson: any): string {
   const dataStr = JSON.stringify(dataJson);
   return strToHex(dataStr);
 }
@@ -114,7 +114,7 @@ function jsonToQr(dataJson) {
  * @param  {String} dataHex
  * @return {Object}
  */
-function qrToJson(dataHex) {
+function qrToJson(dataHex: string): any {
   const dataStr = hexToStr(dataHex); // remove the 0x
   return JSON.parse(dataStr);
 }
@@ -125,7 +125,7 @@ function qrToJson(dataHex) {
  * @param  {String} addressHex
  * @returns {Boolean}
  */
-function verifySignature(mHex, signatureHex, addressHex) {
+function verifySignature(mHex: string, signatureHex: string, addressHex: string): boolean {
   const m = hexToBytes(mHex);
   const r = signatureHex.slice(0, 66);
   const s = `0x${signatureHex.slice(66, 130)}`;
@@ -141,7 +141,7 @@ function verifySignature(mHex, signatureHex, addressHex) {
  * @param  {String} signatureHex
  * @returns {String} addressHex
  */
-function addrFromSig(mOriginal, signatureHex) {
+function addrFromSig(mOriginal: string, signatureHex: string): string {
   const message = ethUtil.toBuffer(mOriginal);
   const m = ethUtil.hashPersonalMessage(message); // message hash
   const r = signatureHex.slice(0, 66);
@@ -157,7 +157,7 @@ function addrFromSig(mOriginal, signatureHex) {
  * @param  {Number} difficulty
  * @returns {Boolean}
  */
-function checkPoW(hash, difficulty) {
+function checkPoW(hash: Buffer, difficulty: number): boolean {
   if (Buffer.compare(hash.slice(0, difficulty), Buffer.alloc(difficulty)) !== 0) {
     return false;
   }
@@ -169,7 +169,7 @@ function checkPoW(hash, difficulty) {
  * @param  {Number} difficulty
  * @returns {Object}
  */
-function pow(data, difficulty) {
+function pow(data: any, difficulty: number): any {
   data.nonce = 0;
   let hash = hashBytes(Buffer.from(JSON.stringify(data)));
   while (!checkPoW(hash, difficulty)) {

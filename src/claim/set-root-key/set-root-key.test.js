@@ -1,8 +1,9 @@
+// @flow
+import { describe, it, before } from 'mocha';
+
 const chai = require('chai');
-const Claim = require('../claim');
 const setRootKey = require('./set-root-key');
 const utils = require('../../utils');
-const CONSTANTS = require('../../constants');
 
 const { expect } = chai;
 
@@ -16,36 +17,29 @@ describe('[Claim Set root key]', () => {
   let parsedClaim;
 
   before('Create new assign name claim', () => {
-    claimSetRootKey = new Claim.Factory(CONSTANTS.CLAIMS.SET_ROOT_KEY.ID, {
-      version: versionExample, era: eraExample, id: idExample, rootKey: rootKeyExample,
-    });
+    claimSetRootKey = setRootKey.SetRootKey.new(versionExample, eraExample, idExample, rootKeyExample);
     expect(claimSetRootKey).to.not.be.equal(null);
-    entryClaim = claimSetRootKey.createEntry();
-    parsedClaim = setRootKey.parseSetRootKey(entryClaim);
+    entryClaim = claimSetRootKey.toEntry();
+    parsedClaim = setRootKey.SetRootKey.newFromEntry(entryClaim);
   });
 
   it('Parse claim type', () => {
-    const { claimType } = claimSetRootKey.structure;
-    expect(utils.bytesToHex(claimType)).to.be.equal(utils.bytesToHex(parsedClaim.structure.claimType));
+    expect(utils.bytesToHex(claimSetRootKey.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
   });
   it('Parse version', () => {
-    const { version } = claimSetRootKey.structure;
-    expect(utils.bytesToHex(version)).to.be.equal(utils.bytesToHex(parsedClaim.structure.version));
+    expect(utils.bytesToHex(claimSetRootKey.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
   });
   it('Parse era', () => {
-    const { era } = claimSetRootKey.structure;
-    expect(utils.bytesToHex(era)).to.be.equal(utils.bytesToHex(parsedClaim.structure.era));
+    expect(utils.bytesToHex(claimSetRootKey.era)).to.be.equal(utils.bytesToHex(parsedClaim.era));
   });
   it('Parse id address', () => {
-    const { id } = claimSetRootKey.structure;
-    expect(utils.bytesToHex(id)).to.be.equal(utils.bytesToHex(parsedClaim.structure.id));
+    expect(utils.bytesToHex(claimSetRootKey.id)).to.be.equal(utils.bytesToHex(parsedClaim.id));
   });
   it('Parse rootKey', () => {
-    const { rootKey } = claimSetRootKey.structure;
-    expect(utils.bytesToHex(rootKey)).to.be.equal(utils.bytesToHex(parsedClaim.structure.rootKey));
+    expect(utils.bytesToHex(claimSetRootKey.rootKey)).to.be.equal(utils.bytesToHex(parsedClaim.rootKey));
   });
   it('Extract bytes from full element', () => {
-    const hexFromElement = entryClaim.toHexadecimal();
+    const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
                                        + '000000000000000000000000393939393939393939393939393939393939393a'
