@@ -1,4 +1,3 @@
-const claim = require('./claim/claim');
 const merkleTree = require('./merkle-tree/merkle-tree');
 const sparseMerkleTree = require('./sparse-merkle-tree/sparse-merkle-tree');
 const smtUtils = require('./sparse-merkle-tree/sparse-merkle-tree-utils');
@@ -18,7 +17,6 @@ const { Auth } = auth;
 // const { Dapp } = dapp;
 
 module.exports = {
-  claim,
   merkleTree,
   sparseMerkleTree,
   smtUtils,

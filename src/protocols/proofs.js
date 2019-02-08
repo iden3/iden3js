@@ -1,13 +1,12 @@
 // @flow
 import { Entry } from '../claim/entry/entry';
+import { SetRootKey } from '../claim/set-root-key/set-root-key';
 
 const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
-const claim = require('../claim/claim');
-const CONSTANTS = require('../constants');
 
 /**
  * Auxiliary data required to build a set root claim
@@ -73,8 +72,8 @@ class ProofClaim {
 
 // TODO: Move this to claim utils
 function incClaimVersion(cl: Entry) {
-  // let entry = new Entry();
-  // entry.fromHexadecimal(claim);
+  // let entry = Entry.newEmpty();
+  // entry.fromHex(claim);
   const version = cl.elements[3].slice(20, 24).readUInt32BE(0);
   cl.elements[3].writeUInt32BE(version + 1, cl.elements[3].length - 64 / 8 - 32 / 8);
 }
@@ -118,8 +117,7 @@ function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
     return false;
   }
 
-  let leaf = new Entry();
-  leaf.fromHexadecimal(proof.leaf);
+  let leaf = Entry.newFromHex(proof.leaf);
   let rootKey = '';
   for (let i = 0; i < proof.proofs.length; i++) {
     // for (var i = proof.proofs.length-1; i>=0; i--) {
@@ -151,13 +149,7 @@ function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
       return false;
     }
     const { ver, era, idAddr } = proof.proofs[i].aux;
-    // leaf = new iden3.claims.SetRootKey(version, era, idAddr, rootKey);
-    leaf = new claim.Factory(CONSTANTS.CLAIMS.SET_ROOT_KEY.ID, {
-      ver,
-      era,
-      id: idAddr,
-      rootKey,
-    }).createEntry();
+    leaf = SetRootKey.new(ver, era, idAddr, rootKey).toEntry();
   }
 
   return true;

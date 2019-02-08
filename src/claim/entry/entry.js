@@ -1,6 +1,10 @@
+// @flow
+import { getArrayBigIntFromBuffArray, bigIntToBuffer } from '../../sparse-merkle-tree/sparse-merkle-tree-utils';
+
 const utils = require('../../utils');
 const mimc7 = require('../../sparse-merkle-tree/mimc7');
-const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
+
+const entryElemsLen = 4;
 
 /**
  * Generic representation of claim elements
@@ -8,18 +12,38 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
  * Each element contains 253 useful bits enclosed on a 256 bits Buffer
  */
 export class Entry {
+  _elements: Array<Buffer>;
+
+  constructor(e0: Buffer, e1: Buffer, e2: Buffer, e3: Buffer) {
+    this._elements = [e0, e1, e2, e3];
+  }
+
   /**
    * Initialize claim elements with empty buffer
    */
-  constructor() {
-    this._elements = [Buffer.alloc(32), Buffer.alloc(32), Buffer.alloc(32), Buffer.alloc(32)];
+  static newEmpty(): Entry {
+    return new Entry(Buffer.alloc(32), Buffer.alloc(32), Buffer.alloc(32), Buffer.alloc(32));
+  }
+
+  /**
+   * String deserialization into entry element structure
+   * @param {String} Hexadecimal string representation of element claim structure
+   */
+  static newFromHex(entryHex: string): Entry {
+    const entryBuff = utils.hexToBytes(entryHex);
+    const elements: any = [null, null, null, null];
+    for (let i = 0; i < entryElemsLen; i++) {
+      // Slice buffer into 32 bytes to insert it into an specific element
+      elements[(entryElemsLen - 1) - i] = entryBuff.slice(entryBuff.length - (32 * (i + 1)), entryBuff.length - 32 * i);
+    }
+    return new Entry(elements[0], elements[1], elements[2], elements[3]);
   }
 
   /**
    * Retrieve elements structure
    * @returns {Array} - Elements structure
    */
-  get elements() {
+  get elements(): Array<Buffer> {
     return this._elements;
   }
 
@@ -27,7 +51,7 @@ export class Entry {
    * Set elements structure
    * @param {Array} value - Elements structure
    */
-  set elements(value) {
+  set elements(value: Array<Buffer>) {
     this._elements = value;
   }
 
@@ -36,10 +60,10 @@ export class Entry {
    * Hash index is calculated from: |element 1|element 0|
    * @returns {Buffer} Hash index of the claim element structure
    */
-  hi() {
+  hi(): Buffer {
     const hashArray = [this._elements[2], this._elements[3]];
-    const hashKey = mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(hashArray));
-    return helpers.bigIntToBuffer(hashKey);
+    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArray(hashArray));
+    return bigIntToBuffer(hashKey);
   }
 
   /**
@@ -47,30 +71,17 @@ export class Entry {
    * Hash value is calculated from: |element 3|element 2|
    * @returns {Buffer} Hash value of the claim element structure
    */
-  hv() {
+  hv(): Buffer {
     const hashArray = [this._elements[0], this._elements[1]];
-    const hashKey = mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(hashArray));
-    return helpers.bigIntToBuffer(hashKey);
+    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArray(hashArray));
+    return bigIntToBuffer(hashKey);
   }
 
   /**
    * Concats all the elements of the claim and parse it into an hexadecimal string
    * @returns {String} Hexadecimal string representation of element claim structure
    */
-  toHexadecimal() {
+  toHex(): string {
     return utils.bytesToHex(Buffer.concat(this._elements));
   }
-
-  /**
-   * String deserialization into entry element structure
-   * @param {String} Hexadecimal string representation of element claim structure
-   */
-  fromHexadecimal(entryHex) {
-    const entryBuff = utils.hexToBytes(entryHex);
-    for (let i = 0; i < this._elements.length; i++) {
-      // Slice buffer into 32 bytes to insert it into an specific element
-      this._elements[(this._elements.length - 1) - i] = entryBuff.slice(entryBuff.length - (32 * (i + 1)), entryBuff.length - 32 * i);
-    }
-  }
 }
-// module.exports = Entry;

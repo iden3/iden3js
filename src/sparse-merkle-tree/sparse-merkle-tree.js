@@ -1,6 +1,7 @@
+import * as helpers from './sparse-merkle-tree-utils';
+
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
-const helpers = require('./sparse-merkle-tree-utils');
 const CONSTANTS = require('../constants');
 const mimc7 = require('./mimc7');
 

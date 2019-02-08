@@ -1,4 +1,5 @@
-const claim = require('../claim/claim');
+import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
+
 const DataBase = require('../db/db');
 const CONSTANTS = require('../constants');
 
@@ -103,43 +104,14 @@ class Id {
   }
 
   /**
-   * @param  {Object} kc
-   * @param  {String} kSign
-   * @param  {String} typeStr
-   * @param  {String} extraIndexData
-   * @param  {String} data
-   * @returns {Object}
-   */
-  genericClaim(kc, kSign, proofOfKSign, typeStr, extraIndexData, data) {
-    const genericClaim = new claim.GenericClaim('namespace', typeStr, extraIndexData, data); // TODO namespace will be hardcoded in conf
-    const signatureObj = kc.sign(kSign, genericClaim.hex());
-    const bytesSignedMsg = {
-      valueHex: genericClaim.hex(),
-      signatureHex: signatureObj.signature,
-      ksign: kSign,
-    };
-    const self = this;
-
-    return this.relay.postClaim(this.idAddr, bytesSignedMsg)
-      .then((res) => {
-        if ((self.backup !== undefined) && (proofOfKSign !== undefined)) {
-          self.backup.backupData(kc, self.idAddr, kSign, proofOfKSign, 'claim', genericClaim.hex(), self.relayAddr);
-        }
-        return res;
-      });
-  }
-
-  /**
    * Send new claim of type authorizeKSignSecp256k1 to the identity merkle tree through the associated relay
    * @param {Object} - Key container
    * @param {String} - Key used to sign the claim. This key has to be already authorized on the identity merkle tree
    * @param {keyClaim} - New key to be authorized and added into the identity merkle tree
    */
   authorizeKSignSecp256k1(kc, ksignpk, keyClaim) {
-    const authorizeKSignClaim = new claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
-      version: 0, pubKeyCompressed: keyClaim,
-    });
-    const claimHex = (authorizeKSignClaim.createEntry()).toHexadecimal();
+    const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, keyClaim);
+    const claimHex = (authorizeKSignClaim.toEntry()).toHex();
     const signatureObj = kc.sign(ksignpk, claimHex);
     const bytesSignedMsg = {
       valueHex: claimHex,

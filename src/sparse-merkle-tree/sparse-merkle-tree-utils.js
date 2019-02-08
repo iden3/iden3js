@@ -11,7 +11,7 @@ const { bigInt } = snarkjs;
 * @param {Uint8} byte - Byte to set the bit
 * @returns {Uint8} pos - Position of the bit to set
 */
-function setBit(byte, pos) {
+export function setBit(byte, pos) {
   let mask = 1;
   while (pos) {
     mask <<= 1;
@@ -25,7 +25,7 @@ function setBit(byte, pos) {
 * @param {Uint8} byte - Byte to get the bit
 * @returns {Uint8} pos - Position of the bit to get
 */
-function getBit(byte, pos) {
+export function getBit(byte, pos) {
   return (byte >> pos) & 0x01;
 }
 
@@ -34,7 +34,7 @@ function getBit(byte, pos) {
 * @param {bigInt} index - Hash index of the leaf
 * @returns {Array(Uint8)} - Array of bits determining leaf position
 */
-function getIndexArray(index) {
+export function getIndexArray(index) {
   return index.toArray(2).value.reverse();
 }
 
@@ -43,7 +43,7 @@ function getIndexArray(index) {
 * @param {bigInt} number - bigInt number
 * @returns {Buffer} - Decoded Buffer in UTF-16
 */
-function bigIntToBuffer(number) {
+export function bigIntToBuffer(number) {
   const buff = Buffer.alloc(32);
   let pos = buff.length - 1;
   while (!number.isZero()) {
@@ -59,7 +59,7 @@ function bigIntToBuffer(number) {
 * @param {Buffer} buff - Buffer to convert
 * @returns {bigInt} - Decoded bigInt
 */
-function bufferToBigInt(buff) {
+export function bufferToBigInt(buff) {
   let number = bigInt(0);
   let pos = buff.length - 1;
   while (pos >= 0) {
@@ -77,7 +77,7 @@ function bufferToBigInt(buff) {
 * @param {Object} nodeValue - Object representation of node value data
 * @returns {Buffer} - New buffer
 */
-function nodeValueToBuffer(nodeValue) {
+export function nodeValueToBuffer(nodeValue) {
   return Buffer.concat(nodeValue);
 }
 
@@ -86,7 +86,7 @@ function nodeValueToBuffer(nodeValue) {
 * @param {Buffer} nodeValueBuffer - Buffer to decode
 * @returns {Object} - New object containing node value data
 */
-function bufferToNodeValue(nodeValueBuffer) {
+export function bufferToNodeValue(nodeValueBuffer) {
   const arrayBuff = [];
   for (let i = 0; i < nodeValueBuffer.length - 1; i += 32) {
     const buffTmp = Buffer.alloc(32);
@@ -101,7 +101,7 @@ function bufferToNodeValue(nodeValueBuffer) {
 * @param {Array(bigInt)} arrayBigInt - Hash index of the leaf
 * @returns {Array(Buffer)} - Array of decoded buffers
 */
-function getArrayBuffFromArrayBigInt(arrayBigInt) {
+export function getArrayBuffFromArrayBigInt(arrayBigInt) {
   const arrayBuff = [];
   for (let i = 0; i < arrayBigInt.length; i++) {
     arrayBuff.push(bigIntToBuffer(arrayBigInt[i]));
@@ -114,7 +114,7 @@ function getArrayBuffFromArrayBigInt(arrayBigInt) {
 * @param {Array(Buffer)} arrayBuff - Array of buffer to decode
 * @returns {Array(bigInt)} - Array of bigInt decoded
 */
-function getArrayBigIntFromBuffArray(arrayBuff) {
+export function getArrayBigIntFromBuffArray(arrayBuff) {
   const arrayBigInt = [];
   for (let i = 0; i < arrayBuff.length; i++) {
     arrayBigInt.push(bufferToBigInt(arrayBuff[i]));
@@ -127,7 +127,7 @@ function getArrayBigIntFromBuffArray(arrayBuff) {
 * @param {String} buffHex - hexadecimal string to parse
 * @returns {Object} - proof structure
 */
-function parseProof(buffHex) {
+export function parseProof(buffHex) {
   const buffBytes = utils.hexToBytes(buffHex);
   const flag = buffBytes.readUInt8(0);
   const bitDiff = getBit(flag, 1);
@@ -156,7 +156,7 @@ function parseProof(buffHex) {
 * @param {String} buffHex - hexadecimal string to parse
 * @returns {Object} - structure proof
 */
-function genProofStruct(buffHex) {
+export function genProofStruct(buffHex) {
   const buffBytes = utils.hexToBytes(buffHex);
   return {
     flagExistence: buffBytes.readUInt8(0),
@@ -171,26 +171,10 @@ function genProofStruct(buffHex) {
  * @param {Object} mt
  * @param {Object} claimsDump - array of hex strings containing the claimsDump
  */
-function importClaimsDump(mt, claimsDump) {
+export function importClaimsDump(mt, claimsDump) {
   for (let i = 0; i < claimsDump.length; i++) {
-    const e = new Entry();
-    e.fromHexadecimal(claimsDump[i]);
+    const e = Entry.newFromHex(claimsDump[i]);
     const t = getArrayBigIntFromBuffArray(e.elements);
     mt.addClaim(t);
   }
 }
-
-module.exports = {
-  getBit,
-  parseProof,
-  genProofStruct,
-  getArrayBigIntFromBuffArray,
-  getArrayBuffFromArrayBigInt,
-  bufferToNodeValue,
-  nodeValueToBuffer,
-  bufferToBigInt,
-  bigIntToBuffer,
-  getIndexArray,
-  setBit,
-  importClaimsDump,
-};

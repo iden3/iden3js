@@ -2,6 +2,8 @@
 
 import { type NonceObj, NonceDB } from './nonceDB';
 import { Entry } from '../claim/entry/entry';
+import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
+import { AssignName } from '../claim/assign-name/assign-name';
 
 const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
@@ -202,10 +204,12 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
 
   // check jwsPayload.ksign with jwsPayload.proofKSign.leaf
   // get ClaimAuthorizeKSign from jwsPayload.proofKSign.leaf
-  let entry = new Entry();
-  entry.fromHexadecimal(jwsPayload.proofKSign.leaf);
+  let entry = Entry.newFromHex(jwsPayload.proofKSign.leaf);
   const claimAuthorizeKSign = claimUtils.newClaimFromEntry(entry);
-  const pubK = claimAuthorizeKSign.structure.pubKeyCompressed;
+  if (!(claimAuthorizeKSign instanceof AuthorizeKSignSecp256k1)) {
+    return undefined;
+  }
+  const pubK = claimAuthorizeKSign.pubKeyCompressed;
   const pubKHex = utils.bytesToHex(pubK);
   if (pubKHex !== jwsPayload.ksign) {
     return undefined;
@@ -213,16 +217,18 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
 
   // check that jwsPayload.form.proofEthName == jwsPayload.form.ethName == jwsHeader.iss
   // get ClaimAssignName from jwsPayload.form.proofEthName.leaf
-  entry = new Entry();
-  entry.fromHexadecimal(jwsPayload.form.proofEthName.proofClaimAssignName.leaf);
+  entry = Entry.newFromHex(jwsPayload.form.proofEthName.proofClaimAssignName.leaf);
   const claimAssignName = claimUtils.newClaimFromEntry(entry);
+  if (!(claimAssignName instanceof AssignName)) {
+    return undefined;
+  }
   const nameWithoutDomain = jwsPayload.form.proofEthName.name.split('@')[0];
   // check jwsPayload.form.proofEthName.proofClaimAssignName.leaf {hashName} === hash(jwsPayload.form.proofEthName.name
-  if (utils.bytesToHex(claimAssignName.structure.hashName) !== utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
+  if (utils.bytesToHex(claimAssignName.hashName) !== utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
     return undefined;
   }
   // check claimAssignName.structure.id = jwsHeader.iss
-  if (utils.bytesToHex(claimAssignName.structure.id) !== jwsHeader.iss) {
+  if (utils.bytesToHex(claimAssignName.id) !== jwsHeader.iss) {
     return undefined;
   }
 

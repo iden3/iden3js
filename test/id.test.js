@@ -1,6 +1,7 @@
+import { AuthorizeKSignSecp256k1 } from '../lib/claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
+
 const chai = require('chai');
 const iden3 = require('../index');
-const CONSTANTS = require('../src/constants');
 
 const { expect } = chai;
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
@@ -136,10 +137,8 @@ describe('[id] new Id()', () => {
   it('Check request claim proof by its index request', async () => {
     keyContainer.unlock('pass');
     // Create claim and gets it index
-    const authorizeKSignClaim = new iden3.claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.ID, {
-      version: 0, pubKeyCompressed: id.keyOperationalPub,
-    });
-    const hi = (authorizeKSignClaim.createEntry()).hi();
+    const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, id.keyOperationalPub);
+    const hi = (authorizeKSignClaim.toEntry()).hi();
     await relay.getClaimByHi(id.idAddr, iden3.utils.bytesToHex(hi))
       .then((res) => {
         // Check leaf claim requested is the same as the claim generated when the identty is created
