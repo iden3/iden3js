@@ -5,5 +5,5 @@ node_js:
   - "8"
 script: 
   - npm run flow check
-#  - npm run lint
+  - npm run lint
   - npm run test:unit

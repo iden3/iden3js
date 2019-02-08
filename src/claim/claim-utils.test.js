@@ -1,5 +1,6 @@
+import { Entry } from './entry/entry';
+
 const chai = require('chai');
-const Entry = require('./entry/entry');
 const utils = require('../utils');
 const claimUtils = require('./claim-utils');
 

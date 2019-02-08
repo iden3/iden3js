@@ -9,6 +9,7 @@
   "scripts": {
     "test:unit": "rm -rf tmp && mocha --require babel-core/register --require mock-local-storage --recursive 'src/**/*.test.js' --timeout 100000",
     "test:int": "rm -rf tmp && mocha --require babel-core/register --require mock-local-storage --timeout 20000",
+    "build-test:int": "npm run build && npm run test:int",
     "test:all": "npm run test:unit && npm run test:int",
     "build": "babel src/ -d lib/",
     "prepublish": "npm run build",
@@ -37,7 +38,8 @@
     "snarkjs": "^0.1.7",
     "tweetnacl": "^1.0.0",
     "tweetnacl-util": "^0.15.0",
-    "web3": "1.0.0-beta.33"
+    "web3": "1.0.0-beta.33",
+    "ws": "^5.2.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -58,7 +60,6 @@
     "flow-typed": "^2.5.1",
     "mock-local-storage": "^1.1.8",
     "node-localstorage": "^1.3.1",
-    "utf-8-validate": "^5.0.2",
-    "ws": "^5.2.2"
+    "utf-8-validate": "^5.0.2"
   }
 }

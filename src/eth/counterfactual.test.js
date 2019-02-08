@@ -1,7 +1,8 @@
 const chai = require('chai');
-const { expect } = chai;
-const ethUtil = require('ethereumjs-util');
 const Web3 = require('web3');
+const ethUtil = require('ethereumjs-util');
+
+const { expect } = chai;
 const web3 = new Web3();
 
 const iden3 = require('../index');

@@ -86,14 +86,14 @@ class Auth {
  * @param  {String} h - Hex string
  * @returns {Object} - Object containing challenge, signature, url
  */
-const parseQRhex = function (h) {
+function parseQRhex(h) {
   const b = utils.hexToBytes(h);
   return {
     challenge: b.slice(0, 20).toString(), // 20 is the length of the challenge
     signature: utils.bytesToHex(b.slice(20, 85)),
     url: b.slice(85, b.length).toString(),
   };
-};
+}
 
 /**
  * @param  {String} url
@@ -104,7 +104,7 @@ const parseQRhex = function (h) {
  * @param  {Object} kSignProof
  * @returns
  */
-const resolv = function (url, idAddr, challengeStr, signature, kSign, kSignProof) {
+function resolv(url, idAddr, challengeStr, signature, kSign, kSignProof) {
   const authMsg = {
     address: idAddr,
     challenge: challengeStr,
@@ -113,7 +113,7 @@ const resolv = function (url, idAddr, challengeStr, signature, kSign, kSignProof
     ksignProof: kSignProof,
   };
   return axios.post(`${url}/auth`, authMsg);
-};
+}
 
 module.exports = {
   Auth,
