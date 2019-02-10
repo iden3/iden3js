@@ -49,12 +49,7 @@ class Relay {
    * @returns {Object} - Http response
    */
   getClaimByHi(idAddr, hi) {
-<<<<<<< 08dee8e38e7703306b1c0a4554a503179e86e1c6
-    // return axios.get(`${this.url}/claim_proof/${idAddr}/hi/${hi}`);
-    return axios.get(`${this.url}/ids/${idAddr}/claims/${hi}/proof`);
-=======
     return axios.get(`${this.url}/claim_proof/idaddr/${idAddr}/hi/${hi}`);
->>>>>>> Finish README.md with iden3js version 0.0.17
   }
 
   /**
