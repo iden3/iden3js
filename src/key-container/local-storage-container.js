@@ -44,7 +44,7 @@ class LocalStorageContainer {
    */
   lock() {
     if (!this.encryptionKey) {
-      console.error('Error: KeyContainer not unlocked');
+      // console.error('Error: KeyContainer not unlocked');
       return;
     }
     const self = this;
@@ -122,7 +122,7 @@ class LocalStorageContainer {
   }
 
   /**
-   * Creates all the keys needed to create an identuty aftwrwards
+   * Creates all the keys needed to create an identity afterwards
    * @returns {Object} - It contains all the keys generated, undefined otherwise
    */
   createKeys() {

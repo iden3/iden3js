@@ -13,11 +13,13 @@ const auth = require('./auth/auth');
 const admin = require('./admin/requests');
 const protocols = require('./protocols/protocols');
 const counterfactual = require('./eth/counterfactual');
+const constants = require('./constants');
 
 const { Auth } = auth;
 // const { Dapp } = dapp;
 
 module.exports = {
+  constants,
   claim,
   merkleTree,
   sparseMerkleTree,
