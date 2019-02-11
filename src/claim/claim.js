@@ -1,6 +1,8 @@
+import { Entry } from './entry/entry';
+
 const utils = require('../utils');
 const claimUtils = require('./claim-utils');
-const Entry = require('./entry/entry');
+// const Entry = require('./entry/entry');
 const CONSTANTS = require('../constants');
 const assignNameClaim = require('./assign-name/assign-name');
 const setRootKeyClaim = require('./set-root-key/set-root-key');

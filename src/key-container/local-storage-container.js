@@ -44,7 +44,7 @@ class LocalStorageContainer {
    */
   lock() {
     if (!this.encryptionKey) {
-      console.error('Error: KeyContainer not unlocked');
+      // console.error('Error: KeyContainer not unlocked');
       return;
     }
     const self = this;

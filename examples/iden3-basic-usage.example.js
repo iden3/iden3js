@@ -35,22 +35,22 @@ const keyRevoke = keys[3];
 
 // create a new relay object
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-const relayUrl = 'http://127.0.0.1:8000/api/v0.1';
+const relayUrl = 'http://127.0.0.1:8000/api/unstable';
 const relay = new iden3.Relay(relayUrl);
 
 // create a new id object
 const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
 
 // generates the counterfactoual contract through the relay, get the identity address as response
-let proofOfKsign = {};
+let proofKsign = {};
 
-console.log('Create Identity');
+// console.log('Create Identity');
 id.createID()
   .then((createIdRes) => {
     // Successfull create identity api call to relay
     console.log(createIdRes.idAddr); // Identity counterfactoual address
-    console.log(createIdRes.proofOfClaim); // Proof of claim regarding authorization of key public operational
-    proofOfKsign = createIdRes.proofOfClaim;
+    proofKsign = createIdRes.proofClaim;
+    console.log(proofKsign); // Proof of claim regarding authorization of key public operational
 
     console.log('Create and authorize new key for address');
     // generate new key from identity and issue a claim to relay in order to authorize new key
@@ -58,14 +58,14 @@ id.createID()
     const newKey = id.createKey(keyContainer, keyLabel, true);
     id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, newKey)
       .then((authRes) => {
-        proofOfKSign = authRes.data.proofOfClaim;
-        console.log(proofOfKSign);
+        proofKsign = authRes.data.proofClaim;
+        console.log(proofKsign);
       })
       .catch((error) => {
         console.error(error.message);
       });
 
-    console.log('Bind label to an identity');
+    // console.log('Bind label to an identity');
     // bind the identity address to a label. It send required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with label
     const name = 'testName';
     id.bindID(keyContainer, name)
@@ -74,8 +74,8 @@ id.createID()
         // request idenity address to name-resolver ( currently name-resolver service is inside relay) from a given label
         relay.resolveName(`${name}@iden3.io`)
           .then((resolveRes) => {
-            const idAddress = resolveRes.data.ethAddr;
-            console.log(`${name}@iden3.io associated with addres:${idAddress}`);
+            const idAddress = resolveRes.data.idAddr;
+            console.log(`${name}@iden3.io associated with addres: ${idAddress}`);
           })
           .catch((error) => {
             console.error(error.message);
