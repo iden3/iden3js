@@ -118,11 +118,11 @@ class Db {
    */
   importWallet(kc, dbEncrypted) {
     if (kc.isUnlock()) {
-      this.deleteAll();
       try {
         const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncrypted);
         const dbExp = JSON.parse(dbExpStr);
 
+        this.deleteAll();
         Object.keys(dbExp).forEach((key) => {
           localStorage.setItem(key, dbExp[key]);
         });
