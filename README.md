@@ -6,9 +6,9 @@ Javascript client library of the iden3 system.
 
 ## Install
 ```
-npm install --save iden3
+npm install --save @iden3/iden3
 ```
-https://www.npmjs.com/package/iden3
+https://www.npmjs.com/package/@iden3/iden3
 
 ## Basic usage
 ```js
