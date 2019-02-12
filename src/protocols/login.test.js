@@ -100,8 +100,7 @@ describe('[protocol] interns', () => {
     + '20696d87aeec38c4fb986bdfb6bed824173370cfd75cb4a8e907900278054d68';
     const root = '0x143ff097f932cd5f9964323cd1225cc26f2265a4b68b29e539f70af0902b204b';
 
-    const entry = new Entry();
-    entry.fromHexadecimal(leaf);
+    const entry = Entry.newFromHex(leaf);
     const verified = smt.checkProof(root, proof, iden3.utils.bytesToHex(entry.hi()), iden3.utils.bytesToHex(entry.hv()));
     expect(verified).to.be.equal(true);
   });

@@ -1,3 +1,4 @@
+// @flow
 import { Entry } from '../entry/entry';
 
 const snarkjs = require('snarkjs');
@@ -17,104 +18,90 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
  * |element 1|: |empty|data[0]| - |1 bytes|31 bytes|
  * |element 0|: |empty|data[1]| - |1 bytes|31 bytes|
  */
-class Basic {
+export class Basic {
+  claimType: Buffer;
+  version: Buffer;
+  index: Buffer;
+  extraData: Buffer;
+
   /**
    * Initialize raw claim data structure
    * Bytes are taken according entry claim structure
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
-   * @param {Object} data - Input parameters
-   * Data input object contains:
-   * {Uint32} version - Version assigned to the claim
-   * {String} index - Generic index data
-   * {String} data - Generic data
    */
-  constructor(data) {
-    const versionBuff = Buffer.alloc(4);
-
-    const {
-      version, index, extraData,
-    } = data;
-    versionBuff.writeUInt32BE(version);
-    this._structure = {
-      claimType: helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.BASIC.TYPE)).slice(24, 32),
-      version: versionBuff,
-      index: utils.hexToBytes(index),
-      extraData: utils.hexToBytes(extraData),
-    };
+  constructor(version: Buffer, index: Buffer, extraData: Buffer) {
+    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.BASIC.TYPE)).slice(24, 32);
+    this.version = version;
+    this.index = index;
+    this.extraData = extraData;
   }
 
   /**
-   * Retrieve claim structure
-   * @returns {Object} Raw data claim structure
+   * Initialize claim data structure from fields
    */
-  get structure() {
-    return this._structure;
+  static new(version: number, index: string, extraData: string): Basic {
+    const versionBuff = Buffer.alloc(4);
+    versionBuff.writeUInt32BE(version, 0);
+    const indexBuff = utils.hexToBytes(index);
+    const extraDataBuff = utils.hexToBytes(extraData);
+    return new Basic(versionBuff, indexBuff, extraDataBuff);
+  }
+
+  /**
+  * Decode field claim structure into raw data claim structure
+  * @param {Object} entry - Entry of the claim
+  * @returns {Object} SetRootKey class object
+  */
+  static newFromEntry(entry: Entry): Basic {
+    // Parse element 3 and element 2
+    const versionBuff = entry.elements[3].slice(20, 24);
+    const indexBuff = Buffer.concat([entry.elements[2].slice(1, 32), entry.elements[3].slice(1, 20)]);
+    // Parse element 2 and element 1
+    const extraDataBuff = Buffer.concat([entry.elements[0].slice(1, 32), entry.elements[1].slice(1, 32)]);
+    return new Basic(versionBuff, indexBuff, extraDataBuff);
   }
 
   /**
    * Code raw data claim object into an entry claim object
    * @returns {Object} Entry representation of the claim
    */
-  createEntry() {
-    const claimEntry = new Entry();
+  createEntry(): Entry {
+    const claimEntry = Entry.newEmpty();
     let endIndex = claimEntry.elements[3].length;
-    let startIndex = endIndex - this.structure.claimType.length;
+    let startIndex = endIndex - this.claimType.length;
     // element 3 composition
-    claimEntry.elements[3].fill(this.structure.claimType, startIndex, endIndex);
+    claimEntry.elements[3].fill(this.claimType, startIndex, endIndex);
     endIndex = startIndex;
-    startIndex = endIndex - this.structure.version.length;
-    claimEntry.elements[3].fill(this.structure.version, startIndex, endIndex);
+    startIndex = endIndex - this.version.length;
+    claimEntry.elements[3].fill(this.version, startIndex, endIndex);
     // Get first part of the index
-    let indexLen = this.structure.index.length;
-    const firstSlotIndex = this.structure.index.slice(indexLen - 19, indexLen);
+    let indexLen = this.index.length;
+    const firstSlotIndex = this.index.slice(indexLen - 19, indexLen);
     endIndex = startIndex;
     startIndex = endIndex - firstSlotIndex.length;
     claimEntry.elements[3].fill(firstSlotIndex, startIndex, endIndex);
 
     // element 2 composition
     // Get second part of the index
-    const secondSlotIndex = this.structure.index.slice(0, indexLen - 19);
+    const secondSlotIndex = this.index.slice(0, indexLen - 19);
     endIndex = claimEntry.elements[2].length;
     startIndex = endIndex - secondSlotIndex.length;
     claimEntry.elements[2].fill(secondSlotIndex, startIndex, endIndex);
 
     // element 1 composition
     // Get first part of the data
-    indexLen = this.structure.extraData.length;
-    const firstSlotExtra = this.structure.extraData.slice(indexLen - 31, indexLen);
+    indexLen = this.extraData.length;
+    const firstSlotExtra = this.extraData.slice(indexLen - 31, indexLen);
     endIndex = claimEntry.elements[1].length;
     startIndex = claimEntry.elements[1].length - firstSlotExtra.length;
     claimEntry.elements[1].fill(firstSlotExtra, startIndex, endIndex);
 
     // element 0 composition
     // Get second part of the data
-    const secondSlotExtra = this.structure.extraData.slice(0, indexLen - 31);
+    const secondSlotExtra = this.extraData.slice(0, indexLen - 31);
     endIndex = claimEntry.elements[0].length;
     startIndex = claimEntry.elements[0].length - secondSlotExtra.length;
     claimEntry.elements[0].fill(secondSlotExtra, startIndex, endIndex);
     return claimEntry;
   }
 }
-
-/**
- * Decode field claim structure into raw data claim structure
- * @param {Object} entry - Entry of the claim
- * @returns {Object} SetRootKey class object
- */
-function parseBasicClaim(entry) {
-  const claim = new Basic({
-    version: 0, index: '', extraData: '',
-  });
-  // Parse element 3 and element 2
-  claim.structure.claimType = entry.elements[3].slice(24, 32);
-  claim.structure.version = entry.elements[3].slice(20, 24);
-  claim.structure.index = Buffer.concat([entry.elements[2].slice(1, 32), entry.elements[3].slice(1, 20)]);
-  // Parse element 2 and element 1
-  claim.structure.extraData = Buffer.concat([entry.elements[0].slice(1, 32), entry.elements[1].slice(1, 32)]);
-  return claim;
-}
-
-module.exports = {
-  Basic,
-  parseBasicClaim,
-};
