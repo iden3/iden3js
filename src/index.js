@@ -3,7 +3,7 @@ const sparseMerkleTree = require('./sparse-merkle-tree/sparse-merkle-tree');
 const smtUtils = require('./sparse-merkle-tree/sparse-merkle-tree-utils');
 const Relay = require('./http/relay');
 const Db = require('./db/db');
-const PrivateFolder = require('./http/private-folder');
+const Backup = require('./http/private-folder');
 const KeyContainer = require('./key-container/key-container');
 const Id = require('./id/id');
 // const dapp = require('./auth/dapp');
@@ -23,7 +23,7 @@ module.exports = {
   sparseMerkleTree,
   smtUtils,
   Db,
-  PrivateFolder,
+  Backup,
   KeyContainer,
   Id,
   Relay,
