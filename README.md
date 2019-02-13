@@ -834,5 +834,13 @@ npm run browserify
 ### WARNING
 All code here is experimental and WIP
 
+## Releases
+
+Version compatibility
+
+|     | iden3js | go-iden3 |
+|-----|---------|----------|
+| tag | v0.0.21 | v0.0.2   |
+
 ## License
 iden3js is part of the iden3 project copyright 2018 0kims association and published with GPL-3 license, please check the LICENSE file for more details.
