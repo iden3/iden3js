@@ -12,10 +12,10 @@ const entryElemsLen = 4;
  * Each element contains 253 useful bits enclosed on a 256 bits Buffer
  */
 export class Entry {
-  _elements: Array<Buffer>;
+  elements: Array<Buffer>;
 
   constructor(e0: Buffer, e1: Buffer, e2: Buffer, e3: Buffer) {
-    this._elements = [e0, e1, e2, e3];
+    this.elements = [e0, e1, e2, e3];
   }
 
   /**
@@ -40,28 +40,12 @@ export class Entry {
   }
 
   /**
-   * Retrieve elements structure
-   * @returns {Array} - Elements structure
-   */
-  get elements(): Array<Buffer> {
-    return this._elements;
-  }
-
-  /**
-   * Set elements structure
-   * @param {Array} value - Elements structure
-   */
-  set elements(value: Array<Buffer>) {
-    this._elements = value;
-  }
-
-  /**
    * Hash index calculation using mimc7 hash
    * Hash index is calculated from: |element 1|element 0|
    * @returns {Buffer} Hash index of the claim element structure
    */
   hi(): Buffer {
-    const hashArray = [this._elements[2], this._elements[3]];
+    const hashArray = [this.elements[2], this.elements[3]];
     const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArray(hashArray));
     return bigIntToBuffer(hashKey);
   }
@@ -72,7 +56,7 @@ export class Entry {
    * @returns {Buffer} Hash value of the claim element structure
    */
   hv(): Buffer {
-    const hashArray = [this._elements[0], this._elements[1]];
+    const hashArray = [this.elements[0], this.elements[1]];
     const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArray(hashArray));
     return bigIntToBuffer(hashKey);
   }
@@ -82,6 +66,6 @@ export class Entry {
    * @returns {String} Hexadecimal string representation of element claim structure
    */
   toHex(): string {
-    return utils.bytesToHex(Buffer.concat(this._elements));
+    return utils.bytesToHex(Buffer.concat(this.elements));
   }
 }
