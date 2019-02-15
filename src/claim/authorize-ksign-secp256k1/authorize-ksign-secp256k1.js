@@ -1,3 +1,4 @@
+// @flow
 import { Entry } from '../entry/entry';
 
 const snarkjs = require('snarkjs');
@@ -17,57 +18,65 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
  * |element 1|: |empty| - |32 bytes|
  * |element 0|: |empty| - |32 bytes|
  */
-class AuthorizeKSignSecp256k1 {
+export class AuthorizeKSignSecp256k1 {
+  claimType: Buffer;
+  version: Buffer;
+  pubKeyCompressed: Buffer;
+
   /**
    * Initialize raw claim data structure
    * Bytes are taken according element claim structure
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
-   * @param {Object} data - Input parameters
-   * Data input object contains:
-   * {Uint32} version - Version assigned to the claim
-   * {String} pubKeyCompressed - Public key of Secp256k1 elliptic curve in its compressed version
    */
-  constructor(data) {
-    const versionBuff = Buffer.alloc(4);
-    const {
-      version, pubKeyCompressed,
-    } = data;
-    versionBuff.writeUInt32BE(version);
-    this._structure = {
-      claimType: helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.TYPE)).slice(24, 32),
-      version: versionBuff,
-      pubKeyCompressed: utils.hexToBytes(pubKeyCompressed),
-    };
+  constructor(version: Buffer, pubKeyCompressed: Buffer) {
+    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.TYPE)).slice(24, 32);
+    this.version = version;
+    this.pubKeyCompressed = pubKeyCompressed;
   }
 
   /**
-   * Retrieve claim structure
-   * @returns {Object} Raw data claim structure
+   * Initialize claim data structure from fields
    */
-  get structure() {
-    return this._structure;
+  static new(version: number, pubKeyCompressed: string): AuthorizeKSignSecp256k1 {
+    const versionBuff = Buffer.alloc(4);
+    versionBuff.writeUInt32BE(version, 0);
+    const pubKeyCompressedBuff = utils.hexToBytes(pubKeyCompressed);
+    return new AuthorizeKSignSecp256k1(versionBuff, pubKeyCompressedBuff);
+  }
+
+  /**
+  * Decode field claim structure into raw data claim structure
+  * @param {Object} entry - Element representation of the claim
+  * @returns {Object} AuthorizeKSign class object
+  */
+  static newFromEntry(entry: Entry): AuthorizeKSignSecp256k1 {
+    // Parse element 3
+    const versionBuff = entry.elements[3].slice(20, 24);
+    // Parse element 3 and element 2
+    const pubKeyCompressedBuff = Buffer.concat([entry.elements[2].slice(1, 32), entry.elements[3].slice(18, 20)]);
+    return new AuthorizeKSignSecp256k1(versionBuff, pubKeyCompressedBuff);
   }
 
   /**
    * Code raw data claim object into an entry claim object
    * @returns {Object} Element representation of the claim
    */
-  createEntry() {
-    const claimEntry = new Entry();
+  toEntry(): Entry {
+    const claimEntry = Entry.newEmpty();
     let endIndex = claimEntry.elements[3].length;
-    let startIndex = endIndex - this._structure.claimType.length;
+    let startIndex = endIndex - this.claimType.length;
     // claim element 3 composition
-    claimEntry.elements[3].fill(this._structure.claimType, startIndex, endIndex);
+    claimEntry.elements[3].fill(this.claimType, startIndex, endIndex);
     endIndex = startIndex;
-    startIndex = endIndex - this._structure.version.length;
-    claimEntry.elements[3].fill(this._structure.version, startIndex, endIndex);
-    const indexLen = this._structure.pubKeyCompressed.length;
-    const firstSlotPubKey = this._structure.pubKeyCompressed.slice(indexLen - 2, indexLen);
+    startIndex = endIndex - this.version.length;
+    claimEntry.elements[3].fill(this.version, startIndex, endIndex);
+    const indexLen = this.pubKeyCompressed.length;
+    const firstSlotPubKey = this.pubKeyCompressed.slice(indexLen - 2, indexLen);
     endIndex = startIndex;
     startIndex = endIndex - firstSlotPubKey.length;
     claimEntry.elements[3].fill(firstSlotPubKey, startIndex, endIndex);
     // claim element 2 composition
-    const secondSlotPubKey = this._structure.pubKeyCompressed.slice(0, indexLen - 2);
+    const secondSlotPubKey = this.pubKeyCompressed.slice(0, indexLen - 2);
     endIndex = claimEntry.elements[2].length;
     startIndex = claimEntry.elements[2].length - secondSlotPubKey.length;
     claimEntry.elements[2].fill(secondSlotPubKey, startIndex, endIndex);
@@ -76,25 +85,3 @@ class AuthorizeKSignSecp256k1 {
     return claimEntry;
   }
 }
-
-/**
- * Decode field claim structure into raw data claim structure
- * @param {Object} entry - Element representation of the claim
- * @returns {Object} AuthorizeKSign class object
- */
-function parseAuthorizeKSignSecp256k1(entry) {
-  const claim = new AuthorizeKSignSecp256k1({
-    version: 0, pubKeyCompressed: '',
-  });
-  // Parse element 3
-  claim.structure.claimType = entry.elements[3].slice(24, 32);
-  claim.structure.version = entry.elements[3].slice(20, 24);
-  // Parse element 3 and element 2
-  claim.structure.pubKeyCompressed = Buffer.concat([entry.elements[2].slice(1, 32), entry.elements[3].slice(18, 20)]);
-  return claim;
-}
-
-module.exports = {
-  AuthorizeKSignSecp256k1,
-  parseAuthorizeKSignSecp256k1,
-};

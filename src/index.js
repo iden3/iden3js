@@ -1,10 +1,9 @@
-const claim = require('./claim/claim');
 const merkleTree = require('./merkle-tree/merkle-tree');
 const sparseMerkleTree = require('./sparse-merkle-tree/sparse-merkle-tree');
 const smtUtils = require('./sparse-merkle-tree/sparse-merkle-tree-utils');
 const Relay = require('./http/relay');
 const Db = require('./db/db');
-const PrivateFolder = require('./http/private-folder');
+const Backup = require('./http/private-folder');
 const KeyContainer = require('./key-container/key-container');
 const Id = require('./id/id');
 // const dapp = require('./auth/dapp');
@@ -20,12 +19,11 @@ const { Auth } = auth;
 
 module.exports = {
   constants,
-  claim,
   merkleTree,
   sparseMerkleTree,
   smtUtils,
   Db,
-  PrivateFolder,
+  Backup,
   KeyContainer,
   Id,
   Relay,

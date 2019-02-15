@@ -1,8 +1,9 @@
+// @flow
+import { describe, it, before } from 'mocha';
+
 const chai = require('chai');
-const Claim = require('../claim');
 const authorizeKSign = require('./authorize-ksign');
 const utils = require('../../utils');
-const CONSTANTS = require('../../constants');
 
 const { expect } = chai;
 
@@ -15,32 +16,26 @@ describe('[Claim Authorize KSign]', () => {
   let parsedClaim;
 
   before('Create new authorizeKSign claim', () => {
-    claimAuthorizeKSign = new Claim.Factory(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN.ID, {
-      version: versionExample, sign: signExample, ay: ayExample,
-    });
+    claimAuthorizeKSign = authorizeKSign.AuthorizeKSign.new(versionExample, signExample, ayExample);
     expect(claimAuthorizeKSign).to.not.be.equal(null);
-    entryClaim = claimAuthorizeKSign.createEntry();
-    parsedClaim = authorizeKSign.parseAuthorizeKSign(entryClaim);
+    entryClaim = claimAuthorizeKSign.toEntry();
+    parsedClaim = authorizeKSign.AuthorizeKSign.newFromEntry(entryClaim);
   });
 
   it('Parse claim type', () => {
-    const { claimType } = claimAuthorizeKSign.structure;
-    expect(utils.bytesToHex(claimType)).to.be.equal(utils.bytesToHex(parsedClaim.structure.claimType));
+    expect(utils.bytesToHex(claimAuthorizeKSign.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
   });
   it('Parse version', () => {
-    const { version } = claimAuthorizeKSign.structure;
-    expect(utils.bytesToHex(version)).to.be.equal(utils.bytesToHex(parsedClaim.structure.version));
+    expect(utils.bytesToHex(claimAuthorizeKSign.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
   });
   it('Parse sign', () => {
-    const { sign } = claimAuthorizeKSign.structure;
-    expect(utils.bytesToHex(sign)).to.be.equal(utils.bytesToHex(parsedClaim.structure.sign));
+    expect(utils.bytesToHex(claimAuthorizeKSign.sign)).to.be.equal(utils.bytesToHex(parsedClaim.sign));
   });
   it('Parse Ay', () => {
-    const { ay } = claimAuthorizeKSign.structure;
-    expect(utils.bytesToHex(ay)).to.be.equal(utils.bytesToHex(parsedClaim.structure.ay));
+    expect(utils.bytesToHex(claimAuthorizeKSign.ay)).to.be.equal(utils.bytesToHex(parsedClaim.ay));
   });
   it('Extract bytes from full element', () => {
-    const hexFromElement = entryClaim.toHexadecimal();
+    const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0505050505050505050505050505050505050505050505050505050505050506'
