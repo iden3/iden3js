@@ -2,6 +2,7 @@ const merkleTree = require('./merkle-tree/merkle-tree');
 const sparseMerkleTree = require('./sparse-merkle-tree/sparse-merkle-tree');
 const smtUtils = require('./sparse-merkle-tree/sparse-merkle-tree-utils');
 const Relay = require('./http/relay');
+const NameResolver = require('./http/name-resolver');
 const Db = require('./db/db');
 const Backup = require('./http/private-folder');
 const KeyContainer = require('./key-container/key-container');
@@ -26,6 +27,7 @@ module.exports = {
   Backup,
   KeyContainer,
   Id,
+  NameResolver,
   Relay,
   auth,
   Auth,
