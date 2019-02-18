@@ -8,7 +8,7 @@ const chai = require('chai');
 const { expect } = chai;
 const iden3 = require('../index');
 
-const nameResolverUrl = 'http://127.0.0.1:5001/api/unstable';
+const nameResolverUrl = 'http://127.0.0.1:8000/api/unstable';
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const relayUrl = 'http://127.0.0.1:8000/api/unstable';
 
@@ -20,7 +20,7 @@ describe('[name-resolver] private-folder backup', () => {
   let keyContainer;
   let relay;
 
-  before('create name resolver object', () => {
+  before('Create name resolver object', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
@@ -28,6 +28,7 @@ describe('[name-resolver] private-folder backup', () => {
   });
 
   it('Generate keys for identity', () => {
+    keyContainer.unlock('pass');
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.generateMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
@@ -35,6 +36,7 @@ describe('[name-resolver] private-folder backup', () => {
     const keyRecover = keys[2];
     const keyRevoke = keys[3];
     id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
+    keyContainer.lock();
   });
 
   it('Bind identity to label', async () => {

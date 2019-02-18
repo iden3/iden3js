@@ -9,15 +9,16 @@ const utils = require('../utils');
  * Class representing a name resolver service
  * It contains all the name resolver API calls
  */
-export class NameResolver {
-  url: String;
+class NameResolver {
+  url: string;
+  debug: boolean;
   getFn: (string, any) => any;
   postFn: (string, any) => any;
   /**
    * Initialization name resolver object
-   * @param {String} url - Relay Url identifier
+   * @param {string} url - Relay Url identifier
    */
-  constructor(url: String) {
+  constructor(url: string) {
     this.url = url;
     if (this.debug) {
       this.getFn = axiosGetDebug;
@@ -32,12 +33,12 @@ export class NameResolver {
    * Construct proper object to bind an identity adress to a label
    * Name resolver server creates the claim binding { Label - Identity address }
    * @param  {Object} kc - Keycontainer
-   * @param  {String} idAddr - Identity address
-   * @param  {String} keyOperationalPub - Key used to sign the message sent
-   * @param  {String} name - Label to bind
+   * @param  {string} idAddr - Identity address
+   * @param  {string} keyOperationalPub - Key used to sign the message sent
+   * @param  {string} name - Label to bind
    * @return {AxiosPromise} Promise with http response: empty if OK, otherwise Error
    */
-  bindID(kc: Object, idAddr: String, keyOperationalPub: String, name: String): AxiosPromise<any, ?Error> {
+  bindID(kc: Object, idAddr: string, keyOperationalPub: string, name: string): AxiosPromise<any, ?Error> {
     const idBytes = utils.hexToBytes(idAddr);
     const nameBytes = Buffer.from(name);
     let msgBytes = Buffer.from([]);
@@ -58,10 +59,12 @@ export class NameResolver {
 
   /**
    * Search name string into the name resolver and it retrieves the corresponding public address
-   * @param {String} name - Label to search into the name resolver tree
+   * @param {string} name - Label to search into the name resolver tree
    * @return {AxiosPromise} Promise with http response: empty if OK, otherwise Error
    */
-  resolveName(name: String): AxiosPromise<any, ?Error> {
+  resolveName(name: string): AxiosPromise<any, ?Error> {
     return axios.get(`${this.url}/names/${name}`);
   }
 }
+
+module.exports = NameResolver;
