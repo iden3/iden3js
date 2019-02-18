@@ -19,6 +19,9 @@ const SIGV01 = 'iden3.sig.v0_1';
 const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
 const SIGALGV01 = 'ES255';
 
+// Temporary hardcoded relay address
+const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+
 type RequestIdenAssert = {
   header: {
     typ: string,
@@ -106,7 +109,7 @@ type JwsPayload = {
  * @returns {String} signedPacket
  */
 function signIdenAssertV01(signatureRequest: any, idAddr: string,
-  ethName: string, proofEthName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
+  ethName: string, proofAssignName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
   proofKSign: proofs.ProofClaim, expirationTime: number): string {
   const date = new Date();
   const currentTime = Math.round((date).getTime() / 1000);
@@ -124,7 +127,7 @@ function signIdenAssertV01(signatureRequest: any, idAddr: string,
     proofKSign,
     form: {
       ethName,
-      proofEthName,
+      proofAssignName,
     },
     // identity: {  TODO AFTER MILESTONE
     //   operational: ,
@@ -166,25 +169,15 @@ export type NonceVerified = {
  * @returns {Object} nonce
  */
 function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
-  jwsHeader: JwsHeader, jwsPayload: JwsPayload, signatureBuffer: Buffer): ?NonceVerified {
+  jwsHeader: JwsHeader, jwsPayload: JwsPayload): ?NonceVerified {
   // TODO AFTER MILESTONE check data structure scheme
 
-  // check if jwsHeader.alg is iden3.sig.v0_1 (SIGALGV01)
-  if (jwsHeader.alg !== SIGALGV01) {
-    return undefined;
-  }
-
-  // check if jwsHeader.typ is SIGV01  TODO confirm that must be SIGV01
-  if (jwsHeader.typ !== SIGV01) {
-    return undefined;
-  }
-
-  // check origin
+  // 2. Verify jwsPayload.data.origin is origin
   if (jwsPayload.data.origin !== origin) {
     return undefined;
   }
 
-  // check jwsPayload.data.challege valid
+  // 3. Verify jwsPayload.data.challenge is in nonceDB and hasn't expired, delete it
   const nonceVerified = nonceDB.searchAndDelete(jwsPayload.data.challenge);
   if (nonceVerified == null) {
     return undefined;
@@ -195,16 +188,65 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
     return undefined;
   }
 
-  // check times iat <= current < exp
+  // 4. Verify that jwsHeader.iss and jwsPayload.form.ethName are in jwsPayload.proofAssignName.leaf
+  const entry = Entry.newFromHex(jwsPayload.form.proofAssignName.leaf);
+  const claimAssignName = claimUtils.newClaimFromEntry(entry);
+  if (!(claimAssignName instanceof AssignName)) {
+    return undefined;
+  }
+  const nameWithoutDomain = jwsPayload.form.ethName.split('@')[0];
+  // check jwsPayload.form.proofAssignName.leaf {hashName} === hash(jwsPayload.form.ethName
+  if (utils.bytesToHex(claimAssignName.hashName) !== utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
+    return undefined;
+  }
+  // check claimAssignName.structure.id = jwsHeader.iss
+  if (utils.bytesToHex(claimAssignName.id) !== jwsHeader.iss) {
+    return undefined;
+  }
+
+  // TODO AFTER MILESTONE verify identity address from counterfactual
+  // TODO AFTER MILESTONE check counterfactual address from jwsPayload.identity, address == jwsHeader.iss
+  // TODO AFTER MILESTONE check jwsPayload.identity.relay == hardcoded relay address
+
+  // 5. VerifyProofClaim(jwsPayload.form.proofAssignName, relayPk)
+  if (!proofs.verifyProofClaim(jwsPayload.form.proofAssignName, relayAddr)) {
+    return undefined;
+  }
+
+  // nonceVerified.nonce.ethName = jwsPayload.form.ethName;
+  // nonceVerified.nonce.idAddr = jwsHeader.iss;
+  return {
+    nonce: nonceVerified.nonce,
+    ethName: jwsPayload.form.ethName,
+    idAddr: jwsHeader.iss,
+  };
+}
+
+/**
+ * Verify a signed packet
+ * @param {Object} nonceDB
+ * @param {String} origin
+ * @param {Object} jwsHeader
+ * @param {Object} jwsPayload
+ * @param {Buffer} signatureBuffer
+ * @returns {?NonceVerified} nonce
+ */
+function verifySignedPacketV01(nonceDB: NonceDB, origin: string, jwsHeader: JwsHeader, jwsPayload: JwsPayload,
+  signatureBuffer: Buffer): ?NonceVerified {
+  // 2. Verify jwsHeader.alg is 'ES255'
+  if (jwsHeader.alg !== SIGALGV01) {
+    return undefined;
+  }
+
+  // 3. Verify that jwsHeader.iat <= now() < jwsHeader.exp
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
   if (!((jwsHeader.iat <= current) && (current < jwsHeader.exp))) {
     return undefined;
   }
 
-  // check jwsPayload.ksign with jwsPayload.proofKSign.leaf
-  // get ClaimAuthorizeKSign from jwsPayload.proofKSign.leaf
-  let entry = Entry.newFromHex(jwsPayload.proofKSign.leaf);
+  // 4. Verify that jwsPayload.ksign is in jwsPayload.proofKSign.leaf
+  const entry = Entry.newFromHex(jwsPayload.proofKSign.leaf);
   const claimAuthorizeKSign = claimUtils.newClaimFromEntry(entry);
   if (!(claimAuthorizeKSign instanceof AuthorizeKSignSecp256k1)) {
     return undefined;
@@ -215,25 +257,18 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
     return undefined;
   }
 
-  // check that jwsPayload.form.proofEthName == jwsPayload.form.ethName == jwsHeader.iss
-  // get ClaimAssignName from jwsPayload.form.proofEthName.leaf
-  entry = Entry.newFromHex(jwsPayload.form.proofEthName.proofClaimAssignName.leaf);
-  const claimAssignName = claimUtils.newClaimFromEntry(entry);
-  if (!(claimAssignName instanceof AssignName)) {
+  // 5. Verify that jwsHeader.iss is in jwsPayload.proofKSign.
+  if (jwsPayload.proofKSign.proofs[0].aux == null) {
     return undefined;
   }
-  const nameWithoutDomain = jwsPayload.form.proofEthName.name.split('@')[0];
-  // check jwsPayload.form.proofEthName.proofClaimAssignName.leaf {hashName} === hash(jwsPayload.form.proofEthName.name
-  if (utils.bytesToHex(claimAssignName.hashName) !== utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
-    return undefined;
-  }
-  // check claimAssignName.structure.id = jwsHeader.iss
-  if (utils.bytesToHex(claimAssignName.id) !== jwsHeader.iss) {
+  if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
     return undefined;
   }
 
-  // check verify signature with jwsPayload.ksign
-  // as verifying a signature is cheaper than verifying a merkle tree proof, first we verify signature with ksign
+  // 6. Verify that signature of JWS(jwsHeader, jwsPayload) by jwsPayload.ksign is signature
+  //
+  // As verifying a signature is cheaper than verifying a merkle tree
+  // proof, first we verify signature with ksign
   const header64 = Buffer.from(JSON.stringify(jwsHeader)).toString('base64');
   const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
   const dataSigned = `${header64}.${payload64}`;
@@ -246,29 +281,17 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
     return undefined;
   }
 
-  // TODO AFTER MILESTONE verify identity address from counterfactual
-  // TODO AFTER MILESTONE check counterfactual address from jwsPayload.identity, address == jwsHeader.iss
-  // TODO AFTER MILESTONE check jwsPayload.identity.relay == hardcoded relay address
-
-  const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-
-  // verify proofEthName
-  if (!proofs.verifyProofClaim(jwsPayload.form.proofEthName.proofClaimAssignName, relayAddr)) {
-    return undefined;
-  }
-
-  // check jwsPayload.proofKSign
+  // 7. VerifyProofOfClaim(jwsPayload.proofOfKSign, relayPk)
   if (!proofs.verifyProofClaim(jwsPayload.proofKSign, relayAddr)) {
     return undefined;
   }
 
-  // nonceVerified.nonce.ethName = jwsPayload.form.proofEthName.name;
-  // nonceVerified.nonce.idAddr = jwsHeader.iss;
-  return {
-    nonce: nonceVerified.nonce,
-    ethName: jwsPayload.form.proofEthName.name,
-    idAddr: jwsHeader.iss,
-  };
+  switch (jwsPayload.type) {
+    case IDENASSERTV01:
+      return verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload);
+    default:
+      return undefined;
+  }
 }
 
 /**
@@ -287,10 +310,12 @@ function verifySignedPacket(nonceDB: NonceDB, origin: string, signedPacket: stri
   const jwsPayload = JSON.parse(Buffer.from(jwsPayload64, 'base64').toString('ascii'));
   const signatureBuffer = Buffer.from(signature64, 'base64');
 
+
   // switch over jwsHeader.typ
   switch (jwsHeader.typ) {
+    // 1. Verify jwsHeader.typ is 'iden3.sig.v0_1'
     case SIGV01:
-      return verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
+      return verifySignedPacketV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
     default:
       return undefined;
   }
