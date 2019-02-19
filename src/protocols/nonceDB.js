@@ -18,48 +18,50 @@ export class NonceDB {
   nonces: Array<NonceObj>;
 
   /**
-* Initialize NonceDB
-*/
+  * Initialize NonceDB
+  */
   constructor() {
     this.nonces = [];
   }
 
   /**
-* Add nonce with a specified timeout
-* The nonce will be valid until that timeout
-* @param {String} nonce
-* @param {Number} timeout, in unixtime format
-*/
-  _add(nonce: string, timeout: number): NonceObj {
+  * Add nonce with a specified timeout
+  * The nonce will be valid until that timeout
+  * @param {String} nonce
+  * @param {Number} timeout - in unixtime format
+  * @param {Object} auxData - Extra data to be added to NonceObject
+  */
+  _add(nonce: string, timeout: number, auxData: any = undefined): NonceObj {
     const nonceObj = {
       nonce,
       timestamp: timeout,
-      aux: undefined,
+      aux: auxData,
     };
     this.nonces.push(nonceObj);
     return nonceObj;
   }
 
   /**
-* Add nonce with a specified delta
-* The nonce will be valid until current-time + delta
-* @param {String} nonce
-* @param {Number} delta, in seconds unit
-*/
-  add(nonce: string, delta: number): NonceObj {
+  * Add nonce with a specified delta
+  * The nonce will be valid until current-time + delta
+  * @param {String} nonce
+  * @param {Number} delta, in seconds unit
+  * @param {Object} auxData - Extra data to be added to NonceObject
+  */
+  add(nonce: string, delta: number, auxData: any = undefined): NonceObj {
     const date = new Date();
     const timestamp = Math.round((date).getTime() / 1000);
     const timeout = timestamp + delta;
-    const nonceObj = this._add(nonce, timeout);
+    const nonceObj = this._add(nonce, timeout, auxData);
     return nonceObj;
   }
 
   /**
-* Add aux to the nonce
-* @param {String} nonce
-* @param {Object} aux
-* @param {bool}
-*/
+  * Add aux to the nonce
+  * @param {String} nonce
+  * @param {Object} aux
+  * @param {bool}
+  */
   addAuxToNonce(nonce: string, aux: any): boolean {
     for (let i = 0; i < this.nonces.length; i++) {
       if (this.nonces[i].nonce === nonce) {
@@ -75,10 +77,10 @@ export class NonceDB {
   }
 
   /**
-* Search nonce in NoceDB
-* @param {String} nonce
-* @returns {Object}
-*/
+  * Search nonce in NoceDB
+  * @param {String} nonce
+  * @returns {Object}
+  */
   search(nonce: string): ?NonceResult {
     this.deleteOld();
     for (let i = 0; i < this.nonces.length; i++) {
@@ -93,10 +95,10 @@ export class NonceDB {
   }
 
   /**
-* Search nonce in NoceDB, and then delete it
-* @param {String} nonce
-* @returns {bool}
-*/
+  * Search nonce in NoceDB, and then delete it
+  * @param {String} nonce
+  * @returns {bool}
+  */
   searchAndDelete(nonce: string): ?NonceResult {
     const n = this.search(nonce);
     if (n == null) {
@@ -107,9 +109,9 @@ export class NonceDB {
   }
 
   /**
-* Delete element in NonceDB
-* @param {String} nonce
-*/
+  * Delete element in NonceDB
+  * @param {String} nonce
+  */
   deleteElem(nonce: string) {
     const n = this.search(nonce);
     if (n == null) {
@@ -119,9 +121,9 @@ export class NonceDB {
   }
 
   /**
-* Delete nonces with timestamp older than the given
-* @param {Number} timestamp - if not specified will get current time
-*/
+  * Delete nonces with timestamp older than the given
+  * @param {Number} timestamp - if not specified will get current time
+  */
   deleteOld(timestamp: ?number) {
     if (timestamp == null) {
       const date = new Date();
