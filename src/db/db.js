@@ -98,40 +98,37 @@ class Db {
    * @returns {String} - Encrypted packed data
    */
   exportWallet(kc) {
-    if (kc.isUnlock()) {
-      try {
-        const lsStr = JSON.stringify(localStorage);
+    try {
+      const lsStr = JSON.stringify(localStorage);
+      const pubBackupKey = kc.getBackupPubKey();
 
-        return kcUtils.encrypt(kc.encryptionKey, lsStr); // encrypted wallet data
-      } catch (error) {
-        return undefined;
-      }
+      return kcUtils.encryptBox(pubBackupKey, lsStr);
+    } catch (error) {
+      return undefined;
     }
-    return undefined;
   }
 
   /**
    * Decrypts the encrypted database packed data and saves it into localStorage
+   * @param  {String} masterSeed - Mnemonic representing the master seed
    * @param  {Object} kc - KeyContainer
    * @param  {String} Database encrypted
    * @returns {Bool} - True if database is imported correctly, otherwise False
    */
-  importWallet(kc, dbEncrypted) {
-    if (kc.isUnlock()) {
-      try {
-        const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncrypted);
-        const dbExp = JSON.parse(dbExpStr);
+  importWallet(masterSeed, kc, dbEncrypted) {
+    try {
+      const keyPair = kc.getPrivKeyBackUpFromSeed(masterSeed);
+      const dbExpStr = kcUtils.decryptBox(keyPair.privateKey, keyPair.publicKey, dbEncrypted);
+      const dbExp = JSON.parse(dbExpStr);
 
-        this.deleteAll();
-        Object.keys(dbExp).forEach((key) => {
-          localStorage.setItem(key, dbExp[key]);
-        });
-        return true;
-      } catch (error) {
-        return false;
-      }
+      this.deleteAll();
+      Object.keys(dbExp).forEach((key) => {
+        localStorage.setItem(key, dbExp[key]);
+      });
+      return true;
+    } catch (error) {
+      return false;
     }
-    return false;
   }
 }
 

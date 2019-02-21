@@ -1,6 +1,8 @@
 const ethUtil = require('ethereumjs-util');
 const pbkdf2 = require('pbkdf2-sha256');
 const nacl = require('tweetnacl');
+const sealedBox = require('tweetnacl-sealedbox-js');
+const utils = require('../utils');
 nacl.util = require('tweetnacl-util');
 
 /**
@@ -79,9 +81,41 @@ function decrypt(key, messageWithNonce) {
   return nacl.util.encodeUTF8(decrypted);
 }
 
+/**
+ * Function to encrypt data using public key
+ * @param {String} pubKey - Public key in base64 string representation
+ * @param {String} data - Data to be encrypted
+ */
+function encryptBox(pubKey, data) {
+  const pubKeyBuff = utils.base64ToBytes(pubKey);
+  const dataBuff = nacl.util.decodeUTF8(data);
+  // Encrypt data
+  const dataEncrypted = sealedBox.seal(dataBuff, pubKeyBuff);
+
+  return utils.bytesToBase64(Buffer.from(dataEncrypted));
+}
+
+/**
+ * Function to decrypt data using key pair: public key and private key
+ * @param {String} privKey - Private key in base64 string representation
+ * @param {String} pubKey - Public key in base64 string representation
+ * @param {String} dataEncrypted - Data to be decrypted in base64 string representation
+ */
+function decryptBox(privKey, pubKey, dataEncrypted) {
+  const pubKeyBuff = utils.base64ToBytes(pubKey);
+  const privKeyBuff = utils.base64ToBytes(privKey);
+  const dataEncryptedBuff = utils.base64ToBytes(dataEncrypted);
+  // Decrypt data
+  const data = sealedBox.open(dataEncryptedBuff, pubKeyBuff, privKeyBuff);
+
+  return nacl.util.encodeUTF8(data);
+}
+
 module.exports = {
   concatSignature,
   passToKey,
   encrypt,
   decrypt,
+  encryptBox,
+  decryptBox,
 };

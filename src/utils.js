@@ -71,6 +71,24 @@ function hexToBytes(hex: string): Buffer {
 }
 
 /**
+ * Decode a Buffer to a base64 format string
+ * @param {Buffer} buff - Buffer to decode
+ * @returns {String} - Decoded Buffer in base64
+ */
+function bytesToBase64(buff: Buffer): string {
+  return buff.toString('base64');
+}
+
+/**
+ * Allocates a new Buffer using a base64 string format
+ * @param {String} strBase64 - Base64 string format to parse to a Buffer of bytes
+ * @returns {Buffer} - New parsed Buffer
+ */
+function base64ToBytes(strBase64: string): Buffer {
+  return Buffer.from(strBase64, 'base64');
+}
+
+/**
  * @param  {String} str
  * @returns {String}
  */
@@ -195,4 +213,6 @@ module.exports = {
   ethBytesToUint32,
   uint64ToEthBytes,
   ethBytesToUint64,
+  bytesToBase64,
+  base64ToBytes,
 };
