@@ -178,3 +178,14 @@ export function importClaimsDump(mt, claimsDump) {
     mt.addClaim(t);
   }
 }
+
+/**
+ * Retrieve merkle-tree proof type. It can be either existence or non-existence
+ * @param {String} proofHex - Hexadecimal representation of a merkle-tree proof
+ * @return {Bool} - Flag indicates if proof is existence (true) or non-existence (false)
+ */
+export function isMerkleTreeProofExistence(proofHex) {
+  const proofBuff = parseProof(proofHex);
+  const flagNonExistence = getBit(proofBuff.flagExistence, 0);
+  return !flagNonExistence;
+}
