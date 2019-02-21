@@ -5,6 +5,7 @@ const KCPREFIX = 'i3kc-';
 const IDPREFIX = 'id-';
 const KEYPREFIX = 'keys-';
 const IDRECOVERYPREFIX = 'idRecovery-';
+const PUBKEYBACKUP = 'pubKeyBackup';
 const CLAIMPREFIX = 'claim-';
 const MTPREFIX = 'i3mt-';
 
@@ -33,6 +34,7 @@ const CLAIMS = {
 };
 
 module.exports = {
+  PUBKEYBACKUP,
   IDRECOVERYPREFIX,
   IDPREFIX,
   KEYPREFIX,

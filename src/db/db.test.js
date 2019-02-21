@@ -5,6 +5,7 @@ const KeyContainer = require('../key-container/key-container');
 const { expect } = chai;
 
 describe('[Database] export and import database', () => {
+  const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
   let dataBase;
   let keyContainer;
   before('Create database and fill it', () => {
@@ -18,15 +19,22 @@ describe('[Database] export and import database', () => {
     }
   });
 
+  before('Generate public key backup', () => {
+    keyContainer.unlock('pass');
+    const publicBackupKey = keyContainer.generateKeyBackUp(mnemonic);
+    expect(publicBackupKey).to.be.not.equal(undefined);
+    keyContainer.lock();
+  });
+
   it('Export and import database', () => {
     keyContainer.unlock('pass');
     // Export wallet
-    const lsEncrypted = dataBase.exportWallet(keyContainer, dataBase);
+    const lsEncrypted = dataBase.exportWallet(keyContainer);
     expect(lsEncrypted).to.be.not.equal(undefined);
     // Import wallet
     // Delete LocalStorage
     dataBase.deleteAll();
-    const ack = dataBase.importWallet(keyContainer, lsEncrypted);
+    const ack = dataBase.importWallet(mnemonic, keyContainer, lsEncrypted);
     if (!ack) {
       throw new Error('Error importing database');
     }

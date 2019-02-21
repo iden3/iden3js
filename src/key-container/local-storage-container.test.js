@@ -1,6 +1,7 @@
 const chai = require('chai');
 const Db = require('../db/db');
 const LocalStorageContainer = require('./local-storage-container');
+const kcUtils = require('./kc-utils');
 
 const { expect } = chai;
 
@@ -95,6 +96,30 @@ describe('[Local-storage-container] Test single functions', () => {
     const keyPath = 0;
     const newAddressHex = keyContainer.generateSingleKey(keyProfilePath, keyPath);
     expect(newAddressHex).to.be.equal('0xc7d89fe96acdb257b434bf580b8e6eb677d445a9');
+    keyContainer.lock();
+  });
+
+  it('Generate backup key and store it', () => {
+    keyContainer.unlock('pass');
+    const masterSeed = keyContainer.getMasterSeed();
+    const pubKeyBackup = keyContainer.generateKeyBackUp(masterSeed);
+    const getKeyBackup = keyContainer.getBackupPubKey();
+    expect(getKeyBackup).to.be.not.equal(undefined);
+    expect(getKeyBackup).to.be.equal(pubKeyBackup);
+    keyContainer.lock();
+  });
+
+  it('Encrypt using backup public key and decrypt with mnemonic', () => {
+    keyContainer.unlock('pass');
+    const pubKeyBackup = keyContainer.getBackupPubKey();
+    const data = 'Data example';
+    // Encrypted data
+    const dataEn = kcUtils.encryptBox(pubKeyBackup, data);
+    // Decrypt data with master seed
+    const masterSeed = keyContainer.getMasterSeed();
+    const keyPair = keyContainer.getPrivKeyBackUpFromSeed(masterSeed);
+    const dataOriginal = kcUtils.decryptBox(keyPair.privateKey, keyPair.publicKey, dataEn);
+    expect(dataOriginal).to.be.equal(data);
     keyContainer.lock();
   });
 });

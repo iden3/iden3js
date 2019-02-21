@@ -230,6 +230,68 @@ class LocalStorageContainer {
   }
 
   /**
+   * Generates backup key and store it into the database
+   * @param {String} masterSeed - Master seed
+   * @return {String} - Public key to encrypt
+   */
+  generateKeyBackUp(masterSeed) {
+    try {
+      const root = hdkey.fromMasterSeed(masterSeed);
+      const pathBackup = "m/44'/60'/2'";
+      const addrNodeBackup = root.derive(pathBackup);
+      const privKeyBackup = addrNodeBackup._privateKey;
+      // genarate public key from private key
+      const keyPair = nacl.box.keyPair.fromSecretKey(privKeyBackup);
+      const pubKeyBackup = keyPair.publicKey;
+      const pubKeyBackup64 = utils.bytesToBase64(Buffer.from(pubKeyBackup));
+
+      this.db.insert(this.prefix + CONSTANTS.PUBKEYBACKUP, pubKeyBackup64);
+      return pubKeyBackup64;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  /**
+   * Get backup public key
+   * @return {String} - Backup public key
+   */
+  getBackupPubKey() {
+    try {
+      const keyDb = this.db.listKeys(this.prefix + CONSTANTS.PUBKEYBACKUP);
+
+      if (keyDb.length === 0) {
+        return undefined;
+      }
+      return this.db.get(keyDb);
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  /**
+   * Get backup private key from a given seed
+   * @param {String} masterSeed - Master seed
+   * @return {Object} - Key pair (public - private) derived from master seed represented both in base64 string
+   */
+  getPrivKeyBackUpFromSeed(masterSeed) {
+    try {
+      const root = hdkey.fromMasterSeed(masterSeed);
+      const pathRecovery = "m/44'/60'/2'";
+      const addrNodeRecovery = root.derive(pathRecovery);
+      const privKeyBackup = addrNodeRecovery._privateKey;
+      const privKeyBackup64 = utils.bytesToBase64(privKeyBackup);
+      const keyPair = nacl.box.keyPair.fromSecretKey(privKeyBackup);
+      const pubKeyBackup = keyPair.publicKey;
+      const pubKeyBackup64 = utils.bytesToBase64(Buffer.from(pubKeyBackup));
+
+      return { privateKey: privKeyBackup64, publicKey: pubKeyBackup64 };
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  /**
    * Generates a random key from a given key seed and its path
    * @param {UInt32} keyProfilePath - First path to derive the key
    * @param {UInt32} keyPath - Second path to derive the key
@@ -261,12 +323,12 @@ class LocalStorageContainer {
    */
   getRecoveryAddr() {
     if (this.isUnlock()) {
-      const idSeedKey = this.db.listKeys(this.prefix + CONSTANTS.IDRECOVERYPREFIX);
+      const keyDb = this.db.listKeys(this.prefix + CONSTANTS.IDRECOVERYPREFIX);
 
-      if (idSeedKey.length === 0) {
+      if (keyDb.length === 0) {
         return undefined;
       }
-      return idSeedKey[0].replace(this.prefix + CONSTANTS.IDRECOVERYPREFIX, '');
+      return keyDb[0].replace(this.prefix + CONSTANTS.IDRECOVERYPREFIX, '');
     }
     return undefined;
   }
