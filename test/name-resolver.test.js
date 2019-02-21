@@ -1,14 +1,10 @@
-// @flow
-import {
-  describe, it, before,
-} from 'mocha';
-
 const chai = require('chai');
 
 const { expect } = chai;
 const iden3 = require('../index');
 
 const nameResolverUrl = 'http://127.0.0.1:8000/api/unstable';
+
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const relayUrl = 'http://127.0.0.1:8000/api/unstable';
 

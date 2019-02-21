@@ -1,5 +1,7 @@
 {
   "presets": ["env", "flow"],
+  "sourceMaps": true,
+  "retainLines": true,
   "plugins": [
     [ "transform-runtime",
       { "polyfill": false,

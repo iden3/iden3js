@@ -1,5 +1,6 @@
 // @flow
 import type { AxiosPromise } from 'axios';
+
 import { axiosGetDebug, axiosPostDebug } from './http-debug';
 
 const axios = require('axios');
@@ -38,7 +39,7 @@ class NameResolver {
    * @param  {string} name - Label to bind
    * @return {AxiosPromise} Promise with http response: empty if OK, otherwise Error
    */
-  bindID(kc: Object, idAddr: string, keyOperationalPub: string, name: string): AxiosPromise<any, ?Error> {
+  bindID(kc: Object, idAddr: string, keyOp: string, proofKeyOp: string, name: string): AxiosPromise<any, ?Error> {
     const idBytes = utils.hexToBytes(idAddr);
     const nameBytes = Buffer.from(name);
     let msgBytes = Buffer.from([]);
@@ -46,15 +47,16 @@ class NameResolver {
     msgBytes = Buffer.concat([msgBytes, idBytes]);
     msgBytes = Buffer.concat([msgBytes, nameBytes]);
 
-    const signatureObj = kc.sign(keyOperationalPub, utils.bytesToHex(msgBytes));
-    const bindIDMsg = {
+    const signatureObj = kc.sign(keyOp, utils.bytesToHex(msgBytes));
+    const bindIdMsg = {
       idAddr,
       name,
       signature: signatureObj.signature,
-      kSignPk: keyOperationalPub,
+      kSignPk: keyOp,
+      proofKSign: proofKeyOp,
     };
 
-    return axios.postFn(`${this.url}/names`, bindIDMsg);
+    return this.postFn(`${this.url}/names`, bindIdMsg);
   }
 
   /**
@@ -63,7 +65,15 @@ class NameResolver {
    * @return {AxiosPromise} Promise with http response: empty if OK, otherwise Error
    */
   resolveName(name: string): AxiosPromise<any, ?Error> {
-    return axios.get(`${this.url}/names/${name}`);
+    return this.getFn(`${this.url}/names/${name}`);
+  }
+
+  /**
+   * Retrieve root and contract root of name resolver service
+   * @return {AxiosPromise} Promise with http response: empty if OK, otherwise Error
+   */
+  getRoot(): AxiosPromise<any, ?Error> {
+    return this.getFn(`${this.url}/root`);
   }
 }
 
