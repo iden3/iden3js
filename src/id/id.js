@@ -14,11 +14,12 @@ class Id {
    * @param  {String} keyRevoke - Revoke address key
    * @param  {Object} relay - Relay associated with the identity
    * @param  {Object} relayAddr - Relay address
+   * @param  {Object} nameserver - Name Server associated with the identity
    * @param  {String} implementation
    * @param  {String} backup
    * @param  {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
-  constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, implementation = '', backup = undefined, keyProfilePath = 0) {
+  constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, nameserver, implementation = '', backup = undefined, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
     this.keyRecover = keyRecover;
@@ -26,6 +27,7 @@ class Id {
     this.keyOperationalPub = keyOpPub;
     this.relay = relay;
     this.relayAddr = relayAddr; // this can be get from a relay endpoint
+    this.nameserver = nameserver;
     this.idAddr = undefined;
     this.implementation = implementation;
     this.backup = backup;
@@ -134,8 +136,8 @@ class Id {
    * @param {Object} kc - Key container
    * @param {String} name - Label to identify the address
    */
-  bindID(kc, name) {
-    return this.relay.bindID(kc, this.idAddr, this.keyOperationalPub, name);
+  bindID(kc, ksign, proofKSign, name) {
+    return this.nameserver.bindID(kc, ksign, proofKSign, this.idAddr, name);
   }
 }
 

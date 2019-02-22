@@ -130,15 +130,16 @@ describe('[protocol] login flow', () => {
     // check that the nonce is in the nonceDB
     expect(nonceDB.search(signatureRequest.body.data.challenge)).to.be.not.equal(undefined);
 
-    const date = new Date();
-    const unixtime = Math.round((date).getTime() / 1000);
-    const expirationTime = unixtime + (3600 * 60);
     // identity wallet:
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr,
-      proofEthName.ethName, proofEthName.proofAssignName, kc, ksign, proofKSign, expirationTime);
+      proofEthName.ethName, proofEthName.proofAssignName, kc, ksign, proofKSign, 3600 * 60);
 
     // login backend:
-    const nonceVerified = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
+    const jws = iden3.protocols.login.verifySignedPacket(signedPacket);
+    expect(jws).to.be.not.equal(undefined);
+    expect(jws.verified).to.be.equal(true);
+    expect(jws.payload.type).to.be.equal(iden3.protocols.login.IDENASSERTV01);
+    const nonceVerified = iden3.protocols.login.verifyIdenAssertV01(nonceDB, origin, jws.header, jws.payload);
     expect(nonceVerified).to.be.not.equal(undefined);
 
     // check that the nonce returned when deleting the nonce of the signedPacket, is the same
@@ -152,7 +153,11 @@ describe('[protocol] login flow', () => {
     expect(nonceVerified.idAddr).to.be.equal(usrAddr);
 
     // check that an already checked signedPacket is not more longer available to be verified
-    const nonceF = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
+    const jwsF = iden3.protocols.login.verifySignedPacket(signedPacket);
+    expect(jwsF).to.be.not.equal(undefined);
+    expect(jwsF.verified).to.be.equal(true);
+    expect(jwsF.payload.type).to.be.equal(iden3.protocols.login.IDENASSERTV01);
+    const nonceF = iden3.protocols.login.verifyIdenAssertV01(nonceDB, origin, jwsF.header, jwsF.payload);
     expect(nonceF).to.be.equal(undefined);
   });
 });

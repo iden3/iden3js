@@ -17,7 +17,8 @@ const kCont = require('../key-container/key-container');
 // Constants of the login protocol
 const SIGV01 = 'iden3.sig.v0_1';
 const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
-const SIGALGV01 = 'ES255';
+const GENERICSIGV01 = 'iden3.gen_sig.v0_1';
+const SIGALGV01 = 'EK256K1';
 
 // Temporary hardcoded relay address
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
@@ -97,38 +98,33 @@ type JwsPayload = {
 };
 
 /**
- * Sign signatureRequest
- * @param {Object} signatureRequest
- * @param {String} idAddr
- * @param {String} ethName
- * @param {Object} proofEthName
+ * Sign a SIGV01 packet with ksign as idAddr
  * @param {Object} kc
+ * @param {String} idAddr
  * @param {String} ksign - public key in hex format
  * @param {Object} proofKSign
- * @param {Number} expirationTime
+ * @param {Number} expirationTimeDelta
+ * @param {Object} data
+ * @param {Object} form
  * @returns {String} signedPacket
  */
-function signIdenAssertV01(signatureRequest: any, idAddr: string,
-  ethName: string, proofAssignName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
-  proofKSign: proofs.ProofClaim, expirationTime: number): string {
+function signPacket(kc: kCont.KeyContainer, idAddr: string, ksign: string, proofKSign: proofs.ProofClaim,
+  expirationTimeDelta: number, payloadType: string, data: any, form: any): string {
   const date = new Date();
   const currentTime = Math.round((date).getTime() / 1000);
   const jwsHeader = {
     typ: SIGV01,
     iss: idAddr,
     iat: currentTime,
-    exp: expirationTime,
+    exp: currentTime + expirationTimeDelta,
     alg: SIGALGV01,
   };
   const jwsPayload = {
-    type: IDENASSERTV01,
-    data: signatureRequest.body.data,
+    type: payloadType,
+    data,
     ksign,
     proofKSign,
-    form: {
-      ethName,
-      proofAssignName,
-    },
+    form,
     // identity: {  TODO AFTER MILESTONE
     //   operational: ,
     //   recovery:,
@@ -151,6 +147,25 @@ function signIdenAssertV01(signatureRequest: any, idAddr: string,
 
   const result = `${dataToSign}.${signature64}`;
   return result;
+}
+
+/**
+ * Sign signatureRequest
+ * @param {Object} signatureRequest
+ * @param {String} idAddr
+ * @param {String} ethName
+ * @param {Object} proofEthName
+ * @param {Object} kc
+ * @param {String} ksign - public key in hex format
+ * @param {Object} proofKSign
+ * @param {Number} expirationTimeDelta
+ * @returns {String} signedPacket
+ */
+function signIdenAssertV01(signatureRequest: any, idAddr: string,
+  ethName: string, proofAssignName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
+  proofKSign: proofs.ProofClaim, expirationTimeDelta: number): string {
+  return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
+    IDENASSERTV01, signatureRequest.body.data, { ethName, proofAssignName });
 }
 
 export type NonceVerified = {
@@ -224,45 +239,44 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
 
 /**
  * Verify a signed packet
- * @param {Object} nonceDB
- * @param {String} origin
  * @param {Object} jwsHeader
  * @param {Object} jwsPayload
  * @param {Buffer} signatureBuffer
- * @returns {?NonceVerified} nonce
+ * @returns {boolean} result
  */
-function verifySignedPacketV01(nonceDB: NonceDB, origin: string, jwsHeader: JwsHeader, jwsPayload: JwsPayload,
-  signatureBuffer: Buffer): ?NonceVerified {
+function verifySignedPacketV01(jwsHeader: JwsHeader, jwsPayload: JwsPayload,
+  signatureBuffer: Buffer): boolean {
   // 2. Verify jwsHeader.alg is 'ES255'
   if (jwsHeader.alg !== SIGALGV01) {
-    return undefined;
+    return false;
   }
 
   // 3. Verify that jwsHeader.iat <= now() < jwsHeader.exp
   const date = new Date();
   const current = Math.round((date).getTime() / 1000);
-  if (!((jwsHeader.iat <= current) && (current < jwsHeader.exp))) {
-    return undefined;
+  // Moving iat 2 minutes in the past to accomodate time shifts in time synchronization.
+  if (!((jwsHeader.iat - 120 <= current) && (current < jwsHeader.exp))) {
+    return false;
   }
 
   // 4. Verify that jwsPayload.ksign is in jwsPayload.proofKSign.leaf
   const entry = Entry.newFromHex(jwsPayload.proofKSign.leaf);
   const claimAuthorizeKSign = claimUtils.newClaimFromEntry(entry);
   if (!(claimAuthorizeKSign instanceof AuthorizeKSignSecp256k1)) {
-    return undefined;
+    return false;
   }
   const pubK = claimAuthorizeKSign.pubKeyCompressed;
   const pubKHex = utils.bytesToHex(pubK);
   if (pubKHex !== jwsPayload.ksign) {
-    return undefined;
+    return false;
   }
 
   // 5. Verify that jwsHeader.iss is in jwsPayload.proofKSign.
   if (jwsPayload.proofKSign.proofs[0].aux == null) {
-    return undefined;
+    return false;
   }
   if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
-    return undefined;
+    return false;
   }
 
   // 6. Verify that signature of JWS(jwsHeader, jwsPayload) by jwsPayload.ksign is signature
@@ -278,20 +292,15 @@ function verifySignedPacketV01(nonceDB: NonceDB, origin: string, jwsHeader: JwsH
   const ksignAddr = ethUtil.pubToAddress(jwsPayload.ksign, true);
   const ksignAddrHex = utils.bytesToHex(ksignAddr);
   if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, ksignAddrHex)) { // mHex, sigHex, addressHex
-    return undefined;
+    return false;
   }
 
   // 7. VerifyProofOfClaim(jwsPayload.proofOfKSign, relayPk)
   if (!proofs.verifyProofClaim(jwsPayload.proofKSign, relayAddr)) {
-    return undefined;
+    return false;
   }
 
-  switch (jwsPayload.type) {
-    case IDENASSERTV01:
-      return verifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload);
-    default:
-      return undefined;
-  }
+  return true;
 }
 
 /**
@@ -299,9 +308,9 @@ function verifySignedPacketV01(nonceDB: NonceDB, origin: string, jwsHeader: JwsH
  * @param {Object} nonceDB
  * @param {String} origin
  * @param {String} signedPacket
- * @returns {Object} nonce
+ * @returns {undefined | Object} deserialization output with verification result
  */
-function verifySignedPacket(nonceDB: NonceDB, origin: string, signedPacket: string): ?NonceVerified {
+function verifySignedPacket(signedPacket: string): ?{ verified: boolean, header: JwsHeader, payload: JwsPayload } {
   // extract jwsHeader and jwsPayload and signatureBuffer in object
   const jwsHeader64 = signedPacket.split('.')[0];
   const jwsPayload64 = signedPacket.split('.')[1];
@@ -315,16 +324,25 @@ function verifySignedPacket(nonceDB: NonceDB, origin: string, signedPacket: stri
   switch (jwsHeader.typ) {
     // 1. Verify jwsHeader.typ is 'iden3.sig.v0_1'
     case SIGV01:
-      return verifySignedPacketV01(nonceDB, origin, jwsHeader, jwsPayload, signatureBuffer);
+      return {
+        verified: verifySignedPacketV01(jwsHeader, jwsPayload, signatureBuffer),
+        header: jwsHeader,
+        payload: jwsPayload,
+      };
     default:
       return undefined;
   }
 }
 
 module.exports = {
+  signPacket,
   newRequestIdenAssert,
   signIdenAssertV01,
   // signPacket,
   verifyIdenAssertV01,
   verifySignedPacket,
+  SIGV01,
+  IDENASSERTV01,
+  SIGALGV01,
+  GENERICSIGV01,
 };
