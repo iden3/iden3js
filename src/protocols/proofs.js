@@ -75,8 +75,8 @@ class ProofClaim {
 /**
  * Verify a ProofClaim from the claim to the blockchain root
  * Message signed is built as: | rootKey | Date |
- * @param {ProofClaim} proof - Full dta of claim in order to be verified
- * @param {String} relayAddr - Public address that has sign: | rootKey | Date |
+ * @param {ProofClaim} proof - Full data of claim in order to be verified
+ * @param {String} relayAddr - Public address that has signed: | rootKey | Date |
  */
 function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
   // Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
