@@ -8,6 +8,7 @@
         "regenerator": true
       }
     ],
-    "syntax-flow"
+    "syntax-flow",
   ]
+  
 }

@@ -77,7 +77,7 @@ class LocalStorageContainer {
   /**
    * Generates master mnemonic
    * @param {String} - Mnemonic to store
-   * @returns {Bool} - True if databe has been written correctly, False otherwise
+   * @returns {Bool} - True if database has been written correctly, False otherwise
    */
   generateMasterSeed(mnemonic = bip39.generateMnemonic()) {
     if (this.isUnlock() && bip39.validateMnemonic(mnemonic)) {

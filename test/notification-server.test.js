@@ -5,24 +5,29 @@ const iden3 = require('../index');
 
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const relayUrl = 'http://127.0.0.1:8000/api/unstable';
-const notificationUrl = 'http://127.0.0.1:6000/api/unstable';
+const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
+const notificationUrl = 'http://127.0.0.1:10000/api/unstable';
 
 describe('[notification-server] Notification server Http communications', () => {
+  const testName = 'testName';
   let notificationServer;
   let id;
   let dataBase;
   let keyContainer;
   let relay;
   let proofClaimKeyOperational;
+  let proofEthName;
+  let nameServer;
 
-  before('Create name resolver object', () => {
+  before('Create servers object', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
-    notificationServer = new iden3.NotificationServer(notificationUrl, true);
+    nameServer = new iden3.NameServer(nameServerUrl);
+    notificationServer = new iden3.NotificationServer(notificationUrl);
   });
 
-  it('Create identity and get proofClaim of operational key', async () => {
+  it('Create identity, bind name and get proofClaim of operational key', async () => {
     keyContainer.unlock('pass');
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.generateMasterSeed(mnemonic);
@@ -31,50 +36,113 @@ describe('[notification-server] Notification server Http communications', () => 
     const keyRecover = keys[2];
     const keyRevoke = keys[3];
     // Create identity object
-    id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, '', undefined, 0);
-    await id.createID()
-      .then(async (createIDRes) => {
-        // Successfull create identity api call to relay
-        expect(createIDRes.idAddr).to.be.equal(id.idAddr);
-        expect(createIDRes.idAddr).to.be.not.equal(undefined);
-        expect(createIDRes.proofClaim).to.be.not.equal(undefined);
-        proofClaimKeyOperational = createIDRes.proofClaim;
-      });
+    id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, nameServer, notificationServer, '', undefined, 0);
+    // Create identity
+    const createIdRes = await id.createId();
+    expect(createIdRes.idAddr).to.be.equal(id.idAddr);
+    expect(createIdRes.idAddr).to.be.not.equal(undefined);
+    expect(createIdRes.proofClaim).to.be.not.equal(undefined);
+    proofClaimKeyOperational = createIdRes.proofClaim;
+    // Bind label to identity address
+    const bindIdRes = await id.bindId(keyContainer, id.keyOperationalPub, proofClaimKeyOperational, testName);
+    proofEthName = bindIdRes.data;
     keyContainer.lock();
   });
 
   it('Post notification', async () => {
-    const notification = { issuer: id.idAddr, data: 'dataTest' };
-    const notificationStrig = JSON.stringify(notification);
-    // Create test notification for a given identity
-    await notificationServer.postNotification(id.idAddr, notificationStrig)
-      .then((resp) => {
-        expect(resp.status).to.be.equal(200);
-      });
+    let i = 0;
+    for (i = 0; i < 10; i++) {
+      const notification = `dataTest-${i}`;
+      // Create test notification for a given identity
+      // eslint-disable-next-line no-await-in-loop
+      const respPostNot = await notificationServer.postNotification(id.idAddr, notification);
+      expect(respPostNot.status).to.be.equal(200);
+    }
   });
 
+  it('Login to notification server', async () => {
+    keyContainer.unlock('pass');
+    // Login to notification server
+    // It implies: request login packet, sign packet, submit signed packet and receive jws token
+    const login = await id.loginNotificationServer(proofEthName, keyContainer, id.keyOperationalPub, proofClaimKeyOperational);
+    expect(login.status).to.be.equal(200);
+    keyContainer.lock();
+  });
+
+
   it('Retrieve notifications', async () => {
-    await notificationServer.getNotifications(keyContainer, id.idAddr, id.keyOperationalPub, proofClaimKeyOperational)
-      .then((resp) => {
-        expect(resp.status).to.be.equal(200);
-        const notificationArray = resp.data;
-        expect(notificationArray.length).to.be.equal(1);
-        const notificationObject = notificationArray[0];
-        expect(notificationObject.notification).to.be.equal('dataTest');
-      });
+    // Get all 10 notifications
+    let resGetNot = await id.getNotifications();
+    expect(resGetNot.status).to.be.equal(200);
+    const { notifications } = resGetNot.data;
+    expect(notifications.length).to.be.equal(10);
+    let i = 0;
+    for (i = 0; i < notifications.length; i++) {
+      const notificationElement = notifications[i];
+      const idData = notificationElement.id - 1;
+      const notificationPost = `dataTest-${idData}`;
+      expect(notificationElement.data).to.be.equal(notificationPost);
+    }
+    // Get notifications before identity notification 5
+    resGetNot = await id.getNotifications(5, 0);
+    expect(resGetNot.status).to.be.equal(200);
+    const notificationsBefore = resGetNot.data.notifications;
+    expect(notificationsBefore.length).to.be.equal(4);
+    for (i = 0; i < notificationsBefore.length; i++) {
+      const notificationElement = notificationsBefore[i];
+      const idData = notificationElement.id;
+      expect(idData).to.be.below(5);
+    }
+    // Get notifications after identity notification 5
+    resGetNot = await id.getNotifications(0, 5);
+    expect(resGetNot.status).to.be.equal(200);
+    const notificationsAfter = resGetNot.data.notifications;
+    expect(notificationsAfter.length).to.be.equal(5);
+    for (i = 0; i < notificationsAfter.length; i++) {
+      const notificationElement = notificationsAfter[i];
+      const idData = notificationElement.id;
+      expect(idData).to.be.above(5);
+    }
+  });
+
+  it('Add 20 notifications in total', async () => {
+    // Insert 10 more notifications
+    let i = 0;
+    for (i = 10; i < 20; i++) {
+      const notification = `dataTest-${i}`;
+      // Create test notification for a given identity
+      // eslint-disable-next-line no-await-in-loop
+      const respPostNot = await notificationServer.postNotification(id.idAddr, notification);
+      expect(respPostNot.status).to.be.equal(200);
+    }
+
+    let resGetNot = await id.getNotifications();
+    expect(resGetNot.status).to.be.equal(200);
+    const { notifications } = resGetNot.data;
+    expect(notifications.length).to.be.equal(10);
+
+    // Get notifications before id notification 15
+    // returns 10 notifications before id 15
+    resGetNot = await id.getNotifications(15, 0);
+    expect(resGetNot.status).to.be.equal(200);
+    const notificationsBefore = resGetNot.data.notifications;
+    expect(notificationsBefore.length).to.be.equal(10);
+    for (i = 0; i < notificationsBefore.length; i++) {
+      const notificationElement = notificationsBefore[i];
+      const idData = notificationElement.id;
+      expect(idData).to.be.below(15);
+    }
   });
 
   it('Delete notifications', async () => {
-    await notificationServer.deleteNotifications(keyContainer, id.idAddr, id.keyOperationalPub, proofClaimKeyOperational)
-      .then(async (respDelete) => {
-        expect(respDelete.status).to.be.equal(200);
-        // Retrieve notiications ance thay have been deleted
-        await notificationServer.getNotifications(keyContainer, id.idAddr, id.keyOperationalPub, proofClaimKeyOperational)
-          .then((respGet) => {
-            expect(respGet.status).to.be.equal(200);
-            const notificationArray = respGet.data;
-            expect(notificationArray.length).to.be.equal(1);
-          });
-      });
+    // Delete notifications
+    const deleteResp = await id.deleteNotifications();
+    expect(deleteResp.status).to.be.equal(200);
+    expect(deleteResp.data.removed).to.be.equal(20);
+    // Check pending notifications. Since they have been deleted, it should be 0
+    const resGetNot = await id.getNotifications();
+    expect(resGetNot.status).to.be.equal(200);
+    const { notifications } = resGetNot.data;
+    expect(notifications).to.be.equal(null);
   });
 });

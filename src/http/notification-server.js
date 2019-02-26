@@ -3,13 +3,9 @@ import type { AxiosPromise } from 'axios';
 import { axiosGetDebug, axiosPostDebug, axiosDeleteDebug } from './http-debug';
 
 const axios = require('axios');
-const kCont = require('../key-container/key-container');
-const login = require('../protocols/login');
-const proofs = require('../protocols/proofs');
 /**
  * Class representing the notification server
  * It contains all the relay API calls
- * @param {String} url
  */
 class NotificationServer {
   url: string;
@@ -19,8 +15,9 @@ class NotificationServer {
   deleteFn: (string, any) => any;
 
   /**
-   * Initialization name server object
+   * Initialization notification server object
    * @param {String} url - NameServer Url identifier
+   * @param {Boolean} debug - Default to false. Prints Http response into the console if true
    */
   constructor(url: string, debug: boolean = false) {
     this.url = url;
@@ -37,69 +34,66 @@ class NotificationServer {
   }
 
   /**
+   * Request login into notification server
+   * Login would be done according identity assert protocol
+   * Server response would be signature request package
+   * @return {Object} Http response
+   */
+  requestLogin(): AxiosPromise<any, any> {
+    return this.getFn(`${this.url}/login`);
+  }
+
+  /**
+   * Submit login into notification server
+   * Login would be done according identity assert protocol
+   * Server response would be a jws token
+   * @param {String} signedPacket - Identity assertion packet represented into an encoded base64 string
+   * @return {Object} Http response
+   */
+  submitLogin(signedPacket: string): AxiosPromise<any, any> {
+    return this.postFn(`${this.url}/login`, { jws: signedPacket });
+  }
+
+  /**
    * Set notification on server for an spcefic identity
    * @param {String} idAddr - Identity address
+   * @param {String} notification - Notification to be stored
    * @return {Object} Http response
    */
   postNotification(idAddr: string, notification: string): AxiosPromise<any, any> {
-    return this.postFn(`${this.url}/notifications/${idAddr}`, { jws: notification });
+    return this.postFn(`${this.url}/notifications/${idAddr}`, { data: notification });
   }
 
   /**
    * Gets last 10 notifications available for an specific address
    * Request can be done with following parameters:
-   * before identifier ['beforeId']: returns previous 10 notifications from the notificatio identifier
-   * after identifier ['afterId']: returns next 10 notifications from the notificatio identifier
-   * @param {kCont.KeyContainer} kc - Keycontainer
-   * @param {String} idAddr - Identity address
-   * @param {String} kSign - Key to sign data packet
-   * @param {proofs.ProofClaim} proofKSign - Proof that key signature belongs to identity address
-   * @param {Number} timeoutDelta - Expiration in seconds starting on current time
-   * @param {Number} beforeId - Get 10 notifications before this
-   * @param {Number} afterId - Get 10 notifications after this
+   * before identifier ['beforeId']: returns previous 10 notifications from the notification identifier
+   * after identifier ['afterId']: returns next 10 notifications from the notification identifier
+   * @param {String} token - Session token to be identified
+   * @param {Number} beforeId - Retrieve notifications less than this identifier
+   * @param {Number} afterId - Retrieve notifications greater than this identifier
    * @return {Object} Http response
    */
-  getNotifications(kc: kCont.KeyContainer, idAddr: string, kSign: string, proofKSign: proofs.ProofClaim,
-    timeoutDelta: number = 600, beforeId: number = 0, afterId: number = 0): AxiosPromise<any, any> {
-    // Take url parameters
+  getNotifications(token: string, beforeId: number = 0, afterId: number = 0): AxiosPromise<any, any> {
+    // Handle http parameters
     let urlParams = '';
     if (beforeId !== 0) {
-      urlParams = `?beforeid =${beforeId.toString()}`;
+      urlParams = `?beforeid=${beforeId.toString()}`;
     } else if (afterId !== 0) {
-      urlParams = `?afterid =${afterId.toString()}`;
+      urlParams = `?afterid=${afterId.toString()}`;
     }
-    // Build generic signed packet
-    const signedPacket = login.signGenericSigV01(kc, idAddr, kSign, proofKSign, timeoutDelta, {});
-    // Build input packet to prove that the requester owns identity address
-    const fullRequest = {
-      idAddr,
-      signedPacket,
-      proofKSign,
-    };
-    return this.postFn(`${this.url}/notifications${urlParams}`, { jws: fullRequest });
+
+    return this.getFn(`${this.url}/auth/notifications${urlParams}`, { headers: { Authorization: `Bearer ${token}` } });
   }
 
   /**
-   * Delete all notification associted with an specific identity address
-   * Request has prove to be the owner of the identity adress
-   * @param {kCont.KeyContainer} kc - Keycontainer
-   * @param {String} idAddr - Identity address
-   * @param {String} kSign - Key to sign data packet
-   * @param {proofs.ProofClaim} proofKSign - Proof that key signature belongs to identity address
-   * @param {Number} timeoutDelta - Expiration in seconds starting on current time
+   * Delete all notification associated with an specific identity address
+   * Requester has to prove to be the owner of the identity adress
+   * @param {String} token - Session token to be identified
    * @return {Object} Http response
    */
-  deleteNotifications(kc: kCont.KeyContainer, idAddr: string, kSign: string, proofKSign: proofs.ProofClaim,
-    timeoutDelta: number = 600): AxiosPromise<any, any> {
-    // Build generic signed packet
-    const signedPacket = login.signGenericSigV01(kc, idAddr, kSign, proofKSign, timeoutDelta, {});
-    // Build input packet to prove that the requester owns identity address
-    const fullRequest = {
-      idAddr,
-      signedPacket,
-      proofKSign,
-    };
-    return this.deleteFn(`${this.url}/notifications`, { jws: fullRequest });
+  deleteNotifications(token: string): AxiosPromise<any, any> {
+    return this.deleteFn(`${this.url}/auth/notifications`, { headers: { Authorization: `Bearer ${token}` } });
   }
 }
 
