@@ -69,7 +69,7 @@ describe('[protocol] nonce', () => {
     })).to.be.equal(true);
     const result = (nonceDB.search('asdf0'): any); // This is a type casting
     expect(result).to.not.be.equal(undefined);
-    expect(result.nonce.aux.param1).to.be.equal(1);
+    expect(result.nonceObj.aux.param1).to.be.equal(1);
   });
   it('nonce searchAndDelete', () => {
     const nonceDB = new NonceDB();
@@ -81,6 +81,6 @@ describe('[protocol] nonce', () => {
     });
     const result = (nonceDB.searchAndDelete('asdf3'): any);
     expect(result).to.not.be.equal(undefined);
-    expect(result.nonce.aux.param1).to.be.equal(1);
+    expect(result.nonceObj.aux.param1).to.be.equal(1);
   });
 });

@@ -137,7 +137,7 @@ class Id {
    * @param {String} name - Label to identify the address
    */
   bindID(kc, ksign, proofKSign, name) {
-    return this.nameserver.bindID(kc, ksign, proofKSign, this.idAddr, name);
+    return this.nameserver.bindId(kc, ksign, proofKSign, this.idAddr, name);
   }
 }
 

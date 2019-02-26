@@ -7,7 +7,7 @@ export type NonceObj = {
 };
 
 export type NonceResult = {
-    nonce: NonceObj,
+    nonceObj: NonceObj,
     index: number,
 };
 
@@ -86,7 +86,7 @@ export class NonceDB {
     for (let i = 0; i < this.nonces.length; i++) {
       if (this.nonces[i].nonce === nonce) {
         return {
-          nonce: this.nonces[i],
+          nonceObj: this.nonces[i],
           index: i,
         };
       }

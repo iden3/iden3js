@@ -39,15 +39,16 @@ class NameServer {
    * Construct proper object to bind an identity adress to a label
    * Name resolver server creates the claim binding { Label - Identity address }
    * @param  {Object} kc - Keycontainer
+   * @param  {String} ksing - ksign public key used to sign the request
+   * @param  {Object} proofKSign - AuthorizeKSignSecp256k1 ProofClaim of ksign
    * @param  {String} idAddr - Identity address
-   * @param  {String} keyOperationalPub - Key used to sign the message sent
    * @param  {String} name - Label to bind
    * @return {Object} Http response
    */
-  bindID(kc: kCont.KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
+  bindId(kc: kCont.KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
     idAddr: string, name: string): AxiosPromise<any, any> {
-    const assignNameSignedReq = login.signPacket(kc, idAddr, ksign, proofKSign, 600,
-      login.GENERICSIGV01, {}, { assignName: name });
+    const assignNameSignedReq = login.signGenericSigV01(kc, idAddr,
+      ksign, proofKSign, 600, { assignName: name });
     return this.postFn(`${this.url}/names`, { jws: assignNameSignedReq });
   }
 

@@ -36,6 +36,7 @@ type RequestIdenAssert = {
     }
   }
 };
+
 /**
 * New RequestIdenAssert
 * for login purposes
@@ -98,12 +99,13 @@ type JwsPayload = {
 };
 
 /**
- * Sign a SIGV01 packet with ksign as idAddr
+ * Generate and sign a SIGV01 packet with ksign as idAddr
  * @param {Object} kc
  * @param {String} idAddr
  * @param {String} ksign - public key in hex format
  * @param {Object} proofKSign
  * @param {Number} expirationTimeDelta
+ * @param {String} payloadType - type of signed packet
  * @param {Object} data
  * @param {Object} form
  * @returns {String} signedPacket
@@ -150,7 +152,23 @@ function signPacket(kc: kCont.KeyContainer, idAddr: string, ksign: string, proof
 }
 
 /**
- * Sign signatureRequest
+ * Generate and sign signature packet of type generic
+ * @param {Object} kc
+ * @param {String} idAddr
+ * @param {String} ksign - public key in hex format
+ * @param {Object} proofKSign
+ * @param {Number} expirationTimeDelta
+ * @param {Object} form
+ * @returns {String} signedPacket
+ */
+function signGenericSigV01(kc: kCont.KeyContainer, idAddr: string, ksign: string,
+  proofKSign: proofs.ProofClaim, expirationTimeDelta: number, form: any): string {
+  return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta, GENERICSIGV01, {}, form);
+}
+
+
+/**
+ * Generate and sign signature packet of type identity assertion
  * @param {Object} signatureRequest
  * @param {String} idAddr
  * @param {String} ethName
@@ -168,8 +186,8 @@ function signIdenAssertV01(signatureRequest: any, idAddr: string,
     IDENASSERTV01, signatureRequest.body.data, { ethName, proofAssignName });
 }
 
-export type NonceVerified = {
-  nonce: NonceObj,
+export type IdenAssertRes = {
+  nonceObj: NonceObj,
   ethName: string,
   idAddr: string,
 };
@@ -184,7 +202,7 @@ export type NonceVerified = {
  * @returns {Object} nonce
  */
 function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
-  jwsHeader: JwsHeader, jwsPayload: JwsPayload): ?NonceVerified {
+  jwsHeader: JwsHeader, jwsPayload: JwsPayload): ?IdenAssertRes {
   // TODO AFTER MILESTONE check data structure scheme
 
   // 2. Verify jwsPayload.data.origin is origin
@@ -193,8 +211,8 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
   }
 
   // 3. Verify jwsPayload.data.challenge is in nonceDB and hasn't expired, delete it
-  const nonceVerified = nonceDB.searchAndDelete(jwsPayload.data.challenge);
-  if (nonceVerified == null) {
+  const nonceResult = nonceDB.searchAndDelete(jwsPayload.data.challenge);
+  if (nonceResult == null) {
     return undefined;
   }
 
@@ -228,10 +246,8 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
     return undefined;
   }
 
-  // nonceVerified.nonce.ethName = jwsPayload.form.ethName;
-  // nonceVerified.nonce.idAddr = jwsHeader.iss;
   return {
-    nonce: nonceVerified.nonce,
+    nonceObj: nonceResult.nonceObj,
     ethName: jwsPayload.form.ethName,
     idAddr: jwsHeader.iss,
   };
@@ -334,13 +350,49 @@ function verifySignedPacket(signedPacket: string): ?{ verified: boolean, header:
   }
 }
 
+function verifySignedPacketIdenAssert(signedPacket: string, nonceDB: NonceDB,
+  origin: string): ?IdenAssertRes {
+  const sigPackRes = verifySignedPacket(signedPacket);
+  if (sigPackRes == null) {
+    return undefined;
+  }
+  if (sigPackRes.verified === false) {
+    return undefined;
+  }
+  if (sigPackRes.payload.type !== IDENASSERTV01) {
+    return undefined;
+  }
+  const idenAssertRes = verifyIdenAssertV01(nonceDB, origin, sigPackRes.header, sigPackRes.payload);
+  if (idenAssertRes == null) {
+    return undefined;
+  }
+  return idenAssertRes;
+}
+
+function verifySignedPacketGeneric(signedPacket: string): ?{header: JwsHeader, payload: JwsPayload} {
+  const res = verifySignedPacket(signedPacket);
+  if (res == null) {
+    return undefined;
+  }
+  if (res.verified === false) {
+    return undefined;
+  }
+  if (res.payload.type !== GENERICSIGV01) {
+    return undefined;
+  }
+  return { header: res.header, payload: res.payload };
+}
+
 module.exports = {
-  signPacket,
   newRequestIdenAssert,
+  signPacket,
+  signGenericSigV01,
   signIdenAssertV01,
   // signPacket,
   verifyIdenAssertV01,
   verifySignedPacket,
+  verifySignedPacketGeneric,
+  verifySignedPacketIdenAssert,
   SIGV01,
   IDENASSERTV01,
   SIGALGV01,
