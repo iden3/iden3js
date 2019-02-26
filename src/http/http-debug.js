@@ -29,3 +29,19 @@ export async function axiosPostDebug(url, data, config) {
   });
   return Promise.resolve(res);
 }
+
+export async function axiosDeleteDebug(url, data) {
+  console.log(`### POST ${url}`);
+  console.log('Input:\n```js');
+  console.log(JSON.stringify(data, null, 2));
+  console.log('```');
+  const res = await axios.delete(url, data).then((_res) => {
+    console.log('Returns:\n```js');
+    console.log(JSON.stringify(_res.data, null, 2));
+    console.log('```');
+    return _res;
+  }).catch((_err) => {
+    console.log(`Error: ${_err}`);
+  });
+  return Promise.resolve(res);
+}

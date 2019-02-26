@@ -5,6 +5,7 @@ const Relay = require('./http/relay');
 const NameServer = require('./http/name-server');
 const Db = require('./db/db');
 const Backup = require('./http/private-folder');
+const NotificationServer = require('./http/notification-server');
 const KeyContainer = require('./key-container/key-container');
 const Id = require('./id/id');
 // const dapp = require('./auth/dapp');
@@ -19,6 +20,7 @@ const { Auth } = auth;
 // const { Dapp } = dapp;
 
 module.exports = {
+  NotificationServer,
   constants,
   merkleTree,
   sparseMerkleTree,
