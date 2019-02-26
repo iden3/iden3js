@@ -130,29 +130,25 @@ describe('[protocol] login flow', () => {
     // check that the nonce is in the nonceDB
     expect(nonceDB.search(signatureRequest.body.data.challenge)).to.be.not.equal(undefined);
 
-    const date = new Date();
-    const unixtime = Math.round((date).getTime() / 1000);
-    const expirationTime = unixtime + (3600 * 60);
     // identity wallet:
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr,
-      proofEthName.ethName, proofEthName.proofAssignName, kc, ksign, proofKSign, expirationTime);
+      proofEthName.ethName, proofEthName.proofAssignName, kc, ksign, proofKSign, 3600 * 60);
 
     // login backend:
-    const nonceVerified = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
-    expect(nonceVerified).to.be.not.equal(undefined);
+    const res = iden3.protocols.login.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);
 
     // check that the nonce returned when deleting the nonce of the signedPacket, is the same
     // than the nonce of the signatureRequest
-    expect(nonceVerified.nonce.nonce).to.be.equal(signatureRequest.body.data.challenge);
+    expect(res.nonceObj.nonce).to.be.equal(signatureRequest.body.data.challenge);
 
     // nonce must not be more in the nonceDB
-    expect(nonceDB.search(nonceVerified.nonce)).to.be.equal(undefined);
+    expect(nonceDB.search(res.nonceObj.nonce)).to.be.equal(undefined);
 
-    expect(nonceVerified.ethName).to.be.equal(proofEthName.ethName);
-    expect(nonceVerified.idAddr).to.be.equal(usrAddr);
+    expect(res.ethName).to.be.equal(proofEthName.ethName);
+    expect(res.idAddr).to.be.equal(usrAddr);
 
     // check that an already checked signedPacket is not more longer available to be verified
-    const nonceF = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
-    expect(nonceF).to.be.equal(undefined);
+    const res2 = iden3.protocols.login.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);
+    expect(res2).to.be.equal(undefined);
   });
 });

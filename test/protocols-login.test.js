@@ -32,7 +32,7 @@ describe('[protocol] login', () => {
     proofKSign = res.proofClaim;
   }));
   before(() => {
-    return id.bindID(kc, name).then((bindRes) => {
+    return id.bindId(kc, name).then((bindRes) => {
       expect(bindRes.status).to.be.equal(200);
       proofEthName = bindRes.data;
       return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {

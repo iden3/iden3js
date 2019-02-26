@@ -6,6 +6,7 @@ const iden3 = require('../index');
 const { expect } = chai;
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const relayUrl = 'http://127.0.0.1:8000/api/unstable';
+const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
 
 describe('[id] new Id()', () => {
   let dataBase;
@@ -13,12 +14,15 @@ describe('[id] new Id()', () => {
   let id;
   let keys;
   let relay;
+  let nameserver;
+  let keyOperational;
   let proofClaimKeyOperational;
 
   before('Create local storage container and relay object', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
+    nameserver = new iden3.NameServer(nameServerUrl, true);
   });
 
   it('Generate keys for identity', () => {
@@ -36,7 +40,8 @@ describe('[id] new Id()', () => {
       // Generate keys for first identity
       const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
       ({ keys } = objectKeys);
-      id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, '', undefined, 0);
+      keyOperational = keys[1];
+      id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameserver, '', undefined, 0);
     }
     keyContainer.lock();
   });
@@ -116,7 +121,7 @@ describe('[id] new Id()', () => {
   it('Bind identity and check it on resolve name service', async () => {
     keyContainer.unlock('pass');
     const name = 'testName';
-    await id.bindID(keyContainer, name)
+    await id.bindID(keyContainer, keyOperational, proofClaimKeyOperational, name)
       .then(async (bindRes) => {
         expect(bindRes.status).to.be.equal(200);
         await relay.resolveName(`${name}@iden3.io`)

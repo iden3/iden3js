@@ -1,5 +1,4 @@
 const axios = require('axios');
-const utils = require('../utils');
 
 /**
  * Class representing a the Relay
@@ -51,43 +50,6 @@ class Relay {
   getClaimByHi(idAddr, hi) {
     // return axios.get(`${this.url}/claim_proof/${idAddr}/hi/${hi}`);
     return axios.get(`${this.url}/ids/${idAddr}/claims/${hi}/proof`);
-  }
-
-  /**
-   * Construct proper object to bind an identity adress to a label
-   * Name resolver server creates the claim binding { Label - Identity address }
-   * @param  {Object} kc - Keycontainer
-   * @param  {String} idAddr - Identity address
-   * @param  {String} keyOperationalPub - Key used to sign the message sent
-   * @param  {String} name - Label to bind
-   * @return {Object} Http response
-   */
-  bindID(kc, idAddr, keyOperationalPub, name) {
-    const idBytes = utils.hexToBytes(idAddr);
-    const nameBytes = Buffer.from(name);
-    let msgBytes = Buffer.from([]);
-
-    msgBytes = Buffer.concat([msgBytes, idBytes]);
-    msgBytes = Buffer.concat([msgBytes, nameBytes]);
-
-    const signatureObj = kc.sign(keyOperationalPub, utils.bytesToHex(msgBytes));
-    const bindIDMsg = {
-      idAddr,
-      name,
-      signature: signatureObj.signature,
-      kSignPk: keyOperationalPub,
-    };
-
-    return axios.post(`${this.url}/names`, bindIDMsg);
-  }
-
-  /**
-   * Search name string into the name resolver and it retrieves the corresponding public address
-   * @param {String} name - Label to search into the name resolver tree
-   * @return {Object} Http response
-   */
-  resolveName(name) {
-    return axios.get(`${this.url}/names/${name}`);
   }
 
   /**

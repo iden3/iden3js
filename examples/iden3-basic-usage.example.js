@@ -68,7 +68,7 @@ id.createID()
     // console.log('Bind label to an identity');
     // bind the identity address to a label. It send required data to name-resolver service and name-resolver issue a claim 'assignName' binding identity address with label
     const name = 'testName';
-    id.bindID(keyContainer, name)
+    id.bindId(keyContainer, name)
       .then((bindRes) => {
         console.log(bindRes.data);
         // request idenity address to name-resolver ( currently name-resolver service is inside relay) from a given label
