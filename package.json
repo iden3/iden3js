@@ -16,7 +16,7 @@
     "test:all": "npm run test:unit && npm run test:int",
     "build": "babel --ignore '**/*.test.js' src/ -d lib/",
     "flow": "flow",
-    "browserify": "browserify index.js --standalone iden3 > iden3js-bundle.js",
+    "browserify": "npm run build && browserify lib/index.js --standalone iden3 > iden3js-bundle.js",
     "copy-prepublish": "cp package.json README.md LICENSE lib",
     "build-publish": "npm run build && npm run copy-prepublish && npm publish lib",
     "lint": "eslint ./src"
