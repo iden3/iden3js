@@ -199,7 +199,7 @@ export type IdenAssertRes = {
  * @param {Object} jwsHeader
  * @param {Object} jwsPayload
  * @param {Buffer} signatureBuffer
- * @returns {Object} nonce
+ * @returns {Object} IdenAssertRes - If verification fails, `undefined` is returned
  */
 function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
   jwsHeader: JwsHeader, jwsPayload: JwsPayload): ?IdenAssertRes {
@@ -227,9 +227,9 @@ function verifyIdenAssertV01(nonceDB: NonceDB, origin: string,
   if (!(claimAssignName instanceof AssignName)) {
     return undefined;
   }
-  const nameWithoutDomain = jwsPayload.form.ethName.split('@')[0];
+  // const nameWithoutDomain = jwsPayload.form.ethName.split('@')[0];
   // check jwsPayload.form.proofAssignName.leaf {hashName} === hash(jwsPayload.form.ethName
-  if (utils.bytesToHex(claimAssignName.hashName) !== utils.bytesToHex(utils.hashBytes(nameWithoutDomain).slice(1, 32))) {
+  if (utils.bytesToHex(claimAssignName.hashName) !== utils.bytesToHex(utils.hashBytes(jwsPayload.form.ethName).slice(1, 32))) {
     return undefined;
   }
   // check claimAssignName.structure.id = jwsHeader.iss

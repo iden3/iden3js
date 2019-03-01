@@ -15,7 +15,6 @@ describe('[id] new Id()', () => {
   let keys;
   let relay;
   let nameserver;
-  let keyOperational;
   let proofClaimKeyOperational;
 
   before('Create local storage container and relay object', () => {
@@ -40,7 +39,6 @@ describe('[id] new Id()', () => {
       // Generate keys for first identity
       const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
       ({ keys } = objectKeys);
-      keyOperational = keys[1];
       id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameserver, '', undefined, 0);
     }
     keyContainer.lock();
@@ -122,7 +120,7 @@ describe('[id] new Id()', () => {
   it('Bind identity and check it on resolve name service', async () => {
     keyContainer.unlock('pass');
     const name = 'testName';
-    await id.bindId(keyContainer, keyOperational, proofClaimKeyOperational, name)
+    await id.bindId(keyContainer, id.keyOperationalPub, proofClaimKeyOperational, name)
       .then(async (bindRes) => {
         expect(bindRes.status).to.be.equal(200);
         await nameserver.resolveName(`${name}@iden3.io`)

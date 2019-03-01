@@ -12,6 +12,8 @@ const db = new iden3.Db();
 const kc = new iden3.KeyContainer('localStorage', db);
 kc.unlock('pass');
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/unstable');
+const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
+const nameserver = new iden3.NameServer(nameServerUrl);
 
 kc.generateMasterSeed(mnemonic);
 const mnemonicDb = kc.getMasterSeed();
@@ -20,7 +22,7 @@ const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
 let keys;
 ({ keys } = objectKeys);
-let id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, '', undefined, 0);
+const id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameserver, '', undefined, 0);
 const ksign = keys[1]; // public key in hex format
 
 // vars that will be filled with http requests to the relay
@@ -28,25 +30,30 @@ let proofEthName = {};
 let proofKSign = {};
 
 describe('[protocol] login', () => {
-  before(() => id.createId().then((res) => {
-    proofKSign = res.proofClaim;
-  }));
-  before(() => {
-    return id.bindId(kc, name).then((bindRes) => {
-      expect(bindRes.status).to.be.equal(200);
-      proofEthName = bindRes.data;
-      return relay.resolveName(`${name}@iden3.io`).then((resolveRes) => {
-        expect(resolveRes.status).to.be.equal(200);
+  before('Create idenity and bind it to a name', async () => {
+    kc.unlock('pass');
+    await id.createId()
+      .then(async (resCreateId) => {
+        proofKSign = resCreateId.proofClaim;
+        await id.bindId(kc, id.keyOperationalPub, proofKSign, name)
+          .then(async (resBindId) => {
+            proofEthName = resBindId.data;
+            expect(resBindId.status).to.be.equal(200);
+            await nameserver.resolveName(`${name}@iden3.io`)
+              .then((resResolve) => {
+                expect(resResolve.status).to.be.equal(200);
+                expect(resResolve.data.idAddr).to.be.equal(id.idAddr);
+              });
+          });
       });
-    });
   });
 
   it('verify ProofClaimFull (proofClaimAssignName & proofKSign)', () => {
-    const assignNameVerified = iden3.protocols.verifyProofClaimFull(proofEthName.proofClaimAssignName, relayAddr);
-    expect(assignNameVerified).to.be.equal(true);
-
     const ksignVerified = iden3.protocols.verifyProofClaimFull(proofKSign, relayAddr);
     expect(ksignVerified).to.be.equal(true);
+
+    const assignNameVerified = iden3.protocols.verifyProofClaimFull(proofEthName.proofAssignName, relayAddr);
+    expect(assignNameVerified).to.be.equal(true);
   });
 
   it('newRequestIdenAssert', () => {
@@ -56,20 +63,20 @@ describe('[protocol] login', () => {
 
     const date = new Date();
     const unixtime = Math.round((date).getTime() / 1000);
-    const res = iden3.protocols.verifyProofClaimFull(proofKSign, relayAddr);
-    expect(res).to.be.equal(true);
+    const resClaim = iden3.protocols.verifyProofClaimFull(proofKSign, relayAddr);
+    expect(resClaim).to.be.equal(true);
 
     const expirationTime = unixtime + (3600 * 60);
-    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofEthName.proofClaimAssignName, kc, ksign, proofKSign, expirationTime);
+    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofEthName.proofAssignName, kc, ksign, proofKSign, expirationTime);
 
-    const nonce = iden3.protocols.login.verifySignedPacket(nonceDB, origin, signedPacket);
-    expect(nonce).to.be.not.equal(undefined);
-
+    const resIdenAssert = iden3.protocols.login.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);
+    expect(resIdenAssert).to.be.not.equal(undefined);
     // check that the nonce returned when deleting the nonce of the signedPacket, is the same
     // than the nonce of the signatureRequest
-    expect(nonce.nonce.nonce).to.be.equal(signatureRequest.body.data.challenge);
-
+    expect(resIdenAssert.nonceObj.nonce).to.be.equal(signatureRequest.body.data.challenge);
     // nonce must not be more in the nonceDB
-    expect(nonceDB.search(nonce.nonce)).to.be.equal(undefined);
+    expect(nonceDB.search(resIdenAssert.nonceObj.nonce)).to.be.equal(undefined);
+    expect(resIdenAssert.ethName).to.be.equal(proofEthName.ethName);
+    expect(resIdenAssert.idAddr).to.be.equal(id.idAddr);
   });
 });
