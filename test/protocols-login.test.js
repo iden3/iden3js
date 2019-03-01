@@ -28,7 +28,7 @@ let proofEthName = {};
 let proofKSign = {};
 
 describe('[protocol] login', () => {
-  before(() => id.createID().then((res) => {
+  before(() => id.createId().then((res) => {
     proofKSign = res.proofClaim;
   }));
   before(() => {

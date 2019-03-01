@@ -27,7 +27,7 @@ class Relay {
    * @param {String} isAddr - Identity address
    * @returns {Object} - Http response
    */
-  getIDRoot(idAddr) {
+  getIdRoot(idAddr) {
     return axios.get(`${this.url}/ids/${idAddr}/root`);
   }
 
@@ -59,7 +59,7 @@ class Relay {
    * @param  {String} rec - Recovery key
    * @param  {String} rev - Revoke key
    */
-  createID(op, rec, rev) {
+  createId(op, rec, rev) {
     const keys = {
       operationalpk: op,
       recoverer: rec,
@@ -75,7 +75,7 @@ class Relay {
    * @param  {String} idAddr
    * @returns {Object} Http response
    */
-  getID(idAddr) {
+  getId(idAddr) {
     return axios.get(`${this.url}/ids/${idAddr}`);
   }
 
@@ -83,7 +83,7 @@ class Relay {
    * Deploy smart contract of the given idenity on the blockchain
    * @param  {String} idAddr - Identity address
    */
-  deployID(idAddr) {
+  deployId(idAddr) {
     return axios.post(`${this.url}/ids/${idAddr}/deploy`);
   }
 }
