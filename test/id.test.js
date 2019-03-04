@@ -1,4 +1,4 @@
-import { AuthorizeKSignSecp256k1 } from '../lib/claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
+import { AuthorizeKSignSecp256k1 } from '../src/claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
 
 const chai = require('chai');
 const iden3 = require('../index');
@@ -14,15 +14,14 @@ describe('[id] new Id()', () => {
   let id;
   let keys;
   let relay;
-  let nameserver;
-  let keyOperational;
+  let nameServer;
   let proofClaimKeyOperational;
 
   before('Create local storage container and relay object', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
-    nameserver = new iden3.NameServer(nameServerUrl, true);
+    nameServer = new iden3.NameServer(nameServerUrl);
   });
 
   it('Generate keys for identity', () => {
@@ -40,8 +39,7 @@ describe('[id] new Id()', () => {
       // Generate keys for first identity
       const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
       ({ keys } = objectKeys);
-      keyOperational = keys[1];
-      id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameserver, '', undefined, 0);
+      id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameServer, '', undefined, 0);
     }
     keyContainer.lock();
   });
@@ -56,27 +54,28 @@ describe('[id] new Id()', () => {
   // Get proofClaim in CreateId
   it('Create identity and deploy it', async () => {
     keyContainer.unlock('pass');
-    await id.createID()
-      .then(async (createIDRes) => {
+    await id.createId()
+      .then(async (createIdRes) => {
       // Successfull create identity api call to relay
-        expect(createIDRes.idAddr).to.be.equal(id.idAddr);
-        expect(createIDRes.idAddr).to.be.not.equal(undefined);
-        expect(createIDRes.proofClaim).to.be.not.equal(undefined);
-        proofClaimKeyOperational = createIDRes.proofClaim;
-        await id.deployID()
-          .then((deployIDres) => {
+        expect(createIdRes.idAddr).to.be.equal(id.idAddr);
+        expect(createIdRes.idAddr).to.be.not.equal(undefined);
+        expect(createIdRes.proofClaim).to.be.not.equal(undefined);
+        proofClaimKeyOperational = createIdRes.proofClaim;
+        await id.deployId()
+          .then((deployIdres) => {
           // Successfull deploy identity api call to relay
-            expect(deployIDres.status).to.be.equal(200);
+            expect(deployIdres.status).to.be.equal(200);
           })
           .catch((error) => {
-            expect(error.response.data.error).to.be.equal('already deployed');
+            // expect(error.response.data.error).to.be.equal('already deployed');
+            console.error(error.response.data.error);
           });
       });
     keyContainer.lock();
   });
-  it('relay.getID()', async () => {
-    await relay.getID(id.idAddr).then((getIDres) => {
-      expect(getIDres.status).to.be.equal(200);
+  it('relay.getId()', async () => {
+    await relay.getId(id.idAddr).then((getIdres) => {
+      expect(getIdres.status).to.be.equal(200);
     });
   });
 
@@ -121,10 +120,10 @@ describe('[id] new Id()', () => {
   it('Bind identity and check it on resolve name service', async () => {
     keyContainer.unlock('pass');
     const name = 'testName';
-    await id.bindID(keyContainer, keyOperational, proofClaimKeyOperational, name)
+    await id.bindId(keyContainer, id.keyOperationalPub, proofClaimKeyOperational, name)
       .then(async (bindRes) => {
         expect(bindRes.status).to.be.equal(200);
-        await relay.resolveName(`${name}@iden3.io`)
+        await nameServer.resolveName(`${name}@iden3.io`)
           .then((resolveRes) => {
             expect(resolveRes.status).to.be.equal(200);
             expect(resolveRes.data.idAddr).to.be.equal(id.idAddr);

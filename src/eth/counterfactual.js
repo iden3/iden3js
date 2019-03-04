@@ -59,7 +59,7 @@ function buildCreate2Address(creatorAddr, salt, byteCode) {
 * @param {String} bytecode - Bytecode of the IDen3DelegateProxy contract
 * @returns {String} - idAddr, the computed eth address of the counterfactual contract
 */
-function calculateIDAddress(kop, krec, krev, relayAddr, iden3implAddr, iden3deployerAddr, bytecode) {
+function calculateIdAddress(kop, krec, krev, relayAddr, iden3implAddr, iden3deployerAddr, bytecode) {
   const bytecodefull = `${bytecode}${
     encodeParam('address', kop).slice(2)}${
     encodeParam('address', relayAddr).slice(2)}${
@@ -74,5 +74,5 @@ module.exports = {
   encodeParam,
   readContractFile,
   buildCreate2Address,
-  calculateIDAddress,
+  calculateIdAddress,
 };

@@ -44,7 +44,7 @@ describe('[eth/counterfactual] buildCreate2Address', () => {
   });
 });
 
-describe('[eth/counterfactual] calculateIDAddress', () => {
+describe('[eth/counterfactual] calculateIdAddress', () => {
   it('calculate idAddr using the counterfactual contract', () => {
     // read bytecode from the contract file
     const bytecode = iden3.counterfactual.readContractFile('./src/eth/testbytecode.json');
@@ -55,7 +55,7 @@ describe('[eth/counterfactual] calculateIDAddress', () => {
     expect(addressHex).to.be.equal('0xbc8c480e68d0895f1e410f4e4ea6e2d6b160ca9f');
 
 
-    const computedAddr = iden3.counterfactual.calculateIDAddress(kop, krec, krev, relayAddr, iden3implAddr, iden3deployerAddr, bytecode);
+    const computedAddr = iden3.counterfactual.calculateIdAddress(kop, krec, krev, relayAddr, iden3implAddr, iden3deployerAddr, bytecode);
     expect(computedAddr).to.be.equal('0x52dc5fa952194ad6c3268666fc4e64407a1d457a');
   });
 });

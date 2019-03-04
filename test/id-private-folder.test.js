@@ -29,7 +29,7 @@ describe('[id-private-folder] id.genericClaim with backup', () => {
     expect(authRes.status).to.be.equal(200);
   }));
 
-  return id.createID()
+  return id.createId()
     .then(() => id.authorizeKSignClaim(kc, id.keyOperational, proofOfKSign, kSign, 'appToAuthName', 'authz', 1535208350, 1535208350))
     .then((authRes) => {
       proofOfKSign = authRes.data.proofOfClaim;

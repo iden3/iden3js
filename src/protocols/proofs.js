@@ -93,7 +93,7 @@ function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
   const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
   const msgHashHex = utils.bytesToHex(msgHash);
   const sig = utils.hexToBytes(proof.signature);
-  sig[64] += 27;
+  // sig[64] += 27;
   const signatureHex = utils.bytesToHex(sig);
   if (!utils.verifySignature(msgHashHex, signatureHex, relayAddr)) { // mHex, sigHex, addressHex
     // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) {  mHex, sigHex, addressHex
