@@ -139,5 +139,4 @@ describe('[key-container] mnemonic paths', () => {
     expect(keysId3.keys[1]).to.be.equal('0xfcbff1ba506445b8ee1cf17fcacac5c1a43ba184');
     expect(keysId3.keys[2]).to.be.equal('0x0c75c1527c5483243ba416a69af585ec1d89e77f');
   });
-
 });

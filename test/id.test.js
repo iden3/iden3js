@@ -14,14 +14,14 @@ describe('[id] new Id()', () => {
   let id;
   let keys;
   let relay;
-  let nameserver;
+  let nameServer;
   let proofClaimKeyOperational;
 
   before('Create local storage container and relay object', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
-    nameserver = new iden3.NameServer(nameServerUrl);
+    nameServer = new iden3.NameServer(nameServerUrl);
   });
 
   it('Generate keys for identity', () => {
@@ -39,7 +39,7 @@ describe('[id] new Id()', () => {
       // Generate keys for first identity
       const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
       ({ keys } = objectKeys);
-      id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameserver, '', undefined, 0);
+      id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameServer, '', undefined, 0);
     }
     keyContainer.lock();
   });
@@ -123,7 +123,7 @@ describe('[id] new Id()', () => {
     await id.bindId(keyContainer, id.keyOperationalPub, proofClaimKeyOperational, name)
       .then(async (bindRes) => {
         expect(bindRes.status).to.be.equal(200);
-        await nameserver.resolveName(`${name}@iden3.io`)
+        await nameServer.resolveName(`${name}@iden3.io`)
           .then((resolveRes) => {
             expect(resolveRes.status).to.be.equal(200);
             expect(resolveRes.data.idAddr).to.be.equal(id.idAddr);

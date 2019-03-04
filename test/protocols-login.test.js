@@ -13,16 +13,15 @@ const kc = new iden3.KeyContainer('localStorage', db);
 kc.unlock('pass');
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/unstable');
 const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
-const nameserver = new iden3.NameServer(nameServerUrl);
+const nameServer = new iden3.NameServer(nameServerUrl);
 
 kc.generateMasterSeed(mnemonic);
 const mnemonicDb = kc.getMasterSeed();
-const ack = kc.generateKeySeed(mnemonicDb);
+kc.generateKeySeed(mnemonicDb);
 const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
-let keys;
-({ keys } = objectKeys);
-const id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameserver, '', undefined, 0);
+const { keys } = objectKeys;
+const id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameServer, '', undefined, 0);
 const ksign = keys[1]; // public key in hex format
 
 // vars that will be filled with http requests to the relay
@@ -32,20 +31,16 @@ let proofKSign = {};
 describe('[protocol] login', () => {
   before('Create idenity and bind it to a name', async () => {
     kc.unlock('pass');
-    await id.createId()
-      .then(async (resCreateId) => {
-        proofKSign = resCreateId.proofClaim;
-        await id.bindId(kc, id.keyOperationalPub, proofKSign, name)
-          .then(async (resBindId) => {
-            proofEthName = resBindId.data;
-            expect(resBindId.status).to.be.equal(200);
-            await nameserver.resolveName(`${name}@iden3.io`)
-              .then((resResolve) => {
-                expect(resResolve.status).to.be.equal(200);
-                expect(resResolve.data.idAddr).to.be.equal(id.idAddr);
-              });
-          });
-      });
+    const resCreateId = await id.createId();
+    proofKSign = resCreateId.proofClaim;
+    const resBindId = await id.bindId(kc, id.keyOperationalPub, proofKSign, name);
+    proofEthName = resBindId.data;
+    const resResolveName = await nameServer.resolveName(`${name}@iden3.io`);
+    expect(resResolveName.data.idAddr).to.be.equal(id.idAddr);
+  });
+
+  after('lock key container', () => {
+    kc.lock();
   });
 
   it('verify ProofClaimFull (proofClaimAssignName & proofKSign)', () => {
