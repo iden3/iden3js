@@ -1,3 +1,5 @@
+import { axiosGetDebug, axiosPostDebug } from './http-debug';
+
 const axios = require('axios');
 
 /**
@@ -10,8 +12,16 @@ class Relay {
    * Initialization relay object
    * @param {String} url - Relay Url identifier
    */
-  constructor(url) {
+  constructor(url, debug = false) {
     this.url = url;
+    this.debug = debug;
+    if (this.debug) {
+      this.getFn = axiosGetDebug;
+      this.postFn = axiosPostDebug;
+    } else {
+      this.getFn = axios.get;
+      this.postFn = axios.post;
+    }
   }
 
   /**
@@ -19,7 +29,7 @@ class Relay {
    * @returns {Object} - Http response
    */
   getRelayRoot() {
-    return axios.get(`${this.url}/root`);
+    return this.getFn(`${this.url}/root`);
   }
 
   /**
@@ -28,7 +38,7 @@ class Relay {
    * @returns {Object} - Http response
    */
   getIdRoot(idAddr) {
-    return axios.get(`${this.url}/ids/${idAddr}/root`);
+    return this.getFn(`${this.url}/ids/${idAddr}/root`);
   }
 
   /**
@@ -38,7 +48,7 @@ class Relay {
    * @returns {Object} - Http response
    */
   postClaim(idAddr, bytesSignedMsg) {
-    return axios.post(`${this.url}/ids/${idAddr}/claims`, bytesSignedMsg);
+    return this.postFn(`${this.url}/ids/${idAddr}/claims`, bytesSignedMsg);
   }
 
   /**
@@ -48,8 +58,8 @@ class Relay {
    * @returns {Object} - Http response
    */
   getClaimByHi(idAddr, hi) {
-    // return axios.get(`${this.url}/claim_proof/${idAddr}/hi/${hi}`);
-    return axios.get(`${this.url}/ids/${idAddr}/claims/${hi}/proof`);
+    // return this.getFn(`${this.url}/claim_proof/${idAddr}/hi/${hi}`);
+    return this.getFn(`${this.url}/ids/${idAddr}/claims/${hi}/proof`);
   }
 
   /**
@@ -66,7 +76,7 @@ class Relay {
       revokator: rev,
     };
 
-    return axios.post(`${this.url}/ids`, keys);
+    return this.postFn(`${this.url}/ids`, keys);
   }
 
   /**
@@ -76,7 +86,7 @@ class Relay {
    * @returns {Object} Http response
    */
   getId(idAddr) {
-    return axios.get(`${this.url}/ids/${idAddr}`);
+    return this.getFn(`${this.url}/ids/${idAddr}`);
   }
 
   /**
@@ -84,7 +94,7 @@ class Relay {
    * @param  {String} idAddr - Identity address
    */
   deployId(idAddr) {
-    return axios.post(`${this.url}/ids/${idAddr}/deploy`);
+    return this.postFn(`${this.url}/ids/${idAddr}/deploy`);
   }
 }
 
