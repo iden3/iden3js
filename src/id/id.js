@@ -2,7 +2,7 @@ import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/auth
 
 const DataBase = require('../db/db');
 const CONSTANTS = require('../constants');
-
+const protocols = require('../protocols/protocols');
 /**
  * Class representing a user identity
  * Manage all possible actions related to identity usage
@@ -14,12 +14,13 @@ class Id {
    * @param  {String} keyRevoke - Revoke address key
    * @param  {Object} relay - Relay associated with the identity
    * @param  {Object} relayAddr - Relay address
-   * @param  {Object} nameServer - Name Server associated with the identity
+   * @param  {Object} nameServer - Name server associated with the identity
+   * @param  {Object} notificationServer - Notification server associated with the identity
    * @param  {String} implementation
    * @param  {String} backup
    * @param  {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
-  constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, nameServer, implementation = '', backup = undefined, keyProfilePath = 0) {
+  constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, nameServer, notificationServer, implementation = '', backup = undefined, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
     this.keyRecover = keyRecover;
@@ -28,11 +29,13 @@ class Id {
     this.relay = relay;
     this.relayAddr = relayAddr; // this can be get from a relay endpoint
     this.nameServer = nameServer;
+    this.notificationServer = notificationServer;
     this.idAddr = undefined;
     this.implementation = implementation;
     this.backup = backup;
     this.prefix = CONSTANTS.IDPREFIX;
     this.keyProfilePath = keyProfilePath;
+    this.tokenLogin = undefined;
   }
 
   /**
@@ -136,8 +139,63 @@ class Id {
    * @param {Object} kc - Key container
    * @param {String} name - Label to identify the address
    */
-  bindId(kc, ksign, proofKSign, name) {
-    return this.nameServer.bindId(kc, ksign, proofKSign, this.idAddr, name);
+  bindId(kc, kSign, proofKSign, name) {
+    return this.nameServer.bindId(kc, kSign, proofKSign, this.idAddr, name);
+  }
+
+  /**
+   * Login procedure to get token in order to interact with system notification service
+   * @param {Object} proofEthName - proof verifying a label bind it to an address
+   * @param {Object} kc - key container
+   * @param {String} kSign - key used to sign
+   * @param {Object} proofKSign - proof verifying a key belongs to a specific identity
+   */
+  loginNotificationServer(proofEthName, kc, kSign, proofKSign) {
+    const self = this;
+    return this.notificationServer.requestLogin()
+      .then((resReqLogin) => {
+        const { sigReq } = resReqLogin.data;
+        // Sign 'signedPacket'
+        const date = new Date();
+        const unixtime = Math.round((date).getTime() / 1000);
+        const expirationTime = unixtime + 60;
+        const signedPacket = protocols.login.signIdenAssertV01(sigReq, self.idAddr,
+          proofEthName.ethName, proofEthName.proofAssignName, kc, kSign, proofKSign, expirationTime);
+        // Send back to notification server 'signIdenAssert'
+        return self.notificationServer.submitLogin(signedPacket)
+          .then((resSubLogin) => {
+            self.tokenLogin = resSubLogin.data.token;
+            return resSubLogin;
+          });
+      });
+  }
+
+  /**
+   * Post notifications associated with this identity
+   * @param {String} idAddrDest - Notification will be stored for this identity address
+   * @param {String} notification - Notification to store
+   * @return {Object} - Http response
+   */
+  postNotifications(idAddrDest, notification) {
+    return this.notificationServer.postNotifications(idAddrDest, notification);
+  }
+
+  /**
+   * Get 10 notifications associated with this identity
+   * @param {Number} beforeId - Specify get 10 notifications before this identifier
+   * @param {Number} afterId - Specify get 10 notifications after this identifier
+   * @return {Object} - Http response
+   */
+  getNotifications(beforeId = 0, afterId = 0) {
+    return this.notificationServer.getNotifications(this.tokenLogin, beforeId, afterId);
+  }
+
+  /**
+   * Delete all notifications associated with this idenity
+   * @return {Object} - Http response
+   */
+  deleteNotifications() {
+    return this.notificationServer.deleteNotifications(this.tokenLogin);
   }
 }
 

@@ -1,31 +1,70 @@
 const axios = require('axios');
+const util = require('util');
 
-/* eslint no-console: "off" */
-export async function axiosGetDebug(url, config) {
-  console.log(`### GET ${url}`);
-  const res = await axios.get(url, config).then((_res) => {
-    console.log('Returns:\n```js');
-    console.log(JSON.stringify(_res.data, null, 2));
-    console.log('```');
-    return _res;
-  }).catch((_err) => {
-    console.log(`Error: ${_err}`);
-  });
-  return Promise.resolve(res);
+function printResponse(r) {
+  console.log(`${r.status} ${r.statusText}`);
+  console.log(`headers: ${util.inspect(r.headers)}`);
+  console.log(util.inspect(r.data));
 }
 
-export async function axiosPostDebug(url, data, config) {
-  console.log(`### POST ${url}`);
-  console.log('Input:\n```js');
-  console.log(JSON.stringify(data, null, 2));
-  console.log('```');
-  const res = await axios.post(url, data, config).then((_res) => {
+/* eslint no-console: "off" */
+export function axiosGetDebug(url, config) {
+  const h = () => { console.log(`### GET ${url}`); };
+  return axios.get(url, config).then((res) => {
+    h();
     console.log('Returns:\n```js');
-    console.log(JSON.stringify(_res.data, null, 2));
+    console.log(JSON.stringify(res.data, null, 2));
     console.log('```');
-    return _res;
-  }).catch((_err) => {
-    console.log(`Error: ${_err}`);
+    return Promise.resolve(res);
+  }).catch((err) => {
+    h();
+    console.log('Input headers:\n', util.inspect(err.config.headers));
+    console.log('Returns error:');
+    printResponse(err.response);
+    return Promise.reject(err);
   });
-  return Promise.resolve(res);
+}
+
+export function axiosPostDebug(url, data, config) {
+  const h = () => {
+    console.log(`### POST ${url}`);
+    console.log('Input:\n```js');
+    console.log(JSON.stringify(data, null, 2));
+    console.log('```');
+  };
+  return axios.post(url, data, config).then((res) => {
+    h();
+    console.log('Returns:\n```js');
+    console.log(JSON.stringify(res.data, null, 2));
+    console.log('```');
+    return Promise.resolve(res);
+  }).catch((err) => {
+    h();
+    console.log('Returns error:');
+    console.log('DBG\n', util.inspect(err), '\nDBG');
+    printResponse(err.response);
+    return Promise.reject(err);
+  });
+}
+
+export function axiosDeleteDebug(url, data, config) {
+  const h = () => {
+    console.log(`### DELETE ${url}`);
+    console.log('Input:\n```js');
+    console.log(JSON.stringify(data, null, 2));
+    console.log('```');
+  };
+  return axios.delete(url, data, config).then((res) => {
+    h();
+    console.log('Returns:\n```js');
+    console.log(JSON.stringify(res.data, null, 2));
+    console.log('```');
+    return Promise.resolve(res);
+  }).catch((err) => {
+    h();
+    console.log('Returns error:');
+    console.log('DBG\n', util.inspect(err), '\nDBG');
+    printResponse(err.response);
+    return Promise.reject(err);
+  });
 }
