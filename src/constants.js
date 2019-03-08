@@ -31,6 +31,10 @@ const CLAIMS = {
     ID: 'authorizeKSignSecp256k1',
     TYPE: 4,
   },
+  LINK_OBJECT_IDENTITY: {
+    ID: 'linkObjectIdentity',
+    TYPE: 5,
+  },
 };
 
 module.exports = {

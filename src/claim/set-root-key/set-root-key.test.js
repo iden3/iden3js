@@ -16,7 +16,7 @@ describe('[Claim Set root key]', () => {
   let entryClaim;
   let parsedClaim;
 
-  before('Create new assign name claim', () => {
+  before('Create new set root claim', () => {
     claimSetRootKey = setRootKey.SetRootKey.new(versionExample, eraExample, idExample, rootKeyExample);
     expect(claimSetRootKey).to.not.be.equal(null);
     entryClaim = claimSetRootKey.toEntry();
