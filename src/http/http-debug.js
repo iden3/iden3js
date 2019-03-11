@@ -15,13 +15,13 @@ export function axiosGetDebug(url, config) {
     console.log('Returns:\n```js');
     console.log(JSON.stringify(res.data, null, 2));
     console.log('```');
-    return Promise.resolve(res);
+    return res;
   }).catch((err) => {
     h();
     console.log('Input headers:\n', util.inspect(err.config.headers));
     console.log('Returns error:');
     printResponse(err.response);
-    return Promise.reject(err);
+    throw err;
   });
 }
 
@@ -37,13 +37,13 @@ export function axiosPostDebug(url, data, config) {
     console.log('Returns:\n```js');
     console.log(JSON.stringify(res.data, null, 2));
     console.log('```');
-    return Promise.resolve(res);
+    return res;
   }).catch((err) => {
     h();
+    console.log('Input headers:\n', util.inspect(err.config.headers));
     console.log('Returns error:');
-    console.log('DBG\n', util.inspect(err), '\nDBG');
     printResponse(err.response);
-    return Promise.reject(err);
+    throw err;
   });
 }
 
@@ -59,12 +59,12 @@ export function axiosDeleteDebug(url, data, config) {
     console.log('Returns:\n```js');
     console.log(JSON.stringify(res.data, null, 2));
     console.log('```');
-    return Promise.resolve(res);
+    return res;
   }).catch((err) => {
     h();
+    console.log('Input headers:\n', util.inspect(err.config.headers));
     console.log('Returns error:');
-    console.log('DBG\n', util.inspect(err), '\nDBG');
     printResponse(err.response);
-    return Promise.reject(err);
+    throw err;
   });
 }
