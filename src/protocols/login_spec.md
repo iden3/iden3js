@@ -64,7 +64,7 @@ JWS_PAYLOAD = {
   data: DATA
   form: FORM
   ksign: str # ksing public key in compressed form
-  proofOfKSing: proofOfClaim # Proof of authorize k sign claim (which contains the public key in compressed form)
+  proofKSing: proofClaim # Proof of authorize k sign claim (which contains the public key in compressed form)
 }
 
 JWS_HEADER = {
@@ -72,7 +72,7 @@ JWS_HEADER = {
   iss: str # Ethereum Address
   iat: uint # issued at time, unix timestamp
   exp: uint # expiration time, unix timestamp
-  alg: ? # algorithm, example: "ES256" is ECDSA P-256 w/ SHA256
+  alg: ? # algorithm
 }
 
 JWS_SIGN(JWS_HEADER, JWS_PAYLOAD)
@@ -85,29 +85,32 @@ user. In the request view, the user has the ability to pick some elements of
 the `form`.
 
 `ksign` is the compressed public key of a secp256k ECDSA key pair. The
-`proofOfKSing` contains a KSign Authorize Claim for a secp256k public key.
+`proofKSing` contains a KSign Authorize Claim for a secp256k public key.
 
+As `JWS_HEADER.alg` we will use a custom algorithm (not defined in the JWS
+standard): "EK256K1", which is ECDSA with secp256k1 curve and keccak as hash
+function, the same signature algorithm configuration used in Ethereum.
 
 ### Auxiliary data structures
 
 ```
-proofOfClaim: {
+proofClaim: {
     signature: signature # Relay root + date signed by relay
     date: uint
     leaf: claim
-    proofs: proofOfClaimPartial[]
+    proofs: proofClaimPartial[]
 }
 
-proofOfClaimPartial: {
+proofClaimPartial: {
     mtp0: mtp # merkle tree proof of leaf existence
     mtp1: mtp # merkle tree proof of leaf non-existence
     root: key # merkle tree root
-    aux: nil | { ver: uint, era: uint, ethAddr: str } # Necessary data to construct SetRootClaim from root
+    aux: nil | { ver: uint, era: uint, idAddr: str } # Necessary data to construct SetRootClaim from root
 }
 ```
 
-Usually the relay returns the `proofOfClaim` data structure to proove that a
-claim is valid and is in the merkle tree.
+Usually the relay returns the `proofClaim` data structure to prove that a claim
+is valid and is in the merkle tree.
 
 ## Identity Assertion v0.1 spec
 
@@ -121,7 +124,7 @@ data: {
 }
 form: {
   ethName: str # ethereumName
-  proofOfEthName: proofOfClaim
+  proofAssignName: proofClaim # proof of claim Assign Name for ethName
 }
 ```
 
@@ -150,12 +153,12 @@ by `relayPk`) that acts as a relay and as a domain name server.
 ```
 VerifySignedPacket(jwsHeader, jwsPayload, signature, relayPk):
 1. Verify jwsHeader.typ is 'iden3.sig.v0_1'
-2. Verify jwsHeader.alg is 'ES255'
+2. Verify jwsHeader.alg is 'EK256K1'
 3. Verify that jwsHeader.iat <= now() < jwsHeader.exp 
-4. Verify that jwsPayload.ksign is in jwsPayload.proofOfKSign.leaf
-5. Verify that jwsHeader.iss is in jwsPayload.proofOfKSign
+4. Verify that jwsPayload.ksign is in jwsPayload.proofKSign.leaf
+5. Verify that jwsHeader.iss is in jwsPayload.proofKSign
 6. Verify that signature of JWS(jwsHeader, jwsPayload) by jwsPayload.ksign is signature
-7. VerifyProofOfClaim(jwsPayload.proofOfKSign, relayPk)
+7. VerifyProofOfClaim(jwsPayload.proofKSign, relayPk)
 ```
 
 In 4. we verify that the ksign used to sign the packet is authorized by the user, identified by jwsHeader.iss ethereum address.
@@ -166,7 +169,7 @@ VerifyIdenAssertV01(nonceDB, origin, jwsHeader, jwsPayload, signature, relayPk):
 1. Verify jwsPayload.type is 'iden3.iden_assert.v0_1'
 2. Verify jwsPayload.data.origin is origin
 3. Verify jwsPayload.data.challenge is in nonceDB and hasn't expired, delete it
-4. Verify that jwsHeader.iss and jwsPayload.form.ethName are in jwsPayload.proofOfEthName.leaf
+4. Verify that jwsHeader.iss and jwsPayload.form.ethName are in jwsPayload.proofAssignName.leaf
 5. VerifyProofOfClaim(jwsPayload.form.ethName, relayPk)
 ```
 
