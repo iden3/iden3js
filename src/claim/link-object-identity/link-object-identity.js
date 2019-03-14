@@ -36,7 +36,7 @@ export class LinkObjectIdentity {
    * @param {Buffer} objectHash - Hash representing the object
    */
   constructor(version: Buffer, hashType: Buffer, objectType: Buffer, objectIndex: Buffer, idAddr: Buffer, objectHash: Buffer) {
-    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.SET_ROOT_KEY.TYPE)).slice(24, 32);
+    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
     this.version = version;
     this.hashType = hashType;
     this.objectType = objectType;
