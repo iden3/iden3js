@@ -53,11 +53,11 @@ describe('[Claim link object identity Id]', () => {
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
                                        + '000000000000000000000000393939393939393939393939393939393939393a'
-                                       + '0000000000000000000000000000000100000001000000010000000000000002');
+                                       + '0000000000000000000000000000000100000001000000010000000000000005');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x18e5cd328f663ceefb0ca1752a3981356145ef8116fabb9ad9198b91b44188f6';
+    const hiResult = '0x0d64bf8fd783338f82a8ce0aa31768cc6c84b616f382f65d553ce7cdbf017cec';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
