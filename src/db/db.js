@@ -55,8 +55,7 @@ class Db {
   }
 
   /**
-   * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string.
-   *
+   * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string
    * @param  {Object} kc - KeyContainer
    * @returns {Object} - encrypted packed data
    */

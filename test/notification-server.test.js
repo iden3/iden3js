@@ -3,7 +3,6 @@ const chai = require('chai');
 const { expect } = chai;
 const iden3 = require('../index');
 
-const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const relayUrl = 'http://127.0.0.1:8000/api/unstable';
 const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
 const notificationUrl = 'http://127.0.0.1:10000/api/unstable';
@@ -27,7 +26,7 @@ describe('[notification-server] Notification server Http communications', () => 
     notificationServer = new iden3.NotificationServer(notificationUrl);
   });
 
-  it('Create identity, bind name and get proofClaim of operational key', async () => {
+  it('Generate keys for identity', () => {
     keyContainer.unlock('pass');
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.generateMasterSeed(mnemonic);
@@ -36,7 +35,19 @@ describe('[notification-server] Notification server Http communications', () => 
     const keyRecover = keys[2];
     const keyRevoke = keys[3];
     // Create identity object
-    id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, nameServer, notificationServer, '', undefined, 0);
+    id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, 0);
+    keyContainer.lock();
+  });
+
+  it('Load servers', () => {
+    id.addNameServer(nameServer);
+    expect(id.nameServer).to.be.not.equal(undefined);
+    id.addNotificationServer(notificationServer);
+    expect(id.nameServer).to.be.not.equal(undefined);
+  });
+
+  it('Create identity, bind name and get proofClaim of operational key', async () => {
+    keyContainer.unlock('pass');
     // Create identity
     const createIdRes = await id.createId();
     expect(createIdRes.idAddr).to.be.equal(id.idAddr);
