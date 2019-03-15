@@ -9,33 +9,51 @@ const protocols = require('../protocols/protocols');
  */
 class Id {
   /**
-   * @param  {String} keyOpPub - Operational public key
-   * @param  {String} keyRecover - Recovery address key
-   * @param  {String} keyRevoke - Revoke address key
-   * @param  {Object} relay - Relay associated with the identity
-   * @param  {Object} relayAddr - Relay address
-   * @param  {Object} nameServer - Name server associated with the identity
-   * @param  {Object} notificationServer - Notification server associated with the identity
-   * @param  {String} implementation
-   * @param  {String} backup
-   * @param  {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
+   * @param {String} keyOpPub - Operational public key
+   * @param {String} keyRecover - Recovery address key
+   * @param {String} keyRevoke - Revoke address key
+   * @param {Object} relay - Relay associated with the identity
+   * @param {Object} notificationServer - Notification server associated with the identity
+   * @param {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
-  constructor(keyOpPub, keyRecover, keyRevoke, relay, relayAddr, nameServer, notificationServer, implementation = '', backup = undefined, keyProfilePath = 0) {
+  constructor(keyOpPub, keyRecover, keyRevoke, relay, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
     this.keyOperationalPub = keyOpPub;
     this.relay = relay;
-    this.relayAddr = relayAddr; // this can be get from a relay endpoint
-    this.nameServer = nameServer;
-    this.notificationServer = notificationServer;
-    this.idAddr = undefined;
-    this.implementation = implementation;
-    this.backup = backup;
     this.prefix = CONSTANTS.IDPREFIX;
     this.keyProfilePath = keyProfilePath;
+    this.nameServer = undefined;
+    this.notificationServer = undefined;
+    this.idAddr = undefined;
+    this.backupServer = undefined;
     this.tokenLogin = undefined;
+  }
+
+  /**
+   * Load name server
+   * @param {Object} nameServer - Represents all the functionalities of the name server
+   */
+  addNameServer(nameServer) {
+    this.nameServer = nameServer;
+  }
+
+  /**
+   * Load notification server
+   * @param {Object} notificationServer - Represents all the functionalities of the notification server
+   */
+  addNotificationServer(notificationServer) {
+    this.notificationServer = notificationServer;
+  }
+
+  /**
+   * Load backup server
+   * @param {Object} backupServer - Represents all the functionalities of the backup server
+   */
+  addBackupServer(backupServer) {
+    this.backupServer = backupServer;
   }
 
   /**
@@ -55,6 +73,13 @@ class Id {
 
     this.db.insert(stringKey, JSON.stringify(objectValue));
     return true;
+  }
+
+  /**
+   * Retrieve address of the relay that has been linked to the identity address
+   */
+  getInfoIdentity() {
+    return this.relay.getId(this.idAddr);
   }
 
   /**
@@ -128,7 +153,7 @@ class Id {
       .then((res) => {
         if ((self.backup !== undefined)) { // && (proofOfKSign !== undefined)) {
           // Private folder - future work
-          // self.backup.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+          // self.backupServer.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
         }
         return res;
       });

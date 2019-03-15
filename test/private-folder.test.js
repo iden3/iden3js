@@ -13,7 +13,7 @@ const iden3 = require('../index');
 // const testPrivKHex = '5ca155481bafd651f6297f525781430e737c3e64a7f854af5870897fa307ae65';
 // const relay = new iden3.Relay('http://127.0.0.1:8000');
 // const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-const backupUrl = 'http://127.0.0.1:5001/api/unstable';
+const backupUrl = 'http://127.0.0.1:5000/api/unstable';
 const username = 'john@iden3.io';
 const password = 'potatoes';
 
@@ -22,6 +22,7 @@ const password = 'potatoes';
 // let proofOfKSign = {};
 
 describe('private-folder backup', () => {
+  const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
   let dataBase;
   let keyContainer;
   let backupService;
@@ -30,12 +31,13 @@ describe('private-folder backup', () => {
   before('create db and key container', () => {
     dataBase = new iden3.Db();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
+    keyContainer.unlock('pass');
+    keyContainer.generateKeyBackUp(mnemonic);
     for (let i = 0; i < 10; i++) {
       const key = `key-${i}`;
       const value = `value-${i}`;
       dataBase.insert(key, value);
     }
-    keyContainer.unlock('pass');
     backup = dataBase.exportWallet(keyContainer);
   });
 

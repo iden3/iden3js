@@ -21,7 +21,8 @@ kc.generateKeySeed(mnemonicDb);
 const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
 const { keys } = objectKeys;
-const id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameServer, '', undefined, 0);
+const id = new iden3.Id(keys[1], keys[2], keys[3], relay, 0);
+id.addNameServer(nameServer);
 const ksign = keys[1]; // public key in hex format
 
 // vars that will be filled with http requests to the relay

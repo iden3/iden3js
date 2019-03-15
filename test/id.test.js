@@ -4,7 +4,6 @@ const chai = require('chai');
 const iden3 = require('../index');
 
 const { expect } = chai;
-const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const relayUrl = 'http://127.0.0.1:8000/api/unstable';
 const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
 
@@ -39,9 +38,14 @@ describe('[id] new Id()', () => {
       // Generate keys for first identity
       const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
       ({ keys } = objectKeys);
-      id = new iden3.Id(keys[1], keys[2], keys[3], relay, relayAddr, nameServer, '', undefined, 0);
+      id = new iden3.Id(keys[1], keys[2], keys[3], relay, 0);
     }
     keyContainer.lock();
+  });
+
+  it('Load servers', () => {
+    id.addNameServer(nameServer);
+    expect(id.nameServer).to.be.not.equal(undefined);
   });
 
   it('Check identity keys', () => {
