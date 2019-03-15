@@ -54,6 +54,7 @@ class ProofClaimPartial {
  * the top level tree. */
 class ProofClaim {
   signature: string;
+  signer: string;
   date: number;
   leaf: string;
   proofs: Array<ProofClaimPartial>;
@@ -64,8 +65,10 @@ class ProofClaim {
    * @param {Leaf} leaf
    * @param {[]ProofClaimPartial} proofs
    */
-  constructor(rootKeySig: string, date: number, leaf: string, proofs: Array<ProofClaimPartial>) {
+  constructor(rootKeySig: string, signer: string, date: number, leaf: string,
+    proofs: Array<ProofClaimPartial>) {
     this.signature = rootKeySig;
+    this.signer = signer;
     this.date = date;
     this.leaf = leaf;
     this.proofs = proofs;
