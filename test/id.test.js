@@ -1,5 +1,3 @@
-import { AuthorizeKSignSecp256k1 } from '../src/claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
-
 const chai = require('chai');
 const iden3 = require('../index');
 
@@ -145,7 +143,8 @@ describe('[id] new Id()', () => {
   it('Check request claim proof by its index request', async () => {
     keyContainer.unlock('pass');
     // Create claim and gets it index
-    const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, id.keyOperationalPub);
+    // const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, id.keyOperationalPub);
+    const authorizeKSignClaim = iden3.claim.AuthorizeKSignSecp256k1.new(0, id.keyOperationalPub);
     const hi = (authorizeKSignClaim.toEntry()).hi();
     await relay.getClaimByHi(id.idAddr, iden3.utils.bytesToHex(hi))
       .then((res) => {

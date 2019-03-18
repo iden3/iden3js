@@ -9,7 +9,7 @@ const { expect } = chai;
 
 const testEntityIdAddr = '0x0123456789abcdef0123456789abcdef01234567';
 
-describe('Discovery', () => {
+describe('[Discovery]', () => {
   it('new & getEntity', () => {
     const discovery = new Discovery(testEntititesJSON);
     const testEntity = discovery.getEntity(testEntityIdAddr);

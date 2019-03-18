@@ -6,7 +6,7 @@ const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
-const claimHelpers = require('../claim/claim-utils.js');
+const claimUtils = require('../claim/claim-utils.js');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 /**
@@ -129,7 +129,7 @@ function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
     if (mtHelpers.isMerkleTreeProofExistence(mtpNoEx)) {
       return false;
     }
-    claimHelpers.incClaimVersion(leaf);
+    claimUtils.incClaimVersion(leaf);
     if (smt.checkProof(rootKey, mtpNoEx, utils.bytesToHex(leaf.hi()), utils.bytesToHex(leaf.hv())) !== true) {
       return false;
     }

@@ -17,7 +17,7 @@ const admin = require('./admin/requests');
 const protocols = require('./protocols/protocols');
 const counterfactual = require('./eth/counterfactual');
 const constants = require('./constants');
-const claim = require('./claim/claim-utils');
+const claim = require('./claim/claim');
 
 const { Auth } = auth;
 // const { Dapp } = dapp;

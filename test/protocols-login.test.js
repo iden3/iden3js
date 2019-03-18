@@ -1,3 +1,6 @@
+import { testNamesJSON } from '../src/http/name-resolver';
+import { testEntititesJSON } from '../src/http/discovery';
+
 const chai = require('chai');
 
 const { expect } = chai;
@@ -30,6 +33,8 @@ let proofEthName = {};
 let proofKSign = {};
 
 describe('[protocol] login', () => {
+  let signedPacketVerifier;
+
   before('Create idenity and bind it to a name', async () => {
     kc.unlock('pass');
     const resCreateId = await id.createId();
@@ -42,6 +47,12 @@ describe('[protocol] login', () => {
 
   after('lock key container', () => {
     kc.lock();
+  });
+
+  it('initialize login objects', () => {
+    const discovery = new iden3.discovery.Discovery(testEntititesJSON);
+    const nameResolver = new iden3.nameResolver.NameResolver(testNamesJSON);
+    signedPacketVerifier = new iden3.protocols.login.SignedPacketVerifier(discovery, nameResolver);
   });
 
   it('verify ProofClaimFull (proofClaimAssignName & proofKSign)', () => {
@@ -65,7 +76,7 @@ describe('[protocol] login', () => {
     const expirationTime = unixtime + (3600 * 60);
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofEthName.proofAssignName, kc, ksign, proofKSign, expirationTime);
 
-    const resIdenAssert = iden3.protocols.login.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);
+    const resIdenAssert = signedPacketVerifier.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);
     expect(resIdenAssert).to.be.not.equal(undefined);
     // check that the nonce returned when deleting the nonce of the signedPacket, is the same
     // than the nonce of the signatureRequest

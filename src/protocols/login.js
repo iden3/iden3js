@@ -1,17 +1,15 @@
 // @flow
 
 import { type NonceObj, NonceDB } from './nonceDB';
-import { Entry } from '../claim/entry/entry';
-import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
-import { AssignName } from '../claim/assign-name/assign-name';
 import { NameResolver } from '../http/name-resolver';
 import { Discovery } from '../http/discovery';
+import { Entry } from '../claim/entry/entry';
 
 const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
-const claimUtils = require('../claim/claim-utils');
+const claim = require('../claim/claim');
 const proofs = require('./proofs');
 // const NonceDB = require('./nonceDB');
 const kCont = require('../key-container/key-container');
@@ -239,8 +237,8 @@ export class SignedPacketVerifier {
 
     // 4. Verify that jwsHeader.iss and jwsPayload.form.ethName are in jwsPayload.proofAssignName.leaf
     const entry = Entry.newFromHex(jwsPayload.form.proofAssignName.leaf);
-    const claimAssignName = claimUtils.newClaimFromEntry(entry);
-    if (!(claimAssignName instanceof AssignName)) {
+    const claimAssignName = claim.newClaimFromEntry(entry);
+    if (!(claimAssignName instanceof claim.AssignName)) {
       return undefined;
     }
     // const nameWithoutDomain = jwsPayload.form.ethName.split('@')[0];
@@ -262,7 +260,7 @@ export class SignedPacketVerifier {
     if (idx === -1) {
       return undefined;
     }
-    const domain = jwsPayload.form.EthName.substring(idx + 1);
+    const domain = jwsPayload.form.ethName.substring(idx + 1);
 
     // 5b. Resolve name to obtain name server idAddr and verify that it matches the signer idAddr
     if (jwsPayload.form.proofAssignName.proofs.length !== 1) {
@@ -319,8 +317,8 @@ export class SignedPacketVerifier {
 
     // 4. Verify that jwsPayload.ksign is in jwsPayload.proofKSign.leaf
     const entry = Entry.newFromHex(jwsPayload.proofKSign.leaf);
-    const claimAuthorizeKSign = claimUtils.newClaimFromEntry(entry);
-    if (!(claimAuthorizeKSign instanceof AuthorizeKSignSecp256k1)) {
+    const claimAuthorizeKSign = claim.newClaimFromEntry(entry);
+    if (!(claimAuthorizeKSign instanceof claim.AuthorizeKSignSecp256k1)) {
       return false;
     }
     const pubK = claimAuthorizeKSign.pubKeyCompressed;
