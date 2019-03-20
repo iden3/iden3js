@@ -35,7 +35,7 @@ describe('[memory database]', () => {
     const singleKey = 'key-3';
     dataBase.delete(singleKey);
     const value = dataBase.get(singleKey);
-    expect(value).to.be.equal(undefined);
+    expect(value).to.be.equal(null);
   });
 
   it('Clear full database', () => {
@@ -43,7 +43,7 @@ describe('[memory database]', () => {
     for (let i = 0; i < 10; i++) {
       const key = `key-${i}`;
       const value = dataBase.get(key);
-      expect(value).to.be.equal(undefined);
+      expect(value).to.be.equal(null);
     }
   });
 });

@@ -27,7 +27,9 @@ class MemorydB {
    * @returns {String}
    */
   get(key) {
-    return this.db.get(this.prefix + key);
+    const value = this.db.get(this.prefix + key);
+    if (value === undefined) { return null; }
+    return value;
   }
 
   /**
