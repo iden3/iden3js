@@ -10,7 +10,7 @@ const { expect } = chai;
 const testName = 'iden3.io';
 const testEntityIdAddr = '0x0123456789abcdef0123456789abcdef01234567';
 
-describe('NameResolver', () => {
+describe('[NameResolver]', () => {
   it('new & resolve', () => {
     const nameResolver = new NameResolver(testNamesJSON);
     const testIdAddr = nameResolver.resolve(testName);

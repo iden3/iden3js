@@ -2,7 +2,6 @@ import { Entry } from '../claim/entry/entry';
 
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
-// const Entry = require('../claim/entry/entry');
 
 const { bigInt } = snarkjs;
 
