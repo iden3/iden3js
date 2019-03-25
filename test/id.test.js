@@ -62,9 +62,16 @@ describe('[id] new Id()', () => {
     expect(createIdRes.idAddr).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
     proofClaimKeyOperational = createIdRes.proofClaim;
-    const deployIdres = await id.deployId();
-    // Successfull deploy identity api call to relay
-    expect(deployIdres.status).to.be.equal(200);
+    try {
+      const deployIdres = await id.deployId();
+      // Successfull deploy identity api call to relay
+      expect(deployIdres.status).to.be.equal(200);
+    } catch (e) {
+      // Deploying may fail because the identity has already been depoloyed.
+      expect(e.response.status).to.be.equal(400);
+      expect(e.response.data.error).to.be.equal('error deploying');
+      console.error(e);
+    }
     keyContainer.lock();
   });
   it('relay.getId()', async () => {
