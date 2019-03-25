@@ -43,9 +43,8 @@ describe('private-folder backup', () => {
 
   before('create backup service and register', async () => {
     backupService = new iden3.Backup(backupUrl, username, password, true);
-    await backupService.register().then((resp) => {
-      expect(resp.status).to.be.equal(200);
-    });
+    const resp = await backupService.register();
+    expect(resp.status).to.be.equal(200);
   });
 
   after('lock keyContainer', () => {
@@ -53,16 +52,14 @@ describe('private-folder backup', () => {
   });
 
   it('backup upload', async () => {
-    await backupService.upload(backup).then((resp) => {
-      expect(resp.status).to.be.equal(200);
-    });
+    const resp = await backupService.upload(backup)
+    expect(resp.status).to.be.equal(200);
   });
 
   it('backup download', async () => {
-    await backupService.download().then((resp) => {
-      expect(resp.status).to.be.equal(200);
-      expect(resp.data.backup).to.be.equal(backup);
-    });
+    const resp = await backupService.download()
+    expect(resp.status).to.be.equal(200);
+    expect(resp.data.backup).to.be.equal(backup);
   });
 });
 
