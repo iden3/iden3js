@@ -2,7 +2,7 @@ const kcUtils = require('../key-container/kc-utils');
 const CONSTANTS = require('../constants');
 
 /**
- * @param  {String} url - url of the backup system backend
+ * @param {String} url - url of the backup system backend
  */
 class Db {
   constructor() {
@@ -10,15 +10,15 @@ class Db {
   }
 
   /**
-   * @param  {String} key
-   * @param  {String} value
+   * @param {String} key
+   * @param {String} value
    */
   insert(key, value) {
     localStorage.setItem(this.prefix + key, value);
   }
 
   /**
-   * @param  {String} key
+   * @param {String} key
    * @returns {String}
    */
   get(key) {
@@ -26,7 +26,7 @@ class Db {
   }
 
   /**
-   * @param  {String} key
+   * @param {String} key
    */
   delete(key) {
     localStorage.removeItem(this.prefix + key);
@@ -56,7 +56,7 @@ class Db {
 
   /**
    * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string
-   * @param  {Object} kc - KeyContainer
+   * @param {Object} kc - KeyContainer
    * @returns {Object} - encrypted packed data
    */
   exportLocalStorage(kc) {
@@ -79,8 +79,8 @@ class Db {
 
   /**
    * Decrypts the encrypted packed data and saves it into localStorage
-   * @param  {Object} kc - KeyContainer
-   * @param  {String} Database encrypted
+   * @param {Object} kc - KeyContainer
+   * @param {String} Database encrypted
    */
   importLocalStorage(kc, dbEncrypted) {
     const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncrypted);
@@ -93,7 +93,7 @@ class Db {
 
   /**
    * Gets all the localStorage data and packs it into an encrpyted string
-   * @param  {Object} kc - KeyContainer
+   * @param {Object} kc - KeyContainer
    * @returns {String} - Encrypted packed data
    */
   exportWallet(kc) {
@@ -109,9 +109,9 @@ class Db {
 
   /**
    * Decrypts the encrypted database packed data and saves it into localStorage
-   * @param  {String} masterSeed - Mnemonic representing the master seed
-   * @param  {Object} kc - KeyContainer
-   * @param  {String} Database encrypted
+   * @param {String} masterSeed - Mnemonic representing the master seed
+   * @param {Object} kc - KeyContainer
+   * @param {String} Database encrypted
    * @returns {Bool} - True if database is imported correctly, otherwise False
    */
   importWallet(masterSeed, kc, dbEncrypted) {
