@@ -8,8 +8,8 @@ const { expect } = chai;
 const iden3 = require('../index');
 
 const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-const name = 'usertest';
-const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+const name = 'protocols-login-test-user';
+const mnemonic = 'adjust toy select soon nest caught resource rally side wheat traffic amount';
 
 const db = new iden3.Db();
 const kc = new iden3.KeyContainer('localStorage', db);
