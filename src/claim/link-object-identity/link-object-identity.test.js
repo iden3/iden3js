@@ -50,19 +50,19 @@ describe('[Claim link object identity Id]', () => {
   });
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHex();
-    expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
-                                       + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
+    expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001'
+                                       + '000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
                                        + '000000000000000000000000393939393939393939393939393939393939393a'
-                                       + '0000000000000000000000000000000100000001000000010000000000000005');
+                                       + '0000000000000000000000000000000000000001000000010000000000000005');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x0d64bf8fd783338f82a8ce0aa31768cc6c84b616f382f65d553ce7cdbf017cec';
+    const hiResult = '0x2180103fca164a1f4afe33b610f8573076a24de6d7ca3d20fcf62540d3c73338';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x0ad7edbf562757b1ad2282c44e2c248f95e9e6b09ba0d32809aa724fbf148e0c';
+    const hvResult = '0x1bc5fac04887744f1831a8d881e4d68330e9f5f60a1c85265896df294329c7cc';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

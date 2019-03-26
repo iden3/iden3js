@@ -12,19 +12,19 @@ const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
  * Class representing an object linked to an identity
  * Hash object is used to store an object representation through a hash
  * Link object identity entry representation is as follows:
- * |element 3|: |empty|object index|object type|hash type|version|claim type| - |10 bytes|2 bytes|4 bytes|4 bytes|4 bytes|8 bytes|
+ * |element 3|: |empty|object index|object type|version|claim type| - |14 bytes|2 bytes|4 bytes|4 bytes|8 bytes|
  * |element 2|: |empty|identity| - |12 bytes|20 bytes|
  * |element 1|: |hash object| - |32 bytes|
- * |element 0|: |empty| - |32 bytes|
+ * |element 0|: |empty|hash type| - |28 bytes|4 bytes|
  */
 export class LinkObjectIdentity {
   claimType: Buffer;
   version: Buffer;
-  hashType: Buffer;
   objectType: Buffer;
   objectIndex: Buffer;
   idAddr: Buffer;
   objectHash: Buffer;
+  hashType: Buffer;
   /**
    * Initialize raw claim data structure
    * Bytes are taken according entry claim structure
@@ -38,11 +38,11 @@ export class LinkObjectIdentity {
   constructor(version: Buffer, hashType: Buffer, objectType: Buffer, objectIndex: Buffer, idAddr: Buffer, objectHash: Buffer) {
     this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
     this.version = version;
-    this.hashType = hashType;
     this.objectType = objectType;
     this.objectIndex = objectIndex;
     this.idAddr = idAddr;
     this.objectHash = objectHash;
+    this.hashType = hashType;
   }
 
   /**
@@ -58,7 +58,7 @@ export class LinkObjectIdentity {
     objectTypeBuff.writeUInt32BE(objectType, 0);
     const objectIndexBuff = Buffer.alloc(2);
     objectIndexBuff.writeUInt16BE(objectIndex, 0);
-    const objectHashBuff = utils.hexToBytes(objectHash);
+    const objectHashBuff = (utils.hexToBytes(objectHash)).fill(0, 0, 1);
     const idAddrBuff = utils.hexToBytes(idAddr);
     return new LinkObjectIdentity(versionBuff, hashTypeBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff);
   }
@@ -71,13 +71,14 @@ export class LinkObjectIdentity {
   static newFromEntry(entry: Entry) {
     // Parse element 3
     const versionBuff = entry.elements[3].slice(20, 24);
-    const hashTypeBuff = entry.elements[3].slice(16, 20);
-    const objectTypeBuff = entry.elements[3].slice(12, 16);
-    const objectIndexBuff = entry.elements[3].slice(10, 12);
+    const objectTypeBuff = entry.elements[3].slice(16, 20);
+    const objectIndexBuff = entry.elements[3].slice(14, 16);
     // Parse element 2
     const idAddrBuff = entry.elements[2].slice(12, 32);
     // Parse element 1
     const objectHashBuff = entry.elements[1].slice(0, 32);
+    // Parse element 0
+    const hashTypeBuff = entry.elements[0].slice(28, 32);
     return new LinkObjectIdentity(versionBuff, hashTypeBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff);
   }
 
@@ -95,15 +96,12 @@ export class LinkObjectIdentity {
     startIndex = endIndex - this.version.length;
     claimEntry.elements[3].fill(this.version, startIndex, endIndex);
     endIndex = startIndex;
-    startIndex = endIndex - this.hashType.length;
-    claimEntry.elements[3].fill(this.hashType, startIndex, endIndex);
-    endIndex = startIndex;
     startIndex = endIndex - this.objectType.length;
     claimEntry.elements[3].fill(this.objectType, startIndex, endIndex);
     endIndex = startIndex;
     startIndex = endIndex - this.objectIndex.length;
     claimEntry.elements[3].fill(this.objectIndex, startIndex, endIndex);
-    // Entry element 2 remains as empty value
+    // Entry element 2 composition
     endIndex = claimEntry.elements[2].length;
     startIndex = claimEntry.elements[2].length - this.idAddr.length;
     claimEntry.elements[2].fill(this.idAddr, startIndex, endIndex);
@@ -111,7 +109,10 @@ export class LinkObjectIdentity {
     endIndex = claimEntry.elements[1].length;
     startIndex = claimEntry.elements[1].length - this.objectHash.length;
     claimEntry.elements[1].fill(this.objectHash, startIndex, endIndex);
-    // Entry element 0 remains as empty value
+    // Entry element 0 composition
+    endIndex = claimEntry.elements[0].length;
+    startIndex = claimEntry.elements[0].length - this.hashType.length;
+    claimEntry.elements[0].fill(this.hashType, startIndex, endIndex);
     return claimEntry;
   }
 }

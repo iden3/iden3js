@@ -5,6 +5,15 @@ const TYPE_OBJECT = {
   dob: 3,
   givenName: 4,
   familyName: 5,
+  certificate: 6,
 };
 
-module.exports = TYPE_OBJECT;
+const TYPE_HASH = {
+  keccak256: 0,
+  sha256: 1,
+};
+
+module.exports = {
+  TYPE_OBJECT,
+  TYPE_HASH,
+};
