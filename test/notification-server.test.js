@@ -8,7 +8,7 @@ const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
 const notificationUrl = 'http://127.0.0.1:10000/api/unstable';
 
 describe('[notification-server] Notification server Http communications', () => {
-  const testName = 'testName';
+  const testName = 'notification-server-test-user';
   let notificationServer;
   let id;
   let dataBase;
@@ -28,7 +28,7 @@ describe('[notification-server] Notification server Http communications', () => 
 
   it('Generate keys for identity', () => {
     keyContainer.unlock('pass');
-    const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+    const mnemonic = 'clog brass lonely material arrest nominee flight try arrive water life cruise';
     keyContainer.generateMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
     const keyPublicOp = keys[1];
