@@ -23,7 +23,7 @@ describe('[notification-server] Notification server Http communications', () => 
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
-    notificationServer = new iden3.NotificationServer(notificationUrl);
+    notificationServer = new iden3.notifications.NotificationServer(notificationUrl);
   });
 
   it('Generate keys for identity', () => {
@@ -75,7 +75,8 @@ describe('[notification-server] Notification server Http communications', () => 
       const notification = `dataTest-${i}`;
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
-      const respPostNot = await id.postNotification(id.idAddr, notification);
+      const respPostNot = await id.sendNotification(id.idAddr,
+        iden3.notifications.newNotifTxt(notification));
       expect(respPostNot.status).to.be.equal(200);
     }
   });
@@ -122,7 +123,8 @@ describe('[notification-server] Notification server Http communications', () => 
       const notification = `dataTest-${i}`;
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
-      const respPostNot = await id.postNotification(id.idAddr, notification);
+      const respPostNot = await id.sendNotification(id.idAddr,
+        iden3.notifications.newNotifTxt(notification));
       expect(respPostNot.status).to.be.equal(200);
     }
 

@@ -196,12 +196,12 @@ class Id {
   }
 
   /**
-   * Post notifications associated with this identity
+   * Send notification associated with this identity
    * @param {String} idAddrDest - Notification will be stored for this identity address
    * @param {String} notification - Notification to store
    * @return {Object} - Http response
    */
-  postNotification(idAddrDest, notification) {
+  sendNotification(idAddrDest, notification) {
     return this.notificationServer.postNotification(this.tokenLogin, idAddrDest, notification);
   }
 
