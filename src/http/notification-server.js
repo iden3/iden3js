@@ -11,7 +11,7 @@ class NotificationServer {
   url: string;
   debug: boolean;
   getFn: (string, any) => any;
-  postFn: (string, any) => any;
+  postFn: (string, any, any) => any;
   deleteFn: (string, any) => any;
 
   /**
@@ -56,12 +56,14 @@ class NotificationServer {
 
   /**
    * Set notification on server for an spcefic identity
+   * @param {String} token - Session token to be identified
    * @param {String} idAddr - Identity address
    * @param {String} notification - Notification to be stored
    * @return {Object} Http response
    */
-  postNotification(idAddr: string, notification: string): AxiosPromise<any, any> {
-    return this.postFn(`${this.url}/notifications/${idAddr}`, { data: notification });
+  postNotification(token: string, idAddr: string, notification: string): AxiosPromise<any, any> {
+    return this.postFn(`${this.url}/auth/notifications/${idAddr}`, { data: notification },
+      { headers: { Authorization: `Bearer ${token}` } });
   }
 
   /**
@@ -83,7 +85,8 @@ class NotificationServer {
       urlParams = `?afterid=${afterId.toString()}`;
     }
 
-    return this.getFn(`${this.url}/auth/notifications${urlParams}`, { headers: { Authorization: `Bearer ${token}` } });
+    return this.getFn(`${this.url}/auth/notifications${urlParams}`,
+      { headers: { Authorization: `Bearer ${token}` } });
   }
 
   /**

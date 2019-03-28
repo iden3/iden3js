@@ -201,8 +201,8 @@ class Id {
    * @param {String} notification - Notification to store
    * @return {Object} - Http response
    */
-  postNotifications(idAddrDest, notification) {
-    return this.notificationServer.postNotifications(idAddrDest, notification);
+  postNotification(idAddrDest, notification) {
+    return this.notificationServer.postNotification(this.tokenLogin, idAddrDest, notification);
   }
 
   /**
