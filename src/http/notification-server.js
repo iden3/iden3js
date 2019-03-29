@@ -1,17 +1,41 @@
 // @flow
 import type { AxiosPromise } from 'axios';
 import { axiosGetDebug, axiosPostDebug, axiosDeleteDebug } from './http-debug';
-
+// import { ProofClaim } from '../protocols/proofs';
 const axios = require('axios');
+const proofs = require('../protocols/proofs');
+
+export const NOTIFCLAIMV01 = 'notif.claim.v01';
+export const NOTIFTXTV01 = 'notif.txt.v01';
+
+type Notification = {
+  type: string,
+  data: Object,
+};
+
+export function newNotifClaim(proofClaim: proofs.ProofClaim): Notification {
+  return {
+    type: NOTIFCLAIMV01,
+    data: proofClaim,
+  };
+}
+
+export function newNotifTxt(txt: string): Notification {
+  return {
+    type: NOTIFTXTV01,
+    data: txt,
+  };
+}
+
 /**
  * Class representing the notification server
  * It contains all the relay API calls
  */
-class NotificationServer {
+export class NotificationServer {
   url: string;
   debug: boolean;
   getFn: (string, any) => any;
-  postFn: (string, any) => any;
+  postFn: (string, any, any) => any;
   deleteFn: (string, any) => any;
 
   /**
@@ -56,12 +80,14 @@ class NotificationServer {
 
   /**
    * Set notification on server for an spcefic identity
+   * @param {String} token - Session token to be identified
    * @param {String} idAddr - Identity address
    * @param {String} notification - Notification to be stored
    * @return {Object} Http response
    */
-  postNotification(idAddr: string, notification: string): AxiosPromise<any, any> {
-    return this.postFn(`${this.url}/notifications/${idAddr}`, { data: notification });
+  postNotification(token: string, idAddr: string, notification: Notification): AxiosPromise<any, any> {
+    return this.postFn(`${this.url}/auth/notifications/${idAddr}`, notification,
+      { headers: { Authorization: `Bearer ${token}` } });
   }
 
   /**
@@ -83,7 +109,8 @@ class NotificationServer {
       urlParams = `?afterid=${afterId.toString()}`;
     }
 
-    return this.getFn(`${this.url}/auth/notifications${urlParams}`, { headers: { Authorization: `Bearer ${token}` } });
+    return this.getFn(`${this.url}/auth/notifications${urlParams}`,
+      { headers: { Authorization: `Bearer ${token}` } });
   }
 
   /**
@@ -96,5 +123,3 @@ class NotificationServer {
     return this.deleteFn(`${this.url}/auth/notifications`, { headers: { Authorization: `Bearer ${token}` } });
   }
 }
-
-module.exports = NotificationServer;

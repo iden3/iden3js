@@ -23,7 +23,7 @@ describe('[notification-server] Notification server Http communications', () => 
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
-    notificationServer = new iden3.NotificationServer(notificationUrl);
+    notificationServer = new iden3.notifications.NotificationServer(notificationUrl);
   });
 
   it('Generate keys for identity', () => {
@@ -60,17 +60,6 @@ describe('[notification-server] Notification server Http communications', () => 
     keyContainer.lock();
   });
 
-  it('Post notification', async () => {
-    let i = 0;
-    for (i = 0; i < 10; i++) {
-      const notification = `dataTest-${i}`;
-      // Create test notification for a given identity
-      // eslint-disable-next-line no-await-in-loop
-      const respPostNot = await notificationServer.postNotification(id.idAddr, notification);
-      expect(respPostNot.status).to.be.equal(200);
-    }
-  });
-
   it('Login to notification server', async () => {
     keyContainer.unlock('pass');
     // Login to notification server
@@ -80,6 +69,17 @@ describe('[notification-server] Notification server Http communications', () => 
     keyContainer.lock();
   });
 
+  it('Post notification', async () => {
+    let i = 0;
+    for (i = 0; i < 10; i++) {
+      const notification = `dataTest-${i}`;
+      // Create test notification for a given identity
+      // eslint-disable-next-line no-await-in-loop
+      const respPostNot = await id.sendNotification(id.idAddr,
+        iden3.notifications.newNotifTxt(notification));
+      expect(respPostNot.status).to.be.equal(200);
+    }
+  });
 
   it('Retrieve notifications', async () => {
     // Get all 10 notifications
@@ -123,7 +123,8 @@ describe('[notification-server] Notification server Http communications', () => 
       const notification = `dataTest-${i}`;
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
-      const respPostNot = await notificationServer.postNotification(id.idAddr, notification);
+      const respPostNot = await id.sendNotification(id.idAddr,
+        iden3.notifications.newNotifTxt(notification));
       expect(respPostNot.status).to.be.equal(200);
     }
 
