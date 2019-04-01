@@ -3,6 +3,8 @@ import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/auth
 const DataBase = require('../db/db');
 const CONSTANTS = require('../constants');
 const protocols = require('../protocols/protocols');
+const not = require('../manager/manager-notification.js');
+
 /**
  * Class representing a user identity
  * Manage all possible actions related to identity usage
@@ -30,6 +32,7 @@ class Id {
     this.idAddr = undefined;
     this.backupServer = undefined;
     this.tokenLogin = undefined;
+    this.manageNotifications = new not.ManagerNotifications();
   }
 
   /**
@@ -206,13 +209,70 @@ class Id {
   }
 
   /**
-   * Get 10 notifications associated with this identity
+   * Get notifications associated with this identity
    * @param {Number} beforeId - Specify get 10 notifications before this identifier
    * @param {Number} afterId - Specify get 10 notifications after this identifier
    * @return {Object} - Http response
    */
   getNotifications(beforeId = 0, afterId = 0) {
-    return this.notificationServer.getNotifications(this.tokenLogin, beforeId, afterId);
+    return this.notificationServer.getNotifications(this.tokenLogin, beforeId, afterId)
+      .then((resNot) => {
+        const arrayNot = [];
+        const { notifications } = resNot.data;
+        if (notifications === null) {
+          return undefined;
+        }
+        notifications.forEach((notification) => {
+          const notFull = this.manageNotifications.checkNot(notification);
+          arrayNot.push(notFull);
+          if (notFull !== undefined) {
+            if (this.storeNotification(notFull)) {
+              this.manageNotifications.updateLastId(notFull.id);
+            }
+          }
+        });
+        return arrayNot;
+      });
+  }
+
+  /**
+   * Get last 10 notifications associated with this identity from last notification received
+   * @return {Object} - Http response
+   */
+  getNotificationsFromLast() {
+    const lastId = this.manageNotifications.lastIdNotification;
+    return this.notificationServer.getNotifications(this.tokenLogin, 0, lastId)
+      .then((resNot) => {
+        const arrayNot = [];
+        const { notifications } = resNot.data;
+        if (notifications === null) {
+          return undefined;
+        }
+        notifications.forEach((notification) => {
+          const notFull = this.manageNotifications.checkNot(notification);
+          arrayNot.push(notFull);
+          if (notFull !== undefined) {
+            if (this.storeNotification(notFull)) {
+              this.manageNotifications.updateLastId(notFull.id);
+            }
+          }
+        });
+        return arrayNot;
+      });
+  }
+
+  /**
+   * Store content of notifications downloaded
+   * @param {NotificationFull} notFull - Full notification data
+   */
+  storeNotification(notFull) {
+    // Check if key already exist
+    if (this.db.listKeys(`${this.prefix}-not-${notFull.id}`)) {
+      return false;
+    }
+    // Store notification
+    this.db.insert(`${this.prefix}-not-${notFull.id}`, JSON.stringify(notFull));
+    return true;
   }
 
   /**
