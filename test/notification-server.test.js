@@ -24,10 +24,16 @@ describe('[notification-server] Notification server Http communications', () => 
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
     notificationServer = new iden3.notifications.NotificationServer(notificationUrl);
+    console.log("Unlocking key container...");
+    keyContainer.unlock('pass');
   });
 
+  after('Lock keyContainer', () => {
+    console.log("Locking key container...");
+    keyContainer.lock();
+  })
+
   it('Generate keys for identity', () => {
-    keyContainer.unlock('pass');
     const mnemonic = 'clog brass lonely material arrest nominee flight try arrive water life cruise';
     keyContainer.generateMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
@@ -36,7 +42,6 @@ describe('[notification-server] Notification server Http communications', () => 
     const keyRevoke = keys[3];
     // Create identity object
     id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, 0);
-    keyContainer.lock();
   });
 
   it('Load servers', () => {
@@ -47,7 +52,6 @@ describe('[notification-server] Notification server Http communications', () => 
   });
 
   it('Create identity, bind name and get proofClaim of operational key', async () => {
-    keyContainer.unlock('pass');
     // Create identity
     const createIdRes = await id.createId();
     expect(createIdRes.idAddr).to.be.equal(id.idAddr);
@@ -57,29 +61,28 @@ describe('[notification-server] Notification server Http communications', () => 
     // Bind label to identity address
     const bindIdRes = await id.bindId(keyContainer, id.keyOperationalPub, proofClaimKeyOperational, testName);
     proofEthName = bindIdRes.data;
-    keyContainer.lock();
-  });
-
-  it('Login to notification server', async () => {
-    keyContainer.unlock('pass');
-    // Login to notification server
-    // It implies: request login packet, sign packet, submit signed packet and receive jws token
-    const login = await id.loginNotificationServer(proofEthName, keyContainer, id.keyOperationalPub, proofClaimKeyOperational);
-    expect(login.status).to.be.equal(200);
-    keyContainer.lock();
   });
 
   it('Post notification', async () => {
     let i = 0;
     for (i = 0; i < 10; i++) {
-      const notification = `dataTest-${i}`;
+      const msg = `dataTest-${i}`;
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
-      const respPostNot = await id.sendNotification(id.idAddr,
-        iden3.notifications.newNotifTxt(notification));
+      const respPostNot = await id.sendNotification(keyContainer, id.keyOperationalPub,
+        proofClaimKeyOperational, id.idAddr, iden3.notifications.newNotifTxt(msg));
       expect(respPostNot.status).to.be.equal(200);
     }
   });
+
+/*
+  it('Login to notification server', async () => {
+    // Login to notification server
+    // It implies: request login packet, sign packet, submit signed packet and receive jws token
+    const login = await id.loginNotificationServer(proofEthName, keyContainer, id.keyOperationalPub, proofClaimKeyOperational);
+    expect(login.status).to.be.equal(200);
+  });
+
 
   it('Retrieve notifications', async () => {
     // Get all 10 notifications
@@ -157,4 +160,5 @@ describe('[notification-server] Notification server Http communications', () => 
     const { notifications } = resGetNot.data;
     expect(notifications).to.be.equal(null);
   });
+*/
 });

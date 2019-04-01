@@ -201,11 +201,15 @@ class Id {
   /**
    * Send notification associated with this identity
    * @param {String} idAddrDest - Notification will be stored for this identity address
-   * @param {String} signedMsg - Signed Message to send as notification
+   * @param {String} msgType
+   * @param {String} msg
    * @return {Object} - Http response
    */
-  sendNotification(idAddrDest, signedMsg) {
-    return this.notificationServer.postNotification(this.tokenLogin, idAddrDest, { jwt: signedMsg });
+  sendNotification(kc, kSign, proofKSign, idAddrDest, notification) {
+    const expirationTime = Math.round((new Date()).getTime() / 1000) + 60;
+    const signedMsg = protocols.login.signMsgV01(this.idAddr, kc, kSign, proofKSign,
+      expirationTime, notification.type, notification.data);
+    return this.notificationServer.postNotification(idAddrDest, signedMsg);
   }
 
   /**

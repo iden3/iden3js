@@ -194,7 +194,6 @@ export type IdenAssertRes = {
 
 /**
  * Generate and sign signature packet of type identity assertion
- * @param {Object} signatureRequest
  * @param {String} idAddr
  * @param {Object} kc
  * @param {String} ksign - public key in hex format
@@ -204,7 +203,7 @@ export type IdenAssertRes = {
  * @param {Object} msg - message object
  * @returns {String} signedPacket
  */
-export function signMsgV01(signatureRequest: any, idAddr: string,
+export function signMsgV01(idAddr: string,
   kc: kCont.KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
   expirationTimeDelta: number, msgType: string, msg: any): string {
   return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
