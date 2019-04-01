@@ -201,11 +201,11 @@ class Id {
   /**
    * Send notification associated with this identity
    * @param {String} idAddrDest - Notification will be stored for this identity address
-   * @param {String} notification - Notification to store
+   * @param {String} signedMsg - Signed Message to send as notification
    * @return {Object} - Http response
    */
-  sendNotification(idAddrDest, notification) {
-    return this.notificationServer.postNotification(this.tokenLogin, idAddrDest, notification);
+  sendNotification(idAddrDest, signedMsg) {
+    return this.notificationServer.postNotification(this.tokenLogin, idAddrDest, { jwt: signedMsg });
   }
 
   /**
