@@ -450,7 +450,7 @@ export class SignedPacketVerifier {
     return idenAssertRes;
   }
 
-  verifySignedPacketGeneric(signedPacket: string): ?{header: JwsHeader, payload: JwsPayload} {
+  verifySignedPacketBase(signedPacket: string, payloadType: string): ?{header: JwsHeader, payload: JwsPayload} {
     const res = this.verifySignedPacket(signedPacket);
     if (res == null) {
       return undefined;
@@ -458,9 +458,17 @@ export class SignedPacketVerifier {
     if (res.verified === false) {
       return undefined;
     }
-    if (res.payload.type !== GENERICSIGV01) {
+    if (res.payload.type !== payloadType) {
       return undefined;
     }
     return { header: res.header, payload: res.payload };
+  }
+
+  verifySignedPacketGeneric(signedPacket: string): ?{header: JwsHeader, payload: JwsPayload} {
+    return this.verifySignedPacketBase(signedPacket, GENERICSIGV01);
+  }
+
+  verifySignedPacketMessage(signedPacket: string): ?{header: JwsHeader, payload: JwsPayload} {
+    return this.verifySignedPacketBase(signedPacket, MSGV01);
   }
 }

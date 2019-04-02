@@ -51,6 +51,15 @@ describe('[notification-server] Notification server Http communications', () => 
     expect(id.nameServer).to.be.not.equal(undefined);
   });
 
+  it('Setup manageNotifications in id', () => {
+    const discovery = new iden3.discovery.Discovery(iden3.discovery.testEntititesJSON);
+    const nameResolver = new iden3.nameResolver.NameResolver(iden3.nameResolver.testNamesJSON);
+    id.addDiscovery(discovery);
+    id.addNameResolver(nameResolver);
+    id.initSignedPacketVerifier();
+    id.initManageNotifications();
+  });
+
   it('Create identity, bind name and get proofClaim of operational key', async () => {
     // Create identity
     const createIdRes = await id.createId();
@@ -75,7 +84,6 @@ describe('[notification-server] Notification server Http communications', () => 
     }
   });
 
-/*
   it('Login to notification server', async () => {
     // Login to notification server
     // It implies: request login packet, sign packet, submit signed packet and receive jws token
@@ -86,9 +94,7 @@ describe('[notification-server] Notification server Http communications', () => 
 
   it('Retrieve notifications', async () => {
     // Get all 10 notifications
-    let resGetNot = await id.getNotifications();
-    expect(resGetNot.status).to.be.equal(200);
-    const { notifications } = resGetNot.data;
+    const notifications = await id.getNotifications();
     expect(notifications.length).to.be.equal(10);
     let i = 0;
     for (i = 0; i < notifications.length; i++) {
@@ -98,9 +104,7 @@ describe('[notification-server] Notification server Http communications', () => 
       expect(notificationElement.data).to.be.equal(notificationPost);
     }
     // Get notifications before identity notification 5
-    resGetNot = await id.getNotifications(5, 0);
-    expect(resGetNot.status).to.be.equal(200);
-    const notificationsBefore = resGetNot.data.notifications;
+    const notificationsBefore = await id.getNotifications(5, 0);
     expect(notificationsBefore.length).to.be.equal(4);
     for (i = 0; i < notificationsBefore.length; i++) {
       const notificationElement = notificationsBefore[i];
@@ -108,9 +112,7 @@ describe('[notification-server] Notification server Http communications', () => 
       expect(idData).to.be.below(5);
     }
     // Get notifications after identity notification 5
-    resGetNot = await id.getNotifications(0, 5);
-    expect(resGetNot.status).to.be.equal(200);
-    const notificationsAfter = resGetNot.data.notifications;
+    const notificationsAfter = await id.getNotifications(0, 5);
     expect(notificationsAfter.length).to.be.equal(5);
     for (i = 0; i < notificationsAfter.length; i++) {
       const notificationElement = notificationsAfter[i];
@@ -126,21 +128,17 @@ describe('[notification-server] Notification server Http communications', () => 
       const notification = `dataTest-${i}`;
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
-      const respPostNot = await id.sendNotification(id.idAddr,
-        iden3.notifications.newNotifTxt(notification));
+      const respPostNot = await id.sendNotification(keyContainer, id.keyOperationalPub,
+        proofClaimKeyOperational, id.idAddr, iden3.notifications.newNotifTxt(notification));
       expect(respPostNot.status).to.be.equal(200);
     }
 
-    let resGetNot = await id.getNotifications();
-    expect(resGetNot.status).to.be.equal(200);
-    const { notifications } = resGetNot.data;
+    const notifications = await id.getNotifications();
     expect(notifications.length).to.be.equal(10);
 
     // Get notifications before id notification 15
     // returns 10 notifications before id 15
-    resGetNot = await id.getNotifications(15, 0);
-    expect(resGetNot.status).to.be.equal(200);
-    const notificationsBefore = resGetNot.data.notifications;
+    const notificationsBefore = await id.getNotifications(15, 0);
     expect(notificationsBefore.length).to.be.equal(10);
     for (i = 0; i < notificationsBefore.length; i++) {
       const notificationElement = notificationsBefore[i];
@@ -155,10 +153,7 @@ describe('[notification-server] Notification server Http communications', () => 
     expect(deleteResp.status).to.be.equal(200);
     expect(deleteResp.data.removed).to.be.equal(20);
     // Check pending notifications. Since they have been deleted, it should be 0
-    const resGetNot = await id.getNotifications();
-    expect(resGetNot.status).to.be.equal(200);
-    const { notifications } = resGetNot.data;
-    expect(notifications).to.be.equal(null);
+    const notifications = await id.getNotifications();
+    expect(notifications.length).to.be.equal(0);
   });
-*/
 });

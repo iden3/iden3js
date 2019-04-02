@@ -4,6 +4,7 @@ const DataBase = require('../db/db');
 const CONSTANTS = require('../constants');
 const protocols = require('../protocols/protocols');
 const not = require('../manager/manager-notification.js');
+const sign = require('../protocols/login');
 
 /**
  * Class representing a user identity
@@ -32,7 +33,11 @@ class Id {
     this.idAddr = undefined;
     this.backupServer = undefined;
     this.tokenLogin = undefined;
-    this.manageNotifications = new not.ManagerNotifications();
+    // this.manageNotifications = new not.ManagerNotifications();
+    this.discovery = undefined;
+    this.nameResolver = undefined;
+    this.signedPacketVerifier = undefined;
+    this.manageNotifications = undefined;
   }
 
   /**
@@ -57,6 +62,28 @@ class Id {
    */
   addBackupServer(backupServer) {
     this.backupServer = backupServer;
+  }
+
+  addDiscovery(discovery) {
+    this.discovery = discovery;
+  }
+
+  addNameResolver(nameResolver) {
+    this.nameResolver = nameResolver;
+  }
+
+  initSignedPacketVerifier() {
+    if (this.discovery == null || this.nameResolver == null) {
+      throw new Error('id.discovery or id.nameResolver not set');
+    }
+    this.signedPacketVerifier = new sign.SignedPacketVerifier(this.discovery, this.nameResolver);
+  }
+
+  initManageNotifications() {
+    if (this.signedPacketVerifier == null) {
+      throw new Error('id.signedPacketVerifier not set');
+    }
+    this.manageNotifications = new not.ManagerNotifications(this.signedPacketVerifier);
   }
 
   /**
@@ -219,12 +246,16 @@ class Id {
    * @return {Object} - Http response
    */
   getNotifications(beforeId = 0, afterId = 0) {
+    if (this.manageNotifications == null) {
+      throw new Error('id.manageNotifications not set');
+    }
     return this.notificationServer.getNotifications(this.tokenLogin, beforeId, afterId)
       .then((resNot) => {
+        // console.error('DBG resNot.data', resNot.data);
         const arrayNot = [];
         const { notifications } = resNot.data;
-        if (notifications === null) {
-          return undefined;
+        if (notifications == null) {
+          return arrayNot;
         }
         notifications.forEach((notification) => {
           const notFull = this.manageNotifications.checkNot(notification);
@@ -235,6 +266,7 @@ class Id {
             }
           }
         });
+        // console.error('DBG arrayNot', arrayNot);
         return arrayNot;
       });
   }
@@ -244,6 +276,9 @@ class Id {
    * @return {Object} - Http response
    */
   getNotificationsFromLast() {
+    if (this.manageNotifications == null) {
+      throw new Error('id.manageNotifications not set');
+    }
     const lastId = this.manageNotifications.lastIdNotification;
     return this.notificationServer.getNotifications(this.tokenLogin, 0, lastId)
       .then((resNot) => {

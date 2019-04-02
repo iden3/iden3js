@@ -2,20 +2,20 @@
 
 const sign = require('../protocols/login');
 
-type Notification = {
+export type Notification = {
   id: number,
   date: number,
   jws: string,
   toAddr: string,
 };
 
-type NotificationFull = {
+export type NotificationFull = {
   id: number,
   dateServer: number,
   issuer: string,
-  dateIssuer: string,
+  dateIssuer: number,
   type: string,
-  data: object,
+  data: Object,
 }
 
 const TYPE_NOTIFICATIONS = {
@@ -29,6 +29,7 @@ const TYPE_NOTIFICATIONS = {
  */
 export class ManagerNotifications {
   lastIdNotification: number;
+  verifier: sign.SignedPacketVerifier;
 
   constructor(verifyService: sign.SignedPacketVerifier) {
     this.lastIdNotification = 0;
@@ -51,7 +52,8 @@ export class ManagerNotifications {
    */
   checkNot(not: Notification): ?NotificationFull {
     const result = this.verifier.verifySignedPacketMessage(not.jws);
-    if (result === undefined) {
+    if (result == null) {
+      // console.error('DBG not.verify = null');
       return undefined;
     }
     const { header, payload } = result;
@@ -73,9 +75,3 @@ export class ManagerNotifications {
     }
   }
 }
-
-module.exports = {
-  ManagerNotifications,
-  NotificationFull,
-  Notification,
-};
