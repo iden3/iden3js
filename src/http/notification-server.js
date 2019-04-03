@@ -5,8 +5,8 @@ import { axiosGetDebug, axiosPostDebug, axiosDeleteDebug } from './http-debug';
 const axios = require('axios');
 const proofs = require('../protocols/proofs');
 
-export const NOTIFCLAIMV01 = 'notif.claim.v01';
-export const NOTIFTXTV01 = 'notif.txt.v01';
+export const NOTIFCLAIMV01 = 'iden3.proofclaim.v0_1';
+export const NOTIFTXTV01 = 'iden3.txt.v0_1';
 
 type Notification = {
   type: string,
