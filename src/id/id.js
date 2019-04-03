@@ -5,6 +5,7 @@ const CONSTANTS = require('../constants');
 const protocols = require('../protocols/protocols');
 const not = require('../manager/manager-notification.js');
 const sign = require('../protocols/login');
+const notServer = require('../http/notification-server');
 
 /**
  * Class representing a user identity
@@ -16,7 +17,6 @@ class Id {
    * @param {String} keyRecover - Recovery address key
    * @param {String} keyRevoke - Revoke address key
    * @param {Object} relay - Relay associated with the identity
-   * @param {Object} notificationServer - Notification server associated with the identity
    * @param {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
   constructor(keyOpPub, keyRecover, keyRevoke, relay, keyProfilePath = 0) {
@@ -33,7 +33,6 @@ class Id {
     this.idAddr = undefined;
     this.backupServer = undefined;
     this.tokenLogin = undefined;
-    // this.manageNotifications = new not.ManagerNotifications();
     this.discovery = undefined;
     this.nameResolver = undefined;
     this.signedPacketVerifier = undefined;
@@ -64,14 +63,26 @@ class Id {
     this.backupServer = backupServer;
   }
 
+  /**
+   * Load discovery server
+   * @param {Object} discovery - Represents all the functionalities of the discovery server
+   */
   addDiscovery(discovery) {
     this.discovery = discovery;
   }
 
+  /**
+   * Load name resolver
+   * @param {Object} nameResolver - Represents all the functionalities of the name resolver server
+   */
   addNameResolver(nameResolver) {
     this.nameResolver = nameResolver;
   }
 
+  /**
+   * Initialize signed packet functionalities
+   * It directly depends on name resolver and discovery service
+   */
   initSignedPacketVerifier() {
     if (this.discovery == null || this.nameResolver == null) {
       throw new Error('id.discovery or id.nameResolver not set');
@@ -79,6 +90,10 @@ class Id {
     this.signedPacketVerifier = new sign.SignedPacketVerifier(this.discovery, this.nameResolver);
   }
 
+  /**
+   * Initialize manage notification functionalities
+   * It directly depends on signed packet functions
+   */
   initManageNotifications() {
     if (this.signedPacketVerifier == null) {
       throw new Error('id.signedPacketVerifier not set');
@@ -164,9 +179,10 @@ class Id {
 
   /**
    * Send new claim of type authorizeKSignSecp256k1 to the identity merkle tree through the associated relay
-   * @param {Object} - Key container
-   * @param {String} - Key used to sign the claim. This key has to be already authorized on the identity merkle tree
-   * @param {keyClaim} - New key to be authorized and added into the identity merkle tree
+   * @param {Object} kc - Key container
+   * @param {String} ksignpk - Key used to sign the claim. This key has to be already authorized on the identity merkle tree
+   * @param {keyClaim} keyClaim - New key to be authorized and added into the identity merkle tree
+   * @return {Object} - Http response
    */
   authorizeKSignSecp256k1(kc, ksignpk, keyClaim) {
     const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, keyClaim);
@@ -192,7 +208,10 @@ class Id {
   /**
    * Bind current identity to an address through name resolver service
    * @param {Object} kc - Key container
+   * @param {Object} kSign - Key used to sign
+   * @param {Object} proofKSign - proof verifying kSign is authorized
    * @param {String} name - Label to identify the address
+   * @return {Object} - Http response
    */
   bindId(kc, kSign, proofKSign, name) {
     return this.nameServer.bindId(kc, kSign, proofKSign, this.idAddr, name);
@@ -204,6 +223,7 @@ class Id {
    * @param {Object} kc - key container
    * @param {String} kSign - key used to sign
    * @param {Object} proofKSign - proof verifying a key belongs to a specific identity
+   * @return {Object} - Http response
    */
   loginNotificationServer(proofEthName, kc, kSign, proofKSign) {
     const self = this;
@@ -227,16 +247,20 @@ class Id {
 
   /**
    * Send notification associated with this identity
-   * @param {String} idAddrDest - Notification will be stored for this identity address
-   * @param {String} msgType
-   * @param {String} msg
+   * @param {Object} kc - Key container
+   * @param {Object} kSign - Key to sign the notification
+   * @param {Object} proofKSign - Proof that kSign belongs to this identity
+   * @param {String} idAddrDest - Address destiny
+   * @param {String} destNotUrl - Notification server url associated to identty address destiny
+   * @param {Object} notification - Notification stored on the notification service1
    * @return {Object} - Http response
    */
-  sendNotification(kc, kSign, proofKSign, idAddrDest, notification) {
+  sendNotification(kc, kSign, proofKSign, idAddrDest, destNotUrl, notification) {
     const expirationTime = Math.round((new Date()).getTime() / 1000) + 60;
     const signedMsg = protocols.login.signMsgV01(this.idAddr, kc, kSign, proofKSign,
       expirationTime, notification.type, notification.data);
-    return this.notificationServer.postNotification(idAddrDest, signedMsg);
+    const destNotServerUrl = new notServer.NotificationServer(destNotUrl);
+    return destNotServerUrl.postNotification(idAddrDest, signedMsg);
   }
 
   /**
@@ -251,7 +275,6 @@ class Id {
     }
     return this.notificationServer.getNotifications(this.tokenLogin, beforeId, afterId)
       .then((resNot) => {
-        // console.error('DBG resNot.data', resNot.data);
         const arrayNot = [];
         const { notifications } = resNot.data;
         if (notifications == null) {
@@ -266,7 +289,6 @@ class Id {
             }
           }
         });
-        // console.error('DBG arrayNot', arrayNot);
         return arrayNot;
       });
   }
@@ -303,6 +325,8 @@ class Id {
   /**
    * Store content of notifications downloaded
    * @param {NotificationFull} notFull - Full notification data
+   * @return {bool} - False if the notification is already stored on database
+   * True if notification  is stored is successfully
    */
   storeNotification(notFull) {
     // Check if key already exist

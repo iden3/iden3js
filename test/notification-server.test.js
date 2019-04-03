@@ -24,14 +24,12 @@ describe('[notification-server] Notification server Http communications', () => 
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
     notificationServer = new iden3.notifications.NotificationServer(notificationUrl);
-    console.log("Unlocking key container...");
     keyContainer.unlock('pass');
   });
 
   after('Lock keyContainer', () => {
-    console.log("Locking key container...");
     keyContainer.lock();
-  })
+  });
 
   it('Generate keys for identity', () => {
     const mnemonic = 'clog brass lonely material arrest nominee flight try arrive water life cruise';
@@ -52,7 +50,7 @@ describe('[notification-server] Notification server Http communications', () => 
   });
 
   it('Setup manageNotifications in id', () => {
-    const discovery = new iden3.discovery.Discovery(iden3.discovery.testEntititesJSON);
+    const discovery = new iden3.discovery.Discovery(iden3.discovery.testEntitiesJSON);
     const nameResolver = new iden3.nameResolver.NameResolver(iden3.nameResolver.testNamesJSON);
     id.addDiscovery(discovery);
     id.addNameResolver(nameResolver);
@@ -79,7 +77,7 @@ describe('[notification-server] Notification server Http communications', () => 
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
       const respPostNot = await id.sendNotification(keyContainer, id.keyOperationalPub,
-        proofClaimKeyOperational, id.idAddr, iden3.notifications.newNotifTxt(msg));
+        proofClaimKeyOperational, id.idAddr, notificationUrl, iden3.notifications.newNotifTxt(msg));
       expect(respPostNot.status).to.be.equal(200);
     }
   });
@@ -129,7 +127,7 @@ describe('[notification-server] Notification server Http communications', () => 
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
       const respPostNot = await id.sendNotification(keyContainer, id.keyOperationalPub,
-        proofClaimKeyOperational, id.idAddr, iden3.notifications.newNotifTxt(notification));
+        proofClaimKeyOperational, id.idAddr, notificationUrl, iden3.notifications.newNotifTxt(notification));
       expect(respPostNot.status).to.be.equal(200);
     }
 

@@ -1,5 +1,5 @@
 import { testNamesJSON } from '../src/http/name-resolver';
-import { testEntititesJSON } from '../src/http/discovery';
+import { testEntitiesJSON } from '../src/http/discovery';
 
 const chai = require('chai');
 
@@ -50,7 +50,7 @@ describe('[protocol] login', () => {
   });
 
   it('initialize login objects', () => {
-    const discovery = new iden3.discovery.Discovery(testEntititesJSON);
+    const discovery = new iden3.discovery.Discovery(testEntitiesJSON);
     const nameResolver = new iden3.nameResolver.NameResolver(testNamesJSON);
     signedPacketVerifier = new iden3.protocols.login.SignedPacketVerifier(discovery, nameResolver);
   });
