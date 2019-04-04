@@ -325,7 +325,7 @@ export class SignedPacketVerifier {
     signatureBuffer: Buffer): boolean {
     // 2. Verify jwsHeader.alg is 'ES255'
     if (jwsHeader.alg !== SIGALGV01) {
-      return false;
+      throw new Error(`Unsupported alg: ${jwsHeader.alg}`);
     }
 
     // 3. Verify that jwsHeader.iat <= now() < jwsHeader.exp
@@ -333,35 +333,35 @@ export class SignedPacketVerifier {
     const current = Math.round((date).getTime() / 1000);
     // Moving iat 2 minutes in the past to accomodate time shifts in time synchronization.
     if (!((jwsHeader.iat - 120 <= current) && (current < jwsHeader.exp))) {
-      return false;
+      throw new Error(`Signature not valid for current date (iat:${jwsHeader.iat} - 120, now:${current}, exp:${jwsHeader.exp})`);
     }
 
     // 4. Verify that jwsPayload.ksign is in jwsPayload.proofKSign.leaf
     const entry = Entry.newFromHex(jwsPayload.proofKSign.leaf);
     const claimAuthorizeKSign = claim.newClaimFromEntry(entry);
     if (!(claimAuthorizeKSign instanceof claim.AuthorizeKSignSecp256k1)) {
-      return false;
+      throw new Error('jwsPayload.proofKSign.leaf is not a claim.AuthorizeKSignSecp256k1');
     }
     const pubK = claimAuthorizeKSign.pubKeyCompressed;
     const pubKHex = utils.bytesToHex(pubK);
     if (pubKHex !== jwsPayload.ksign) {
-      return false;
+      throw new Error('Pub key in payload.proofksign doesn\'t match payload.ksign');
     }
 
     // X. check that 1 <= jwsPayload.proofKSign.proofs.length <= 2
     if (jwsPayload.proofKSign.proofs.length < 1) {
-      return false;
+      throw new Error('No proofs found in payload.proofKSign');
     }
     if (jwsPayload.proofKSign.proofs.length > 2) {
-      return false;
+      throw new Error('Authorize KSign claim proofs of depth > 2 not allowed yet');
     }
 
     // 5. Verify that jwsHeader.iss is in jwsPayload.proofKSign.
     if (jwsPayload.proofKSign.proofs[0].aux == null) {
-      return false;
+      throw new Error('payload.proofksign.proofs[0].aux is nil');
     }
     if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
-      return false;
+      throw new Error('header.iss doesn\'t match with idaddr in proofksign set root claim');
     }
 
     // 6. Verify that signature of JWS(jwsHeader, jwsPayload) by jwsPayload.ksign is signature
@@ -377,7 +377,7 @@ export class SignedPacketVerifier {
     const ksignAddr = ethUtil.pubToAddress(jwsPayload.ksign, true);
     const ksignAddrHex = utils.bytesToHex(ksignAddr);
     if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, ksignAddrHex)) { // mHex, sigHex, addressHex
-      return false;
+      throw new Error('JWS signature doesn\'t match with pub key in payload.ksign');
     }
 
     // 7a. Get the operational key from the signer and in case it's a relay,
@@ -385,17 +385,17 @@ export class SignedPacketVerifier {
     const signerIdAddr = jwsPayload.proofKSign.signer;
     const signer = this.discovery.getEntity(signerIdAddr);
     if (signer == null) {
-      return false;
+      throw new Error('Unable to get payload.proofksign.signer entity data');
     }
     if (jwsPayload.proofKSign.proofs.length > 1) {
       if (!signer.trusted.relay) {
-        return false;
+        throw new Error('payload.proofksign.signer is not a trusted relay');
       }
     }
 
     // 7b. VerifyProofClaim(jwsPayload.proofOfKSign, signerOperational)
     if (!proofs.verifyProofClaim(jwsPayload.proofKSign, signer.kOpAddr)) {
-      return false;
+      throw new Error('Invalid proofKSign');
     }
 
     return true;
@@ -427,7 +427,7 @@ export class SignedPacketVerifier {
           payload: jwsPayload,
         };
       default:
-        return undefined;
+        throw new Error(`Unsupported signature packet typ: ${jwsHeader.typ}`);
     }
   }
 

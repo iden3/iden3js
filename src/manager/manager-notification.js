@@ -58,7 +58,7 @@ export class ManagerNotifications {
   checkNot(not: Notification): ?NotificationFull {
     const result = this.verifier.verifySignedPacketMessage(not.jws);
     if (result == null) {
-      return undefined;
+      throw new Error('Notification verification failed');
     }
     const { header, payload } = result;
     const notFull = {
