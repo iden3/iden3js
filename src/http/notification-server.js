@@ -80,14 +80,12 @@ export class NotificationServer {
 
   /**
    * Set notification on server for an spcefic identity
-   * @param {String} token - Session token to be identified
    * @param {String} idAddr - Identity address
-   * @param {String} notification - Notification to be stored
+   * @param {String} signedMsg - Signed Message to send as notification
    * @return {Object} Http response
    */
-  postNotification(token: string, idAddr: string, notification: Notification): AxiosPromise<any, any> {
-    return this.postFn(`${this.url}/auth/notifications/${idAddr}`, notification,
-      { headers: { Authorization: `Bearer ${token}` } });
+  postNotification(idAddr: string, signedMsg: string): AxiosPromise<any, any> {
+    return this.postFn(`${this.url}/notifications/${idAddr}`, { jws: signedMsg });
   }
 
   /**

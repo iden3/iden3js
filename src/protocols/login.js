@@ -18,6 +18,9 @@ const kCont = require('../key-container/key-container');
 export const SIGV01 = 'iden3.sig.v0_1';
 export const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
 export const GENERICSIGV01 = 'iden3.gen_sig.v0_1';
+export const MSGV01 = 'iden3.msg.v0_1';
+export const MSGPROOFCLAIMV01 = 'iden3.proofclaim.v0_1';
+export const MSGTXT = 'txt';
 export const SIGALGV01 = 'EK256K1';
 
 type RequestIdenAssert = {
@@ -188,6 +191,24 @@ export type IdenAssertRes = {
   ethName: string,
   idAddr: string,
 };
+
+/**
+ * Generate and sign signature packet of type identity assertion
+ * @param {String} idAddr
+ * @param {Object} kc
+ * @param {String} ksign - public key in hex format
+ * @param {Object} proofKSign
+ * @param {Number} expirationTimeDelta
+ * @param {String} msgType - type of message
+ * @param {Object} msg - message object
+ * @returns {String} signedPacket
+ */
+export function signMsgV01(idAddr: string,
+  kc: kCont.KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
+  expirationTimeDelta: number, msgType: string, msg: any): string {
+  return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
+    MSGV01, null, { type: msgType, data: msg });
+}
 
 /**
  * Class representing a signedpacket verifier
@@ -429,7 +450,7 @@ export class SignedPacketVerifier {
     return idenAssertRes;
   }
 
-  verifySignedPacketGeneric(signedPacket: string): ?{header: JwsHeader, payload: JwsPayload} {
+  verifySignedPacketBase(signedPacket: string, payloadType: string): ?{header: JwsHeader, payload: JwsPayload} {
     const res = this.verifySignedPacket(signedPacket);
     if (res == null) {
       return undefined;
@@ -437,9 +458,17 @@ export class SignedPacketVerifier {
     if (res.verified === false) {
       return undefined;
     }
-    if (res.payload.type !== GENERICSIGV01) {
+    if (res.payload.type !== payloadType) {
       return undefined;
     }
     return { header: res.header, payload: res.payload };
+  }
+
+  verifySignedPacketGeneric(signedPacket: string): ?{header: JwsHeader, payload: JwsPayload} {
+    return this.verifySignedPacketBase(signedPacket, GENERICSIGV01);
+  }
+
+  verifySignedPacketMessage(signedPacket: string): ?{header: JwsHeader, payload: JwsPayload} {
+    return this.verifySignedPacketBase(signedPacket, MSGV01);
   }
 }

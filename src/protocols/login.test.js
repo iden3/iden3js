@@ -4,7 +4,7 @@ import {
 } from 'mocha';
 import { Entry } from '../claim/entry/entry';
 import { NameResolver, testNamesJSON } from '../http/name-resolver';
-import { Discovery, testEntititesJSON } from '../http/discovery';
+import { Discovery, testEntitiesJSON } from '../http/discovery';
 import { SignedPacketVerifier } from './login';
 
 const chai = require('chai');
@@ -69,7 +69,7 @@ describe('[protocol]', () => {
   let signedPacketVerifier;
 
   before('initialize objects', () => {
-    const discovery = new Discovery(testEntititesJSON);
+    const discovery = new Discovery(testEntitiesJSON);
     const nameResolver = new NameResolver(testNamesJSON);
     signedPacketVerifier = new SignedPacketVerifier(discovery, nameResolver);
     db = new iden3.Db();

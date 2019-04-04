@@ -12,15 +12,15 @@ type Entity = {
  * Class representing a discovery client
  */
 class Discovery {
-  entitites: { [string]: Entity };
+  entities: { [string]: Entity };
 
   /**
    * Initialization Discovery object
-   * @param {String} entititesJSON - map of entitites serialized in JSON
+   * @param {String} entitiesJSON - map of entitites serialized in JSON
    */
-  constructor(entititesJSON: string) {
-    this.entitites = JSON.parse(entititesJSON);
-    Object.keys(this.entitites).forEach((idAddr) => { this.entitites[idAddr].idAddr = idAddr; });
+  constructor(entitiesJSON: string) {
+    this.entities = JSON.parse(entitiesJSON);
+    Object.keys(this.entities).forEach((idAddr) => { this.entities[idAddr].idAddr = idAddr; });
   }
 
   /**
@@ -29,13 +29,13 @@ class Discovery {
    * @returns {?Entity} entity
    */
   getEntity(idAddr: string): ?Entity {
-    return this.entitites[idAddr];
+    return this.entities[idAddr];
   }
 }
 
 /* Temporary entitites configuration data.  Use only for testing.  To be
  * deleted after the discovery protocol becomes stable. */
-const testEntititesJSON = `
+const testEntitiesJSON = `
 {
   "0x0123456789abcdef0123456789abcdef01234567": {
     "name": "iden3-test-relay",
@@ -47,5 +47,5 @@ const testEntititesJSON = `
 
 module.exports = {
   Discovery,
-  testEntititesJSON,
+  testEntitiesJSON,
 };
