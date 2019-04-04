@@ -31,6 +31,10 @@ export class ManagerNotifications {
   lastIdNotification: number;
   verifier: sign.SignedPacketVerifier;
 
+  /**
+   * Notification are downloaded and they must be verified first in order to process them afterwards
+   * @param {SignedPacketVerifier} verifyService - Represents all the functions needed to verify packets
+   */
   constructor(verifyService: sign.SignedPacketVerifier) {
     this.lastIdNotification = 0;
     this.verifier = verifyService;
@@ -48,7 +52,8 @@ export class ManagerNotifications {
   }
 
   /**
-   * Checks notification: verify signed packet and retrieve useful notification information
+   * Verify signed packet and retrieve useful notification information
+   * @param {Notification} not - Notification object
    */
   checkNot(not: Notification): ?NotificationFull {
     const result = this.verifier.verifySignedPacketMessage(not.jws);
@@ -68,6 +73,11 @@ export class ManagerNotifications {
     return notFull;
   }
 
+  /**
+   * Update the last notification identifier
+   * Used to only retrieve notifications after the last one
+   * @param {Number} notId - Notification identifier
+   */
   updateLastId(notId: number) {
     if (notId > this.lastIdNotification) {
       this.lastIdNotification = notId;
