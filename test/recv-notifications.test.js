@@ -11,7 +11,7 @@ const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
 const notificationUrl = 'http://127.0.0.1:10000/api/unstable';
 
 describe('[notification-server] Notification server Http communications', () => {
-  const testName = 'notification-server-test-user';
+  const testName = 'recv-notifications-test-user';
   let notificationServer;
   let id;
   let dataBase;
