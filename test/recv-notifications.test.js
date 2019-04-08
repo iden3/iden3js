@@ -56,7 +56,7 @@ describe('[notification-server] Notification server Http communications', () => 
   });
 
   it('Setup manageNotifications in id', () => {
-    const discovery = new iden3.discovery.Discovery(iden3.discovery.testEntititesJSON);
+    const discovery = new iden3.discovery.Discovery(iden3.discovery.testEntitiesJSON);
     const nameResolver = new iden3.nameResolver.NameResolver(iden3.nameResolver.testNamesJSON);
     id.addDiscovery(discovery);
     id.addNameResolver(nameResolver);
