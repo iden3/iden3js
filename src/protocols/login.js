@@ -264,6 +264,14 @@ export class SignedPacketVerifier {
       return undefined;
     }
 
+    if (jwsPayload.form == null) {
+      return {
+        nonceObj: nonceResult.nonceObj,
+        ethName: "",
+        idAddr: jwsHeader.iss,
+      };
+    }
+
     // 4. Verify that jwsHeader.iss and jwsPayload.form.ethName are in jwsPayload.proofAssignName.leaf
     const entry = Entry.newFromHex(jwsPayload.form.proofAssignName.leaf);
     const claimAssignName = claim.newClaimFromEntry(entry);
@@ -364,12 +372,15 @@ export class SignedPacketVerifier {
       throw new Error('Authorize KSign claim proofs of depth > 2 not allowed yet');
     }
 
-    // 5. Verify that jwsHeader.iss is in jwsPayload.proofKSign.
-    if (jwsPayload.proofKSign.proofs[0].aux == null) {
-      throw new Error('payload.proofksign.proofs[0].aux is nil');
-    }
-    if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
-      throw new Error('header.iss doesn\'t match with idaddr in proofksign set root claim');
+    if (jwsPayload.proofKSign.proofs.length === 1) {
+    } else {
+      // 5. Verify that jwsHeader.iss is in jwsPayload.proofKSign.
+      if (jwsPayload.proofKSign.proofs[0].aux == null) {
+        throw new Error('payload.proofksign.proofs[0].aux is nil');
+      }
+      if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
+        throw new Error('header.iss doesn\'t match with idaddr in proofksign set root claim');
+      }
     }
 
     // 6. Verify that signature of JWS(jwsHeader, jwsPayload) by jwsPayload.ksign is signature
