@@ -138,7 +138,8 @@ describe('[protocol]', () => {
 
     // identity wallet:
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, usrAddr,
-      proofEthName.ethName, proofEthName.proofAssignName, kc, kOperational, proofKSign, 3600 * 60);
+      { ethName: proofEthName.ethName, proofAssignName: proofEthName.proofAssignName},
+      kc, kOperational, proofKSign, 3600 * 60);
 
     // login backend:
     const res = signedPacketVerifier.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);

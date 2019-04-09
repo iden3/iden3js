@@ -166,6 +166,11 @@ export function signGenericSigV01(kc: kCont.KeyContainer, idAddr: string, ksign:
   return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta, GENERICSIGV01, {}, form);
 }
 
+export type IdenAssertProofName = {
+  ethName: string,
+  proofAssignName: proofs.ProofClaim,
+};
+
 
 /**
  * Generate and sign signature packet of type identity assertion
@@ -180,10 +185,13 @@ export function signGenericSigV01(kc: kCont.KeyContainer, idAddr: string, ksign:
  * @returns {String} signedPacket
  */
 export function signIdenAssertV01(signatureRequest: any, idAddr: string,
-  ethName: string, proofAssignName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
+  proofName: ?IdenAssertProofName, kc: kCont.KeyContainer, ksign: string,
   proofKSign: proofs.ProofClaim, expirationTimeDelta: number): string {
+  if (proofName == null) {
+    proofName = null;
+  }
   return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
-    IDENASSERTV01, signatureRequest.body.data, { ethName, proofAssignName });
+    IDENASSERTV01, signatureRequest.body.data, proofName);
 }
 
 export type IdenAssertRes = {
