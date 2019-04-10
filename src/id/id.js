@@ -235,7 +235,7 @@ class Id {
         const unixtime = Math.round((date).getTime() / 1000);
         const expirationTime = unixtime + 60;
         const signedPacket = protocols.login.signIdenAssertV01(sigReq, self.idAddr,
-          proofEthName.ethName, proofEthName.proofAssignName, kc, kSign, proofKSign, expirationTime);
+          proofEthName, kc, kSign, proofKSign, expirationTime);
         // Send back to notification server 'signIdenAssert'
         return self.notificationServer.submitLogin(signedPacket)
           .then((resSubLogin) => {

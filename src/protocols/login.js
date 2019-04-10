@@ -166,6 +166,11 @@ export function signGenericSigV01(kc: kCont.KeyContainer, idAddr: string, ksign:
   return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta, GENERICSIGV01, {}, form);
 }
 
+export type IdenAssertProofName = {
+  ethName: string,
+  proofAssignName: proofs.ProofClaim,
+};
+
 
 /**
  * Generate and sign signature packet of type identity assertion
@@ -180,10 +185,13 @@ export function signGenericSigV01(kc: kCont.KeyContainer, idAddr: string, ksign:
  * @returns {String} signedPacket
  */
 export function signIdenAssertV01(signatureRequest: any, idAddr: string,
-  ethName: string, proofAssignName: proofs.ProofClaim, kc: kCont.KeyContainer, ksign: string,
+  proofName: ?IdenAssertProofName, kc: kCont.KeyContainer, ksign: string,
   proofKSign: proofs.ProofClaim, expirationTimeDelta: number): string {
+  if (proofName === undefined) {
+    proofName = null;
+  }
   return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
-    IDENASSERTV01, signatureRequest.body.data, { ethName, proofAssignName });
+    IDENASSERTV01, signatureRequest.body.data, proofName);
 }
 
 export type IdenAssertRes = {
@@ -254,6 +262,14 @@ export class SignedPacketVerifier {
     // check that jwsPayload.proofKSign.proofs.length <= 2
     if (jwsPayload.proofKSign.proofs.length > 2) {
       return undefined;
+    }
+
+    if (jwsPayload.form == null) {
+      return {
+        nonceObj: nonceResult.nonceObj,
+        ethName: '',
+        idAddr: jwsHeader.iss,
+      };
     }
 
     // 4. Verify that jwsHeader.iss and jwsPayload.form.ethName are in jwsPayload.proofAssignName.leaf
@@ -356,12 +372,14 @@ export class SignedPacketVerifier {
       throw new Error('Authorize KSign claim proofs of depth > 2 not allowed yet');
     }
 
-    // 5. Verify that jwsHeader.iss is in jwsPayload.proofKSign.
-    if (jwsPayload.proofKSign.proofs[0].aux == null) {
-      throw new Error('payload.proofksign.proofs[0].aux is nil');
-    }
-    if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
-      throw new Error('header.iss doesn\'t match with idaddr in proofksign set root claim');
+    if (jwsPayload.proofKSign.proofs.length > 1) {
+      // 5. Verify that jwsHeader.iss is in jwsPayload.proofKSign.
+      if (jwsPayload.proofKSign.proofs[0].aux == null) {
+        throw new Error('payload.proofksign.proofs[0].aux is nil');
+      }
+      if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
+        throw new Error('header.iss doesn\'t match with idaddr in proofksign set root claim');
+      }
     }
 
     // 6. Verify that signature of JWS(jwsHeader, jwsPayload) by jwsPayload.ksign is signature
@@ -392,6 +410,14 @@ export class SignedPacketVerifier {
         throw new Error('payload.proofksign.signer is not a trusted relay');
       }
     }
+
+    // NOTE: For now we accept self signed auth ksign claims (the signer has
+    // the claim in its own merkle tree) as long as the signer identity
+    // details are found via the discovery, which we considered trusted for
+    // now.  In the future the claims will be verified by checking the proof
+    // from the entry to the root of a tree that's on the
+    // blockchain, so no signature verification will be necessary and signing
+    // entities won't be able to sign contradicting claims.
 
     // 7b. VerifyProofClaim(jwsPayload.proofOfKSign, signerOperational)
     if (!proofs.verifyProofClaim(jwsPayload.proofKSign, signer.kOpAddr)) {
