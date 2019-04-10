@@ -74,7 +74,7 @@ describe('[protocol] login', () => {
     expect(resClaim).to.be.equal(true);
 
     const expirationTime = unixtime + (3600 * 60);
-    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, `${name}@iden3.io`, proofEthName.proofAssignName, kc, ksign, proofKSign, expirationTime);
+    const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest, id.idAddr, proofEthName, kc, ksign, proofKSign, expirationTime);
 
     const resIdenAssert = signedPacketVerifier.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);
     expect(resIdenAssert).to.be.not.equal(undefined);
