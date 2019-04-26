@@ -132,8 +132,10 @@ Example can be found in [`iden3-basic-usage.example.js`](https://github.com/iden
 
 ## Centralized login
 In the next links, one can be found an example of `iden3` implementation as well as the login protocol explained in detail
+
 ### Login protocol documentation
 https://github.com/iden3/iden3js/blob/master/src/protocols/README.md
+
 ### Demo centralized application
 https://github.com/iden3/centralized-login-demo
 
@@ -147,14 +149,16 @@ const iden3 = require('iden3');
 ### KeyContainer
 
 - new KeyContainer using localStorage
-  ```js
+
+```js
   // new key container
   // new database
   const db = new iden3.Db();
   let keyContainer = new iden3.KeyContainer('localStorage');
 
-  ```
+```
 - usage:
+
 ```js
 // unlock the KeyContainer for the next 30 seconds
 let passphrase = 'pass';
@@ -195,6 +199,7 @@ const keyRevoke = keys[3];
 ```
 
 ### Identity
+
 ```js
 const db = new iden3.Db();
 const keyContainer = new iden3.KeyContainer('localStorage', db);
@@ -213,12 +218,14 @@ const id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, relayAddr, ''
 #### id.createID
 Creates the counterfactual contract through the `Relay`, and gets the identity address
 When an identity is created, all its keys are automatically stored
+
 ```js
 id.createID().then(res => {
   console.log(res.idAddr);
   console.log(res.proofClaim);
 });
 ```
+
 ```js
 // Return : - idAddr: Address identity identifier
 //          - proofOfClam: Structure of the claim emitted by the relay authorizing its key public operational
@@ -245,7 +252,9 @@ proofClaim = {
   signature:'440ec709297ecb6a7f7a200719c29d96025a893aef7318cebdcec401e3c8b3b711358f5a3c14394dc120b067ade86d7eca0c79be580d35934cc36dc246be6ec000',
 }
 ```
+
 #### id.createKey
+
 ```js
 // Create new key for this identity and bind it to a label
 const labelKey = 'test key'
@@ -257,12 +266,15 @@ console.log(loginKey);
 // Return : New key created
 loginKey = '0xaac4ed37a11e6a9170cb19a6e558913dc3efa6a7';
 ```
+
 #### id.getKeys
+
 ```js
 // Retrieve all keys that have been created for this identity
 const keysIdentity = id.getKeys();
 console.log(keysIdentity);
 ```
+
 ```js
 // Return : Object containing all the keys associated with the identity
 {
@@ -274,7 +286,9 @@ console.log(keysIdentity);
 ```
 
 #### id.deployID
+
 Deploys the counterfactual smart contract of identity to the blockchain.
+
 ```js
 id.deployID().then(res => {
   console.log(res.data);
@@ -330,6 +344,7 @@ id.authorizeKSignSecp256k1(keyContainer, id.keyOperationalPub, loginKey)
   });
 ```
 - Output:
+
 ```js
 // Return object: - proofClaim: full proof of existence of the claim issued by the relay
 proofClaim = {
@@ -747,6 +762,7 @@ relay.getIDRoot(id.kc.addressHex())
 }
 ```
 #### relay.getClaimByHi
+
 ```js
 let leaf = new iden3.claims.Entry();
 leaf.fromHexadecimal(proofClaim.Leaf);
@@ -756,6 +772,7 @@ relay.getClaimByHi(id.idAddr, iden.utils.bytesToHex(leaf.hi()))
     console.log('res.data', res.data);
   });
 ```
+
 ```js
 // Return object: - proofOfClaim: Proof of claim for the claim asked
 proofClaim = {
