@@ -27,7 +27,7 @@ function getNodeValue(db, key, prefix) {
 * Set node value to the merkle tree
 * @param {Object} db - Data base object representation
 * @param {Buffer} key - Key value of the node
-* @param {Object} value - Object representation of node value
+* @param {Object} value - Object representation of node value (Array of buffers)
 * @param {String} prefix - Prefix added to the key
 */
 function setNodeValue(db, key, value, prefix) {
@@ -65,11 +65,13 @@ class SparseMerkleTree {
   * Initiate sparse merkle tree
   * @param {Object} db - Database
   * @param {String} idAddr - adress of the identity
+  * @param {Number} maxLevels - max levels of the merkle tree
   */
-  constructor(db, idAddr) {
+  constructor(db, idAddr, maxLevels) {
     this.db = db;
     this.prefix = CONSTANTS.MTPREFIX + idAddr;
     this.root = emptyNodeValue;
+    this.maxLevels = maxLevels;
   }
 
   /**
@@ -120,6 +122,7 @@ class SparseMerkleTree {
       return;
     }
 
+    let lvlCounter = 0;
     if (nodeValue.length === 4) {
       // get current node value and its hIndex
       const totalTmp = helpers.getArrayBigIntFromBuffArray(nodeValue);
@@ -136,6 +139,11 @@ class SparseMerkleTree {
           arraySiblings.push(emptyNodeValue);
         }
         pos += 1;
+        lvlCounter += 1;
+        if (lvlCounter > this.maxLevels) {
+          // exit function in case that the maxLevels is reached
+          throw new Error('maxLevels reached');
+        }
       }
       arraySiblings.push(key);
       // Write current branch with new claim added
