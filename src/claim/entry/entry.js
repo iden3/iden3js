@@ -1,5 +1,5 @@
 // @flow
-import { getArrayBigIntFromBuffArray, bigIntToBuffer } from '../../sparse-merkle-tree/sparse-merkle-tree-utils';
+import { getArrayBigIntFromBuffArray, bigIntToBuffer } from '../../utils';
 
 const utils = require('../../utils');
 const mimc7 = require('../../sparse-merkle-tree/mimc7');

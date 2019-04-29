@@ -21,10 +21,10 @@ describe('[sparse-merkle-tree] Mimc7 hash function', () => {
   it('hash array bigInts', () => {
     const claim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
     const hi = mimc7.multiHash(claim.slice(2));
-    const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hi));
+    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hi));
     expect(hiHex).to.be.equal('0x1fd4bc970a697084ec1f83ecf81936d4a047e27c654752ddbc89f9ed1728e0ab');
     const hv = mimc7.multiHash(claim.slice(0, 2));
-    const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hv));
+    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hv));
     expect(hvHex).to.be.equal('0x263924eb9ae730cea9ce31bb9ada695ec3525536b4c058813552b074db36ba9a');
   });
 });
@@ -192,8 +192,8 @@ describe('[sparse-merkle-tree] Verify proof', () => {
     const proof = mt.generateProof(proofClaim.slice(2));
 
     const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[0]));
+    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[1]));
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     expect(proofHex).to.be.equal('0x0003000000000000000000000000000000000000000000000000000000000007'
@@ -213,8 +213,8 @@ describe('[sparse-merkle-tree] Verify proof', () => {
     const proof = mt.generateProof(proofClaim.slice(2));
 
     const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[0]));
+    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[1]));
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     expect(proofHex).to.be.equal('0x030400000000000000000000000000000000000000000000000000000000000b'
@@ -236,8 +236,8 @@ describe('[sparse-merkle-tree] Verify proof', () => {
     const proof = mt.generateProof(proofClaim.slice(2));
 
     const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[0]));
+    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[1]));
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     expect(proofHex).to.be.equal('0x0105000000000000000000000000000000000000000000000000000000000017'
@@ -265,8 +265,8 @@ describe('[sparse-merkle-tree] Verify trick proofs', () => {
     // Verify proof with node mismatch between generated proof and  node used for verification
     const proofClaimFalse = [bigInt(0), bigInt(5), bigInt(0), bigInt(5)];
     const hashes = iden3.sparseMerkleTree.getHiHv(proofClaimFalse);
-    const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[0]));
+    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[1]));
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
     expect(check).to.be.equal(false);
   });
@@ -285,9 +285,9 @@ describe('[sparse-merkle-tree] Verify trick proofs', () => {
     // and adding node metadata as auxiliary node
     objectProof.flagExistence = true;
     const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
-    const hashesBuff = Buffer.concat(helpers.getArrayBuffFromArrayBigInt(hashes));
+    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[0]));
+    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[1]));
+    const hashesBuff = Buffer.concat(iden3.utils.getArrayBuffFromArrayBigInt(hashes));
     objectProof.metaData = hashesBuff;
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
     expect(check).to.be.equal(false);
@@ -308,8 +308,8 @@ describe('[sparse-merkle-tree] Add Claim Repeated', () => {
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
 
     const hashes = iden3.sparseMerkleTree.getHiHv(claim);
-    const hiHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(helpers.bigIntToBuffer(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[0]));
+    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBuffer(hashes[1]));
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);

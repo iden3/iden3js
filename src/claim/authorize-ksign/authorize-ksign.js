@@ -6,7 +6,6 @@ const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
 const { bigInt } = snarkjs;
-const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Class representing an authorized Ksign claim
@@ -29,7 +28,7 @@ export class AuthorizeKSign {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    */
   constructor(version: Buffer, sign: Buffer, ay: Buffer) {
-    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN.TYPE)).slice(24, 32);
     this.version = version;
     this.sign = sign;
     this.ay = ay;

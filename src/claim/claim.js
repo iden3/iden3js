@@ -11,6 +11,7 @@ const helpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 const CONSTANTS = require('../constants');
 const TYPE_OBJECT = require('./link-object-identity/object-types.js');
 const utils = require('./claim-utils');
+const i3utils = require('../utils');
 
 /**
  * Decode entry class into claim data structure depending on its type
@@ -20,7 +21,7 @@ const utils = require('./claim-utils');
 // eslint-disable-next-line max-len
 function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSign | SetRootKey | AssignName | AuthorizeKSignSecp256k1 | LinkObjectIdentity {
   // Decode claim type from Entry class
-  const claimType = helpers.bufferToBigInt(entry.elements[3].slice(24, 32)).value;
+  const claimType = i3utils.bufferToBigInt(entry.elements[3].slice(24, 32)).value;
   // Parse elements and return the proper claim structure
   switch (claimType) {
     case CONSTANTS.CLAIMS.BASIC.TYPE:

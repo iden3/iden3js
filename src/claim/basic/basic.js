@@ -6,7 +6,6 @@ const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
 const { bigInt } = snarkjs;
-const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Class representing a basic claim
@@ -30,7 +29,7 @@ export class Basic {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    */
   constructor(version: Buffer, index: Buffer, extraData: Buffer) {
-    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.BASIC.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.BASIC.TYPE)).slice(24, 32);
     this.version = version;
     this.index = index;
     this.extraData = extraData;
