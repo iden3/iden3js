@@ -7,7 +7,6 @@ import { AssignName } from './assign-name/assign-name';
 import { AuthorizeKSignSecp256k1 } from './authorize-ksign-secp256k1/authorize-ksign-secp256k1';
 import { LinkObjectIdentity } from './link-object-identity/link-object-identity';
 
-const helpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 const CONSTANTS = require('../constants');
 const TYPE_OBJECT = require('./link-object-identity/object-types.js');
 const utils = require('./claim-utils');

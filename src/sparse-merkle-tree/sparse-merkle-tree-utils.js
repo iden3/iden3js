@@ -1,9 +1,6 @@
 import { Entry } from '../claim/entry/entry';
 
-const snarkjs = require('snarkjs');
 const utils = require('../utils');
-
-const { bigInt } = snarkjs;
 
 /**
 * Sets bit to 1 into a Uint8
