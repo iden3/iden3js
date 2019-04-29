@@ -19,6 +19,7 @@ const protocols = require('./protocols/protocols');
 const counterfactual = require('./eth/counterfactual');
 const constants = require('./constants');
 const claim = require('./claim/claim');
+const MemDb = require('./db/memory-db');
 
 const { Auth } = auth;
 // const { Dapp } = dapp;
@@ -47,4 +48,5 @@ module.exports = {
   claim,
   nameResolver,
   discovery,
+  MemDb,
 };

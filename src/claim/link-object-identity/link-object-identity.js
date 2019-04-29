@@ -12,9 +12,9 @@ const { bigInt } = snarkjs;
  * Hash object is used to store an object representation through a hash
  * Link object identity entry representation is as follows:
  * |element 3|: |empty|object index|object type|version|claim type| - |14 bytes|2 bytes|4 bytes|4 bytes|8 bytes|
- * |element 2|: |empty|identity| - |12 bytes|20 bytes|
+ * |element 2|: |empty|identity| - |empty|20 bytes|
  * |element 1|: |hash object| - |32 bytes|
- * |element 0|: |empty|hash type| - |28 bytes|4 bytes|
+ * |element 0|: |auxData| - |32 bytes|
  */
 export class LinkObjectIdentity {
   claimType: Buffer;
@@ -23,43 +23,44 @@ export class LinkObjectIdentity {
   objectIndex: Buffer;
   idAddr: Buffer;
   objectHash: Buffer;
-  hashType: Buffer;
+  auxData: Buffer;
   /**
    * Initialize raw claim data structure
    * Bytes are taken according entry claim structure
    * @param {Buffer} version - specifies version of the claim
-   * @param {Buffer} hashType - indicates what kind of hash is used on object hash
    * @param {Buffer} objectType - indicates object associated with object hash
    * @param {Buffer} objectIndex - instance of the object
    * @param {Buffer} idAddr - identity address linked to object
    * @param {Buffer} objectHash - Hash representing the object
+   * @param {Buffer} auxData - Auxiliary data to complement hash object
    */
-  constructor(version: Buffer, hashType: Buffer, objectType: Buffer, objectIndex: Buffer, idAddr: Buffer, objectHash: Buffer) {
+  constructor(version: Buffer, objectType: Buffer, objectIndex: Buffer,
+    idAddr: Buffer, objectHash: Buffer, auxData: Buffer) {
     this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
     this.version = version;
     this.objectType = objectType;
     this.objectIndex = objectIndex;
     this.idAddr = idAddr;
     this.objectHash = objectHash;
-    this.hashType = hashType;
+    this.auxData = auxData;
   }
 
   /**
    * Initialize claim data structure from fields
    */
   // eslint-disable-next-line max-len
-  static new(version: number, hashType: number, objectType: number, objectIndex: number, idAddr: string, objectHash: string): LinkObjectIdentity {
+  static new(version: number, objectType: number, objectIndex: number,
+    idAddr: string, objectHash: string, auxData: string): LinkObjectIdentity {
     const versionBuff = Buffer.alloc(4);
     versionBuff.writeUInt32BE(version, 0);
-    const hashTypeBuff = Buffer.alloc(4);
-    hashTypeBuff.writeUInt32BE(hashType, 0);
     const objectTypeBuff = Buffer.alloc(4);
     objectTypeBuff.writeUInt32BE(objectType, 0);
     const objectIndexBuff = Buffer.alloc(2);
     objectIndexBuff.writeUInt16BE(objectIndex, 0);
     const objectHashBuff = (utils.hexToBytes(objectHash)).fill(0, 0, 1);
     const idAddrBuff = utils.hexToBytes(idAddr);
-    return new LinkObjectIdentity(versionBuff, hashTypeBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff);
+    const auxDataBuff = (utils.hexToBytes(auxData)).fill(0, 0, 1);
+    return new LinkObjectIdentity(versionBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff, auxDataBuff);
   }
 
   /**
@@ -77,8 +78,8 @@ export class LinkObjectIdentity {
     // Parse element 1
     const objectHashBuff = entry.elements[1].slice(0, 32);
     // Parse element 0
-    const hashTypeBuff = entry.elements[0].slice(28, 32);
-    return new LinkObjectIdentity(versionBuff, hashTypeBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff);
+    const auxDataBuff = entry.elements[0].slice(0, 32);
+    return new LinkObjectIdentity(versionBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff, auxDataBuff);
   }
 
   /**
@@ -110,8 +111,8 @@ export class LinkObjectIdentity {
     claimEntry.elements[1].fill(this.objectHash, startIndex, endIndex);
     // Entry element 0 composition
     endIndex = claimEntry.elements[0].length;
-    startIndex = claimEntry.elements[0].length - this.hashType.length;
-    claimEntry.elements[0].fill(this.hashType, startIndex, endIndex);
+    startIndex = claimEntry.elements[0].length - this.auxData.length;
+    claimEntry.elements[0].fill(this.auxData, startIndex, endIndex);
     return claimEntry;
   }
 }
