@@ -1,9 +1,6 @@
 import { Entry } from '../claim/entry/entry';
 
-const snarkjs = require('snarkjs');
 const utils = require('../utils');
-
-const { bigInt } = snarkjs;
 
 /**
 * Sets bit to 1 into a Uint8
@@ -35,90 +32,6 @@ export function getBit(byte, pos) {
 */
 export function getIndexArray(index) {
   return index.toArray(2).value.reverse();
-}
-
-/**
-* Allocates a new Buffer from a bigInt number
-* @param {bigInt} number - bigInt number
-* @returns {Buffer} - Decoded Buffer in UTF-16
-*/
-export function bigIntToBuffer(number) {
-  const buff = Buffer.alloc(32);
-  let pos = buff.length - 1;
-  while (!number.isZero()) {
-    buff[pos] = number.and(255);
-    number = number.shiftRight(8);
-    pos -= 1;
-  }
-  return buff;
-}
-
-/**
-* Allocates a new bigInt from a buffer
-* @param {Buffer} buff - Buffer to convert
-* @returns {bigInt} - Decoded bigInt
-*/
-export function bufferToBigInt(buff) {
-  let number = bigInt(0);
-  let pos = buff.length - 1;
-  while (pos >= 0) {
-    let tmpNum = bigInt(buff[pos]);
-    tmpNum = tmpNum.shiftLeft(8 * (buff.length - 1 - pos));
-
-    number = number.add(tmpNum);
-    pos -= 1;
-  }
-  return number;
-}
-
-/**
-* Create a buffer from a node object
-* @param {Object} nodeValue - Object representation of node value data
-* @returns {Buffer} - New buffer
-*/
-export function nodeValueToBuffer(nodeValue) {
-  return Buffer.concat(nodeValue);
-}
-
-/**
-* Decode a buffer into an object represenation of node value
-* @param {Buffer} nodeValueBuffer - Buffer to decode
-* @returns {Object} - New object containing node value data
-*/
-export function bufferToNodeValue(nodeValueBuffer) {
-  const arrayBuff = [];
-  for (let i = 0; i < nodeValueBuffer.length - 1; i += 32) {
-    const buffTmp = Buffer.alloc(32);
-    buffTmp.fill(nodeValueBuffer.slice(i, i + 32));
-    arrayBuff.push(buffTmp);
-  }
-  return arrayBuff;
-}
-
-/**
-* Gets an array of buffers from bigInt array
-* @param {Array(bigInt)} arrayBigInt - Hash index of the leaf
-* @returns {Array(Buffer)} - Array of decoded buffers
-*/
-export function getArrayBuffFromArrayBigInt(arrayBigInt) {
-  const arrayBuff = [];
-  for (let i = 0; i < arrayBigInt.length; i++) {
-    arrayBuff.push(bigIntToBuffer(arrayBigInt[i]));
-  }
-  return arrayBuff;
-}
-
-/**
-* Gets an array of bigInt from buffer array
-* @param {Array(Buffer)} arrayBuff - Array of buffer to decode
-* @returns {Array(bigInt)} - Array of bigInt decoded
-*/
-export function getArrayBigIntFromBuffArray(arrayBuff) {
-  const arrayBigInt = [];
-  for (let i = 0; i < arrayBuff.length; i++) {
-    arrayBigInt.push(bufferToBigInt(arrayBuff[i]));
-  }
-  return arrayBigInt;
 }
 
 /**
@@ -173,7 +86,7 @@ export function genProofStruct(buffHex) {
 export function importClaimsDump(mt, claimsDump) {
   for (let i = 0; i < claimsDump.length; i++) {
     const e = Entry.newFromHex(claimsDump[i]);
-    const t = getArrayBigIntFromBuffArray(e.elements);
+    const t = utils.getArrayBigIntFromBuffArray(e.elements);
     mt.addClaim(t);
   }
 }

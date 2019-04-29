@@ -6,7 +6,6 @@ const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
 const { bigInt } = snarkjs;
-const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Class representing an assign name claim
@@ -29,7 +28,7 @@ export class AssignName {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    */
   constructor(version: Buffer, hashName: Buffer, id: Buffer) {
-    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.ASSIGN_NAME.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.ASSIGN_NAME.TYPE)).slice(24, 32);
     this.version = version;
     this.hashName = hashName;
     this.id = id;

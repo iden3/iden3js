@@ -20,7 +20,7 @@ function getNodeValue(db, key, prefix) {
   const keyHex = utils.bytesToHex(key);
   const valueHex = db.get(prefix + keyHex);
   if (valueHex === null) { return emptyNodeValue; }
-  return helpers.bufferToNodeValue(utils.hexToBytes(valueHex));
+  return utils.bufferToBuffArray(utils.hexToBytes(valueHex));
 }
 
 /**
@@ -32,7 +32,7 @@ function getNodeValue(db, key, prefix) {
 */
 function setNodeValue(db, key, value, prefix) {
   const keyHex = utils.bytesToHex(key);
-  const valueHex = utils.bytesToHex(helpers.nodeValueToBuffer(value));
+  const valueHex = utils.bytesToHex(utils.buffArrayToBuffer(value));
   db.insert(prefix + keyHex, valueHex);
 }
 
@@ -45,7 +45,7 @@ function setNodeValue(db, key, value, prefix) {
 function getHashFinalNode(hi, hv) {
   const hashArray = [bigInt(1), hi, hv];
   const hashKey = mimc7.multiHash(hashArray);
-  return helpers.bigIntToBuffer(hashKey);
+  return utils.bigIntToBuffer(hashKey);
 }
 
 /**
@@ -108,14 +108,14 @@ class SparseMerkleTree {
 
     if (nodeValue === emptyNodeValue) {
       let nextHash = getHashFinalNode(hi, hv);
-      setNodeValue(this.db, nextHash, helpers.getArrayBuffFromArrayBigInt(currentClaim), this.prefix);
+      setNodeValue(this.db, nextHash, utils.getArrayBuffFromArrayBigInt(currentClaim), this.prefix);
       let concat = 0;
       const level = arraySiblings.length - 1;
       for (let i = level; i >= 0; i--) {
         const bitLeaf = (i > (hiBinay.length - 1)) ? 0 : hiBinay[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-        nextHash = helpers.bigIntToBuffer(mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(concat)));
+        nextHash = utils.bigIntToBuffer(mimc7.multiHash(utils.getArrayBigIntFromBuffArray(concat)));
         setNodeValue(this.db, nextHash, concat, this.prefix);
       }
       this.root = nextHash;
@@ -125,7 +125,7 @@ class SparseMerkleTree {
     let lvlCounter = 0;
     if (nodeValue.length === 4) {
       // get current node value and its hIndex
-      const totalTmp = helpers.getArrayBigIntFromBuffArray(nodeValue);
+      const totalTmp = utils.getArrayBigIntFromBuffArray(nodeValue);
       let hiTmp = totalTmp.slice(2);
       hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
       // compare position index until find a split
@@ -148,7 +148,7 @@ class SparseMerkleTree {
       arraySiblings.push(key);
       // Write current branch with new claim added
       const newHash = getHashFinalNode(hi, hv);
-      setNodeValue(this.db, newHash, helpers.getArrayBuffFromArrayBigInt(currentClaim), this.prefix);
+      setNodeValue(this.db, newHash, utils.getArrayBuffFromArrayBigInt(currentClaim), this.prefix);
       // Recalculate nodes until the root
       let concat = 0;
       const level = arraySiblings.length - 1;
@@ -157,7 +157,7 @@ class SparseMerkleTree {
         const bitLeaf = (i > (hiBinay.length - 1)) ? 0 : hiBinay[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-        nextHash = helpers.bigIntToBuffer(mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(concat)));
+        nextHash = utils.bigIntToBuffer(mimc7.multiHash(utils.getArrayBigIntFromBuffArray(concat)));
         setNodeValue(this.db, nextHash, concat, this.prefix);
       }
       this.root = nextHash;
@@ -182,7 +182,7 @@ class SparseMerkleTree {
       nodeValue = getNodeValue(this.db, key, this.prefix);
       claimIndex += 1;
     }
-    return helpers.getArrayBigIntFromBuffArray(nodeValue);
+    return utils.getArrayBigIntFromBuffArray(nodeValue);
   }
 
   /**
@@ -223,7 +223,7 @@ class SparseMerkleTree {
       // set exist to 0
       exist = false;
       // get current node value and its hIndex
-      totalTmp = helpers.getArrayBigIntFromBuffArray(nodeValue);
+      totalTmp = utils.getArrayBigIntFromBuffArray(nodeValue);
       let hiTmp = totalTmp.slice(2);
       hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
       // Check input index and node index
@@ -255,8 +255,8 @@ class SparseMerkleTree {
     }
     if (checkIndex) {
       const hashes = getHiHv(totalTmp);
-      const hiFinal = helpers.bigIntToBuffer(hashes[0]);
-      const hvFinal = helpers.bigIntToBuffer(hashes[1]);
+      const hiFinal = utils.bigIntToBuffer(hashes[0]);
+      const hvFinal = utils.bigIntToBuffer(hashes[1]);
       buffTmp = Buffer.concat([buffTmp, hiFinal, hvFinal]);
     }
     return buffTmp;
@@ -274,8 +274,8 @@ class SparseMerkleTree {
 function checkProof(rootHex, proofHex, hiHex, hvHex) {
   const root = utils.hexToBytes(rootHex);
   const proofBuff = helpers.parseProof(proofHex);
-  const hi = helpers.bufferToBigInt(utils.hexToBytes(hiHex));
-  const hv = helpers.bufferToBigInt(utils.hexToBytes(hvHex));
+  const hi = utils.bufferToBigInt(utils.hexToBytes(hiHex));
+  const hv = utils.bufferToBigInt(utils.hexToBytes(hvHex));
   const hvBuff = getHashFinalNode(hi, hv);
   const hiBinay = helpers.getIndexArray(hi);
   const { siblings } = proofBuff;
@@ -288,8 +288,8 @@ function checkProof(rootHex, proofHex, hiHex, hvHex) {
   let pos = 0;
   let newHash = emptyNodeValue;
   if (flagNonExistence && flagNonDiff) {
-    const hiTmp = helpers.bufferToBigInt(proofBuff.metaData.slice(0, 32));
-    const hvTmp = helpers.bufferToBigInt(proofBuff.metaData.slice(32, proofBuff.metaData.length));
+    const hiTmp = utils.bufferToBigInt(proofBuff.metaData.slice(0, 32));
+    const hvTmp = utils.bufferToBigInt(proofBuff.metaData.slice(32, proofBuff.metaData.length));
     const hiTmpBinary = helpers.getIndexArray(hiTmp);
     while (!exist && !((pos > hiBinay.length - 1) && (pos > hiTmpBinary.length - 1))) {
       const bitLeaf = (pos > (hiBinay.length - 1)) ? 0 : hiBinay[pos];
@@ -323,7 +323,7 @@ function checkProof(rootHex, proofHex, hiHex, hvHex) {
   for (let i = arrayFullSiblings.length - 1; i >= 0; i--) {
     const siblingTmp = arrayFullSiblings[i];
     concat = hiBinay[i] ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-    nextHash = helpers.bigIntToBuffer(mimc7.multiHash(helpers.getArrayBigIntFromBuffArray(concat)));
+    nextHash = utils.bigIntToBuffer(mimc7.multiHash(utils.getArrayBigIntFromBuffArray(concat)));
   }
   return Buffer.compare(nextHash, root) === 0;
 }

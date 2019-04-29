@@ -6,7 +6,6 @@ const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
 
 const { bigInt } = snarkjs;
-const helpers = require('../../sparse-merkle-tree/sparse-merkle-tree-utils');
 
 /**
  * Class representing an object linked to an identity
@@ -36,7 +35,7 @@ export class LinkObjectIdentity {
    * @param {Buffer} objectHash - Hash representing the object
    */
   constructor(version: Buffer, hashType: Buffer, objectType: Buffer, objectIndex: Buffer, idAddr: Buffer, objectHash: Buffer) {
-    this.claimType = helpers.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
     this.version = version;
     this.objectType = objectType;
     this.objectIndex = objectIndex;

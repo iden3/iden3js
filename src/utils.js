@@ -2,6 +2,10 @@
 const ethUtil = require('ethereumjs-util');
 const createKeccakHash = require('keccak');
 
+const snarkjs = require('snarkjs');
+
+const { bigInt } = snarkjs;
+
 /**
  * @param  {uint32} u
  * @returns {Buffer}
@@ -197,6 +201,91 @@ function pow(data: any, difficulty: number): any {
   return data;
 }
 
+
+/**
+* Allocates a new Buffer from a bigInt number
+* @param {bigInt} number - bigInt number
+* @returns {Buffer} - Decoded Buffer in UTF-16
+*/
+function bigIntToBuffer(number: bigInt): Buffer {
+  const buff = Buffer.alloc(32);
+  let pos = buff.length - 1;
+  while (!number.isZero()) {
+    buff[pos] = number.and(255);
+    number = number.shiftRight(8);
+    pos -= 1;
+  }
+  return buff;
+}
+
+/**
+* Allocates a new bigInt from a buffer
+* @param {Buffer} buff - Buffer to convert
+* @returns {bigInt} - Decoded bigInt
+*/
+function bufferToBigInt(buff: Buffer): bigInt {
+  let number = bigInt(0);
+  let pos = buff.length - 1;
+  while (pos >= 0) {
+    let tmpNum = bigInt(buff[pos]);
+    tmpNum = tmpNum.shiftLeft(8 * (buff.length - 1 - pos));
+
+    number = number.add(tmpNum);
+    pos -= 1;
+  }
+  return number;
+}
+
+/**
+* Create a buffer from a node object
+* @param {Array(Buffer)} buffArray - array of buffers
+* @returns {Buffer} - New buffer
+*/
+function buffArrayToBuffer(buffArray: Array<Buffer>): Buffer {
+  return Buffer.concat(buffArray);
+}
+
+/**
+* Decode a buffer into an object represenation of node value
+* @param {Buffer} buffer - Buffer to decode
+* @returns {Array<Buffer>} - array of buffers
+*/
+function bufferToBuffArray(buff: Buffer): Array<Buffer> {
+  const arrayBuff = [];
+  for (let i = 0; i < buff.length - 1; i += 32) {
+    const buffTmp = Buffer.alloc(32);
+    buffTmp.fill(buff.slice(i, i + 32));
+    arrayBuff.push(buffTmp);
+  }
+  return arrayBuff;
+}
+
+/**
+* Gets an array of buffers from bigInt array
+* @param {Array(bigInt)} arrayBigInt - Hash index of the leaf
+* @returns {Array(Buffer)} - Array of decoded buffers
+*/
+function getArrayBuffFromArrayBigInt(arrayBigInt: Array<bigInt>): Array<Buffer> {
+  const arrayBuff = [];
+  for (let i = 0; i < arrayBigInt.length; i++) {
+    arrayBuff.push(bigIntToBuffer(arrayBigInt[i]));
+  }
+  return arrayBuff;
+}
+
+/**
+* Gets an array of bigInt from buffer array
+* @param {Array(Buffer)} arrayBuff - Array of buffer to decode
+* @returns {Array(bigInt)} - Array of bigInt decoded
+*/
+function getArrayBigIntFromBuffArray(arrayBuff: Array<Buffer>): Array<bigInt> {
+  const arrayBigInt = [];
+  for (let i = 0; i < arrayBuff.length; i++) {
+    arrayBigInt.push(bufferToBigInt(arrayBuff[i]));
+  }
+  return arrayBigInt;
+}
+
 module.exports = {
   hashBytes,
   bytesToHex,
@@ -215,4 +304,10 @@ module.exports = {
   ethBytesToUint64,
   bytesToBase64,
   base64ToBytes,
+  bigIntToBuffer,
+  bufferToBigInt,
+  buffArrayToBuffer,
+  bufferToBuffArray,
+  getArrayBuffFromArrayBigInt,
+  getArrayBigIntFromBuffArray,
 };
