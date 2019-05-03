@@ -5,7 +5,8 @@ const TYPE_OBJECT = {
   dob: 3,
   givenName: 4,
   familyName: 5,
-  certificate: 6,
+  certificate_A: 6,
+  storage: 7,
 };
 
 const TYPE_HASH = {

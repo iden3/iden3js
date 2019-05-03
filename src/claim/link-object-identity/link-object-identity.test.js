@@ -9,18 +9,18 @@ const { expect } = chai;
 
 describe('[Claim link object identity Id]', () => {
   const versionExample = 1;
-  const hashTypeExample = 1;
   const objectTypeExample = 1;
   const objectIndexExample = 0;
   const hashObjectExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
   const idAddrExample = '0x393939393939393939393939393939393939393A';
+  const auxDataExample = '0x000102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102';
   let claimLinkObject;
   let entryClaim;
   let parsedClaim;
 
   before('Create new unique id claim', () => {
     claimLinkObject = linkObjectIdentity.LinkObjectIdentity.new(
-      versionExample, hashTypeExample, objectTypeExample, objectIndexExample, idAddrExample, hashObjectExample,
+      versionExample, objectTypeExample, objectIndexExample, idAddrExample, hashObjectExample, auxDataExample,
     );
     expect(claimLinkObject).to.not.be.equal(null);
     entryClaim = claimLinkObject.toEntry();
@@ -32,9 +32,6 @@ describe('[Claim link object identity Id]', () => {
   });
   it('Parse version', () => {
     expect(utils.bytesToHex(claimLinkObject.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
-  });
-  it('Parse hash type', () => {
-    expect(utils.bytesToHex(claimLinkObject.hashType)).to.be.equal(utils.bytesToHex(parsedClaim.hashType));
   });
   it('Parse object type', () => {
     expect(utils.bytesToHex(claimLinkObject.objectType)).to.be.equal(utils.bytesToHex(parsedClaim.objectType));
@@ -48,9 +45,12 @@ describe('[Claim link object identity Id]', () => {
   it('Parse identity address', () => {
     expect(utils.bytesToHex(claimLinkObject.idAddr)).to.be.equal(utils.bytesToHex(parsedClaim.idAddr));
   });
+  it('Parse auxiliary data', () => {
+    expect(utils.bytesToHex(claimLinkObject.auxData)).to.be.equal(utils.bytesToHex(parsedClaim.auxData));
+  });
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHex();
-    expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000001'
+    expect(hexFromElement).to.be.equal('0x000102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102'
                                        + '000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
                                        + '000000000000000000000000393939393939393939393939393939393939393a'
                                        + '0000000000000000000000000000000000000001000000010000000000000005');
@@ -62,7 +62,7 @@ describe('[Claim link object identity Id]', () => {
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x1bc5fac04887744f1831a8d881e4d68330e9f5f60a1c85265896df294329c7cc';
+    const hvResult = '0x29b6b6df525047ada442f0db2fd2a3b74e0cb3f6bed89709d5cd72d69c5a135c';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });
