@@ -96,7 +96,7 @@ describe('[protocol]', () => {
   it('test bigint', () => {
     // check that node version supports shiftLeft on bigInt
     bigInt(8).toString();
-    bigInt(8).shiftLeft(2);
+    bigInt(8).shl(2);
   });
 
   it('test check proof', () => {

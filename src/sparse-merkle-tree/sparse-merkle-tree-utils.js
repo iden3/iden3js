@@ -1,5 +1,7 @@
 import { Entry } from '../claim/entry/entry';
 
+const { bigInt } = require('snarkjs');
+
 const utils = require('../utils');
 
 /**
@@ -31,7 +33,21 @@ export function getBit(byte, pos) {
 * @returns {Array(Uint8)} - Array of bits determining leaf position
 */
 export function getIndexArray(index) {
-  return index.toArray(2).value.reverse();
+  let k = bigInt(index);
+  const res = [];
+
+  while (!k.isZero()) {
+    if (k.isOdd()) {
+      res.push(1);
+    } else {
+      res.push(0);
+    }
+    k = k.shr(1);
+  }
+
+  while (res.length < 256) res.push(false);
+
+  return res;
 }
 
 /**

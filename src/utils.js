@@ -29,8 +29,11 @@ function ethBytesToUint32(b: Buffer): number { // compatible with EthBytesToUint
  * @returns {Buffer}
  */
 function uint64ToEthBytes(u: number): Buffer { // compatible with Uint64ToEthBytes() go-iden3 version
+  // NOTE: JavaScript's number based on IEEE-754 could only handle 53 bits
+  // precision.  The closes multiple of 8 to 53 is 6, so we only support 6*8 =
+  // 48bit numbers instead of 64bit uint.
   const buf = Buffer.alloc(8);
-  buf.writeUIntBE(u, 0, 8);
+  buf.slice(2, 8).writeUIntBE(u, 0, 6);
   return buf;
 }
 
@@ -53,9 +56,9 @@ function hashBytes(b: Buffer): any {
 }
 
 /**
- * Decode a Buffer to a string (UTF-16)
- * @param {Buffer} buff - Buffer to decode
- * @returns {String} - Decoded Buffer in UTF-16
+ * Encode a Buffer to a string in hex
+ * @param {Buffer} buff - Buffer to encode
+ * @returns {String} - Encoded Buffer
  */
 function bytesToHex(buff: Buffer): string {
   return `0x${buff.toString('hex')}`;
@@ -205,14 +208,14 @@ function pow(data: any, difficulty: number): any {
 /**
 * Allocates a new Buffer from a bigInt number
 * @param {bigInt} number - bigInt number
-* @returns {Buffer} - Decoded Buffer in UTF-16
+* @returns {Buffer} - Decoded Buffer
 */
 function bigIntToBuffer(number: bigInt): Buffer {
   const buff = Buffer.alloc(32);
   let pos = buff.length - 1;
   while (!number.isZero()) {
-    buff[pos] = number.and(255);
-    number = number.shiftRight(8);
+    buff[pos] = Number(number.and(bigInt(255)));
+    number = number.shr(8);
     pos -= 1;
   }
   return buff;
@@ -228,7 +231,7 @@ function bufferToBigInt(buff: Buffer): bigInt {
   let pos = buff.length - 1;
   while (pos >= 0) {
     let tmpNum = bigInt(buff[pos]);
-    tmpNum = tmpNum.shiftLeft(8 * (buff.length - 1 - pos));
+    tmpNum = tmpNum.shl(8 * (buff.length - 1 - pos));
 
     number = number.add(tmpNum);
     pos -= 1;

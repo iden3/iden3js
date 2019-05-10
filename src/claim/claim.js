@@ -20,7 +20,7 @@ const i3utils = require('../utils');
 // eslint-disable-next-line max-len
 function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSign | SetRootKey | AssignName | AuthorizeKSignSecp256k1 | LinkObjectIdentity {
   // Decode claim type from Entry class
-  const claimType = i3utils.bufferToBigInt(entry.elements[3].slice(24, 32)).value;
+  const claimType = Number(i3utils.bufferToBigInt(entry.elements[3].slice(24, 32)));
   // Parse elements and return the proper claim structure
   switch (claimType) {
     case CONSTANTS.CLAIMS.BASIC.TYPE:
@@ -36,7 +36,7 @@ function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSign | SetRoo
     case CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE:
       return LinkObjectIdentity.newFromEntry(entry);
     default:
-      return undefined;
+      throw new Error(`Unknown claim type ${claimType}`);
   }
 }
 
