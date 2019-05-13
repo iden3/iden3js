@@ -49,12 +49,12 @@ describe('[Claim Basic]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x10dae586534145cf6bf10cb0f7dc7f0a343b6fb32c04501e85cace56c9381f73';
+    const hiResult = '0x1d4d6c81f3cd8bd286affa0d5ac3b677d86fea34ba88d450081d703bcf712e6a';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x00fa98173f610358b765b4ff593ed7bae0db326d287eec86b1782da9bea45748';
+    const hvResult = '0x03c4686d099ffd137b83ba22b57dc954ac1e6c0e2b1e0ef972a936992b8788ff';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });
