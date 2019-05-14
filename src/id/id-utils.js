@@ -1,7 +1,10 @@
+const bs58 = require('bs58');
 const utils = require('../utils');
 const MemoryDb = require('../db/memory-db');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 const authorizeKSignSecp256k1 = require('../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1');
+
+const TypeS2M7 = Buffer.from([0x00, 0x04]);
 
 /**
  * given 3 hex string compressed public keys, returns an array of 3 AuthorizeKSignSecp256k1 claims for each one of the input keys
@@ -12,11 +15,71 @@ const authorizeKSignSecp256k1 = require('../claim/authorize-ksign-secp256k1/auth
  */
 function generateInitialClaimsAuthorizeKSign(kopComp, krecComp, krevComp) {
   const claims = [];
-  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, utils.bytesToHex(kopComp)));
-  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, utils.bytesToHex(krecComp)));
-  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, utils.bytesToHex(krevComp)));
+  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, kopComp));
+  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, krecComp));
+  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, krevComp));
   return claims;
 }
+
+
+/**
+ * from a given id (Buffer), returns an object containing:
+ * {
+ *      type,
+ *      genesis,
+ *      checksum
+ * }
+ * @param {Buffer} id - id
+ * @returns {Object} - object {type, genesis, checksum}
+ */
+function decomposeID(id) {
+  const typ = id.slice(0, 2);
+  const genesis = id.slice(2, id.length - 2);
+  const checksum = id.slice(id.length - 2, id.length);
+  return {
+    type: typ,
+    genesis,
+    checksum,
+  };
+}
+
+/**
+ * calculates the checksum for a given type & genesis
+ * @param {Buffer} typ - type of identity specification
+ * @param {Buffer} genesis - genesis root of the id state: id_0.0
+ * @returns {Buffer} checksum
+ */
+function calculateChecksum(typ, genesis) {
+  const toHash = Buffer.concat([typ, genesis]);
+  const h = utils.hashBytes(toHash);
+  const checksum = h.slice(h.length - 2, h.length);
+  return checksum;
+}
+/**
+ * Checks the checksum of a given identity
+ * @param {Buffer} id - id
+ * @returns {bool} - true if the checksum is correct, false if not
+ */
+function checkChecksum(id) {
+  const decomposed = decomposeID(id);
+  const c = calculateChecksum(decomposed.typ, decomposed.genesis);
+  return Buffer.compare(decomposed.checksum, c);
+}
+
+/**
+ * creates an identity given type & genesis
+ * where the id will be [ typ | genesis | checksum ]
+ * @param {Buffer} typ - type of identity specification
+ * @param {Buffer} genesis - genesis root of the id state: id_0.0
+ * @returns {Buffer} id
+ */
+function newID(typ, genesis) {
+  const checksum = calculateChecksum(typ, genesis);
+  // as this is not a typed language, the .slice(0, x) is to make sure that the variables are of the desired length
+  const id = Buffer.concat([typ.slice(0, 2), genesis.slice(0, 27), checksum.slice(0, 2)]);
+  return id;
+}
+
 
 /**
  * calculates the Id Genesis, from given public keys
@@ -35,12 +98,16 @@ function calculateIdGenesis(kopComp, krecComp, krevComp) {
     const c = utils.getArrayBigIntFromBuffArray(claims[i].toEntry().elements);
     mt.addClaim(c);
   }
-  const h = utils.hashBytes(mt.root);
-  const idAddrBytes = h.slice(12, h.length);
-  return utils.bytesToHex(idAddrBytes);
+  const idGenesisBuffer = mt.root.slice(0, 27);
+  const id = newID(TypeS2M7, idGenesisBuffer);
+  return bs58.encode(id);
 }
-
 
 module.exports = {
   calculateIdGenesis,
+  decomposeID,
+  calculateChecksum,
+  checkChecksum,
+  newID,
 };
+

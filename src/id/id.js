@@ -22,10 +22,12 @@ class Id {
   constructor(keyOpPub, keyRecover, keyRevoke, relay, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
+
     this.keyRecover = keyRecover;
     this.keyRevoke = keyRevoke;
     this.keyOperationalPub = keyOpPub;
     this.relay = relay;
+
     this.prefix = CONSTANTS.IDPREFIX;
     this.keyProfilePath = keyProfilePath;
     this.nameServer = undefined;
