@@ -147,3 +147,12 @@ describe('[util] pow dataBackup', () => {
     expect(iden3.utils.checkPoW(hash, 2)).to.be.equal(true);
   });
 });
+
+describe('[util] swap endianness', () => {
+  it('Swap buffers', () => {
+    const buffHex = '0x01020304050607080910';
+    const buff = iden3.utils.hexToBytes(buffHex);
+    const buffSwap = iden3.utils.swapEndianness(buff);
+    expect(iden3.utils.bytesToHex(buffSwap)).to.be.equal('0x10090807060504030201');
+  });
+});
