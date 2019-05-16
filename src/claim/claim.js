@@ -20,7 +20,7 @@ const i3utils = require('../utils');
 // eslint-disable-next-line max-len
 function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSignBabyJub | SetRootKey | AssignName | AuthorizeKSignSecp256k1 | LinkObjectIdentity {
   // Decode claim type from Entry class
-  const claimType = Number(i3utils.bufferToBigInt(entry.elements[3].slice(24, 32)));
+  const claimType = Number(i3utils.bufferToBigIntBE(entry.elements[3].slice(24, 32)));
   // Parse elements and return the proper claim structure
   switch (claimType) {
     case CONSTANTS.CLAIMS.BASIC.TYPE:

@@ -36,7 +36,7 @@ export class LinkObjectIdentity {
    */
   constructor(version: Buffer, objectType: Buffer, objectIndex: Buffer,
     idAddr: Buffer, objectHash: Buffer, auxData: Buffer) {
-    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBufferBE(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
     this.version = version;
     this.objectType = objectType;
     this.objectIndex = objectIndex;

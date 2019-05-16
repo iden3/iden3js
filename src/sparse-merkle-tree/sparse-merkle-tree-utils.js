@@ -102,7 +102,7 @@ export function genProofStruct(buffHex) {
 export function importClaimsDump(mt, claimsDump) {
   for (let i = 0; i < claimsDump.length; i++) {
     const e = Entry.newFromHex(claimsDump[i]);
-    const t = utils.getArrayBigIntFromBuffArray(e.elements);
+    const t = utils.getArrayBigIntFromBuffArrayBE(e.elements);
     mt.addClaim(t);
   }
 }

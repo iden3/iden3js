@@ -1,5 +1,5 @@
 // @flow
-import { getArrayBigIntFromBuffArray, bigIntToBuffer } from '../../utils';
+import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../../utils';
 
 const utils = require('../../utils');
 const mimc7 = require('../../sparse-merkle-tree/mimc7');
@@ -46,8 +46,8 @@ export class Entry {
    */
   hi(): Buffer {
     const hashArray = [this.elements[2], this.elements[3]];
-    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArray(hashArray));
-    return bigIntToBuffer(hashKey);
+    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
+    return bigIntToBufferBE(hashKey);
   }
 
   /**
@@ -57,8 +57,8 @@ export class Entry {
    */
   hv(): Buffer {
     const hashArray = [this.elements[0], this.elements[1]];
-    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArray(hashArray));
-    return bigIntToBuffer(hashKey);
+    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
+    return bigIntToBufferBE(hashKey);
   }
 
   /**

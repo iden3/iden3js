@@ -29,7 +29,7 @@ export class SetRootKey {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    */
   constructor(version: Buffer, era: Buffer, id: Buffer, rootKey: Buffer) {
-    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.SET_ROOT_KEY.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBufferBE(bigInt(CONSTANTS.CLAIMS.SET_ROOT_KEY.TYPE)).slice(24, 32);
     this.version = version;
     this.era = era;
     this.id = id;
