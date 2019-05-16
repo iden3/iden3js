@@ -14,10 +14,10 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
   const privKeyBuff = utils.hexToBytes(privKey);
   const pubKeyBuff = utilsBabyJub.privToPub(privKeyBuff, true);
   let sign = false;
-  if (pubKeyBuff[31] & 0x80) {
+  if (pubKeyBuff[0] & 0x80) {
     sign = true;
   }
-  pubKeyBuff[31] &= 0x7F;
+  pubKeyBuff[0] &= 0x7F;
   let AuthorizeKSignBabyJub;
   let entryClaim;
   let parsedClaim;
@@ -45,12 +45,12 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
     const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0000000000000000000000000000000000000000000000000000000000000000'
-                                       + 'ab05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c'
-                                       + '0000000000000000000000000000000000000000000000010000000000000001');
+                                       + '2b05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c'
+                                       + '0000000000000000000000000000000000000001000000010000000000000001');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x2a4d01b0a8dbcb1ed1ae7907202d5d45130c8116f29211dc01229dde97d0f89b';
+    const hiResult = '0x04f41fdac3240e7b68905df19a2394e4a4f1fb7eaeb310e39e1bb0b225b7763f';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
