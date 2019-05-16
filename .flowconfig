@@ -2,6 +2,7 @@
 .*/node_modules/.*/test/.*
 
 [include]
+./node_modules/events
 
 [libs]
 

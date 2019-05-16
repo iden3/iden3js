@@ -20,16 +20,16 @@ describe('[Claim-utils]', () => {
     expect((claim.version).readUInt32BE(0)).to.be.equal(1);
   });
 
-  it('Parse entry into claim authorize key sign', () => {
+  it('Parse entry into claim authorize key sign babyjub', () => {
     const entryHex = '0x0000000000000000000000000000000000000000000000000000000000000000'
                      + '0000000000000000000000000000000000000000000000000000000000000000'
-                     + '0505050505050505050505050505050505050505050505050505050505050506'
-                     + '0000000000000000000000000000000000000001000000010000000000000001';
+                     + '031ebff0c058993f2dce2f14b891093a2115f48e711bb39ecb8e4b90e94f8425'
+                     + '0000000000000000000000000000000000000000000000010000000000000001';
     const entry = Entry.newFromHex(entryHex);
     const claim = (claimUtils.newClaimFromEntry(entry): any);
     expect((claim.version).readUInt32BE(0)).to.be.equal(1);
-    expect((claim.sign).readUInt8(0)).to.be.equal(1);
-    expect(utils.bytesToHex(claim.ay)).to.be.equal('0x0505050505050505050505050505050505050505050505050505050505050506');
+    expect((claim.sign).readUInt8(0)).to.be.equal(0);
+    expect(utils.bytesToHex(claim.ay)).to.be.equal('0x031ebff0c058993f2dce2f14b891093a2115f48e711bb39ecb8e4b90e94f8425');
   });
 
   it('Parse entry into claim assign name', () => {

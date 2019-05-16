@@ -1,7 +1,7 @@
 // @flow
 import { Entry } from './entry/entry';
 import { Basic } from './basic/basic';
-import { AuthorizeKSign } from './authorize-ksign/authorize-ksign';
+import { AuthorizeKSignBabyJub } from './authorize-ksign-babyjub/authorize-ksign-babyjub';
 import { SetRootKey } from './set-root-key/set-root-key';
 import { AssignName } from './assign-name/assign-name';
 import { AuthorizeKSignSecp256k1 } from './authorize-ksign-secp256k1/authorize-ksign-secp256k1';
@@ -18,15 +18,15 @@ const i3utils = require('../utils');
  * @returns {Object} Claim raw data
  */
 // eslint-disable-next-line max-len
-function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSign | SetRootKey | AssignName | AuthorizeKSignSecp256k1 | LinkObjectIdentity {
+function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSignBabyJub | SetRootKey | AssignName | AuthorizeKSignSecp256k1 | LinkObjectIdentity {
   // Decode claim type from Entry class
   const claimType = Number(i3utils.bufferToBigInt(entry.elements[3].slice(24, 32)));
   // Parse elements and return the proper claim structure
   switch (claimType) {
     case CONSTANTS.CLAIMS.BASIC.TYPE:
       return Basic.newFromEntry(entry);
-    case CONSTANTS.CLAIMS.AUTHORIZE_KSIGN.TYPE:
-      return AuthorizeKSign.newFromEntry(entry);
+    case CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_BABYJUB.TYPE:
+      return AuthorizeKSignBabyJub.newFromEntry(entry);
     case CONSTANTS.CLAIMS.SET_ROOT_KEY.TYPE:
       return SetRootKey.newFromEntry(entry);
     case CONSTANTS.CLAIMS.ASSIGN_NAME.TYPE:
@@ -43,7 +43,7 @@ function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSign | SetRoo
 module.exports = {
   Entry,
   Basic,
-  AuthorizeKSign,
+  AuthorizeKSignBabyJub,
   SetRootKey,
   AssignName,
   AuthorizeKSignSecp256k1,

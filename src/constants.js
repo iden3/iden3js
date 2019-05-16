@@ -15,8 +15,8 @@ const CLAIMS = {
     ID: 'basic',
     TYPE: 0,
   },
-  AUTHORIZE_KSIGN: {
-    ID: 'authorizeKSign',
+  AUTHORIZE_KSIGN_BABYJUB: {
+    ID: 'authorizeKSignBabyJub',
     TYPE: 1,
   },
   SET_ROOT_KEY: {

@@ -289,6 +289,20 @@ function getArrayBigIntFromBuffArray(arrayBuff: Array<Buffer>): Array<bigInt> {
   return arrayBigInt;
 }
 
+/**
+* Swap endianess buffer
+* @param {Buffer} buff - Buffer to swap
+* @returns {Buffer} - Buffer swapped
+*/
+function swapEndianness(buff: Buffer): Buffer {
+  const len = buff.length;
+  const buffSwap = Buffer.alloc(len);
+  for (let i = 0; i < len; i++) {
+    buffSwap[i] = buff[(len - 1) - i];
+  }
+  return buffSwap;
+}
+
 module.exports = {
   hashBytes,
   bytesToHex,
@@ -313,4 +327,5 @@ module.exports = {
   bufferToBuffArray,
   getArrayBuffFromArrayBigInt,
   getArrayBigIntFromBuffArray,
+  swapEndianness,
 };
