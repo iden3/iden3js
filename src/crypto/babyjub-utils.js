@@ -17,7 +17,7 @@ const baseBabyJub = babyJub.Base8;
  * @returns {Buffer} - Public key compressed
  */
 function compressPoint(pubKeyX: Buffer, pubKeyY: Buffer): Buffer {
-  const pubKeyXBigInt = utils.bufferToBigInt(pubKeyX);
+  const pubKeyXBigInt = utils.bufferToBigIntBE(pubKeyX);
   if (pubKeyXBigInt.greater(babyJub.p.shr(1))) {
     pubKeyY[0] |= 0x80;
   }
@@ -75,8 +75,8 @@ function privToPub(privKey: Buffer, compress: boolean): Buffer {
   }
   const scalar = privToScalar(privKey);
   const pubKey = babyJub.mulPointEscalar(baseBabyJub, scalar);
-  const pubKeyX = utils.bigIntToBuffer(pubKey[0]);
-  const pubKeyY = utils.bigIntToBuffer(pubKey[1]);
+  const pubKeyX = utils.bigIntToBufferBE(pubKey[0]);
+  const pubKeyY = utils.bigIntToBufferBE(pubKey[1]);
   if (!babyJub.inSubgroup(pubKey)) {
     throw new Error('Point generated not in babyjub subgroup');
   }

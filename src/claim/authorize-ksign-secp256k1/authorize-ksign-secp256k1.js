@@ -28,7 +28,7 @@ export class AuthorizeKSignSecp256k1 {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    */
   constructor(version: Buffer, pubKeyCompressed: Buffer) {
-    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBufferBE(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_SECP256K1.TYPE)).slice(24, 32);
     this.version = version;
     this.pubKeyCompressed = pubKeyCompressed;
   }

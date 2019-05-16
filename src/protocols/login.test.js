@@ -114,9 +114,9 @@ describe('[protocol]', () => {
     + '0000000000000000000000000000000000000000000000010000000000000003';
     // Add leaf to sparse merkle tree
     const entry = Entry.newFromHex(leaf);
-    mt.addClaim(iden3.utils.getArrayBigIntFromBuffArray(entry.elements));
+    mt.addClaim(iden3.utils.getArrayBigIntFromBuffArrayBE(entry.elements));
     // generate proof
-    const proofBuff = mt.generateProof(iden3.utils.getArrayBigIntFromBuffArray([entry.elements[2], entry.elements[3]]));
+    const proofBuff = mt.generateProof(iden3.utils.getArrayBigIntFromBuffArrayBE([entry.elements[2], entry.elements[3]]));
     const proof = iden3.utils.bytesToHex(proofBuff);
     const root = iden3.utils.bytesToHex(mt.root);
     const verified = smt.checkProof(root, proof, iden3.utils.bytesToHex(entry.hi()), iden3.utils.bytesToHex(entry.hv()));

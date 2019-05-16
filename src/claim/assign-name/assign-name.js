@@ -28,7 +28,7 @@ export class AssignName {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    */
   constructor(version: Buffer, hashName: Buffer, id: Buffer) {
-    this.claimType = utils.bigIntToBuffer(bigInt(CONSTANTS.CLAIMS.ASSIGN_NAME.TYPE)).slice(24, 32);
+    this.claimType = utils.bigIntToBufferBE(bigInt(CONSTANTS.CLAIMS.ASSIGN_NAME.TYPE)).slice(24, 32);
     this.version = version;
     this.hashName = hashName;
     this.id = id;

@@ -32,7 +32,7 @@ function calculateIdGenesis(kopComp, krecComp, krevComp) {
   const claims = generateInitialClaimsAuthorizeKSign(kopComp, krecComp, krevComp);
 
   for (let i = 0; i < claims.length; i++) {
-    const c = utils.getArrayBigIntFromBuffArray(claims[i].toEntry().elements);
+    const c = utils.getArrayBigIntFromBuffArrayBE(claims[i].toEntry().elements);
     mt.addClaim(c);
   }
   const h = utils.hashBytes(mt.root);

@@ -206,11 +206,11 @@ function pow(data: any, difficulty: number): any {
 
 
 /**
-* Allocates a new Buffer from a bigInt number
+* Allocates a new Buffer from a bigInt number in big-endian format
 * @param {bigInt} number - bigInt number
 * @returns {Buffer} - Decoded Buffer
 */
-function bigIntToBuffer(number: bigInt): Buffer {
+function bigIntToBufferBE(number: bigInt): Buffer {
   const buff = Buffer.alloc(32);
   let pos = buff.length - 1;
   while (!number.isZero()) {
@@ -222,11 +222,11 @@ function bigIntToBuffer(number: bigInt): Buffer {
 }
 
 /**
-* Allocates a new bigInt from a buffer
+* Allocates a new bigInt from a buffer in big-endian format
 * @param {Buffer} buff - Buffer to convert
 * @returns {bigInt} - Decoded bigInt
 */
-function bufferToBigInt(buff: Buffer): bigInt {
+function bufferToBigIntBE(buff: Buffer): bigInt {
   let number = bigInt(0);
   let pos = buff.length - 1;
   while (pos >= 0) {
@@ -265,26 +265,28 @@ function bufferToBuffArray(buff: Buffer): Array<Buffer> {
 
 /**
 * Gets an array of buffers from bigInt array
+* Each buffer is in big-endian format
 * @param {Array(bigInt)} arrayBigInt - Hash index of the leaf
 * @returns {Array(Buffer)} - Array of decoded buffers
 */
-function getArrayBuffFromArrayBigInt(arrayBigInt: Array<bigInt>): Array<Buffer> {
+function getArrayBuffFromArrayBigIntBE(arrayBigInt: Array<bigInt>): Array<Buffer> {
   const arrayBuff = [];
   for (let i = 0; i < arrayBigInt.length; i++) {
-    arrayBuff.push(bigIntToBuffer(arrayBigInt[i]));
+    arrayBuff.push(bigIntToBufferBE(arrayBigInt[i]));
   }
   return arrayBuff;
 }
 
 /**
 * Gets an array of bigInt from buffer array
+* Each buffer is in big-endian format
 * @param {Array(Buffer)} arrayBuff - Array of buffer to decode
 * @returns {Array(bigInt)} - Array of bigInt decoded
 */
-function getArrayBigIntFromBuffArray(arrayBuff: Array<Buffer>): Array<bigInt> {
+function getArrayBigIntFromBuffArrayBE(arrayBuff: Array<Buffer>): Array<bigInt> {
   const arrayBigInt = [];
   for (let i = 0; i < arrayBuff.length; i++) {
-    arrayBigInt.push(bufferToBigInt(arrayBuff[i]));
+    arrayBigInt.push(bufferToBigIntBE(arrayBuff[i]));
   }
   return arrayBigInt;
 }
@@ -321,11 +323,11 @@ module.exports = {
   ethBytesToUint64,
   bytesToBase64,
   base64ToBytes,
-  bigIntToBuffer,
-  bufferToBigInt,
+  bigIntToBufferBE,
+  bufferToBigIntBE,
   buffArrayToBuffer,
   bufferToBuffArray,
-  getArrayBuffFromArrayBigInt,
-  getArrayBigIntFromBuffArray,
+  getArrayBuffFromArrayBigIntBE,
+  getArrayBigIntFromBuffArrayBE,
   swapEndianness,
 };
