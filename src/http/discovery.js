@@ -42,6 +42,18 @@ const testEntitiesJSON = `
     "kOpAddr": "0xe0fbce58cfaa72812103f003adce3f284fe5fc7c",
     "kOpPub": "0x036d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd4d59",
     "trusted": { "relay": true }
+  },
+  "11AVZrKNJVqDJoyKrdyaAgEynyBEjksV5z2NjZoWij": {
+    "name": "iden3-test-relay2",
+    "kOpAddr": "0x7633bc9012f924100fae50d6dda7162b0bba720d",
+    "kOpPub": "0x036d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd4d59",
+    "trusted": { "relay": true }
+  },
+  "1N7d2qVEJeqnYAWVi5Cq6PLj6GwxaW6FYcfmY2fps": {
+    "name": "iden3-test-relay3",
+    "kOpAddr": "0xe0fbce58cfaa72812103f003adce3f284fe5fc7c",
+    "kOpPub": "0x036d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd4d59",
+    "trusted": { "relay": true }
   }
 }`;
 

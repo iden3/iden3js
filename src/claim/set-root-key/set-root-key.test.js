@@ -10,7 +10,7 @@ const { expect } = chai;
 describe('[Claim Set root key]', () => {
   const versionExample = 1;
   const eraExample = 1;
-  const idExample = '0x393939393939393939393939393939393939393A';
+  const idExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
   const rootKeyExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
   let claimSetRootKey;
   let entryClaim;
@@ -42,12 +42,12 @@ describe('[Claim Set root key]', () => {
     const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
-                                       + '000000000000000000000000393939393939393939393939393939393939393a'
+                                       + '0000041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4'
                                        + '0000000000000000000000000000000000000001000000010000000000000002');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x294f519cc92c64c68bb78df0d39ff5a67af9a2db26d6b9df2a977ab56e84ca4d';
+    const hiResult = '0x12bf59ff4171debe81321c04a52298e62650ca8514e9a7a8a64c23cb55eeaa2e';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {

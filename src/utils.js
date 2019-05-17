@@ -65,11 +65,27 @@ function bytesToHex(buff: Buffer): string {
 }
 
 /**
+ * Tests if a string is valid hexadecimal
+ * @param {String} input - input string
+ * @returns {Boolean} - Result
+ */
+function isHex(input: string): boolean {
+  const re = /[0-9A-Fa-f]{6}/g;
+  if (input.substr(0, 2) === '0x') {
+    input = input.substr(2);
+  }
+  return re.test(input);
+}
+
+/**
  * Allocates a new Buffer using a hexadecimal string sent
  * @param {String} hex - Hexadecimal string to parse to a Buffer of bytes
  * @returns {Buffer} - A new Buffer
  */
 function hexToBytes(hex: string): Buffer {
+  if (!isHex(hex)) {
+    throw new Error('Input string is not hex');
+  }
   if (hex.substr(0, 2) === '0x') {
     return Buffer.from(hex.substr(2), 'hex');
   }
