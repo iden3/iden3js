@@ -55,7 +55,7 @@ describe('[Claim-utils]', () => {
     const claim = (claimUtils.newClaimFromEntry(entry): any);
     expect((claim.version).readUInt32BE(0)).to.be.equal(1);
     expect((claim.era).readUInt32BE(0)).to.be.equal(1);
-    expect(utils.bytesToHex(claim.id)).to.be.equal('0x393939393939393939393939393939393939393a');
+    expect(utils.bytesToHex(claim.id)).to.be.equal('0x0000000000000000000000393939393939393939393939393939393939393a');
     expect(utils.bytesToHex(claim.rootKey)).to.be.equal('0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c');
   });
 

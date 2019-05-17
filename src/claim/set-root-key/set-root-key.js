@@ -1,6 +1,7 @@
 // @flow
 import { Entry } from '../entry/entry';
 
+const bs58 = require('bs58');
 const snarkjs = require('snarkjs');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
@@ -12,7 +13,7 @@ const { bigInt } = snarkjs;
  * Set root key claim is used to commit a root of a merkle by a given identity
  * Set root key name entry representation is as follows:
  * |element 3|: |empty|era|version|claim type| - |16 bytes|4 bytes|4 bytes|8 bytes|
- * |element 2|: |empty|identity| - |12 bytes|20 bytes|
+ * |element 2|: |empty|identity| - |1 byte|31 bytes|
  * |element 1|: |root key| - |32 bytes|
  * |element 0|: |empty| - |32 bytes|
  */
@@ -44,7 +45,7 @@ export class SetRootKey {
     versionBuff.writeUInt32BE(version, 0);
     const eraBuff = Buffer.alloc(4);
     eraBuff.writeUInt32BE(era, 0);
-    const idBuff = utils.hexToBytes(id);
+    const idBuff = bs58.decode(id);
     const rootKeyBuff = utils.hexToBytes(rootKey);
     return new SetRootKey(versionBuff, eraBuff, idBuff, rootKeyBuff);
   }
@@ -59,7 +60,7 @@ export class SetRootKey {
     const versionBuff = entry.elements[3].slice(20, 24);
     const eraBuff = entry.elements[3].slice(16, 20);
     // Parse element 2
-    const idBuff = entry.elements[2].slice(12, 32);
+    const idBuff = entry.elements[2].slice(1, 32);
     // Parse element 1
     const rootKeyBuff = entry.elements[1].slice(0, 32);
     return new SetRootKey(versionBuff, eraBuff, idBuff, rootKeyBuff);
