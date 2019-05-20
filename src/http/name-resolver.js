@@ -28,7 +28,8 @@ class NameResolver {
  * after the domain name assignment / resolution becomes stable. */
 const testNamesJSON = `
 {
-  "iden3.io": "0x0123456789abcdef0123456789abcdef01234567"
+  "iden3.io": "1N7d2qVEJeqnYAWVi5Cq6PLj6GwxaW6FYcfmY2fps",
+  "iden3.eth": "11AVZrKNJVqDJoyKrdyaAgEynyBEjksV5z2NjZoWij"
 }`;
 
 module.exports = {
