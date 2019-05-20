@@ -41,9 +41,9 @@ describe('[notification-server] Notification server Http communications', () => 
     const mnemonic = 'emerge resource veteran where letter quantum budget elite bracket grab pioneer plunge';
     keyContainer.generateMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
-    const keyPublicOp = keys[1];
-    const keyRecover = keys[2];
-    const keyRevoke = keys[3];
+    const keyPublicOp = keys[0];
+    const keyRecover = keys[1];
+    const keyRevoke = keys[2];
     // Create identity object
     id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, 0);
   });
@@ -68,7 +68,6 @@ describe('[notification-server] Notification server Http communications', () => 
     // Create identity
     const createIdRes = await id.createId();
     expect(createIdRes.idAddr).to.be.equal(id.idAddr);
-    // console.log('idAddr:', id.idAddr);
     expect(createIdRes.idAddr).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
     proofClaimKeyOperational = createIdRes.proofClaim;

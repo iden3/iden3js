@@ -5,6 +5,7 @@ import { NameResolver } from '../http/name-resolver';
 import { Discovery } from '../http/discovery';
 import { Entry } from '../claim/entry/entry';
 
+const bs58 = require('bs58');
 const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
 
@@ -250,18 +251,18 @@ export class SignedPacketVerifier {
 
     // 2. Verify jwsPayload.data.origin is origin
     if (jwsPayload.data.origin !== origin) {
-      return undefined;
+      throw new Error('payload.data.origin != origin');
     }
 
     // 3. Verify jwsPayload.data.challenge is in nonceDB and hasn't expired, delete it
     const nonceResult = nonceDB.searchAndDelete(jwsPayload.data.challenge);
     if (nonceResult == null) {
-      return undefined;
+      throw new Error('Challenge nonce not found in the DB');
     }
 
     // check that jwsPayload.proofKSign.proofs.length <= 2
     if (jwsPayload.proofKSign.proofs.length > 2) {
-      return undefined;
+      throw new Error('length of payload.proofKSign.proof > 2');
     }
 
     if (jwsPayload.form == null) {
@@ -276,16 +277,16 @@ export class SignedPacketVerifier {
     const entry = Entry.newFromHex(jwsPayload.form.proofAssignName.leaf);
     const claimAssignName = claim.newClaimFromEntry(entry);
     if (!(claimAssignName instanceof claim.AssignName)) {
-      return undefined;
+      throw new Error('payload.form.proofAssignName is not an assign name claim');
     }
     // const nameWithoutDomain = jwsPayload.form.ethName.split('@')[0];
     // check jwsPayload.form.proofAssignName.leaf {hashName} === hash(jwsPayload.form.ethName
     if (utils.bytesToHex(claimAssignName.hashName) !== utils.bytesToHex(utils.hashBytes(jwsPayload.form.ethName).slice(1, 32))) {
-      return undefined;
+      throw new Error('hash(payload.form.ethName) != payload.form.proofAssignName.structure.hashName');
     }
     // check claimAssignName.structure.id = jwsHeader.iss
-    if (utils.bytesToHex(claimAssignName.id) !== jwsHeader.iss) {
-      return undefined;
+    if (bs58.encode(claimAssignName.id) !== jwsHeader.iss) {
+      throw new Error('claimAssignName.structure.id != header.iss');
     }
 
     // TODO AFTER MILESTONE verify identity address from counterfactual
@@ -295,32 +296,32 @@ export class SignedPacketVerifier {
     // 5a. Extract domain from the name
     const idx = jwsPayload.form.ethName.indexOf('@');
     if (idx === -1) {
-      return undefined;
+      throw new Error('No @ in the name');
     }
     const domain = jwsPayload.form.ethName.substring(idx + 1);
 
     // 5b. Resolve name to obtain name server idAddr and verify that it matches the signer idAddr
     if (jwsPayload.form.proofAssignName.proofs.length !== 1) {
-      return undefined;
+      throw new Error('length of payload.form.proofKSign != 1');
     }
     const nameServerIdAddr = this.nameResolver.resolve(domain);
     if (nameServerIdAddr == null) {
-      return undefined;
+      throw new Error('Can\'t resolve domain');
     }
     const signerIdAddr = jwsPayload.form.proofAssignName.signer;
     if (nameServerIdAddr !== signerIdAddr) {
-      return undefined;
+      throw new Error('Resolved name server id doesn\'t match payload.form.proofAssignName.signer');
     }
 
     // 5c. Get the operational key from the signer (name server).
     const signer = this.discovery.getEntity(signerIdAddr);
     if (signer == null) {
-      return undefined;
+      throw new Error('Can\'t get the operational public key of the name server');
     }
 
     // 5d. VerifyProofClaim(jwsPayload.form.proofAssignName, signerOperational)
     if (!proofs.verifyProofClaim(jwsPayload.form.proofAssignName, signer.kOpAddr)) {
-      return undefined;
+      throw new Error('verify proof claim of payload.form.proofAssignName failed');
     }
 
     return {
@@ -434,7 +435,7 @@ export class SignedPacketVerifier {
    * @param {String} signedPacket
    * @returns {undefined | Object} deserialization output with verification result
    */
-  verifySignedPacket(signedPacket: string): ?{ verified: boolean, header: JwsHeader, payload: JwsPayload } {
+  verifySignedPacket(signedPacket: string): { verified: boolean, header: JwsHeader, payload: JwsPayload } {
     // extract jwsHeader and jwsPayload and signatureBuffer in object
     const jwsHeader64 = signedPacket.split('.')[0];
     const jwsPayload64 = signedPacket.split('.')[1];
@@ -460,18 +461,15 @@ export class SignedPacketVerifier {
   verifySignedPacketIdenAssert(signedPacket: string, nonceDB: NonceDB,
     origin: string): ?IdenAssertRes {
     const sigPackRes = this.verifySignedPacket(signedPacket);
-    if (sigPackRes == null) {
-      return undefined;
-    }
     if (sigPackRes.verified === false) {
       return undefined;
     }
     if (sigPackRes.payload.type !== IDENASSERTV01) {
-      return undefined;
+      throw new Error(`payload type is not ${IDENASSERTV01}`);
     }
     const idenAssertRes = this.verifyIdenAssertV01(nonceDB, origin, sigPackRes.header, sigPackRes.payload);
     if (idenAssertRes == null) {
-      return undefined;
+      throw new Error('verifyIdenAssertV01 failed');
     }
     return idenAssertRes;
   }

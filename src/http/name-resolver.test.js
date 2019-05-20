@@ -8,7 +8,7 @@ const chai = require('chai');
 const { expect } = chai;
 
 const testName = 'iden3.io';
-const testEntityIdAddr = '0x0123456789abcdef0123456789abcdef01234567';
+const testEntityIdAddr = '1N7d2qVEJeqnYAWVi5Cq6PLj6GwxaW6FYcfmY2fps';
 
 describe('[NameResolver]', () => {
   it('new & resolve', () => {

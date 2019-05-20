@@ -36,7 +36,7 @@ describe('[id] new Id()', () => {
       // Generate keys for first identity
       const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
       ({ keys } = objectKeys);
-      id = new iden3.Id(keys[1], keys[2], keys[3], relay, 0);
+      id = new iden3.Id(keys[0], keys[1], keys[2], relay, 0);
     }
     keyContainer.lock();
   });
@@ -47,9 +47,9 @@ describe('[id] new Id()', () => {
   });
 
   it('Check identity keys', () => {
-    expect(id.keyOperationalPub).to.be.equal(keys[1]);
-    expect(id.keyRecover).to.be.equal(keys[2]);
-    expect(id.keyRevoke).to.be.equal(keys[3]);
+    expect(id.keyOperationalPub).to.be.equal(keys[0]);
+    expect(id.keyRecoverPub).to.be.equal(keys[1]);
+    expect(id.keyRevokePub).to.be.equal(keys[2]);
     expect(id.relay).to.be.equal(relay);
   });
 
@@ -62,16 +62,16 @@ describe('[id] new Id()', () => {
     expect(createIdRes.idAddr).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
     proofClaimKeyOperational = createIdRes.proofClaim;
-    try {
-      const deployIdres = await id.deployId();
-      // Successfull deploy identity api call to relay
-      expect(deployIdres.status).to.be.equal(200);
-    } catch (e) {
-      // Deploying may fail because the identity has already been depoloyed.
-      expect(e.response.status).to.be.equal(400);
-      expect(e.response.data.error).to.be.equal('error deploying');
-      console.error(e);
-    }
+    // try {
+    //   const deployIdres = await id.deployId();
+    //   // Successfull deploy identity api call to relay
+    //   expect(deployIdres.status).to.be.equal(200);
+    // } catch (e) {
+    //   // Deploying may fail because the identity has already been depoloyed.
+    //   expect(e.response.status).to.be.equal(400);
+    //   expect(e.response.data.error).to.be.equal('error deploying');
+    //   console.error(e);
+    // }
     keyContainer.lock();
   });
   it('relay.getId()', async () => {
