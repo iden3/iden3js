@@ -1,5 +1,6 @@
 import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
 
+const ethUtil = require('ethereumjs-util');
 const DataBase = require('../db/db');
 const CONSTANTS = require('../constants');
 const protocols = require('../protocols/protocols');
@@ -14,17 +15,19 @@ const notServer = require('../http/notification-server');
 class Id {
   /**
    * @param {String} keyOpPub - Operational public key
-   * @param {String} keyRecover - Recovery address key
-   * @param {String} keyRevoke - Revoke address key
+   * @param {String} keyRecoverPub - Recovery public key
+   * @param {String} keyRevokePub - Revoke public key
    * @param {Object} relay - Relay associated with the identity
    * @param {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
-  constructor(keyOpPub, keyRecover, keyRevoke, relay, keyProfilePath = 0) {
+  constructor(keyOpPub, keyRecoverPub, keyRevokePub, relay, keyProfilePath = 0) {
     const db = new DataBase();
     this.db = db;
 
-    this.keyRecover = keyRecover;
-    this.keyRevoke = keyRevoke;
+    this.keyRecoverPub = keyRecoverPub;
+    this.keyRecover = ethUtil.pubToAddress(keyRecoverPub, true).toString('hex');
+    this.keyRevokePub = keyRevokePub;
+    this.keyRevoke = ethUtil.pubToAddress(keyRevokePub, true).toString('hex');
     this.keyOperationalPub = keyOpPub;
     this.relay = relay;
 
@@ -113,7 +116,9 @@ class Id {
       keyPath: 4,
       keys: {
         operationalPub: this.keyOperationalPub,
+        recoverPub: this.keyRecoverPub,
         recover: this.keyRecover,
+        revokePub: this.keyRevokePub,
         revoke: this.keyRevoke,
       },
     };
@@ -163,7 +168,7 @@ class Id {
    * @returns {Object} - Http response
    */
   createId() {
-    return this.relay.createId(this.keyOperationalPub, this.keyRecover, this.keyRevoke)
+    return this.relay.createId(this.keyOperationalPub, this.keyRecoverPub, this.keyRevokePub)
       .then((res) => {
         this.idAddr = res.data.idAddr;
         this.saveKeys();

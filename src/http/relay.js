@@ -71,9 +71,9 @@ class Relay {
    */
   createId(op, rec, rev) {
     const keys = {
-      operationalpk: op,
-      recoverer: rec,
-      revokator: rev,
+      operationalPk: op,
+      recoveryPk: rec,
+      revokePk: rev,
     };
 
     return this.postFn(`${this.url}/ids`, keys);

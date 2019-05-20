@@ -86,7 +86,6 @@ describe('[Local-storage-container] Test single functions', () => {
     expect(keys[0]).to.be.not.equal(undefined);
     expect(keys[1]).to.be.not.equal(undefined);
     expect(keys[2]).to.be.not.equal(undefined);
-    expect(keys[3]).to.be.not.equal(undefined);
     keyContainer.lock();
   });
 
@@ -141,10 +140,9 @@ describe('[Local-storage-container] Test identity flow', () => {
       const keys = keyContainer.createKeys();
       keyContainer.lock();
       expect(keys).to.be.not.equal(undefined);
-      expect(keys[0]).to.be.equal('0xc7d89fe96acdb257b434bf580b8e6eb677d445a9');
-      expect(keys[1]).to.be.equal('0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833');
-      expect(keys[2]).to.be.equal('0xf3c9f94e4eaffef676d4fd3b4fc2732044caea91');
-      expect(keys[3]).to.be.equal('0xb07079bd6238fa845dc77bbce3ec2edf98ffe735');
+      expect(keys[0]).to.be.equal('0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833');
+      expect(keys[1]).to.be.equal('0x037dc67e977ff1943e5b9d137adc3decb72890ecf8631eb3459630f63de47d841b');
+      expect(keys[2]).to.be.equal('0x03ebbbe4f9310268d87f65c7b6846e2c412d77383c84996ef4238716c6c6130a3f');
     }
   });
 
@@ -159,9 +157,8 @@ describe('[Local-storage-container] Test identity flow', () => {
     const keys = keyContainer.createKeys();
     keyContainer.lock();
     expect(keys).to.be.not.equal(undefined);
-    expect(keys[0]).to.be.equal('0x2dc1f223c441412c9e490042360a9eaa96db0829');
-    expect(keys[1]).to.be.equal('0x0279f9574efb8f4dbffd07f386bb4736f516bd75824eae7ebda3c87ee18ac3618c');
-    expect(keys[2]).to.be.equal('0xf8c1904635ccc145db913d4a0b382e4ec053dd9b');
-    expect(keys[3]).to.be.equal('0xb8adfcddbc5b140469a638671e2fa4e1be8f1a61');
+    expect(keys[0]).to.be.equal('0x0279f9574efb8f4dbffd07f386bb4736f516bd75824eae7ebda3c87ee18ac3618c');
+    expect(keys[1]).to.be.equal('0x03c9ee27039102f1b403b6cd542e9acd21cdba83ed0a32caf0561fed2e693c4640');
+    expect(keys[2]).to.be.equal('0x03665116518b496b9c6f9d12f64cda99d0956c970cc3b7db6d62fb1759d86eeaa6');
   });
 });

@@ -28,13 +28,13 @@ describe('[Identity management]', () => {
       const { keySeed, pathKey } = keyContainer.getKeySeed();
       // Generate keys for first identity
       const { keys } = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
-      const identity = new Id(keys[1], keys[2], keys[3], 'relay test', 0);
+      const identity = new Id(keys[0], keys[1], keys[2], 'relay test', 0);
       // Save keys and retrieve it
       identity.saveKeys();
       const keysDb = identity.getKeys();
-      expect(keys[1]).to.be.equal(keysDb.operationalPub);
-      expect(keys[2]).to.be.equal(keysDb.recover);
-      expect(keys[3]).to.be.equal(keysDb.revoke);
+      expect(keys[0]).to.be.equal(keysDb.operationalPub);
+      expect(keys[1]).to.be.equal(keysDb.recoverPub);
+      expect(keys[2]).to.be.equal(keysDb.revokePub);
       // Create new key for the identity
       const loginKey = identity.createKey(keyContainer, 'login Key');
       // Retrieve keys
@@ -58,13 +58,13 @@ describe('[Identity management]', () => {
       const { keySeed, pathKey } = keyContainer.getKeySeed();
       // Generate keys for first identity
       const { keys } = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
-      const identity = new Id(keys[1], keys[2], keys[3], 'relay test', 0);
+      const identity = new Id(keys[0], keys[1], keys[2], 'relay test', 0);
       // Save keys and retrieve it
       identity.saveKeys();
       const keysDb = identity.getKeys();
-      expect(keys[1]).to.be.equal(keysDb.operationalPub);
-      expect(keys[2]).to.be.equal(keysDb.recover);
-      expect(keys[3]).to.be.equal(keysDb.revoke);
+      expect(keys[0]).to.be.equal(keysDb.operationalPub);
+      expect(keys[1]).to.be.equal(keysDb.recoverPub);
+      expect(keys[2]).to.be.equal(keysDb.revokePub);
       // Create new key for the identity
       const loginKey = identity.createKey(keyContainer, 'login Key');
       // Retrieve keys

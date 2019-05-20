@@ -7,7 +7,7 @@ const { expect } = chai;
 
 const iden3 = require('../index');
 
-const relayAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+const relayKSignAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const name = 'protocols-login-test-user';
 const mnemonic = 'adjust toy select soon nest caught resource rally side wheat traffic amount';
 
@@ -24,9 +24,9 @@ kc.generateKeySeed(mnemonicDb);
 const { keySeed, pathKey } = kc.getKeySeed();
 const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
 const { keys } = objectKeys;
-const id = new iden3.Id(keys[1], keys[2], keys[3], relay, 0);
+const id = new iden3.Id(keys[0], keys[1], keys[2], relay, 0);
 id.addNameServer(nameServer);
-const ksign = keys[1]; // public key in hex format
+const ksign = keys[0]; // public key in hex format
 
 // vars that will be filled with http requests to the relay
 let proofEthName = {};
@@ -56,10 +56,10 @@ describe('[protocol] login', () => {
   });
 
   it('verify ProofClaimFull (proofClaimAssignName & proofKSign)', () => {
-    const ksignVerified = iden3.protocols.verifyProofClaimFull(proofKSign, relayAddr);
+    const ksignVerified = iden3.protocols.verifyProofClaimFull(proofKSign, relayKSignAddr);
     expect(ksignVerified).to.be.equal(true);
 
-    const assignNameVerified = iden3.protocols.verifyProofClaimFull(proofEthName.proofAssignName, relayAddr);
+    const assignNameVerified = iden3.protocols.verifyProofClaimFull(proofEthName.proofAssignName, relayKSignAddr);
     expect(assignNameVerified).to.be.equal(true);
   });
 
@@ -70,7 +70,7 @@ describe('[protocol] login', () => {
 
     const date = new Date();
     const unixtime = Math.round((date).getTime() / 1000);
-    const resClaim = iden3.protocols.verifyProofClaimFull(proofKSign, relayAddr);
+    const resClaim = iden3.protocols.verifyProofClaimFull(proofKSign, relayKSignAddr);
     expect(resClaim).to.be.equal(true);
 
     const expirationTime = unixtime + (3600 * 60);

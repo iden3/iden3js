@@ -356,18 +356,15 @@ class LocalStorageContainer {
       const addressHex = utils.bytesToHex(address);
       const privKHex = utils.bytesToHex(privK);
       const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
-      keys.push(addressHex);
+      //keys.push(addressHex);
 
       this.db.insert(this.prefix + addressHex, privKHexEncrypted);
-      // Consider key 0 as the operational
       // Retrieve and save public key ( compress format ) from private operational
-      if (i === 0) {
-        const pubK = addrNode._publicKey;
-        const pubKHex = utils.bytesToHex(pubK);
-        keys.push(pubKHex);
+      const pubK = addrNode._publicKey;
+      const pubKHex = utils.bytesToHex(pubK);
+      keys.push(pubKHex);
 
-        this.db.insert(this.prefix + pubKHex, privKHexEncrypted);
-      }
+      this.db.insert(this.prefix + pubKHex, privKHexEncrypted);
     }
     return { keys };
   }
