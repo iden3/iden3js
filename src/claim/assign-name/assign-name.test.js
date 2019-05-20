@@ -10,7 +10,7 @@ const { expect } = chai;
 describe('[Claim Assign Name]', () => {
   const versionExample = 1;
   const nameExample = 'example.iden3.eth';
-  const idExample = '0x393939393939393939393939393939393939393A';
+  const idExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
   let claimAssignName;
   let entryClaim;
   let parsedClaim;
@@ -37,7 +37,7 @@ describe('[Claim Assign Name]', () => {
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
-                                       + '000000000000000000000000393939393939393939393939393939393939393a'
+                                       + '0000041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4'
                                        + '00d67b05d8e2d1ace8f3e84b8451dd2e9da151578c3c6be23e7af11add5a807a'
                                        + '0000000000000000000000000000000000000000000000010000000000000003');
   });
@@ -48,7 +48,7 @@ describe('[Claim Assign Name]', () => {
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x09a4b0eb3812af4321e445f464ee27838b5742604ca13b89822efffe02f3d5fc';
+    const hvResult = '0x25867e06233f276f39e298775245bad077eb0852b4eaac8dbf646a95bd3f8625';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

@@ -1,6 +1,7 @@
 // @flow
 import { Entry } from '../entry/entry';
 
+const bs58 = require('bs58');
 const snarkjs = require('snarkjs');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
@@ -13,7 +14,7 @@ const { bigInt } = snarkjs;
  * Assign name entry representation is as follows:
  * |element 3|: |empty|version|claim type| - |20 bytes|4 bytes|8 bytes|
  * |element 2|: |hash name| - |32 bytes|
- * |element 1|: |empty|identity| - |12 bytes|20 bytes|
+ * |element 1|: |empty|identity| - |1 bytes|31 bytes|
  * |element 0|: |empty| - |32 bytes|
  */
 export class AssignName {
@@ -41,7 +42,7 @@ export class AssignName {
     const versionBuff = Buffer.alloc(4);
     versionBuff.writeUInt32BE(version, 0);
     const hashName = utils.hashBytes(Buffer.from(name, 'utf8')).fill(0, 0, 1);
-    const idBuff = utils.hexToBytes(id);
+    const idBuff = bs58.decode(id);
     return new AssignName(versionBuff, hashName, idBuff);
   }
 
@@ -55,7 +56,7 @@ export class AssignName {
     // Parse element 2
     const hashName = entry.elements[2].slice(1, 32);
     // Parse element 1
-    const idBuff = entry.elements[1].slice(12, 32);
+    const idBuff = entry.elements[1].slice(1, 32);
     return new AssignName(versionBuff, hashName, idBuff);
   }
 

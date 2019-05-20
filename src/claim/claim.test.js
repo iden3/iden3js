@@ -36,26 +36,26 @@ describe('[Claim-utils]', () => {
     const nameExample = 'example.iden3.eth';
     const hashNameExample = utils.hashBytes(Buffer.from(nameExample, 'utf8')).slice(1, 32);
     const entryHex = '0x0000000000000000000000000000000000000000000000000000000000000000'
-                     + '000000000000000000000000393939393939393939393939393939393939393a'
+                     + '0000041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4'
                      + '00d67b05d8e2d1ace8f3e84b8451dd2e9da151578c3c6be23e7af11add5a807a'
                      + '0000000000000000000000000000000000000000000000010000000000000003';
     const entry = Entry.newFromHex(entryHex);
     const claim = (claimUtils.newClaimFromEntry(entry): any);
     expect((claim.version).readUInt32BE(0)).to.be.equal(1);
-    expect(utils.bytesToHex(claim.id)).to.be.equal('0x393939393939393939393939393939393939393a');
+    expect(utils.bytesToHex(claim.id)).to.be.equal('0x00041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4');
     expect(utils.bytesToHex(claim.hashName)).to.be.equal(utils.bytesToHex(hashNameExample));
   });
 
   it('Parse entry into claim set root key', () => {
     const entryHex = '0x0000000000000000000000000000000000000000000000000000000000000000'
                      + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
-                     + '000000000000000000000000393939393939393939393939393939393939393a'
+                     + '0000041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4'
                      + '0000000000000000000000000000000000000001000000010000000000000002';
     const entry = Entry.newFromHex(entryHex);
     const claim = (claimUtils.newClaimFromEntry(entry): any);
     expect((claim.version).readUInt32BE(0)).to.be.equal(1);
     expect((claim.era).readUInt32BE(0)).to.be.equal(1);
-    expect(utils.bytesToHex(claim.id)).to.be.equal('0x0000000000000000000000393939393939393939393939393939393939393a');
+    expect(utils.bytesToHex(claim.id)).to.be.equal('0x00041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4');
     expect(utils.bytesToHex(claim.rootKey)).to.be.equal('0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c');
   });
 
