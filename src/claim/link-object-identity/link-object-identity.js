@@ -1,6 +1,7 @@
 // @flow
 import { Entry } from '../entry/entry';
 
+const bs58 = require('bs58');
 const snarkjs = require('snarkjs');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
@@ -12,7 +13,7 @@ const { bigInt } = snarkjs;
  * Hash object is used to store an object representation through a hash
  * Link object identity entry representation is as follows:
  * |element 3|: |empty|object index|object type|version|claim type| - |14 bytes|2 bytes|4 bytes|4 bytes|8 bytes|
- * |element 2|: |empty|identity| - |empty|20 bytes|
+ * |element 2|: |empty|identity| - |1 empty|31 bytes|
  * |element 1|: |hash object| - |32 bytes|
  * |element 0|: |auxData| - |32 bytes|
  */
@@ -48,7 +49,6 @@ export class LinkObjectIdentity {
   /**
    * Initialize claim data structure from fields
    */
-  // eslint-disable-next-line max-len
   static new(version: number, objectType: number, objectIndex: number,
     idAddr: string, objectHash: string, auxData: string): LinkObjectIdentity {
     const versionBuff = Buffer.alloc(4);
@@ -58,7 +58,7 @@ export class LinkObjectIdentity {
     const objectIndexBuff = Buffer.alloc(2);
     objectIndexBuff.writeUInt16BE(objectIndex, 0);
     const objectHashBuff = (utils.hexToBytes(objectHash)).fill(0, 0, 1);
-    const idAddrBuff = utils.hexToBytes(idAddr);
+    const idAddrBuff = bs58.decode(idAddr);
     const auxDataBuff = (utils.hexToBytes(auxData)).fill(0, 0, 1);
     return new LinkObjectIdentity(versionBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff, auxDataBuff);
   }
@@ -74,7 +74,7 @@ export class LinkObjectIdentity {
     const objectTypeBuff = entry.elements[3].slice(16, 20);
     const objectIndexBuff = entry.elements[3].slice(14, 16);
     // Parse element 2
-    const idAddrBuff = entry.elements[2].slice(12, 32);
+    const idAddrBuff = entry.elements[2].slice(1, 32);
     // Parse element 1
     const objectHashBuff = entry.elements[1].slice(0, 32);
     // Parse element 0
