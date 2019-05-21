@@ -1,12 +1,12 @@
 import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
 
 const ethUtil = require('ethereumjs-util');
-const DataBase = require('../db/db');
+const Db = require('../db/db');
 const CONSTANTS = require('../constants');
 const protocols = require('../protocols/protocols');
 const not = require('../manager/manager-notification.js');
 const sign = require('../protocols/login');
-const notServer = require('../http/notification-server');
+const notServer = require('../api-client/notification-server');
 
 /**
  * Class representing a user identity
@@ -21,7 +21,7 @@ class Id {
    * @param {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
   constructor(keyOpPub, keyRecoverPub, keyRevokePub, relay, keyProfilePath = 0) {
-    const db = new DataBase();
+    const db = new Db.LocalStorage();
     this.db = db;
 
     this.keyRecoverPub = keyRecoverPub;

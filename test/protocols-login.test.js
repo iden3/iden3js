@@ -1,5 +1,5 @@
-import { testNamesJSON } from '../src/http/name-resolver';
-import { testEntitiesJSON } from '../src/http/discovery';
+import { testNamesJSON } from '../src/api-client/name-resolver';
+import { testEntitiesJSON } from '../src/api-client/discovery';
 
 const chai = require('chai');
 
@@ -11,7 +11,7 @@ const relayKSignAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 const name = 'protocols-login-test-user';
 const mnemonic = 'adjust toy select soon nest caught resource rally side wheat traffic amount';
 
-const db = new iden3.Db();
+const db = new iden3.Db.LocalStorage();
 const kc = new iden3.KeyContainer('localStorage', db);
 kc.unlock('pass');
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/unstable');

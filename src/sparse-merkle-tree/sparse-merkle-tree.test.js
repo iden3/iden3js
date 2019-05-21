@@ -7,7 +7,7 @@ const mimc7 = require('./mimc7');
 const { bigInt } = snarkjs;
 const { expect } = chai;
 
-const db = new iden3.Db();
+const db = new iden3.Db.Memory();
 const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
 
 describe('[sparse-merkle-tree] Empty tree', () => {

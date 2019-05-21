@@ -1,8 +1,8 @@
 // @flow
 
 import { type NonceObj, NonceDB } from './nonceDB';
-import { NameResolver } from '../http/name-resolver';
-import { Discovery } from '../http/discovery';
+import { NameResolver } from '../api-client/name-resolver';
+import { Discovery } from '../api-client/discovery';
 import { Entry } from '../claim/entry/entry';
 
 const bs58 = require('bs58');

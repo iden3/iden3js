@@ -4,7 +4,7 @@ const iden3 = require('../index');
 const { expect } = chai;
 
 // new database
-const db = new iden3.Db();
+const db = new iden3.Db.Memory();
 // hardcoded id address for testing purposes
 const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
 

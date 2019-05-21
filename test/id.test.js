@@ -15,7 +15,7 @@ describe('[id] new Id()', () => {
   let proofClaimKeyOperational;
 
   before('Create local storage container and relay object', () => {
-    dataBase = new iden3.Db();
+    dataBase = new iden3.Db.LocalStorage();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);

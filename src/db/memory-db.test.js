@@ -1,5 +1,5 @@
 const chai = require('chai');
-const MemoryDb = require('./memory-db');
+const Db = require('./db');
 const CONSTANTS = require('../constants');
 
 const { expect } = chai;
@@ -8,14 +8,14 @@ describe('[memory database]', () => {
   let dataBase;
 
   it('Check prefix', () => {
-    const dataBaseNoPrefix = new MemoryDb(false);
+    const dataBaseNoPrefix = new Db.Memory(false);
     expect(dataBaseNoPrefix.prefix).to.be.equal('');
-    const dataBasePrefix = new MemoryDb(true);
+    const dataBasePrefix = new Db.Memory(true);
     expect(dataBasePrefix.prefix).to.be.equal(CONSTANTS.DBPREFIX);
   });
 
   it('Create database and fill it', () => {
-    dataBase = new MemoryDb();
+    dataBase = new Db.Memory();
     for (let i = 0; i < 10; i++) {
       const key = `key-${i}`;
       const value = `value-${i}`;

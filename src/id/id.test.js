@@ -9,7 +9,7 @@ describe('[Identity management]', () => {
   let dataBase;
   let keyContainer;
   before('Create local storage container', () => {
-    dataBase = new Db();
+    dataBase = new Db.LocalStorage();
     keyContainer = new LocalStorageContainer(dataBase);
   });
 

@@ -1,6 +1,6 @@
 const bs58 = require('bs58');
 const utils = require('../utils');
-const MemoryDb = require('../db/memory-db');
+const Db = require('../db/db');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 const authorizeKSignSecp256k1 = require('../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1');
 
@@ -89,7 +89,7 @@ function newID(typ, genesis) {
  * @returns {String} idGenesis - hex representation of the IdGenesis
  */
 function calculateIdGenesis(kopComp, krecComp, krevComp) {
-  const db = new MemoryDb(false);
+  const db = new Db.Memory(false);
   const mt = new smt.SparseMerkleTree(db, '');
 
   const claims = generateInitialClaimsAuthorizeKSign(kopComp, krecComp, krevComp);
