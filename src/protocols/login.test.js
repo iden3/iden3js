@@ -3,8 +3,8 @@ import {
   describe, it, before, after,
 } from 'mocha';
 import { Entry } from '../claim/entry/entry';
-import { NameResolver, testNamesJSON } from '../http/name-resolver';
-import { Discovery, testEntitiesJSON } from '../http/discovery';
+import { NameResolver, testNamesJSON } from '../api-client/name-resolver';
+import { Discovery, testEntitiesJSON } from '../api-client/discovery';
 import { SignedPacketVerifier } from './login';
 
 const chai = require('chai');
@@ -78,7 +78,7 @@ describe('[protocol]', () => {
     const discovery = new Discovery(testEntitiesJSON);
     const nameResolver = new NameResolver(testNamesJSON);
     signedPacketVerifier = new SignedPacketVerifier(discovery, nameResolver);
-    db = new iden3.Db();
+    db = new iden3.Db.LocalStorage();
     kc = new iden3.KeyContainer('localStorage', db);
     kc.unlock('pass');
   });

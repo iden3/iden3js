@@ -22,7 +22,7 @@ describe('[notification-server] Notification server Http communications', () => 
   let nameServer;
 
   before('Create servers object', () => {
-    dataBase = new iden3.Db();
+    dataBase = new iden3.Db.LocalStorage();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);

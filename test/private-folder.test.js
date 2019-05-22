@@ -29,7 +29,7 @@ describe('private-folder backup', () => {
   let backup;
 
   before('create db and key container', () => {
-    dataBase = new iden3.Db();
+    dataBase = new iden3.Db.LocalStorage();
     keyContainer = new iden3.KeyContainer('localStorage', dataBase);
     keyContainer.unlock('pass');
     keyContainer.generateKeyBackUp(mnemonic);

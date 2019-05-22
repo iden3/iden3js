@@ -5,7 +5,7 @@ const smtUtils = require('./sparse-merkle-tree-utils');
 const { expect } = chai;
 
 // new database
-const db = new iden3.Db();
+const db = new iden3.Db.Memory();
 
 // claimsDump is the dump of claims from the go-iden3, using merkletree.Walk function, in the TestMTWalkDumpClaims() test function in the go-iden3/merkletree/merkletree_test.go
 const claimsDump = [
