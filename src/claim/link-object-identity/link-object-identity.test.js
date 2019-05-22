@@ -12,7 +12,7 @@ describe('[Claim link object identity Id]', () => {
   const objectTypeExample = 1;
   const objectIndexExample = 0;
   const hashObjectExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
-  const idAddrExample = '0x393939393939393939393939393939393939393A';
+  const idAddrExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
   const auxDataExample = '0x000102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102';
   let claimLinkObject;
   let entryClaim;
@@ -52,12 +52,12 @@ describe('[Claim link object identity Id]', () => {
     const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x000102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102'
                                        + '000b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
-                                       + '000000000000000000000000393939393939393939393939393939393939393a'
+                                       + '0000041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4'
                                        + '0000000000000000000000000000000000000001000000010000000000000005');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x1d2f709deed3b20cba6218773b87fcd007bfefffc78193bfaa58b4b761f3d2a5';
+    const hiResult = '0x2dc73c37e603a15f8f028aa5c3f668d1210c86008577188ce279ead60a9afec4';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
