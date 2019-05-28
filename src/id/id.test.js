@@ -1,6 +1,6 @@
 const chai = require('chai');
 const Db = require('../db/db');
-const LocalStorageContainer = require('../key-container/local-storage-container');
+const KeyContainer = require('../key-container/key-container');
 const Id = require('./id');
 
 const { expect } = chai;
@@ -10,7 +10,7 @@ describe('[Identity management]', () => {
   let keyContainer;
   before('Create local storage container', () => {
     dataBase = new Db.LocalStorage();
-    keyContainer = new LocalStorageContainer(dataBase);
+    keyContainer = new KeyContainer(dataBase);
   });
 
   it('Generate first identity', () => {

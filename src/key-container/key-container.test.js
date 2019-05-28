@@ -1,6 +1,6 @@
 const chai = require('chai');
 const Db = require('../db/db');
-const LocalStorageContainer = require('./local-storage-container');
+const KeyContainer = require('./key-container');
 const kcUtils = require('./kc-utils');
 
 const { expect } = chai;
@@ -10,7 +10,7 @@ describe('[Local-storage-container] Test single functions', () => {
   let keyContainer;
   before('Create local storage container', () => {
     dataBase = new Db.LocalStorage();
-    keyContainer = new LocalStorageContainer(dataBase);
+    keyContainer = new KeyContainer(dataBase);
   });
 
   it('Get master seed without generate it one', () => {
@@ -128,7 +128,7 @@ describe('[Local-storage-container] Test identity flow', () => {
   let keyContainer;
   before('Create local storage container', () => {
     dataBase = new Db.LocalStorage();
-    keyContainer = new LocalStorageContainer(dataBase);
+    keyContainer = new KeyContainer(dataBase);
     keyContainer.deleteAll();
   });
 
