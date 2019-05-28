@@ -13,7 +13,7 @@ const utils = require('../utils');
 const claim = require('../claim/claim');
 const proofs = require('./proofs');
 // const NonceDB = require('./nonceDB');
-const kCont = require('../key-container/key-container');
+const KeyContainer = require('../key-container/key-container');
 
 // Constants of the login protocol
 export const SIGV01 = 'iden3.sig.v0_1';
@@ -111,7 +111,7 @@ type JwsPayload = {
  * @param {Object} form
  * @returns {String} signedPacket
  */
-export function signPacket(kc: kCont.KeyContainer, idAddr: string, ksign: string, proofKSign: proofs.ProofClaim,
+export function signPacket(kc: KeyContainer, idAddr: string, ksign: string, proofKSign: proofs.ProofClaim,
   expirationTimeDelta: number, payloadType: string, data: any, form: any): string {
   const date = new Date();
   const currentTime = Math.round((date).getTime() / 1000);
@@ -143,7 +143,7 @@ export function signPacket(kc: kCont.KeyContainer, idAddr: string, ksign: string
   const dataToSign = `${header64}.${payload64}`;
 
   // sign data
-  const signedObj = kc.sign(ksign, dataToSign);
+  const signedObj = kc.sign(ksign, ethUtil.toBuffer(dataToSign));
   const signatureHex = signedObj.signature;
   const signatureBuffer = utils.hexToBytes(signatureHex);
   const signature64 = signatureBuffer.toString('base64');
@@ -162,7 +162,7 @@ export function signPacket(kc: kCont.KeyContainer, idAddr: string, ksign: string
  * @param {Object} form
  * @returns {String} signedPacket
  */
-export function signGenericSigV01(kc: kCont.KeyContainer, idAddr: string, ksign: string,
+export function signGenericSigV01(kc: KeyContainer, idAddr: string, ksign: string,
   proofKSign: proofs.ProofClaim, expirationTimeDelta: number, form: any): string {
   return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta, GENERICSIGV01, {}, form);
 }
@@ -186,7 +186,7 @@ export type IdenAssertProofName = {
  * @returns {String} signedPacket
  */
 export function signIdenAssertV01(signatureRequest: any, idAddr: string,
-  proofName: ?IdenAssertProofName, kc: kCont.KeyContainer, ksign: string,
+  proofName: ?IdenAssertProofName, kc: KeyContainer, ksign: string,
   proofKSign: proofs.ProofClaim, expirationTimeDelta: number): string {
   if (proofName === undefined) {
     proofName = null;
@@ -213,7 +213,7 @@ export type IdenAssertRes = {
  * @returns {String} signedPacket
  */
 export function signMsgV01(idAddr: string,
-  kc: kCont.KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
+  kc: KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
   expirationTimeDelta: number, msgType: string, msg: any): string {
   return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
     MSGV01, null, { type: msgType, data: msg });

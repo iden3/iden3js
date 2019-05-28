@@ -3,6 +3,9 @@ const Db = require('../db/db');
 const KeyContainer = require('./key-container');
 const kcUtils = require('./kc-utils');
 
+const errorKeySeedNoExistMsg = kcUtils.errorLocked;
+const errorFailDecryptMsg = kcUtils.errorFailDecryptMsg;
+
 const { expect } = chai;
 
 describe('[Local-storage-container] Test single functions', () => {
@@ -16,43 +19,40 @@ describe('[Local-storage-container] Test single functions', () => {
   it('Get master seed without generate it one', () => {
     keyContainer.deleteAll();
     keyContainer.unlock('pass');
-    const mnemonic = keyContainer.getMasterSeed();
-    expect(mnemonic).to.be.equal(undefined);
+    expect(() => {keyContainer.getMasterSeed(); }).to.throw(errorKeySeedNoExistMsg);
     keyContainer.lock('pass');
   });
 
   it('Generate random master seed and retrieve it from local storage', () => {
     keyContainer.unlock('pass');
     const ack = keyContainer.generateMasterSeed();
-    if (ack) {
-      const mnemonic = keyContainer.getMasterSeed();
-      keyContainer.lock();
-      expect(mnemonic).to.be.not.equal(undefined);
-    }
+    expect(ack).to.be.equal(true);
+    const mnemonic = keyContainer.getMasterSeed();
+    keyContainer.lock();
+    expect(mnemonic).to.be.not.equal(undefined);
   });
 
   it('Generate known master seed, save it and access with different passphrase', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.unlock('pass');
     const ack = keyContainer.generateMasterSeed(mnemonic);
-    if (ack) {
-      keyContainer.lock();
-      keyContainer.unlock('passwrong');
-      const mnemonicDb = keyContainer.getMasterSeed();
-      keyContainer.lock();
-      expect(mnemonicDb).to.be.equal(undefined);
-    }
+    expect(ack).to.be.equal(true);
+
+    keyContainer.lock();
+    keyContainer.unlock('passwrong');
+    // keyContainer.getMasterSeed();
+    expect(() => { keyContainer.getMasterSeed(); }).to.throw(errorFailDecryptMsg);
+    keyContainer.lock();
   });
 
   it('Save a known master seed and retrieve it from local storage', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.unlock('pass');
     const ack = keyContainer.generateMasterSeed(mnemonic);
-    if (ack) {
-      const seedDb = keyContainer.getMasterSeed();
-      keyContainer.lock();
-      expect(mnemonic).to.be.equal(seedDb);
-    }
+    expect(ack).to.be.equal(true);
+    const seedDb = keyContainer.getMasterSeed();
+    keyContainer.lock();
+    expect(mnemonic).to.be.equal(seedDb);
   });
 
   it('Generate recovery adress and retrieve it from database', () => {
@@ -67,13 +67,11 @@ describe('[Local-storage-container] Test single functions', () => {
   it('Generate key seed', () => {
     keyContainer.unlock('pass');
     const masterSeed = keyContainer.getMasterSeed();
-    const ack = keyContainer.generateKeySeed(masterSeed);
-    if (ack) {
-      const { keySeed, pathKey } = keyContainer.getKeySeed();
-      keyContainer.lock();
-      expect(pathKey).to.be.equal(0);
-      expect(keySeed).to.be.equal('drift true reunion shoulder achieve stereo blame absurd evolve elbow include hospital hint evil goddess child shuffle devote game power salt ensure beyond brush');
-    }
+    keyContainer.generateKeySeed(masterSeed);
+    const { keySeed, pathKey } = keyContainer.getKeySeed();
+    keyContainer.lock();
+    expect(pathKey).to.be.equal(0);
+    expect(keySeed).to.be.equal('drift true reunion shoulder achieve stereo blame absurd evolve elbow include hospital hint evil goddess child shuffle devote game power salt ensure beyond brush');
   });
 
   it('Generate keys {operational, recovery, revoke} from key path 0', () => {
@@ -136,14 +134,13 @@ describe('[Local-storage-container] Test identity flow', () => {
     keyContainer.unlock('pass');
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     const ack = keyContainer.generateMasterSeed(mnemonic);
-    if (ack) {
-      const keys = keyContainer.createKeys();
-      keyContainer.lock();
-      expect(keys).to.be.not.equal(undefined);
-      expect(keys[0]).to.be.equal('0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833');
-      expect(keys[1]).to.be.equal('0x037dc67e977ff1943e5b9d137adc3decb72890ecf8631eb3459630f63de47d841b');
-      expect(keys[2]).to.be.equal('0x03ebbbe4f9310268d87f65c7b6846e2c412d77383c84996ef4238716c6c6130a3f');
-    }
+    expect(ack).to.be.equal(true);
+    const keys = keyContainer.createKeys();
+    keyContainer.lock();
+    expect(keys).to.be.not.equal(undefined);
+    expect(keys[0]).to.be.equal('0x03c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff57833');
+    expect(keys[1]).to.be.equal('0x037dc67e977ff1943e5b9d137adc3decb72890ecf8631eb3459630f63de47d841b');
+    expect(keys[2]).to.be.equal('0x03ebbbe4f9310268d87f65c7b6846e2c412d77383c84996ef4238716c6c6130a3f');
   });
 
   it('Check state of key seed and key path', () => {

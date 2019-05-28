@@ -194,7 +194,7 @@ class Id {
   authorizeKSignSecp256k1(kc, ksignpk, keyClaim) {
     const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, keyClaim);
     const claimHex = (authorizeKSignClaim.toEntry()).toHex();
-    const signatureObj = kc.sign(ksignpk, claimHex);
+    const signatureObj = kc.sign(ksignpk, ethUtil.toBuffer(claimHex));
     const bytesSignedMsg = {
       valueHex: claimHex,
       signatureHex: signatureObj.signature,

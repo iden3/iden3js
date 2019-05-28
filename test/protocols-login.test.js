@@ -12,7 +12,7 @@ const name = 'protocols-login-test-user';
 const mnemonic = 'adjust toy select soon nest caught resource rally side wheat traffic amount';
 
 const db = new iden3.Db.LocalStorage();
-const kc = new iden3.KeyContainer('localStorage', db);
+const kc = new iden3.KeyContainer(db);
 kc.unlock('pass');
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/unstable');
 const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';

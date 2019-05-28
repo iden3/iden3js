@@ -5,7 +5,7 @@ import { axiosGetDebug, axiosPostDebug } from './http-debug';
 
 const axios = require('axios');
 const login = require('../protocols/login');
-const kCont = require('../key-container/key-container');
+const KeyContainer = require('../key-container/key-container');
 const proofs = require('../protocols/proofs');
 
 /**
@@ -45,7 +45,7 @@ class NameServer {
    * @param  {String} name - Label to bind
    * @return {Object} Http response
    */
-  bindId(kc: kCont.KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
+  bindId(kc: KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
     idAddr: string, name: string): AxiosPromise<any, any> {
     const assignNameSignedReq = login.signGenericSigV01(kc, idAddr,
       ksign, proofKSign, 600, { assignName: name });

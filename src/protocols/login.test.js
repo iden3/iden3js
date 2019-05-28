@@ -79,7 +79,7 @@ describe('[protocol]', () => {
     const nameResolver = new NameResolver(testNamesJSON);
     signedPacketVerifier = new SignedPacketVerifier(discovery, nameResolver);
     db = new iden3.Db.LocalStorage();
-    kc = new iden3.KeyContainer('localStorage', db);
+    kc = new iden3.KeyContainer(db);
     kc.unlock('pass');
   });
 

@@ -75,7 +75,7 @@ function decrypt(key, messageWithNonce) {
   const decrypted = nacl.secretbox.open(message, nonce, keyUint8Array);
 
   if (!decrypted) {
-    throw new Error('Could not decrypt message');
+    throw new Error(errorFailDecryptMsg);
   }
   // base64 decrypted message
   return nacl.util.encodeUTF8(decrypted);
@@ -111,6 +111,10 @@ function decryptBox(privKey, pubKey, dataEncrypted) {
   return nacl.util.encodeUTF8(data);
 }
 
+const errorLockedMsg = 'Key Container is locked';
+const errorKeySeedNoExistMsg = 'key seed doesn\'t exists';
+const errorFailDecryptMsg = 'Could not decrypt message';
+
 module.exports = {
   concatSignature,
   passToKey,
@@ -118,4 +122,7 @@ module.exports = {
   decrypt,
   encryptBox,
   decryptBox,
+  errorLockedMsg,
+  errorKeySeedNoExistMsg,
+  errorFailDecryptMsg,
 };
