@@ -28,6 +28,10 @@ export class Signature {
   compress(): Buffer {
     return eddsa.packSignature({ R8: this.r8, S: this.s });
   }
+
+  toString(): string {
+    return this.compress().toString('hex');
+  }
 }
 
 export class PublicKey {
@@ -53,6 +57,10 @@ export class PublicKey {
     return utils.swapEndianness(babyJub.packPoint(this.p));
   }
 
+  toString(): string {
+    return this.compress().toString('hex');
+  }
+
   verifyMimc7(msg: bigInt, sig: Signature): boolean {
     return eddsa.verifyMiMC(msg, { R8: sig.r8, S: sig.s }, this.p);
   }
@@ -71,6 +79,10 @@ export class PrivateKey {
   static newRandom(): PrivateKey {
     const buf = crypto.randomBytes(Math.floor(256 / 8));
     return new PrivateKey(buf);
+  }
+
+  toString(): string {
+    return this.sk.toString('hex');
   }
 
   public(): PublicKey {

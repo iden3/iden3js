@@ -3,6 +3,8 @@ const pbkdf2 = require('pbkdf2-sha256');
 const nacl = require('tweetnacl');
 const sealedBox = require('tweetnacl-sealedbox-js');
 const utils = require('../utils');
+const mimc7 = require('../sparse-merkle-tree/mimc7');
+const { bigInt } = require('snarkjs');
 nacl.util = require('tweetnacl-util');
 
 /**
@@ -111,6 +113,21 @@ function decryptBox(privKey, pubKey, dataEncrypted) {
   return nacl.util.encodeUTF8(data);
 }
 
+function mimc7HashBuffer(msg: Buffer): bigInt {
+  const n = 31;
+  let msgArray = new Array();
+  const fullParts = Math.floor(msg.length / n);
+  for (let i = 0; i < fullParts; i++) {
+    const v = bigInt.leBuff2int(msg.slice(n*i, n*(i+1)));
+    msgArray.push(v);
+  }
+  if (msg.length % n != 0) {
+    const v = bigInt.leBuff2int(msg.slice(fullParts * n));
+    msgArray.push(v);
+  }
+  return mimc7.multiHash(msgArray);
+}
+
 const errorLockedMsg = 'Key Container is locked';
 const errorKeySeedNoExistMsg = 'key seed doesn\'t exists';
 const errorFailDecryptMsg = 'Could not decrypt message';
@@ -125,4 +142,5 @@ module.exports = {
   errorLockedMsg,
   errorKeySeedNoExistMsg,
   errorFailDecryptMsg,
+  mimc7HashBuffer,
 };

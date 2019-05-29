@@ -8,9 +8,11 @@ const hdkey = require('hdkey');
 const CONSTANTS = require('../constants');
 const utils = require('../utils');
 const kcUtils = require('./kc-utils');
+const eddsa = require('../crypto/eddsa-babyjub');
 
 const errorLockedMsg = kcUtils.errorLockedMsg;
 const errorKeySeedNoExistMsg = kcUtils.errorKeySeedNoExistMsg;
+const mimc7HashBuffer = kcUtils.mimc7HashBuffer;
 
 nacl.util = require('tweetnacl-util');
 
@@ -123,25 +125,23 @@ class KeyContainer {
    * Creates all the keys needed to create an identity afterwards
    * @returns {Object} - It contains all the keys generated, undefined otherwise
    */
-  createKeys(): Array<string> {
+  createKeys(): Array<eddsa.PublicKey> {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
     let objectKeySeed;
     // Get key seed and generate if it is not already created
     try {
       objectKeySeed = this.getKeySeed();
     } catch (error) {
-      console.log("DBG Catch!");
       // Generate key seed if it doesn't exist
       if (error.message === errorKeySeedNoExistMsg) {
         this.generateKeySeed(this.getMasterSeed());
         objectKeySeed = this.getKeySeed();
       } else {
-        console.log("DBG Error", error.message);
         throw error;
       }
     }
     // Creates keys
-    const { keys } = this.generateKeysFromKeyPath(objectKeySeed.keySeed, objectKeySeed.pathKey);
+    const keys = this.generateKeysFromKeyPath(objectKeySeed.keySeed, objectKeySeed.pathKey);
     this.increaseKeyPath();
     return keys;
   }
@@ -320,42 +320,33 @@ class KeyContainer {
    * @returns {Object} It contains all the keys generated
    */
   generateKeysFromKeyPath(mnemonic: string = bip39.generateMnemonic(), pathProfile: number = 0,
-    numberOfDerivedKeys: number = 3): {keys: Array<string>} {
-    if (!this.isUnlock() || !bip39.validateMnemonic(mnemonic)) {
-      throw new Error('Error: KeyContainer not unlocked');
-    }
+    numberOfDerivedKeys: number = 3): Array<eddsa.PublicKey> {
+    if (!bip39.validateMnemonic(mnemonic)) { throw new Error('Mnemonic validation failed'); }
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
     const root = hdkey.fromMasterSeed(mnemonic);
     const keys = [];
     const path = "m/44'/60'/0'/";
 
-    // to allow in the future specify how many keys want to derivate
     for (let i = 0; i < numberOfDerivedKeys; i++) {
       const addrNode = root.derive(`${path + pathProfile}/${i}`); // "m/44'/60'/0'/pathProfile/i"
-      const privK = addrNode._privateKey;
-      const address = ethUtil.privateToAddress(addrNode._privateKey);
-      const addressHex = utils.bytesToHex(address);
-      const privKHex = utils.bytesToHex(privK);
-      const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privKHex);
-      // keys.push(addressHex);
+      const privateKey = new eddsa.PrivateKey(addrNode._privateKey);
+      const privKHexEncrypted = kcUtils.encrypt(this.encryptionKey, privateKey.toString());
+      const publicKey = privateKey.public();
+      keys.push(publicKey);
 
-      this.db.insert(this.prefix + addressHex, privKHexEncrypted);
-      // Retrieve and save public key ( compress format ) from private operational
-      const pubK = addrNode._publicKey;
-      const pubKHex = utils.bytesToHex(pubK);
-      keys.push(pubKHex);
-
-      this.db.insert(this.prefix + pubKHex, privKHexEncrypted);
+      this.db.insert(this.prefix + publicKey.toString(), privKHexEncrypted);
     }
-    return { keys };
+    return keys;
   }
 
-  /**
-   * Get all the identities from dataBase
-   * @returns {Array} Contains all the identities found in the database
-   */
-  listIdentities(): Array<string> {
-    return this.db.listKeys(this.prefix + CONSTANTS.IDPREFIX);
-  }
+  // NOT USED
+  // /**
+  //  * Get all the identities from dataBase
+  //  * @returns {Array} Contains all the identities found in the database
+  //  */
+  // listIdentities(): Array<string> {
+  //   return this.db.listKeys(this.prefix + CONSTANTS.IDPREFIX);
+  // }
 
   /**
    * @returns {String} AddressHex
@@ -409,6 +400,14 @@ class KeyContainer {
     const sig = ethUtil.ecsign(msgHash, utils.hexToBytes(privKHex));
 
     return kcUtils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
+  }
+
+  signBaby(publicKeyHex: string, message: Buffer): eddsa.Signature {
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    const privateKeyHexEncrypted = this.db.get(this.prefix + publicKeyHex);
+    const privateKeyHex = kcUtils.decrypt(this.encryptionKey, privateKeyHexEncrypted);
+    const privateKey = new eddsa.PrivateKey(new Buffer(privateKeyHex, 'hex'));
+    return privateKey.signMimc7(mimc7HashBuffer(message));
   }
 
   /**
