@@ -18,13 +18,8 @@ const relay = new iden3.Relay('http://127.0.0.1:8000/api/unstable');
 const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
 const nameServer = new iden3.NameServer(nameServerUrl);
 
-kc.generateMasterSeed(mnemonic);
-const mnemonicDb = kc.getMasterSeed();
-kc.generateKeySeed(mnemonicDb);
-const { keySeed, pathKey } = kc.getKeySeed();
-const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
-const { keys } = objectKeys;
-const id = new iden3.Id(keys[0], keys[1], keys[2], relay, 0);
+kc.setMasterSeed(mnemonic);
+const id = new Id(keys.kOp, keys.kRev, keys.kRec, 'relay test', 0);
 id.addNameServer(nameServer);
 const ksign = keys[0]; // public key in hex format
 

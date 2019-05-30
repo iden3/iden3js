@@ -33,7 +33,7 @@ describe('[notification-server] Notification server Http communications', () => 
 
   it('Generate keys for identity', () => {
     const mnemonic = 'clog brass lonely material arrest nominee flight try arrive water life cruise';
-    keyContainer.generateMasterSeed(mnemonic);
+    keyContainer.setMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
     const keyPublicOp = keys[0];
     const keyRecover = keys[1];

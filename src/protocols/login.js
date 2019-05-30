@@ -17,12 +17,14 @@ const KeyContainer = require('../key-container/key-container');
 
 // Constants of the login protocol
 export const SIGV01 = 'iden3.sig.v0_1';
+export const SIGV02 = 'iden3.sig.v0_2';
 export const IDENASSERTV01 = 'iden3.iden_assert.v0_1';
 export const GENERICSIGV01 = 'iden3.gen_sig.v0_1';
 export const MSGV01 = 'iden3.msg.v0_1';
 export const MSGPROOFCLAIMV01 = 'iden3.proofclaim.v0_1';
 export const MSGTXT = 'txt';
 export const SIGALGV01 = 'EK256K1';
+export const SIGALGV02 = 'EK256K1';
 
 type RequestIdenAssert = {
   header: {
@@ -52,7 +54,7 @@ export function newRequestIdenAssert(nonceDB: NonceDB, origin: string, deltatime
   const nonceObj = nonceDB.add(nonce, deltatimeout);
   return {
     header: {
-      typ: SIGV01,
+      typ: SIGV02,
     },
     body: {
       type: IDENASSERTV01,
@@ -100,9 +102,9 @@ type JwsPayload = {
 };
 
 /**
- * Generate and sign a SIGV01 packet with ksign as idAddr
+ * Generate and sign a SIGV02 packet with ksign as id
  * @param {Object} kc
- * @param {String} idAddr
+ * @param {String} id
  * @param {String} ksign - public key in hex format
  * @param {Object} proofKSign
  * @param {Number} expirationTimeDelta
@@ -111,16 +113,16 @@ type JwsPayload = {
  * @param {Object} form
  * @returns {String} signedPacket
  */
-export function signPacket(kc: KeyContainer, idAddr: string, ksign: string, proofKSign: proofs.ProofClaim,
+export function signPacket(kc: KeyContainer, id: string, ksign: string, proofKSign: proofs.ProofClaim,
   expirationTimeDelta: number, payloadType: string, data: any, form: any): string {
   const date = new Date();
   const currentTime = Math.round((date).getTime() / 1000);
   const jwsHeader = {
-    typ: SIGV01,
-    iss: idAddr,
+    typ: SIGV02,
+    iss: id,
     iat: currentTime,
     exp: currentTime + expirationTimeDelta,
-    alg: SIGALGV01,
+    alg: SIGALGV02,
   };
   const jwsPayload = {
     type: payloadType,
@@ -143,10 +145,8 @@ export function signPacket(kc: KeyContainer, idAddr: string, ksign: string, proo
   const dataToSign = `${header64}.${payload64}`;
 
   // sign data
-  const signedObj = kc.sign(ksign, ethUtil.toBuffer(dataToSign));
-  const signatureHex = signedObj.signature;
-  const signatureBuffer = utils.hexToBytes(signatureHex);
-  const signature64 = signatureBuffer.toString('base64');
+  const signature = kc.signBaby(ksign, ethUtil.toBuffer(dataToSign));
+  const signature64 = signature.compress().toString('base64');
 
   const result = `${dataToSign}.${signature64}`;
   return result;
@@ -155,16 +155,16 @@ export function signPacket(kc: KeyContainer, idAddr: string, ksign: string, proo
 /**
  * Generate and sign signature packet of type generic
  * @param {Object} kc
- * @param {String} idAddr
+ * @param {String} id
  * @param {String} ksign - public key in hex format
  * @param {Object} proofKSign
  * @param {Number} expirationTimeDelta
  * @param {Object} form
  * @returns {String} signedPacket
  */
-export function signGenericSigV01(kc: KeyContainer, idAddr: string, ksign: string,
+export function signGenericSigV01(kc: KeyContainer, id: string, ksign: string,
   proofKSign: proofs.ProofClaim, expirationTimeDelta: number, form: any): string {
-  return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta, GENERICSIGV01, {}, form);
+  return signPacket(kc, id, ksign, proofKSign, expirationTimeDelta, GENERICSIGV01, {}, form);
 }
 
 export type IdenAssertProofName = {
@@ -176,7 +176,7 @@ export type IdenAssertProofName = {
 /**
  * Generate and sign signature packet of type identity assertion
  * @param {Object} signatureRequest
- * @param {String} idAddr
+ * @param {String} id
  * @param {String} ethName
  * @param {Object} proofEthName
  * @param {Object} kc
@@ -185,25 +185,25 @@ export type IdenAssertProofName = {
  * @param {Number} expirationTimeDelta
  * @returns {String} signedPacket
  */
-export function signIdenAssertV01(signatureRequest: any, idAddr: string,
+export function signIdenAssertV01(signatureRequest: any, id: string,
   proofName: ?IdenAssertProofName, kc: KeyContainer, ksign: string,
   proofKSign: proofs.ProofClaim, expirationTimeDelta: number): string {
   if (proofName === undefined) {
     proofName = null;
   }
-  return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
+  return signPacket(kc, id, ksign, proofKSign, expirationTimeDelta,
     IDENASSERTV01, signatureRequest.body.data, proofName);
 }
 
 export type IdenAssertRes = {
   nonceObj: NonceObj,
   ethName: string,
-  idAddr: string,
+  id: string,
 };
 
 /**
  * Generate and sign signature packet of type identity assertion
- * @param {String} idAddr
+ * @param {String} id
  * @param {Object} kc
  * @param {String} ksign - public key in hex format
  * @param {Object} proofKSign
@@ -212,10 +212,10 @@ export type IdenAssertRes = {
  * @param {Object} msg - message object
  * @returns {String} signedPacket
  */
-export function signMsgV01(idAddr: string,
+export function signMsgV01(id: string,
   kc: KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
   expirationTimeDelta: number, msgType: string, msg: any): string {
-  return signPacket(kc, idAddr, ksign, proofKSign, expirationTimeDelta,
+  return signPacket(kc, id, ksign, proofKSign, expirationTimeDelta,
     MSGV01, null, { type: msgType, data: msg });
 }
 
@@ -269,7 +269,7 @@ export class SignedPacketVerifier {
       return {
         nonceObj: nonceResult.nonceObj,
         ethName: '',
-        idAddr: jwsHeader.iss,
+        id: jwsHeader.iss,
       };
     }
 
@@ -300,7 +300,7 @@ export class SignedPacketVerifier {
     }
     const domain = jwsPayload.form.ethName.substring(idx + 1);
 
-    // 5b. Resolve name to obtain name server idAddr and verify that it matches the signer idAddr
+    // 5b. Resolve name to obtain name server id and verify that it matches the signer id
     if (jwsPayload.form.proofAssignName.proofs.length !== 1) {
       throw new Error('length of payload.form.proofKSign != 1');
     }
@@ -320,14 +320,14 @@ export class SignedPacketVerifier {
     }
 
     // 5d. VerifyProofClaim(jwsPayload.form.proofAssignName, signerOperational)
-    if (!proofs.verifyProofClaim(jwsPayload.form.proofAssignName, signer.kOpAddr)) {
+    if (!proofs.verifyProofClaim(jwsPayload.form.proofAssignName, signer.kOpPub)) {
       throw new Error('verify proof claim of payload.form.proofAssignName failed');
     }
 
     return {
       nonceObj: nonceResult.nonceObj,
       ethName: jwsPayload.form.ethName,
-      idAddr: jwsHeader.iss,
+      id: jwsHeader.iss,
     };
   }
 
@@ -338,10 +338,10 @@ export class SignedPacketVerifier {
    * @param {Buffer} signatureBuffer
    * @returns {boolean} result
    */
-  verifySignedPacketV01(jwsHeader: JwsHeader, jwsPayload: JwsPayload,
+  verifySignedPacketV02(jwsHeader: JwsHeader, jwsPayload: JwsPayload,
     signatureBuffer: Buffer): boolean {
-    // 2. Verify jwsHeader.alg is 'ES255'
-    if (jwsHeader.alg !== SIGALGV01) {
+    // 2. Verify jwsHeader.alg is 'ED256BJ'
+    if (jwsHeader.alg !== SIGALGV02) {
       throw new Error(`Unsupported alg: ${jwsHeader.alg}`);
     }
 
@@ -356,12 +356,15 @@ export class SignedPacketVerifier {
     // 4. Verify that jwsPayload.ksign is in jwsPayload.proofKSign.leaf
     const entry = Entry.newFromHex(jwsPayload.proofKSign.leaf);
     const claimAuthorizeKSign = claim.newClaimFromEntry(entry);
-    if (!(claimAuthorizeKSign instanceof claim.AuthorizeKSignSecp256k1)) {
-      throw new Error('jwsPayload.proofKSign.leaf is not a claim.AuthorizeKSignSecp256k1');
+    if (!(claimAuthorizeKSign instanceof claim.AuthorizeKSignBabyJub)) {
+      throw new Error('jwsPayload.proofKSign.leaf is not a claim.AuthorizeKSignBabyJub');
     }
-    const pubK = claimAuthorizeKSign.pubKeyCompressed;
-    const pubKHex = utils.bytesToHex(pubK);
-    if (pubKHex !== jwsPayload.ksign) {
+    const publicKeyComp = claimAuthorizeKSign.ay;
+    if (claimAuthorizeKSign.sign[0] === 1) {
+      publicKeyComp[0] |= 0x80;
+    }
+    const publicKeyHex = utils.swapEndianness(publicKeyComp).toString('hex');
+    if (publicKeyHex !== jwsPayload.ksign) {
       throw new Error('Pub key in payload.proofksign doesn\'t match payload.ksign');
     }
 
@@ -378,7 +381,7 @@ export class SignedPacketVerifier {
       if (jwsPayload.proofKSign.proofs[0].aux == null) {
         throw new Error('payload.proofksign.proofs[0].aux is nil');
       }
-      if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.idAddr) {
+      if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.id) {
         throw new Error('header.iss doesn\'t match with idaddr in proofksign set root claim');
       }
     }
@@ -391,11 +394,13 @@ export class SignedPacketVerifier {
     const payload64 = Buffer.from(JSON.stringify(jwsPayload)).toString('base64');
     const dataSigned = `${header64}.${payload64}`;
     const message = ethUtil.toBuffer(dataSigned);
-    const msgHash = ethUtil.hashPersonalMessage(message);
-    const sigHex = utils.bytesToHex(signatureBuffer);
-    const ksignAddr = ethUtil.pubToAddress(jwsPayload.ksign, true);
-    const ksignAddrHex = utils.bytesToHex(ksignAddr);
-    if (!utils.verifySignature(utils.bytesToHex(msgHash), sigHex, ksignAddrHex)) { // mHex, sigHex, addressHex
+    // const msgHash = ethUtil.hashPersonalMessage(message);
+    const sigHex = signatureBuffer.toString('hex');
+    // const ksignAddr = ethUtil.pubToAddress(jwsPayload.ksign, true);
+    // const ksignAddrHex = utils.bytesToHex(ksignAddr);
+
+    // console.log('sigHex', message.toString('hex'));
+    if (!utils.verifyBabySignature(jwsPayload.ksign, message, sigHex)) {
       throw new Error('JWS signature doesn\'t match with pub key in payload.ksign');
     }
 
@@ -421,7 +426,7 @@ export class SignedPacketVerifier {
     // entities won't be able to sign contradicting claims.
 
     // 7b. VerifyProofClaim(jwsPayload.proofOfKSign, signerOperational)
-    if (!proofs.verifyProofClaim(jwsPayload.proofKSign, signer.kOpAddr)) {
+    if (!proofs.verifyProofClaim(jwsPayload.proofKSign, signer.kOpPub)) {
       throw new Error('Invalid proofKSign');
     }
 
@@ -446,10 +451,12 @@ export class SignedPacketVerifier {
 
     // switch over jwsHeader.typ
     switch (jwsHeader.typ) {
-      // 1. Verify jwsHeader.typ is 'iden3.sig.v0_1'
       case SIGV01:
+        throw new Error(`Deprecated signature packet typ: ${jwsHeader.typ}`);
+      // 1. Verify jwsHeader.typ is 'iden3.sig.v0_2'
+      case SIGV02:
         return {
-          verified: this.verifySignedPacketV01(jwsHeader, jwsPayload, signatureBuffer),
+          verified: this.verifySignedPacketV02(jwsHeader, jwsPayload, signatureBuffer),
           header: jwsHeader,
           payload: jwsPayload,
         };

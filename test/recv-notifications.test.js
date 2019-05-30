@@ -39,7 +39,7 @@ describe('[notification-server] Notification server Http communications', () => 
   it('Generate keys for identity', () => {
     // https://iancoleman.io/bip39/
     const mnemonic = 'emerge resource veteran where letter quantum budget elite bracket grab pioneer plunge';
-    keyContainer.generateMasterSeed(mnemonic);
+    keyContainer.setMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
     const keyPublicOp = keys[0];
     const keyRecover = keys[1];

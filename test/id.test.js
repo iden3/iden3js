@@ -25,19 +25,13 @@ describe('[id] new Id()', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.unlock('pass');
     // Generate key master in key container
-    keyContainer.generateMasterSeed(mnemonic);
+    keyContainer.setMasterSeed(mnemonic);
     const mnemonicDb = keyContainer.getMasterSeed();
     // Check master seed from database is the same as the master seed input
     expect(mnemonic).to.be.equal(mnemonicDb);
     // Generate Key seed
-    const ack = keyContainer.generateKeySeed(mnemonicDb);
-    if (ack) {
-      const { keySeed, pathKey } = keyContainer.getKeySeed();
-      // Generate keys for first identity
-      const objectKeys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
-      ({ keys } = objectKeys);
-      id = new iden3.Id(keys[0], keys[1], keys[2], relay, 0);
-    }
+    const keys = keyContainer.createKeys();
+    id = new Id(keys.kOp, keys.kRev, keys.kRec, 'relay test', 0);
     keyContainer.lock();
   });
 

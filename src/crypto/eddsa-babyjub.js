@@ -3,7 +3,6 @@
 const crypto = require('crypto');
 const { babyJub, eddsa } = require('circomlib');
 const { bigInt } = require('snarkjs');
-const utils = require('../utils');
 
 export class Signature {
   r8: [bigInt, bigInt];
@@ -45,8 +44,8 @@ export class PublicKey {
     if (buf.length !== 32) {
       throw new Error('buf must be 32 bytes');
     }
-    const bufLE = utils.swapEndianness(buf);
-    const p = babyJub.unpackPoint(bufLE);
+    // const bufLE = utils.swapEndianness(buf);
+    const p = babyJub.unpackPoint(buf);
     if (p == null) {
       throw new Error('unpackPoint failed');
     }
@@ -54,7 +53,8 @@ export class PublicKey {
   }
 
   compress(): Buffer {
-    return utils.swapEndianness(babyJub.packPoint(this.p));
+    // return utils.swapEndianness(babyJub.packPoint(this.p));
+    return babyJub.packPoint(this.p);
   }
 
   toString(): string {

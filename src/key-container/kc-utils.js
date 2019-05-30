@@ -2,10 +2,15 @@ const ethUtil = require('ethereumjs-util');
 const pbkdf2 = require('pbkdf2-sha256');
 const nacl = require('tweetnacl');
 const sealedBox = require('tweetnacl-sealedbox-js');
-const utils = require('../utils');
-const mimc7 = require('../sparse-merkle-tree/mimc7');
 const { bigInt } = require('snarkjs');
 nacl.util = require('tweetnacl-util');
+const utils = require('../utils');
+const mimc7 = require('../sparse-merkle-tree/mimc7');
+
+const errorLockedMsg = 'Key Container is locked';
+const errorKeySeedNoExistMsg = 'key seed doesn\'t exists';
+const errorFailDecryptMsg = 'Could not decrypt message';
+const errorDbKeyNoExistMsg = 'DB Key doesn\'t exist';
 
 /**
  * @param  {Buffer} msg
@@ -128,10 +133,6 @@ function mimc7HashBuffer(msg: Buffer): bigInt {
   return mimc7.multiHash(msgArray);
 }
 
-const errorLockedMsg = 'Key Container is locked';
-const errorKeySeedNoExistMsg = 'key seed doesn\'t exists';
-const errorFailDecryptMsg = 'Could not decrypt message';
-
 module.exports = {
   concatSignature,
   passToKey,
@@ -142,5 +143,6 @@ module.exports = {
   errorLockedMsg,
   errorKeySeedNoExistMsg,
   errorFailDecryptMsg,
+  errorDbKeyNoExistMsg,
   mimc7HashBuffer,
 };

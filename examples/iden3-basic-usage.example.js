@@ -11,7 +11,7 @@ keyContainer.unlock(passphrase);
 
 // generate master seed
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
-keyContainer.generateMasterSeed(mnemonic);
+keyContainer.setMasterSeed(mnemonic);
 
 // Generate keys for first identity
 const keys = keyContainer.createKeys();

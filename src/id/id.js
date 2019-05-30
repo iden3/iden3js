@@ -14,7 +14,7 @@ const notServer = require('../api-client/notification-server');
  */
 class Id {
   /**
-   * @param {String} keyOpPub - Operational public key
+   * @param {eddsa.PublicKey} keyOpPub - Operational public key
    * @param {String} keyRecoverPub - Recovery public key
    * @param {String} keyRevokePub - Revoke public key
    * @param {Object} relay - Relay associated with the identity
