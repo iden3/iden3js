@@ -14,7 +14,11 @@ const { errorLockedMsg, errorDbKeyNoExistMsg, mimc7HashBuffer } = kcUtils;
 
 nacl.util = require('tweetnacl-util');
 
-
+/**
+ * KeyContainer generates and stores keys, and allows using them to sign messages.
+ * Usage of keys requires the KeyContainer to be unlocked.  Most functions
+ * throw new Error(errorLockedMsg) if the KeyContainer is not unlocked.
+ */
 class KeyContainer {
   prefix: string;
   encryptionKey: string;
@@ -86,6 +90,7 @@ class KeyContainer {
     this.db.insert(`${this.prefix}/masterSeed`, seedEncrypted);
   }
 
+  /* Get the value of a key in the kc DB */
   _getKey(key: string): string {
     const value = this.db.get(`${this.prefix}/${key}`);
     if (value == null) {
@@ -94,11 +99,13 @@ class KeyContainer {
     return value;
   }
 
+  /* Get and decrypt the value of a key in the kc DB */
   _getKeyDecrypt(key: string): string {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return this._decrypt(this._getKey(key));
   }
 
+  /* Store and encrypt a value with a key in the kc DB */
   _setKeyValueEncrypt(key: string, value: string) {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const valueEncrypted = this._encrypt(value);
@@ -357,6 +364,7 @@ class KeyContainer {
     return { publicKey: publicKeyHex, address: addressHex };
   }
 
+  /* Import an EdDSA Baby Jub private key in hex encoding */
   importBabyKey(privateKeyHex: string): string {
     const privateKeyBuffer = utils.hexToBytes(privateKeyHex);
     const privateKey = new eddsa.PrivateKey(privateKeyBuffer);
@@ -403,16 +411,19 @@ class KeyContainer {
     this.db.delete(`${this.prefix}/${addressHex}`);
   }
 
+  // DANGER: this funciton deletes the entire db!
   deleteAll() {
     // localStorage.clear();
     this.db.deleteAll();
   }
 
+  /* Encrypt a string using the kc encryptionKey */
   _encrypt(m: string): string {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return kcUtils.encrypt(this.encryptionKey, m);
   }
 
+  /* Decrypt a string using the kc encryptionKey */
   _decrypt(c: string): string {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return kcUtils.decrypt(this.encryptionKey, c);
