@@ -41,13 +41,13 @@ class NameServer {
    * @param  {Object} kc - Keycontainer
    * @param  {String} ksing - ksign public key used to sign the request
    * @param  {Object} proofKSign - AuthorizeKSignSecp256k1 ProofClaim of ksign
-   * @param  {String} idAddr - Identity address
+   * @param  {String} id - Identity address
    * @param  {String} name - Label to bind
    * @return {Object} Http response
    */
   bindId(kc: KeyContainer, ksign: string, proofKSign: proofs.ProofClaim,
-    idAddr: string, name: string): AxiosPromise<any, any> {
-    const assignNameSignedReq = login.signGenericSigV01(kc, idAddr,
+    id: string, name: string): AxiosPromise<any, any> {
+    const assignNameSignedReq = login.signGenericSigV01(kc, id,
       ksign, proofKSign, 600, { assignName: name });
     return this.postFn(`${this.url}/names`, { jws: assignNameSignedReq });
   }

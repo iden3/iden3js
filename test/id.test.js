@@ -52,8 +52,8 @@ describe('[id] new Id()', () => {
     keyContainer.unlock('pass');
     const createIdRes = await id.createId();
     // Successfull create identity api call to relay
-    expect(createIdRes.idAddr).to.be.equal(id.idAddr);
-    expect(createIdRes.idAddr).to.be.not.equal(undefined);
+    expect(createIdRes.id).to.be.equal(id.id);
+    expect(createIdRes.id).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
     proofClaimKeyOperational = createIdRes.proofClaim;
     // try {
@@ -69,7 +69,7 @@ describe('[id] new Id()', () => {
     keyContainer.lock();
   });
   it('relay.getId()', async () => {
-    const getIdres = await relay.getId(id.idAddr);
+    const getIdres = await relay.getId(id.id);
     expect(getIdres.status).to.be.equal(200);
   });
 
@@ -110,7 +110,7 @@ describe('[id] new Id()', () => {
     expect(bindRes.status).to.be.equal(200);
     const resolveRes = await nameServer.resolveName(`${name}@iden3.io`);
     expect(resolveRes.status).to.be.equal(200);
-    expect(resolveRes.data.idAddr).to.be.equal(id.idAddr);
+    expect(resolveRes.data.id).to.be.equal(id.id);
     keyContainer.lock();
   });
 
@@ -120,7 +120,7 @@ describe('[id] new Id()', () => {
     // const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, id.keyOperationalPub);
     const authorizeKSignClaim = iden3.claim.AuthorizeKSignSecp256k1.new(0, id.keyOperationalPub);
     const hi = (authorizeKSignClaim.toEntry()).hi();
-    const res = await relay.getClaimByHi(id.idAddr, iden3.utils.bytesToHex(hi));
+    const res = await relay.getClaimByHi(id.id, iden3.utils.bytesToHex(hi));
     // Check leaf claim requested is the same as the claim generated when the identty is created
     expect(res.data.proofClaim.leaf).to.be.equal(proofClaimKeyOperational.leaf);
     keyContainer.lock();

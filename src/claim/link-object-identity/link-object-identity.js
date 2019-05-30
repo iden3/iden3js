@@ -22,7 +22,7 @@ export class LinkObjectIdentity {
   version: Buffer;
   objectType: Buffer;
   objectIndex: Buffer;
-  idAddr: Buffer;
+  id: Buffer;
   objectHash: Buffer;
   auxData: Buffer;
   /**
@@ -31,17 +31,17 @@ export class LinkObjectIdentity {
    * @param {Buffer} version - specifies version of the claim
    * @param {Buffer} objectType - indicates object associated with object hash
    * @param {Buffer} objectIndex - instance of the object
-   * @param {Buffer} idAddr - identity address linked to object
+   * @param {Buffer} id - identity address linked to object
    * @param {Buffer} objectHash - Hash representing the object
    * @param {Buffer} auxData - Auxiliary data to complement hash object
    */
   constructor(version: Buffer, objectType: Buffer, objectIndex: Buffer,
-    idAddr: Buffer, objectHash: Buffer, auxData: Buffer) {
+    id: Buffer, objectHash: Buffer, auxData: Buffer) {
     this.claimType = utils.bigIntToBufferBE(bigInt(CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE)).slice(24, 32);
     this.version = version;
     this.objectType = objectType;
     this.objectIndex = objectIndex;
-    this.idAddr = idAddr;
+    this.id = id;
     this.objectHash = objectHash;
     this.auxData = auxData;
   }
@@ -50,7 +50,7 @@ export class LinkObjectIdentity {
    * Initialize claim data structure from fields
    */
   static new(version: number, objectType: number, objectIndex: number,
-    idAddr: string, objectHash: string, auxData: string): LinkObjectIdentity {
+    id: string, objectHash: string, auxData: string): LinkObjectIdentity {
     const versionBuff = Buffer.alloc(4);
     versionBuff.writeUInt32BE(version, 0);
     const objectTypeBuff = Buffer.alloc(4);
@@ -58,9 +58,9 @@ export class LinkObjectIdentity {
     const objectIndexBuff = Buffer.alloc(2);
     objectIndexBuff.writeUInt16BE(objectIndex, 0);
     const objectHashBuff = (utils.hexToBytes(objectHash)).fill(0, 0, 1);
-    const idAddrBuff = bs58.decode(idAddr);
+    const idBuff = bs58.decode(id);
     const auxDataBuff = (utils.hexToBytes(auxData)).fill(0, 0, 1);
-    return new LinkObjectIdentity(versionBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff, auxDataBuff);
+    return new LinkObjectIdentity(versionBuff, objectTypeBuff, objectIndexBuff, idBuff, objectHashBuff, auxDataBuff);
   }
 
   /**
@@ -74,12 +74,12 @@ export class LinkObjectIdentity {
     const objectTypeBuff = entry.elements[3].slice(16, 20);
     const objectIndexBuff = entry.elements[3].slice(14, 16);
     // Parse element 2
-    const idAddrBuff = entry.elements[2].slice(1, 32);
+    const idBuff = entry.elements[2].slice(1, 32);
     // Parse element 1
     const objectHashBuff = entry.elements[1].slice(0, 32);
     // Parse element 0
     const auxDataBuff = entry.elements[0].slice(0, 32);
-    return new LinkObjectIdentity(versionBuff, objectTypeBuff, objectIndexBuff, idAddrBuff, objectHashBuff, auxDataBuff);
+    return new LinkObjectIdentity(versionBuff, objectTypeBuff, objectIndexBuff, idBuff, objectHashBuff, auxDataBuff);
   }
 
   /**
@@ -103,8 +103,8 @@ export class LinkObjectIdentity {
     claimEntry.elements[3].fill(this.objectIndex, startIndex, endIndex);
     // Entry element 2 composition
     endIndex = claimEntry.elements[2].length;
-    startIndex = claimEntry.elements[2].length - this.idAddr.length;
-    claimEntry.elements[2].fill(this.idAddr, startIndex, endIndex);
+    startIndex = claimEntry.elements[2].length - this.id.length;
+    claimEntry.elements[2].fill(this.id, startIndex, endIndex);
     // Entry element 1 composition
     endIndex = claimEntry.elements[1].length;
     startIndex = claimEntry.elements[1].length - this.objectHash.length;

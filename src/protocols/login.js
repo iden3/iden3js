@@ -304,17 +304,17 @@ export class SignedPacketVerifier {
     if (jwsPayload.form.proofAssignName.proofs.length !== 1) {
       throw new Error('length of payload.form.proofKSign != 1');
     }
-    const nameServerIdAddr = this.nameResolver.resolve(domain);
-    if (nameServerIdAddr == null) {
+    const nameServerId = this.nameResolver.resolve(domain);
+    if (nameServerId == null) {
       throw new Error('Can\'t resolve domain');
     }
-    const signerIdAddr = jwsPayload.form.proofAssignName.signer;
-    if (nameServerIdAddr !== signerIdAddr) {
+    const signerId = jwsPayload.form.proofAssignName.signer;
+    if (nameServerId !== signerId) {
       throw new Error('Resolved name server id doesn\'t match payload.form.proofAssignName.signer');
     }
 
     // 5c. Get the operational key from the signer (name server).
-    const signer = this.discovery.getEntity(signerIdAddr);
+    const signer = this.discovery.getEntity(signerId);
     if (signer == null) {
       throw new Error('Can\'t get the operational public key of the name server');
     }
@@ -382,7 +382,7 @@ export class SignedPacketVerifier {
         throw new Error('payload.proofksign.proofs[0].aux is nil');
       }
       if (jwsHeader.iss !== jwsPayload.proofKSign.proofs[0].aux.id) {
-        throw new Error('header.iss doesn\'t match with idaddr in proofksign set root claim');
+        throw new Error('header.iss doesn\'t match with id in proofksign set root claim');
       }
     }
 
@@ -406,8 +406,8 @@ export class SignedPacketVerifier {
 
     // 7a. Get the operational key from the signer and in case it's a relay,
     // check if it's trusted.
-    const signerIdAddr = jwsPayload.proofKSign.signer;
-    const signer = this.discovery.getEntity(signerIdAddr);
+    const signerId = jwsPayload.proofKSign.signer;
+    const signer = this.discovery.getEntity(signerId);
     if (signer == null) {
       throw new Error('Unable to get payload.proofksign.signer entity data');
     }

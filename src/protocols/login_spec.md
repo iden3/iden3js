@@ -105,7 +105,7 @@ proofClaimPartial: {
     mtp0: mtp # merkle tree proof of leaf existence
     mtp1: mtp # merkle tree proof of leaf non-existence
     root: key # merkle tree root
-    aux: nil | { ver: uint, era: uint, idAddr: str } # Necessary data to construct SetRootClaim from root
+    aux: nil | { ver: uint, era: uint, id: str } # Necessary data to construct SetRootClaim from root
 }
 ```
 

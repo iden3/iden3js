@@ -61,8 +61,8 @@ describe('[notification-server] Notification server Http communications', () => 
   it('Create identity, bind name and get proofClaim of operational key', async () => {
     // Create identity
     const createIdRes = await id.createId();
-    expect(createIdRes.idAddr).to.be.equal(id.idAddr);
-    expect(createIdRes.idAddr).to.be.not.equal(undefined);
+    expect(createIdRes.id).to.be.equal(id.id);
+    expect(createIdRes.id).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
     proofClaimKeyOperational = createIdRes.proofClaim;
     // Bind label to identity address
@@ -77,7 +77,7 @@ describe('[notification-server] Notification server Http communications', () => 
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
       const respPostNot = await id.sendNotification(keyContainer, id.keyOperationalPub,
-        proofClaimKeyOperational, id.idAddr, notificationUrl, iden3.notifications.newNotifTxt(msg));
+        proofClaimKeyOperational, id.id, notificationUrl, iden3.notifications.newNotifTxt(msg));
       expect(respPostNot.status).to.be.equal(200);
     }
   });
@@ -127,7 +127,7 @@ describe('[notification-server] Notification server Http communications', () => 
       // Create test notification for a given identity
       // eslint-disable-next-line no-await-in-loop
       const respPostNot = await id.sendNotification(keyContainer, id.keyOperationalPub,
-        proofClaimKeyOperational, id.idAddr, notificationUrl, iden3.notifications.newNotifTxt(notification));
+        proofClaimKeyOperational, id.id, notificationUrl, iden3.notifications.newNotifTxt(notification));
       expect(respPostNot.status).to.be.equal(200);
     }
 

@@ -81,7 +81,7 @@ class KeyContainer {
    */
   setMasterSeed(mnemonic: string = bip39.generateMnemonic()) {
     if (!bip39.validateMnemonic(mnemonic)) { throw new Error('Mnemonic validation failed'); }
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const seedEncrypted = this._encrypt(mnemonic);
     this.db.insert(`${this.prefix}/masterSeed`, seedEncrypted);
   }
@@ -95,12 +95,12 @@ class KeyContainer {
   }
 
   _getKeyDecrypt(key: string): string {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return this._decrypt(this._getKey(key));
   }
 
   _setKeyValueEncrypt(key: string, value: string) {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const valueEncrypted = this._encrypt(value);
     this.db.insert(`${this.prefix}/${key}`, valueEncrypted);
   }
@@ -111,7 +111,7 @@ class KeyContainer {
    * @returns {String} Mnemonic representing the master seed
    */
   getMasterSeed(): string {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return this._getKeyDecrypt('masterSeed');
   }
 
@@ -121,7 +121,7 @@ class KeyContainer {
    * @return {Bool} - True if function succeeds otherwise false
    */
   generateKeySeed(masterSeed: string) {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const root = hdkey.fromMasterSeed(masterSeed);
     const pathRoot = "m/44'/60'/0'";
     // Identity master generation
@@ -141,7 +141,7 @@ class KeyContainer {
    * @return {Object} - Contains identity seed and current path
    */
   getKeySeed(): {keySeed: string, pathKey: number} {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const keySeedDb = this._getKey('keySeed');
     const { keySeedEncrypted, pathKeySeedEncrypted } = JSON.parse(keySeedDb);
     const keySeed = this._decrypt(keySeedEncrypted);
@@ -156,7 +156,7 @@ class KeyContainer {
    * @return {Object} - Contains identity seed and current path
    */
   increaseKeyPath() {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const { keySeed, pathKey } = this.getKeySeed();
     const increasePathKey = pathKey + 1;
     const pathKeyDb = Buffer.alloc(4);
@@ -173,7 +173,7 @@ class KeyContainer {
    * @return {String} - Public recovery address
    */
   generateRecoveryAddr(masterSeed: string): string {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const root = hdkey.fromMasterSeed(masterSeed);
     const pathRecovery = "m/44'/60'/1'";
     const addrNodeRecovery = root.derive(pathRecovery);
@@ -240,7 +240,7 @@ class KeyContainer {
    * @returns {String} New key generated
    */
   generateSingleKey(keyProfilePath: number, keyPath: number, isPublic: boolean): string {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const path = `m/44'/60'/0'/${keyProfilePath}/${keyPath}`;
     const { keySeed } = this.getKeySeed();
     const root = hdkey.fromMasterSeed(keySeed);
@@ -260,7 +260,7 @@ class KeyContainer {
    * @return {String} - Recovery public address
    */
   getRecoveryAddr() {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const keyDb = this._listKeys(CONSTANTS.IDRECOVERYPREFIX);
 
     if (keyDb.length === 0) {
@@ -278,25 +278,25 @@ class KeyContainer {
   generateKeysFromKeyPath(mnemonic: string = bip39.generateMnemonic(),
     pathProfile: number = 0): { kOp: string, kRev: string, kRec: string } {
     if (!bip39.validateMnemonic(mnemonic)) { throw new Error('Mnemonic validation failed'); }
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const root = hdkey.fromMasterSeed(mnemonic);
     const path = `m/44'/60'/0'/${pathProfile}`;
     let i = 0;
 
     // kOperational BabyJub
     i = 0;
-    const addrNode = root.derive(`${path}/${i}`); // "m/44'/60'/0'/pathProfile/i"
+    let addrNode = root.derive(`${path}/${i}`); // "m/44'/60'/0'/pathProfile/i"
     const kOp = this.importBabyKey(addrNode._privateKey.toString('hex'));
 
     // kRevoke, kRecovery Ethereum
-    let ethKeys = [];
+    const ethKeys = [];
     for (i = 1; i < 3; i++) {
-      const addrNode = root.derive(`${path}/${i}`); // "m/44'/60'/0'/pathProfile/i"
+      addrNode = root.derive(`${path}/${i}`); // "m/44'/60'/0'/pathProfile/i"
       const { publicKey } = this.importKey(addrNode._privateKey.toString('hex'));
       ethKeys.push(`0x${publicKey}`);
     }
 
-    return { kOp: kOp, kRev: ethKeys[0], kRec: ethKeys[1] };
+    return { kOp, kRev: ethKeys[0], kRec: ethKeys[1] };
   }
 
   /**
@@ -304,7 +304,7 @@ class KeyContainer {
    * @returns {Object} - It contains all the keys generated, undefined otherwise
    */
   createKeys(): { kOp: string, kRev: string, kRec: string } {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     let objectKeySeed;
     // Get key seed and generate if it is not already created
     try {
@@ -337,7 +337,7 @@ class KeyContainer {
    * @returns {String} AddressHex
    */
   generateKeyRand(): { publicKey: string, address: string } {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const w = ethWallet.generate();
     return this.importKey(w._privKey.toString('hex'));
   }
@@ -372,7 +372,7 @@ class KeyContainer {
    * @returns {Object} signatureObj
    */
   sign(addressHex: string, message: Buffer): Object {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     // const privKHexEncrypted = localStorage.getItem(this.prefix + addressHex);
     const privKHex = this._getKeyDecrypt(`eth-addr/${addressHex}`);
     const msgHash = ethUtil.hashPersonalMessage(message);
@@ -382,9 +382,9 @@ class KeyContainer {
   }
 
   signBaby(publicKeyHex: string, message: Buffer): eddsa.Signature {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const privateKeyHex = this._getKeyDecrypt(`bj/${publicKeyHex}`);
-    const privateKey = new eddsa.PrivateKey(new Buffer(privateKeyHex, 'hex'));
+    const privateKey = new eddsa.PrivateKey(Buffer.from(privateKeyHex, 'hex'));
     return privateKey.signMimc7(mimc7HashBuffer(message));
   }
 
@@ -409,12 +409,12 @@ class KeyContainer {
   }
 
   _encrypt(m: string): string {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return kcUtils.encrypt(this.encryptionKey, m);
   }
 
   _decrypt(c: string): string {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg) };
+    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return kcUtils.decrypt(this.encryptionKey, c);
   }
 }

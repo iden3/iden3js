@@ -8,16 +8,16 @@ class NameResolver {
 
   /**
    * Initialization NameResolver object
-   * @param {String} namesJSON - map of domains to idAddr in JSON
+   * @param {String} namesJSON - map of domains to id in JSON
    */
   constructor(namesJSON: string) {
     this.names = JSON.parse(namesJSON);
   }
 
   /**
-   * Resolve a name to an idAddr
+   * Resolve a name to an id
    * @param {String} name
-   * @returns {?String} idAddr
+   * @returns {?String} id
    */
   resolve(name: string): ?string {
     return this.names[name];
