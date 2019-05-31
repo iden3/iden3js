@@ -4,13 +4,16 @@ const createKeccakHash = require('keccak');
 
 const snarkjs = require('snarkjs');
 
+const eddsa = require('./crypto/eddsa-babyjub');
+const { mimc7HashBuffer } = require('./key-container/kc-utils');
+
 const { bigInt } = snarkjs;
 
 /**
  * @param  {uint32} u
  * @returns {Buffer}
  */
-function uint32ToEthBytes(u: number): Buffer { // compatible with Uint32ToEthBytes() go-iden3 version
+export function uint32ToEthBytes(u: number): Buffer { // compatible with Uint32ToEthBytes() go-iden3 version
   const buf = Buffer.alloc(4);
   buf.writeUIntBE(u, 0, 4); // also can be used buf.writeUInt32BE(u);
   return buf;
@@ -20,7 +23,7 @@ function uint32ToEthBytes(u: number): Buffer { // compatible with Uint32ToEthByt
  * @param  {Buffer} b
  * @returns {uint32}
  */
-function ethBytesToUint32(b: Buffer): number { // compatible with EthBytesToUint32() go-iden3 version
+export function ethBytesToUint32(b: Buffer): number { // compatible with EthBytesToUint32() go-iden3 version
   return b.readUIntBE(0, 4);
 }
 
@@ -28,7 +31,7 @@ function ethBytesToUint32(b: Buffer): number { // compatible with EthBytesToUint
  * @param  {uint64} u
  * @returns {Buffer}
  */
-function uint64ToEthBytes(u: number): Buffer { // compatible with Uint64ToEthBytes() go-iden3 version
+export function uint64ToEthBytes(u: number): Buffer { // compatible with Uint64ToEthBytes() go-iden3 version
   // NOTE: JavaScript's number based on IEEE-754 could only handle 53 bits
   // precision.  The closes multiple of 8 to 53 is 6, so we only support 6*8 =
   // 48bit numbers instead of 64bit uint.
@@ -41,7 +44,7 @@ function uint64ToEthBytes(u: number): Buffer { // compatible with Uint64ToEthByt
  * @param  {Buffer} b
  * @returns {uint64}
  */
-function ethBytesToUint64(b: Buffer): number { // compatible with EthBytesToUint64() go-iden3 version
+export function ethBytesToUint64(b: Buffer): number { // compatible with EthBytesToUint64() go-iden3 version
   return b.readUIntBE(0, 8);
 }
 
@@ -51,7 +54,7 @@ function ethBytesToUint64(b: Buffer): number { // compatible with EthBytesToUint
  * @param {Buffer} b - A byte. It's a Buffer to do the hash
  * @returns {PromiseLike<ArrayBuffer>} - A hash created with keccak256
  */
-function hashBytes(b: Buffer): any {
+export function hashBytes(b: Buffer): any {
   return createKeccakHash('keccak256').update(b).digest();
 }
 
@@ -60,7 +63,7 @@ function hashBytes(b: Buffer): any {
  * @param {Buffer} buff - Buffer to encode
  * @returns {String} - Encoded Buffer
  */
-function bytesToHex(buff: Buffer): string {
+export function bytesToHex(buff: Buffer): string {
   return `0x${buff.toString('hex')}`;
 }
 
@@ -69,7 +72,7 @@ function bytesToHex(buff: Buffer): string {
  * @param {String} input - input string
  * @returns {Boolean} - Result
  */
-function isHex(input: string): boolean {
+export function isHex(input: string): boolean {
   const re = /[0-9A-Fa-f]{6}/g;
   if (input.substr(0, 2) === '0x') {
     input = input.substr(2);
@@ -82,7 +85,7 @@ function isHex(input: string): boolean {
  * @param {String} hex - Hexadecimal string to parse to a Buffer of bytes
  * @returns {Buffer} - A new Buffer
  */
-function hexToBytes(hex: string): Buffer {
+export function hexToBytes(hex: string): Buffer {
   if (!isHex(hex)) {
     throw new Error('Input string is not hex');
   }
@@ -98,7 +101,7 @@ function hexToBytes(hex: string): Buffer {
  * @param {Buffer} buff - Buffer to decode
  * @returns {String} - Decoded Buffer in base64
  */
-function bytesToBase64(buff: Buffer): string {
+export function bytesToBase64(buff: Buffer): string {
   return buff.toString('base64');
 }
 
@@ -107,7 +110,7 @@ function bytesToBase64(buff: Buffer): string {
  * @param {String} strBase64 - Base64 string format to parse to a Buffer of bytes
  * @returns {Buffer} - New parsed Buffer
  */
-function base64ToBytes(strBase64: string): Buffer {
+export function base64ToBytes(strBase64: string): Buffer {
   return Buffer.from(strBase64, 'base64');
 }
 
@@ -115,7 +118,7 @@ function base64ToBytes(strBase64: string): Buffer {
  * @param  {String} str
  * @returns {String}
  */
-function strToHex(str: string): string {
+export function strToHex(str: string): string {
   const arr = [];
 
   for (let i = 0, l = str.length; i < l; i++) {
@@ -130,7 +133,7 @@ function strToHex(str: string): string {
  * @param  {String} hex
  * @returns {String}
  */
-function hexToStr(hex: string): string {
+export function hexToStr(hex: string): string {
   const _hex = hex.toString().substring(2);
   const _hexLength = _hex.length;
   let str = '';
@@ -146,7 +149,7 @@ function hexToStr(hex: string): string {
  * @param  {Object} dataJson
  * @returns {String}
  */
-function jsonToQr(dataJson: any): string {
+export function jsonToQr(dataJson: any): string {
   const dataStr = JSON.stringify(dataJson);
   return strToHex(dataStr);
 }
@@ -155,18 +158,19 @@ function jsonToQr(dataJson: any): string {
  * @param  {String} dataHex
  * @return {Object}
  */
-function qrToJson(dataHex: string): any {
+export function qrToJson(dataHex: string): any {
   const dataStr = hexToStr(dataHex); // remove the 0x
   return JSON.parse(dataStr);
 }
 
 /**
- * @param  {String} mHex
- * @param  {String} signatureHex
- * @param  {String} addressHex
+ * Verify secp256k1 signature
+ * @param  {String} mHex - message
+ * @param  {String} signatureHex - signature
+ * @param  {String} addressHex - address to check
  * @returns {Boolean}
  */
-function verifySignature(mHex: string, signatureHex: string, addressHex: string): boolean {
+export function verifySignature(mHex: string, signatureHex: string, addressHex: string): boolean {
   const m = hexToBytes(mHex);
   const r = signatureHex.slice(0, 66);
   const s = `0x${signatureHex.slice(66, 130)}`;
@@ -178,11 +182,26 @@ function verifySignature(mHex: string, signatureHex: string, addressHex: string)
 }
 
 /**
- * @param  {String} mOriginal
- * @param  {String} signatureHex
- * @returns {String} addressHex
+ * Verify baby jub signature
+ * @param {String} publicKeyHex - public key to check
+ * @param {Buffer} msg - message
+ * @param {String} signatureHex - signature
+ * @returns {Boolean} True if validation is succesfull; otherwise false
  */
-function addrFromSig(mOriginal: string, signatureHex: string): string {
+export function verifyBabySignature(publicKeyHex: string, msg: Buffer, signatureHex: string): boolean {
+  const pk = eddsa.PublicKey.newFromCompressed(Buffer.from(publicKeyHex, 'hex'));
+  const signature = eddsa.Signature.newFromCompressed(Buffer.from(signatureHex, 'hex'));
+  const h = mimc7HashBuffer(msg);
+  return pk.verifyMimc7(h, signature);
+}
+
+/**
+ * Retireve public address from signature object
+ * @param  {String} mOriginal - original message
+ * @param  {String} signatureHex - signature
+ * @returns {String} addressHex - public address
+ */
+export function addrFromSig(mOriginal: string, signatureHex: string): string {
   const message = ethUtil.toBuffer(mOriginal);
   const m = ethUtil.hashPersonalMessage(message); // message hash
   const r = signatureHex.slice(0, 66);
@@ -194,11 +213,12 @@ function addrFromSig(mOriginal: string, signatureHex: string): string {
 }
 
 /**
+ * Check proof of work difficulty
  * @param  {Buffer} hash
  * @param  {Number} difficulty
  * @returns {Boolean}
  */
-function checkPoW(hash: Buffer, difficulty: number): boolean {
+export function checkPoW(hash: Buffer, difficulty: number): boolean {
   if (Buffer.compare(hash.slice(0, difficulty), Buffer.alloc(difficulty)) !== 0) {
     return false;
   }
@@ -206,11 +226,12 @@ function checkPoW(hash: Buffer, difficulty: number): boolean {
 }
 
 /**
+ * Simulates proof of work
  * @param  {Object} data
  * @param  {Number} difficulty
  * @returns {Object}
  */
-function pow(data: any, difficulty: number): any {
+export function pow(data: any, difficulty: number): any {
   data.nonce = 0;
   let hash = hashBytes(Buffer.from(JSON.stringify(data)));
   while (!checkPoW(hash, difficulty)) {
@@ -226,7 +247,7 @@ function pow(data: any, difficulty: number): any {
 * @param {bigInt} number - bigInt number
 * @returns {Buffer} - Decoded Buffer
 */
-function bigIntToBufferBE(number: bigInt): Buffer {
+export function bigIntToBufferBE(number: bigInt): Buffer {
   const buff = Buffer.alloc(32);
   let pos = buff.length - 1;
   while (!number.isZero()) {
@@ -242,7 +263,7 @@ function bigIntToBufferBE(number: bigInt): Buffer {
 * @param {Buffer} buff - Buffer to convert
 * @returns {bigInt} - Decoded bigInt
 */
-function bufferToBigIntBE(buff: Buffer): bigInt {
+export function bufferToBigIntBE(buff: Buffer): bigInt {
   let number = bigInt(0);
   let pos = buff.length - 1;
   while (pos >= 0) {
@@ -260,7 +281,7 @@ function bufferToBigIntBE(buff: Buffer): bigInt {
 * @param {Array(Buffer)} buffArray - array of buffers
 * @returns {Buffer} - New buffer
 */
-function buffArrayToBuffer(buffArray: Array<Buffer>): Buffer {
+export function buffArrayToBuffer(buffArray: Array<Buffer>): Buffer {
   return Buffer.concat(buffArray);
 }
 
@@ -269,7 +290,7 @@ function buffArrayToBuffer(buffArray: Array<Buffer>): Buffer {
 * @param {Buffer} buffer - Buffer to decode
 * @returns {Array<Buffer>} - array of buffers
 */
-function bufferToBuffArray(buff: Buffer): Array<Buffer> {
+export function bufferToBuffArray(buff: Buffer): Array<Buffer> {
   const arrayBuff = [];
   for (let i = 0; i < buff.length - 1; i += 32) {
     const buffTmp = Buffer.alloc(32);
@@ -285,7 +306,7 @@ function bufferToBuffArray(buff: Buffer): Array<Buffer> {
 * @param {Array(bigInt)} arrayBigInt - Hash index of the leaf
 * @returns {Array(Buffer)} - Array of decoded buffers
 */
-function getArrayBuffFromArrayBigIntBE(arrayBigInt: Array<bigInt>): Array<Buffer> {
+export function getArrayBuffFromArrayBigIntBE(arrayBigInt: Array<bigInt>): Array<Buffer> {
   const arrayBuff = [];
   for (let i = 0; i < arrayBigInt.length; i++) {
     arrayBuff.push(bigIntToBufferBE(arrayBigInt[i]));
@@ -299,7 +320,7 @@ function getArrayBuffFromArrayBigIntBE(arrayBigInt: Array<bigInt>): Array<Buffer
 * @param {Array(Buffer)} arrayBuff - Array of buffer to decode
 * @returns {Array(bigInt)} - Array of bigInt decoded
 */
-function getArrayBigIntFromBuffArrayBE(arrayBuff: Array<Buffer>): Array<bigInt> {
+export function getArrayBigIntFromBuffArrayBE(arrayBuff: Array<Buffer>): Array<bigInt> {
   const arrayBigInt = [];
   for (let i = 0; i < arrayBuff.length; i++) {
     arrayBigInt.push(bufferToBigIntBE(arrayBuff[i]));
@@ -312,7 +333,7 @@ function getArrayBigIntFromBuffArrayBE(arrayBuff: Array<Buffer>): Array<bigInt> 
 * @param {Buffer} buff - Buffer to swap
 * @returns {Buffer} - Buffer swapped
 */
-function swapEndianness(buff: Buffer): Buffer {
+export function swapEndianness(buff: Buffer): Buffer {
   const len = buff.length;
   const buffSwap = Buffer.alloc(len);
   for (let i = 0; i < len; i++) {
@@ -320,30 +341,3 @@ function swapEndianness(buff: Buffer): Buffer {
   }
   return buffSwap;
 }
-
-module.exports = {
-  hashBytes,
-  bytesToHex,
-  hexToBytes,
-  strToHex,
-  hexToStr,
-  jsonToQr,
-  qrToJson,
-  verifySignature,
-  addrFromSig,
-  checkPoW,
-  pow,
-  uint32ToEthBytes,
-  ethBytesToUint32,
-  uint64ToEthBytes,
-  ethBytesToUint64,
-  bytesToBase64,
-  base64ToBytes,
-  bigIntToBufferBE,
-  bufferToBigIntBE,
-  buffArrayToBuffer,
-  bufferToBuffArray,
-  getArrayBuffFromArrayBigIntBE,
-  getArrayBigIntFromBuffArrayBE,
-  swapEndianness,
-};

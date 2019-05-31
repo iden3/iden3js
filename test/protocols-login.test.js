@@ -12,19 +12,14 @@ const name = 'protocols-login-test-user';
 const mnemonic = 'adjust toy select soon nest caught resource rally side wheat traffic amount';
 
 const db = new iden3.Db.LocalStorage();
-const kc = new iden3.KeyContainer('localStorage', db);
+const kc = new iden3.KeyContainer(db);
 kc.unlock('pass');
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/unstable');
 const nameServerUrl = 'http://127.0.0.1:7000/api/unstable';
 const nameServer = new iden3.NameServer(nameServerUrl);
 
-kc.generateMasterSeed(mnemonic);
-const mnemonicDb = kc.getMasterSeed();
-kc.generateKeySeed(mnemonicDb);
-const { keySeed, pathKey } = kc.getKeySeed();
-const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
-const { keys } = objectKeys;
-const id = new iden3.Id(keys[0], keys[1], keys[2], relay, 0);
+kc.setMasterSeed(mnemonic);
+const id = new Id(keys.kOp, keys.kRev, keys.kRec, 'relay test', 0);
 id.addNameServer(nameServer);
 const ksign = keys[0]; // public key in hex format
 
@@ -42,7 +37,7 @@ describe('[protocol] login', () => {
     const resBindId = await id.bindId(kc, id.keyOperationalPub, proofKSign, name);
     proofEthName = resBindId.data;
     const resResolveName = await nameServer.resolveName(`${name}@iden3.io`);
-    expect(resResolveName.data.idAddr).to.be.equal(id.idAddr);
+    expect(resResolveName.data.id).to.be.equal(id.id);
   });
 
   after('lock key container', () => {
@@ -75,7 +70,7 @@ describe('[protocol] login', () => {
 
     const expirationTime = unixtime + (3600 * 60);
     const signedPacket = iden3.protocols.login.signIdenAssertV01(signatureRequest,
-      id.idAddr, proofEthName, kc, ksign, proofKSign, expirationTime);
+      id.id, proofEthName, kc, ksign, proofKSign, expirationTime);
 
     const resIdenAssert = signedPacketVerifier.verifySignedPacketIdenAssert(signedPacket, nonceDB, origin);
     expect(resIdenAssert).to.be.not.equal(undefined);
@@ -85,6 +80,6 @@ describe('[protocol] login', () => {
     // nonce must not be more in the nonceDB
     expect(nonceDB.search(resIdenAssert.nonceObj.nonce)).to.be.equal(undefined);
     expect(resIdenAssert.ethName).to.be.equal(proofEthName.ethName);
-    expect(resIdenAssert.idAddr).to.be.equal(id.idAddr);
+    expect(resIdenAssert.id).to.be.equal(id.id);
   });
 });

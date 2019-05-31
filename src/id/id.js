@@ -14,13 +14,13 @@ const notServer = require('../api-client/notification-server');
  */
 class Id {
   /**
-   * @param {String} keyOpPub - Operational public key
-   * @param {String} keyRecoverPub - Recovery public key
+   * @param {eddsa.PublicKey} keyOpPub - Operational public key
    * @param {String} keyRevokePub - Revoke public key
+   * @param {String} keyRecoverPub - Recovery public key
    * @param {Object} relay - Relay associated with the identity
    * @param {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
-  constructor(keyOpPub, keyRecoverPub, keyRevokePub, relay, keyProfilePath = 0) {
+  constructor(keyOpPub, keyRevokePub, keyRecoverPub, relay, keyProfilePath = 0) {
     const db = new Db.LocalStorage();
     this.db = db;
 
@@ -35,7 +35,7 @@ class Id {
     this.keyProfilePath = keyProfilePath;
     this.nameServer = undefined;
     this.notificationServer = undefined;
-    this.idAddr = undefined;
+    this.id = undefined;
     this.backupServer = undefined;
     this.tokenLogin = undefined;
     this.discovery = undefined;
@@ -108,9 +108,10 @@ class Id {
 
   /**
    * Save keys associated with this identity address
+   * @return {boolean} true if object is succesfully saved, false otherwise
    */
   saveKeys() {
-    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.id;
     const objectValue = {
       keyProfilePath: this.keyProfilePath,
       keyPath: 4,
@@ -129,9 +130,10 @@ class Id {
 
   /**
    * Retrieve address of the relay that has been linked to the identity address
+   * @return {object} - Object containing information about identity
    */
   getInfoIdentity() {
-    return this.relay.getId(this.idAddr);
+    return this.relay.getId(this.id);
   }
 
   /**
@@ -139,10 +141,10 @@ class Id {
    * @param {Object} keyContainer - Object containing all the keys created on local storage
    * @param {String} keyLabel - Label associated with the key or address created
    * @param {Bool} isPublic - Determines if it is wanted to generate a public key or a public address
-   * @returns {Bool} Acknowledge
+   * @returns {String} New key generated
    */
   createKey(keyContainer, keyLabel, isPublic = false) {
-    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.id;
     const keyObject = JSON.parse(this.db.get(stringKey));
     const newKey = keyContainer.generateSingleKey(this.keyProfilePath, keyObject.keyPath, isPublic);
 
@@ -157,7 +159,7 @@ class Id {
    * @returns {Object} Contains all the keys as an object in a form: { label key - key }
    */
   getKeys() {
-    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.idAddr;
+    const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.id;
     const keyObject = JSON.parse(this.db.get(stringKey));
 
     return keyObject.keys;
@@ -170,9 +172,9 @@ class Id {
   createId() {
     return this.relay.createId(this.keyOperationalPub, this.keyRecoverPub, this.keyRevokePub)
       .then((res) => {
-        this.idAddr = res.data.idAddr;
+        this.id = res.data.id;
         this.saveKeys();
-        return { idAddr: this.idAddr, proofClaim: res.data.proofClaim };
+        return { id: this.id, proofClaim: res.data.proofClaim };
       });
   }
 
@@ -181,7 +183,7 @@ class Id {
    * @returns {Object} - Http response
    */
   deployId() {
-    return this.relay.deployId(this.idAddr);
+    return this.relay.deployId(this.id);
   }
 
   /**
@@ -194,7 +196,7 @@ class Id {
   authorizeKSignSecp256k1(kc, ksignpk, keyClaim) {
     const authorizeKSignClaim = AuthorizeKSignSecp256k1.new(0, keyClaim);
     const claimHex = (authorizeKSignClaim.toEntry()).toHex();
-    const signatureObj = kc.sign(ksignpk, claimHex);
+    const signatureObj = kc.sign(ksignpk, ethUtil.toBuffer(claimHex));
     const bytesSignedMsg = {
       valueHex: claimHex,
       signatureHex: signatureObj.signature,
@@ -202,11 +204,11 @@ class Id {
     };
     const self = this;
 
-    return this.relay.postClaim(this.idAddr, bytesSignedMsg)
+    return this.relay.postClaim(this.id, bytesSignedMsg)
       .then((res) => {
         if ((self.backup !== undefined)) { // && (proofOfKSign !== undefined)) {
           // Private folder - future work
-          // self.backupServer.backupData(kc, self.idAddr, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
+          // self.backupServer.backupData(kc, self.id, ksign, proofOfKSign, 'claim', authorizeKSignClaim.hex(), self.relayAddr);
         }
         return res;
       });
@@ -221,7 +223,7 @@ class Id {
    * @return {Object} - Http response
    */
   bindId(kc, kSign, proofKSign, name) {
-    return this.nameServer.bindId(kc, kSign, proofKSign, this.idAddr, name);
+    return this.nameServer.bindId(kc, kSign, proofKSign, this.id, name);
   }
 
   /**
@@ -241,7 +243,7 @@ class Id {
         const date = new Date();
         const unixtime = Math.round((date).getTime() / 1000);
         const expirationTime = unixtime + 60;
-        const signedPacket = protocols.login.signIdenAssertV01(sigReq, self.idAddr,
+        const signedPacket = protocols.login.signIdenAssertV01(sigReq, self.id,
           proofEthName, kc, kSign, proofKSign, expirationTime);
         // Send back to notification server 'signIdenAssert'
         return self.notificationServer.submitLogin(signedPacket)
@@ -257,17 +259,17 @@ class Id {
    * @param {Object} kc - Key container
    * @param {Object} kSign - Key to sign the notification
    * @param {Object} proofKSign - Proof that kSign belongs to this identity
-   * @param {String} idAddrDest - Address destiny
+   * @param {String} idDest - Address destiny
    * @param {String} destNotUrl - Notification server url associated to identty address destiny
    * @param {Object} notification - Notification stored on the notification service1
    * @return {Object} - Http response
    */
-  sendNotification(kc, kSign, proofKSign, idAddrDest, destNotUrl, notification) {
+  sendNotification(kc, kSign, proofKSign, idDest, destNotUrl, notification) {
     const expirationTime = Math.round((new Date()).getTime() / 1000) + 60;
-    const signedMsg = protocols.login.signMsgV01(this.idAddr, kc, kSign, proofKSign,
+    const signedMsg = protocols.login.signMsgV01(this.id, kc, kSign, proofKSign,
       expirationTime, notification.type, notification.data);
     const destNotServerUrl = new notServer.NotificationServer(destNotUrl);
-    return destNotServerUrl.postNotification(idAddrDest, signedMsg);
+    return destNotServerUrl.postNotification(idDest, signedMsg);
   }
 
   /**

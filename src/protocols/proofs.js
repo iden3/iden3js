@@ -13,12 +13,12 @@ const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
  * Auxiliary data required to build a set root claim
  */
 class SetRootAux {
-  idAddr: string;
+  id: string;
   ver: number;
   era: number;
 
-  constructor(idAddr: string, version: number, era: number) {
-    this.idAddr = idAddr;
+  constructor(id: string, version: number, era: number) {
+    this.id = id;
     this.ver = version;
     this.era = era;
   }
@@ -81,7 +81,7 @@ class ProofClaim {
  * @param {ProofClaim} proof - Full dta of claim in order to be verified
  * @param {String} relayAddr - Public address that has sign: | rootKey | Date |
  */
-function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
+function verifyProofClaim(proof: ProofClaim, publicKey: string): boolean {
   // Verify that signature(proof.proofs[proof.proofs.length - 1].root) === proof.rootKeySig
   let rootK = proof.proofs[proof.proofs.length - 1].root;
   if (rootK.substr(0, 2) !== '0x') {
@@ -93,12 +93,12 @@ function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
   const dateHex = utils.bytesToHex(dateBytes);
   const msg = `${rootK}${dateHex.slice(2)}`;
   const msgBuffer = ethUtil.toBuffer(msg);
-  const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
-  const msgHashHex = utils.bytesToHex(msgHash);
-  const sig = utils.hexToBytes(proof.signature);
+  // const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
+  // const msgHashHex = utils.bytesToHex(msgHash);
+  // const sig = utils.hexToBytes(proof.signature);
   // sig[64] += 27;
-  const signatureHex = utils.bytesToHex(sig);
-  if (!utils.verifySignature(msgHashHex, signatureHex, relayAddr)) { // mHex, sigHex, addressHex
+  // const signatureHex = utils.bytesToHex(sig);
+  if (!utils.verifyBabySignature(publicKey, msgBuffer, proof.signature)) { // mHex, sigHex, addressHex
     // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) {  mHex, sigHex, addressHex
     return false;
   }
@@ -140,8 +140,8 @@ function verifyProofClaim(proof: ProofClaim, relayAddr: string): boolean {
     if (proof.proofs[i].aux == null) {
       return false;
     }
-    const { ver, era, idAddr } = proof.proofs[i].aux;
-    leaf = SetRootKey.new(ver, era, idAddr, rootKey).toEntry();
+    const { ver, era, id } = proof.proofs[i].aux;
+    leaf = SetRootKey.new(ver, era, id, rootKey).toEntry();
   }
 
   return true;

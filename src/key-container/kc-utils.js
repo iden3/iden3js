@@ -1,9 +1,18 @@
+// @flow
+
 const ethUtil = require('ethereumjs-util');
 const pbkdf2 = require('pbkdf2-sha256');
 const nacl = require('tweetnacl');
 const sealedBox = require('tweetnacl-sealedbox-js');
-const utils = require('../utils');
+const { bigInt } = require('snarkjs');
 nacl.util = require('tweetnacl-util');
+const utils = require('../utils');
+const mimc7 = require('../sparse-merkle-tree/mimc7');
+
+const errorLockedMsg = 'Key Container is locked';
+const errorKeySeedNoExistMsg = 'key seed doesn\'t exists';
+const errorFailDecryptMsg = 'Could not decrypt message';
+const errorDbKeyNoExistMsg = 'DB Key doesn\'t exist';
 
 /**
  * @param  {Buffer} msg
@@ -13,14 +22,14 @@ nacl.util = require('tweetnacl-util');
  * @param  {Buffer} s
  * @returns {Object}
  */
-function concatSignature(msg, msgHash, v, r, s) {
+function concatSignature(msg: Buffer, msgHash: Buffer, v: Buffer, r: Buffer, s: Buffer): Object {
   let serialized = Buffer.from('');
 
   serialized = Buffer.concat([serialized, r]);
   serialized = Buffer.concat([serialized, s]);
   serialized = Buffer.concat([
     serialized,
-    Buffer.from([v]),
+    Buffer.from(v),
   ]);
 
   return {
@@ -38,7 +47,7 @@ function concatSignature(msg, msgHash, v, r, s) {
  * @param  {String} salt
  * @returns {String} - Key encoded in base64
  */
-function passToKey(key, salt) {
+function passToKey(key: string, salt: string): string {
   const res = pbkdf2(key, salt, 256, 32);
   return nacl.util.encodeBase64(res);
 }
@@ -48,7 +57,7 @@ function passToKey(key, salt) {
  * @param  {String} msg
  * @returns {String} - Encrypted msg in base64 encoding
  */
-function encrypt(key, msg) {
+function encrypt(key: string, msg: string): string {
   const newNonce = () => nacl.randomBytes(nacl.secretbox.nonceLength);
   const keyUint8Array = nacl.util.decodeBase64(key);
   const nonce = newNonce();
@@ -67,7 +76,7 @@ function encrypt(key, msg) {
  * @param  {String} key - Key encoded in base64
  * @param  {String} messageWithNonce
  */
-function decrypt(key, messageWithNonce) {
+function decrypt(key: string, messageWithNonce: string): string {
   const keyUint8Array = nacl.util.decodeBase64(key);
   const messageWithNonceAsUint8Array = nacl.util.decodeBase64(messageWithNonce);
   const nonce = messageWithNonceAsUint8Array.slice(0, nacl.secretbox.nonceLength);
@@ -75,7 +84,7 @@ function decrypt(key, messageWithNonce) {
   const decrypted = nacl.secretbox.open(message, nonce, keyUint8Array);
 
   if (!decrypted) {
-    throw new Error('Could not decrypt message');
+    throw new Error(errorFailDecryptMsg);
   }
   // base64 decrypted message
   return nacl.util.encodeUTF8(decrypted);
@@ -86,7 +95,7 @@ function decrypt(key, messageWithNonce) {
  * @param {String} pubKey - Public key in base64 string representation
  * @param {String} data - Data to be encrypted
  */
-function encryptBox(pubKey, data) {
+function encryptBox(pubKey: string, data: string): string {
   const pubKeyBuff = utils.base64ToBytes(pubKey);
   const dataBuff = nacl.util.decodeUTF8(data);
   // Encrypt data
@@ -101,7 +110,7 @@ function encryptBox(pubKey, data) {
  * @param {String} pubKey - Public key in base64 string representation
  * @param {String} dataEncrypted - Data to be decrypted in base64 string representation
  */
-function decryptBox(privKey, pubKey, dataEncrypted) {
+function decryptBox(privKey: string, pubKey: string, dataEncrypted: string) {
   const pubKeyBuff = utils.base64ToBytes(pubKey);
   const privKeyBuff = utils.base64ToBytes(privKey);
   const dataEncryptedBuff = utils.base64ToBytes(dataEncrypted);
@@ -111,6 +120,21 @@ function decryptBox(privKey, pubKey, dataEncrypted) {
   return nacl.util.encodeUTF8(data);
 }
 
+function mimc7HashBuffer(msg: Buffer): bigInt {
+  const n = 31;
+  const msgArray = [];
+  const fullParts = Math.floor(msg.length / n);
+  for (let i = 0; i < fullParts; i++) {
+    const v = bigInt.leBuff2int(msg.slice(n * i, n * (i + 1)));
+    msgArray.push(v);
+  }
+  if (msg.length % n !== 0) {
+    const v = bigInt.leBuff2int(msg.slice(fullParts * n));
+    msgArray.push(v);
+  }
+  return mimc7.multiHash(msgArray);
+}
+
 module.exports = {
   concatSignature,
   passToKey,
@@ -118,4 +142,9 @@ module.exports = {
   decrypt,
   encryptBox,
   decryptBox,
+  errorLockedMsg,
+  errorKeySeedNoExistMsg,
+  errorFailDecryptMsg,
+  errorDbKeyNoExistMsg,
+  mimc7HashBuffer,
 };

@@ -10,7 +10,7 @@ describe('[Database] export and import database', () => {
   let keyContainer;
   before('Create database and fill it', () => {
     dataBase = new Db.LocalStorage();
-    keyContainer = new KeyContainer('localStorage', dataBase);
+    keyContainer = new KeyContainer(dataBase);
     for (let i = 0; i < 10; i++) {
       const key = `key-${i}`;
       const value = `value-${i}`;
@@ -23,6 +23,10 @@ describe('[Database] export and import database', () => {
     keyContainer.unlock('pass');
     const publicBackupKey = keyContainer.generateKeyBackUp(mnemonic);
     expect(publicBackupKey).to.be.not.equal(undefined);
+    keyContainer.lock();
+  });
+
+  after('lock', () => {
     keyContainer.lock();
   });
 

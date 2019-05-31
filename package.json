@@ -11,6 +11,7 @@
   "main": "index.js",
   "scripts": {
     "test:unit": "rm -rf tmp && mocha --require babel-core/register --require mock-local-storage --recursive 'src/**/*.test.js' --timeout 100000",
+    "test:unitf": "rm -rf tmp && mocha --require babel-core/register --require mock-local-storage --bail -ig 'pow' --recursive 'src/**/*.test.js' --timeout 100000 # FAST",
     "test:int": "rm -rf tmp && mocha --require babel-core/register --require mock-local-storage --timeout 20000",
     "build-test:int": "npm run build && npm run test:int",
     "test:all": "npm run test:unit && npm run test:int",

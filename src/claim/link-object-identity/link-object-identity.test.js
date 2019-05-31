@@ -12,7 +12,7 @@ describe('[Claim link object identity Id]', () => {
   const objectTypeExample = 1;
   const objectIndexExample = 0;
   const hashObjectExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
-  const idAddrExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
+  const idExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
   const auxDataExample = '0x000102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102';
   let claimLinkObject;
   let entryClaim;
@@ -20,7 +20,7 @@ describe('[Claim link object identity Id]', () => {
 
   before('Create new unique id claim', () => {
     claimLinkObject = linkObjectIdentity.LinkObjectIdentity.new(
-      versionExample, objectTypeExample, objectIndexExample, idAddrExample, hashObjectExample, auxDataExample,
+      versionExample, objectTypeExample, objectIndexExample, idExample, hashObjectExample, auxDataExample,
     );
     expect(claimLinkObject).to.not.be.equal(null);
     entryClaim = claimLinkObject.toEntry();
@@ -43,7 +43,7 @@ describe('[Claim link object identity Id]', () => {
     expect(utils.bytesToHex(claimLinkObject.objectHash)).to.be.equal(utils.bytesToHex(parsedClaim.objectHash));
   });
   it('Parse identity address', () => {
-    expect(utils.bytesToHex(claimLinkObject.idAddr)).to.be.equal(utils.bytesToHex(parsedClaim.idAddr));
+    expect(utils.bytesToHex(claimLinkObject.id)).to.be.equal(utils.bytesToHex(parsedClaim.id));
   });
   it('Parse auxiliary data', () => {
     expect(utils.bytesToHex(claimLinkObject.auxData)).to.be.equal(utils.bytesToHex(parsedClaim.auxData));

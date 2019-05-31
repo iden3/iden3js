@@ -4,14 +4,14 @@ const iden3 = require('../index');
 // new database
 const db = new iden3.Db();
 // new key container using localStorage
-const keyContainer = new iden3.KeyContainer('localStorage', db);
+const keyContainer = new iden3.KeyContainer(db);
 // unlock the KeyContainer for the next 30 seconds
 const passphrase = 'pass';
 keyContainer.unlock(passphrase);
 
 // generate master seed
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
-keyContainer.generateMasterSeed(mnemonic);
+keyContainer.setMasterSeed(mnemonic);
 
 // Generate keys for first identity
 const keys = keyContainer.createKeys();

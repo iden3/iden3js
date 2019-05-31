@@ -38,7 +38,7 @@ keyContainer.unlock(passphrase);
 
 // generate master seed
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
-keyContainer.generateMasterSeed(mnemonic);
+keyContainer.setMasterSeed(mnemonic);
 
 // Generate keys for first identity
 const keys  = keyContainer.createKeys();
@@ -166,10 +166,10 @@ keyContainer.unlock(passphrase);
 
 // generate master seed
 const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
-keyContainer.generateMasterSeed(mnemonic);
+keyContainer.setMasterSeed(mnemonic);
 
 // Also, master seed can be generated randomly if no mnemonic is specified
-// keyContainer.generateMasterSeed();
+// keyContainer.setMasterSeed();
 
 // functions above stores seed mnemonic into local storage
 // it can be retrieved through:

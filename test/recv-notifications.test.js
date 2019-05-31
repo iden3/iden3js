@@ -23,7 +23,7 @@ describe('[notification-server] Notification server Http communications', () => 
 
   before('Create servers object', () => {
     dataBase = new iden3.Db.LocalStorage();
-    keyContainer = new iden3.KeyContainer('localStorage', dataBase);
+    keyContainer = new iden3.KeyContainer(dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
     notificationServer = new iden3.notifications.NotificationServer(notificationUrl);
@@ -39,13 +39,10 @@ describe('[notification-server] Notification server Http communications', () => 
   it('Generate keys for identity', () => {
     // https://iancoleman.io/bip39/
     const mnemonic = 'emerge resource veteran where letter quantum budget elite bracket grab pioneer plunge';
-    keyContainer.generateMasterSeed(mnemonic);
+    keyContainer.setMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
-    const keyPublicOp = keys[0];
-    const keyRecover = keys[1];
-    const keyRevoke = keys[2];
     // Create identity object
-    id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, 0);
+    id = new iden3.Id(keys.kOp, keys.kRev, keys.kRec, relay, 0);
   });
 
   it('Load servers', () => {
@@ -67,8 +64,8 @@ describe('[notification-server] Notification server Http communications', () => 
   it('Create identity, bind name and get proofClaim of operational key', async () => {
     // Create identity
     const createIdRes = await id.createId();
-    expect(createIdRes.idAddr).to.be.equal(id.idAddr);
-    expect(createIdRes.idAddr).to.be.not.equal(undefined);
+    expect(createIdRes.id).to.be.equal(id.id);
+    expect(createIdRes.id).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
     proofClaimKeyOperational = createIdRes.proofClaim;
     // Bind label to identity address

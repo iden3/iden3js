@@ -1,10 +1,10 @@
 const utils = require('./utils');
 
 const DBPREFIX = 'i3db-';
-const KCPREFIX = 'i3kc-';
+const KCPREFIX = 'i3kc';
 const IDPREFIX = 'id-';
 const KEYPREFIX = 'keys-';
-const IDRECOVERYPREFIX = 'idRecovery-';
+const IDRECOVERYPREFIX = 'idRecovery';
 const PUBKEYBACKUP = 'pubKeyBackup';
 const CLAIMPREFIX = 'claim-';
 const MTPREFIX = 'i3mt-';

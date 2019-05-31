@@ -17,7 +17,7 @@ const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 const { bigInt } = snarkjs;
 // const relayKOpAddr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
-const relayKOpAddr = '0x7633bc9012f924100fae50d6dda7162b0bba720d';
+const relayKOp = '117f0a278b32db7380b078cdb451b509a2ed591664d1bac464e8c35a90646796';
 // const usrAddr = '0x308eff1357e7b5881c00ae22463b0f69a0d58adb';
 const usrAddr = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
 
@@ -27,16 +27,16 @@ const proofEthName = {
   proofAssignName: {
     proofs: [
       {
-        mtp0: '0x00010000000000000000000000000000000000000000000000000000000000011b7a0d2cdea1bd692f8fae6fafa774a4dc8fe28be8f81e464d259a603079e4c5',
-        mtp1: '0x0301000000000000000000000000000000000000000000000000000000000001301a38afef4b2e600259190ab68ee7dddd194766d4ba90c93f49e8310a1b5cba20b468baa588865efc5df741e0a48569aa1171143a8627f425fff0d4fa7803c701bfeaf3af8775cbd1884bde8bec9762d167dcd4c77b3eafa13f938364b89772',
-        root: '0x145cddc2ccb3f46c288e41f53a40c7176920aaf1a10e657455b4a6af9d99a267',
+        mtp0: '0x0001000000000000000000000000000000000000000000000000000000000001066996bfceb028398017cf44ef9e6aab2a13412b7dc9ee00d90a305cb97ae78e',
+        mtp1: '0x0301000000000000000000000000000000000000000000000000000000000001301a38afef4b2e600259190ab68ee7dddd194766d4ba90c93f49e8310a1b5cba20b468baa588865efc5df741e0a48569aa1171143a8627f425fff0d4fa7803c7022a1e2c3a59747c79b0cddee114e3bfb2d24777281ed568b364d43a6eea33a8',
+        root: '0x1c5d63fcb41321f5648ec038d852a345a4c08434896fac8dbcc2bde1d8541015',
         aux: null,
       },
     ],
     leaf: '0x00000000000000000000000000000000000000000000000000000000000000000000041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f400178118069763dbe18ad9c512b09b4f9a9b7ae14c4ead00200ceabdcbac85950000000000000000000000000000000000000000000000000000000000000003',
-    date: 1558363921,
-    signature: '0x1778ab9f274186dd4bba64a93b592e7f01aad7a953b7269b0b955e62216018472a1344353a22bb5cb91610c73ae6ba3efbb360daecc9a61671aaac9e97e67b131c',
-    signer: '11AVZrKNJVqDJoyKrdyaAgEynyBEjksV5z2NjZoWij',
+    date: 1559221970,
+    signature: 'ea74d9bc7c392a162797e9d22d7ea9a8cf41f5193398048cdf5a972edf321c001a198c6ff8320454462dbf5cbf1e4adf04f3b582107303bd752c62648577b000',
+    signer: '1N7d2qVEJeqnYAWVi5Cq6PLj6GwxaW6FYcfmY2fps',
   },
 };
 
@@ -46,26 +46,26 @@ const proofEthName = {
 const proofKSign = {
   proofs: [
     {
-      mtp0: '0x00020000000000000000000000000000000000000000000000000000000000022910a6fba42851f8282e0266c887e09db4fd84975a76a6c6ce468651683d2346',
-      mtp1: '0x010100000000000000000000000000000000000000000000000000000000000125024058dff8730e7c283b2eb8b1553f32b5db48b2dc3499f1f610591b7cb5ab',
-      root: '0x2ad101bc0d0e1b1efa9e74d03f017f531016e1b77c7cd5f514c864e8f4f22f90',
+      mtp0: '0x000100000000000000000000000000000000000000000000000000000000000125024058dff8730e7c283b2eb8b1553f32b5db48b2dc3499f1f610591b7cb5ab',
+      mtp1: '0x0302000000000000000000000000000000000000000000000000000000000003286bbd1d59ecc50d86dbb5ee59e2997d3522d378b0eb70a86fa38e99bc48179d1e7604b4b32e21da52f5f8a0ccf9709e378e033a9c1d458c4d426d57e53f629b2ca6f7a21d09938e1b52786f8b525b19832a84bb59c8ba4de6871728854f60af29af7742f31e4dfe967485d2e10d4f040d3f53236587b7de64717b871e661f84',
+      root: '0x14a946742e18446a877932c0938511bb6df3c77329ccd9c9cab5981212ffff17',
       aux: {
         version: 0,
         era: 0,
-        idAddr: '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z',
+        id: '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z',
       },
     },
     {
       mtp0: '0x0000000000000000000000000000000000000000000000000000000000000000',
-      mtp1: '0x030000000000000000000000000000000000000000000000000000000000000020b468baa588865efc5df741e0a48569aa1171143a8627f425fff0d4fa7803c701bfeaf3af8775cbd1884bde8bec9762d167dcd4c77b3eafa13f938364b89772',
-      root: '0x1b7a0d2cdea1bd692f8fae6fafa774a4dc8fe28be8f81e464d259a603079e4c5',
+      mtp1: '0x030000000000000000000000000000000000000000000000000000000000000020b468baa588865efc5df741e0a48569aa1171143a8627f425fff0d4fa7803c7022a1e2c3a59747c79b0cddee114e3bfb2d24777281ed568b364d43a6eea33a8',
+      root: '0x066996bfceb028398017cf44ef9e6aab2a13412b7dc9ee00d90a305cb97ae78e',
       aux: null,
     },
   ],
-  leaf: '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff50000000000000000000000000000000000007833000000000000000000000004',
-  date: 1558091875,
-  signature: '0x99314ccf4e79472f55019ce348c7f367bc1a8a508bd43c972aa586d0f8bf198c53aea3b40a86bf9a3fba5c8cdadc3bb01c94b3432f9ccce4493ad01ef46dffbb1c',
-  signer: '11AVZrKNJVqDJoyKrdyaAgEynyBEjksV5z2NjZoWij',
+  leaf: '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002906dcb03d2b068326665e02759eff24d35d40522d9e6efd8e29fb299f67bb1c0000000000000000000000000000000000000001000000000000000000000001',
+  date: 1559221970,
+  signature: '2d76607dbd65092adb64a6c64f76946f8c75b9e23d208e2abd1fac0e287063279aa2c6dde9ba47219d403b61c3698e3a0e2204e1d40630ab8180bc8102cd3600',
+  signer: '1N7d2qVEJeqnYAWVi5Cq6PLj6GwxaW6FYcfmY2fps',
 };
 
 describe('[protocol]', () => {
@@ -79,7 +79,7 @@ describe('[protocol]', () => {
     const nameResolver = new NameResolver(testNamesJSON);
     signedPacketVerifier = new SignedPacketVerifier(discovery, nameResolver);
     db = new iden3.Db.LocalStorage();
-    kc = new iden3.KeyContainer('localStorage', db);
+    kc = new iden3.KeyContainer(db);
     kc.unlock('pass');
   });
 
@@ -89,14 +89,10 @@ describe('[protocol]', () => {
 
   it('create operation key', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
-    kc.generateMasterSeed(mnemonic);
-    const mnemonicDb = kc.getMasterSeed();
-    kc.generateKeySeed(mnemonicDb);
-    const { keySeed, pathKey } = kc.getKeySeed();
-    const objectKeys = kc.generateKeysFromKeyPath(keySeed, pathKey);
-    const { keys } = objectKeys;
-    const kSign = keys[0];
-    kOperational = kSign;
+    kc.setMasterSeed(mnemonic);
+    // const keys = kc.createKeys();
+    // kOperational = keys.kOp;
+    kOperational = kc.importBabyKey('9b3260823e7b07dd26ef357ccfed23c10bcef1c85940baa3d02bbf29461bbbbe');
   });
 
   it('test bigint', () => {
@@ -106,8 +102,8 @@ describe('[protocol]', () => {
   });
 
   it('test check proof', () => {
-    const idAddr = '0x393939393939393939393939393939393939393a';
-    const mt = new smt.SparseMerkleTree(db, idAddr, 140);
+    const id = '0x393939393939393939393939393939393939393a';
+    const mt = new smt.SparseMerkleTree(db, id, 140);
     // Add 10 test entries to sparse merkle tree
     for (let i = 0; i < 8; i++) {
       const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
@@ -130,10 +126,10 @@ describe('[protocol]', () => {
   });
 
   it('verify ProofClaimFull (proofClaimAssignName & proofKSign)', () => {
-    const assignNameVerified = iden3.protocols.verifyProofClaimFull(proofEthName.proofAssignName, relayKOpAddr);
+    const assignNameVerified = iden3.protocols.verifyProofClaimFull(proofEthName.proofAssignName, relayKOp);
     expect(assignNameVerified).to.be.equal(true);
 
-    const ksignVerified = iden3.protocols.verifyProofClaimFull(proofKSign, relayKOpAddr);
+    const ksignVerified = iden3.protocols.verifyProofClaimFull(proofKSign, relayKOp);
     expect(ksignVerified).to.be.equal(true);
   });
 
@@ -163,7 +159,7 @@ describe('[protocol]', () => {
     expect(nonceDB.search(res.nonceObj.nonce)).to.be.equal(undefined);
 
     expect(res.ethName).to.be.equal(proofEthName.ethName);
-    expect(res.idAddr).to.be.equal(usrAddr);
+    expect(res.id).to.be.equal(usrAddr);
 
     // check that an already checked signedPacket is not more longer available to be verified
     expect(() => {

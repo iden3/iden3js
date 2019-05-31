@@ -9,7 +9,7 @@
 
 // const db = new iden3.Db();
 // const backup = new iden3.PrivateFolder('http://127.0.0.1:5001');
-// const kc = new iden3.KeyContainer('localStorage', db);
+// const kc = new iden3.KeyContainer(db);
 
 // kc.unlock('pass');
 // const key0id = kc.importKey(testPrivKHex);

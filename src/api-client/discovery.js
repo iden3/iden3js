@@ -4,7 +4,6 @@ type Entity = {
   idAddr: string,
   name: string,
   kOpPub: string,
-  kOpAddr: string,
   trusted: { relay: boolean },
 };
 
@@ -51,8 +50,7 @@ const testEntitiesJSON = `
   },
   "1N7d2qVEJeqnYAWVi5Cq6PLj6GwxaW6FYcfmY2fps": {
     "name": "iden3-test-relay3",
-    "kOpAddr": "0xe0fbce58cfaa72812103f003adce3f284fe5fc7c",
-    "kOpPub": "0x036d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd4d59",
+    "kOpPub": "117f0a278b32db7380b078cdb451b509a2ed591664d1bac464e8c35a90646796",
     "trusted": { "relay": true }
   },
   "1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z": {

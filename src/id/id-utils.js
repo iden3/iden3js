@@ -28,7 +28,7 @@ function decomposeID(id) {
 }
 
 /**
- * calculates the checksum for a given type & genesis
+ * Calculates the checksum for a given type & genesis
  * @param {Buffer} typ - type of identity specification
  * @param {Buffer} genesis - genesis root of the id state: id_0.0
  * @returns {Buffer} checksum
@@ -41,7 +41,7 @@ function calculateChecksum(typ, genesis) {
 }
 
 /**
- * Checks the checksum of a given identity
+ * checks the checksum of a given identity
  * @param {Buffer} id - id
  * @returns {bool} - true if the checksum is correct, false if not
  */
