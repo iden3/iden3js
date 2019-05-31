@@ -15,12 +15,12 @@ const notServer = require('../api-client/notification-server');
 class Id {
   /**
    * @param {eddsa.PublicKey} keyOpPub - Operational public key
-   * @param {String} keyRecoverPub - Recovery public key
    * @param {String} keyRevokePub - Revoke public key
+   * @param {String} keyRecoverPub - Recovery public key
    * @param {Object} relay - Relay associated with the identity
    * @param {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
-  constructor(keyOpPub, keyRecoverPub, keyRevokePub, relay, keyProfilePath = 0) {
+  constructor(keyOpPub, keyRevokePub, keyRecoverPub, relay, keyProfilePath = 0) {
     const db = new Db.LocalStorage();
     this.db = db;
 

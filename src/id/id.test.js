@@ -26,8 +26,8 @@ describe('[Identity management]', () => {
     identity.saveKeys();
     const keysDb = identity.getKeys();
     expect(keys.kOp.toString()).to.be.equal(keysDb.operationalPub);
-    expect(keys.kRev).to.be.equal(keysDb.recoverPub);
-    expect(keys.kRec).to.be.equal(keysDb.revokePub);
+    expect(keys.kRev).to.be.equal(keysDb.revokePub);
+    expect(keys.kRec).to.be.equal(keysDb.recoverPub);
     // Create new key for the identity
     const loginKey = identity.createKey(keyContainer, 'login Key');
     // Retrieve keys
