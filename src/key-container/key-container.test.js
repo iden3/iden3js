@@ -74,8 +74,8 @@ describe('[Local-storage-container] Test single functions', () => {
   it('Generate keys {operational, recovery, revoke} from key path 0', () => {
     keyContainer.unlock('pass');
     const { keySeed, pathKey } = keyContainer.getKeySeed();
-    const keys = keyContainer.generateKeysFromKeyPath(keySeed, pathKey);
-    keyContainer.increaseKeyPath();
+    const keys = keyContainer._generateKeysFromKeyPath(keySeed, pathKey);
+    keyContainer._increaseKeyPath();
     const pathKey1 = (keyContainer.getKeySeed()).pathKey;
     expect(pathKey1).to.be.equal(1);
     expect(keys.kOp).to.be.not.equal(undefined);

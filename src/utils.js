@@ -164,9 +164,10 @@ export function qrToJson(dataHex: string): any {
 }
 
 /**
- * @param  {String} mHex
- * @param  {String} signatureHex
- * @param  {String} addressHex
+ * Verify secp256k1 signature
+ * @param  {String} mHex - message
+ * @param  {String} signatureHex - signature
+ * @param  {String} addressHex - address to check
  * @returns {Boolean}
  */
 export function verifySignature(mHex: string, signatureHex: string, addressHex: string): boolean {
@@ -180,6 +181,13 @@ export function verifySignature(mHex: string, signatureHex: string, addressHex: 
   return addr === addressHex;
 }
 
+/**
+ * Verify baby jub signature
+ * @param {String} publicKeyHex - public key to check
+ * @param {Buffer} msg - message
+ * @param {String} signatureHex - signature
+ * @returns {Boolean} True if validation is succesfull; otherwise false
+ */
 export function verifyBabySignature(publicKeyHex: string, msg: Buffer, signatureHex: string): boolean {
   const pk = eddsa.PublicKey.newFromCompressed(Buffer.from(publicKeyHex, 'hex'));
   const signature = eddsa.Signature.newFromCompressed(Buffer.from(signatureHex, 'hex'));
@@ -188,9 +196,10 @@ export function verifyBabySignature(publicKeyHex: string, msg: Buffer, signature
 }
 
 /**
- * @param  {String} mOriginal
- * @param  {String} signatureHex
- * @returns {String} addressHex
+ * Retireve public address from signature object
+ * @param  {String} mOriginal - original message
+ * @param  {String} signatureHex - signature
+ * @returns {String} addressHex - public address
  */
 export function addrFromSig(mOriginal: string, signatureHex: string): string {
   const message = ethUtil.toBuffer(mOriginal);
@@ -204,6 +213,7 @@ export function addrFromSig(mOriginal: string, signatureHex: string): string {
 }
 
 /**
+ * Check proof of work difficulty
  * @param  {Buffer} hash
  * @param  {Number} difficulty
  * @returns {Boolean}
@@ -216,6 +226,7 @@ export function checkPoW(hash: Buffer, difficulty: number): boolean {
 }
 
 /**
+ * Simulates proof of work
  * @param  {Object} data
  * @param  {Number} difficulty
  * @returns {Object}

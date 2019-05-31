@@ -1,6 +1,6 @@
 // @flow
 
-const ethWallet = require('ethereumjs-wallet');
+// const ethWallet = require('ethereumjs-wallet');
 const ethUtil = require('ethereumjs-util');
 const nacl = require('tweetnacl');
 const bip39 = require('bip39');
@@ -33,6 +33,7 @@ class KeyContainer {
   }
 
   /*
+   * Unlock key container by the passphrase to use keys
    * @param  {String} passphrase
    */
   unlock(passphrase: string) {
@@ -58,7 +59,7 @@ class KeyContainer {
 
   /**
    * Check if local storage container is unlocked
-   * @returns {Bool} - Lock / unlock
+   * @returns {Bool} - Lock / Unlock
    */
   isUnlock(): boolean {
     if (this.encryptionKey) {
@@ -81,7 +82,6 @@ class KeyContainer {
   /**
    * Generates master mnemonic
    * @param {String} - Mnemonic to store
-   * @returns {Bool} - True if database has been written correctly, False otherwise
    */
   setMasterSeed(mnemonic: string = bip39.generateMnemonic()) {
     if (!bip39.validateMnemonic(mnemonic)) { throw new Error('Mnemonic validation failed'); }
@@ -90,7 +90,11 @@ class KeyContainer {
     this.db.insert(`${this.prefix}/masterSeed`, seedEncrypted);
   }
 
-  /* Get the value of a key in the kc DB */
+  /**
+   * Get the value of a key in the key container database
+   * @param {string} key - database key
+   * @returns {string} database value
+   */
   _getKey(key: string): string {
     const value = this.db.get(`${this.prefix}/${key}`);
     if (value == null) {
@@ -99,13 +103,21 @@ class KeyContainer {
     return value;
   }
 
-  /* Get and decrypt the value of a key in the kc DB */
+  /**
+   * Get and decrypt the value of a key in the key container database
+   * @param {string} key - database key
+   * @returns {string} decrypted key
+   */
   _getKeyDecrypt(key: string): string {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return this._decrypt(this._getKey(key));
   }
 
-  /* Store and encrypt a value with a key in the kc DB */
+  /**
+   * Store and encrypt a value with a key in the key container database
+   * @param {string} key - database key
+   * @param {string} value - string to encrypt by key parameter
+   */
   _setKeyValueEncrypt(key: string, value: string) {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const valueEncrypted = this._encrypt(value);
@@ -114,7 +126,6 @@ class KeyContainer {
 
   /**
    * Get master seed
-   * @param {String} pass - Passphrase enter by the user
    * @returns {String} Mnemonic representing the master seed
    */
   getMasterSeed(): string {
@@ -125,7 +136,6 @@ class KeyContainer {
   /**
    * Generates identity seed and store it into the database along with its current path
    * @param {String} seed - Master seed
-   * @return {Bool} - True if function succeeds otherwise false
    */
   generateKeySeed(masterSeed: string) {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
@@ -159,10 +169,9 @@ class KeyContainer {
   }
 
   /**
-   * Gets identity seed and its current path
-   * @return {Object} - Contains identity seed and current path
+   * Gets identity seed path and increase it by one
    */
-  increaseKeyPath() {
+  _increaseKeyPath() {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const { keySeed, pathKey } = this.getKeySeed();
     const increasePathKey = pathKey + 1;
@@ -176,7 +185,7 @@ class KeyContainer {
 
   /**
    * Generates recovery seed and store it into the database
-   * @param {String} seed - Master seed
+   * @param {String} masterSeed - Master seed
    * @return {String} - Public recovery address
    */
   generateRecoveryAddr(masterSeed: string): string {
@@ -217,7 +226,7 @@ class KeyContainer {
    * Get backup public key
    * @return {String} - Backup public key
    */
-  getBackupPubKey() {
+  getBackupPubKey(): string {
     return this._getKey(CONSTANTS.PUBKEYBACKUP);
   }
 
@@ -266,23 +275,23 @@ class KeyContainer {
    * Gets recovery address from the data base
    * @return {String} - Recovery public address
    */
-  getRecoveryAddr() {
+  getRecoveryAddr(): string {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const keyDb = this._listKeys(CONSTANTS.IDRECOVERYPREFIX);
 
     if (keyDb.length === 0) {
-      throw new Error('Recovery addr not found in the DB');
+      throw new Error('Recovery address not found in the DB');
     }
     return keyDb[0].replace(`${this.prefix}/${CONSTANTS.IDRECOVERYPREFIX}/`, '');
   }
 
   /**
+   * Generate keys from a given path profile to create afterwards an identity
    * @param  {String} mnemonic - String with 12 words
    * @param {Number} pathProfile - Indicates the penultimate layer of the derivation path, for the different identity profiles
-   * @param  {Number} numberOfDerivatedKeys - Indicates the last layer of the derivation path, for the different keys of the identity profile
    * @returns {Object} It contains all the keys generated
    */
-  generateKeysFromKeyPath(mnemonic: string = bip39.generateMnemonic(),
+  _generateKeysFromKeyPath(mnemonic: string = bip39.generateMnemonic(),
     pathProfile: number = 0): { kOp: string, kRev: string, kRec: string } {
     if (!bip39.validateMnemonic(mnemonic)) { throw new Error('Mnemonic validation failed'); }
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
@@ -326,7 +335,7 @@ class KeyContainer {
       }
     }
     // Creates keys
-    const keys = this.generateKeysFromKeyPath(objectKeySeed.keySeed, objectKeySeed.pathKey);
+    const keys = this._generateKeysFromKeyPath(objectKeySeed.keySeed, objectKeySeed.pathKey);
     // this.increaseKeyPath();
     return keys;
   }
@@ -340,19 +349,20 @@ class KeyContainer {
   //   return this._listKeys(CONSTANTS.IDPREFIX);
   // }
 
-  /**
-   * @returns {String} AddressHex
-   */
-  generateKeyRand(): { publicKey: string, address: string } {
-    if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
-    const w = ethWallet.generate();
-    return this.importKey(w._privKey.toString('hex'));
-  }
+  // NOT USED
+  // /**
+  //   * @returns {String} AddressHex
+  //   */
+  // generateKeyRand(): { publicKey: string, address: string } {
+  //   if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
+  //   const w = ethWallet.generate();
+  //   return this.importKey(w._privKey.toString('hex'));
+  // }
 
   /**
-   * @param {String} privKHex - PrivK
-   *
-   * @returns {String} AddressHex
+   * Derives secp256k1 public key and addres from private key and store them
+   * @param {String} privateKeyHex - private key in hexadecimal representation
+   * @returns {Object} secp256k1 public key and address generate from private key, encoding in hex
    */
   importKey(privateKeyHex: string): { publicKey: string, address: string } {
     const privateKey = utils.hexToBytes(privateKeyHex);
@@ -364,7 +374,11 @@ class KeyContainer {
     return { publicKey: publicKeyHex, address: addressHex };
   }
 
-  /* Import an EdDSA Baby Jub private key in hex encoding */
+  /**
+   * Derives baby jub public key and stores it
+   * @param {String} privateKeyHex - private key in hexadecimal representation
+   * @returns {String} baby jub public key from private key, encoding in hex
+   */
   importBabyKey(privateKeyHex: string): string {
     const privateKeyBuffer = utils.hexToBytes(privateKeyHex);
     const privateKey = new eddsa.PrivateKey(privateKeyBuffer);
@@ -374,10 +388,10 @@ class KeyContainer {
   }
 
   /**
-   * @param  {String} addressHex
-   * @param  {Buffer} message
-   *
-   * @returns {Object} signatureObj
+   * Sign message with secp256k1 key
+   * @param {String} addressHex - public address
+   * @param {Buffer} message - message to sign
+   * @returns {Object} Signature object
    */
   sign(addressHex: string, message: Buffer): Object {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
@@ -389,6 +403,12 @@ class KeyContainer {
     return kcUtils.concatSignature(message, msgHash, sig.v, sig.r, sig.s);
   }
 
+  /**
+   * Sign message with babyjub key
+   * @param {String} addressHex - public key
+   * @param {Buffer} message - message to sign
+   * @returns {Signature} Eddsa signature object
+   */
   signBaby(publicKeyHex: string, message: Buffer): eddsa.Signature {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const privateKeyHex = this._getKeyDecrypt(`bj/${publicKeyHex}`);
@@ -397,33 +417,47 @@ class KeyContainer {
   }
 
   /**
-   * @returns {Array}
+   * Retrieve all keys that matches a given string
+   * @param {String} key - key to search into key container
+   * @returns {Array} - List all the keys that matches the input key parameter
    */
   _listKeys(key: string): Array<string> {
     return this.db.listKeys(`${this.prefix}/${key}`);
   }
 
   /**
-   * @param  {String} addressHex
+   * Deletes a key that matches the input parameter
+   * @param {String} key - key to delete
    */
-  deleteKey(addressHex: string) {
+  deleteKey(key: string) {
     // localStorage.removeItem(this.prefix + addressHex);
-    this.db.delete(`${this.prefix}/${addressHex}`);
+    this.db.delete(`${this.prefix}/${key}`);
   }
 
   // DANGER: this funciton deletes the entire db!
+  /**
+   * Deletes the whole database
+   */
   deleteAll() {
     // localStorage.clear();
     this.db.deleteAll();
   }
 
-  /* Encrypt a string using the kc encryptionKey */
+  /**
+   * Encrypt a string using the key container encryptionKey
+   * @param {string} m - message to encrypt
+   * @returns {string}
+   */
   _encrypt(m: string): string {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return kcUtils.encrypt(this.encryptionKey, m);
   }
 
-  /* Decrypt a string using the kc encryptionKey */
+  /**
+   * Decrypt a string using the key container encryptionKey
+   * @param {string} c - message to decrypt
+   * @returns {string}
+   */
   _decrypt(c: string): string {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     return kcUtils.decrypt(this.encryptionKey, c);

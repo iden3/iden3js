@@ -108,6 +108,7 @@ class Id {
 
   /**
    * Save keys associated with this identity address
+   * @return {boolean} true if object is succesfully saved, false otherwise
    */
   saveKeys() {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.id;
@@ -129,6 +130,7 @@ class Id {
 
   /**
    * Retrieve address of the relay that has been linked to the identity address
+   * @return {object} - Object containing information about identity
    */
   getInfoIdentity() {
     return this.relay.getId(this.id);
@@ -139,7 +141,7 @@ class Id {
    * @param {Object} keyContainer - Object containing all the keys created on local storage
    * @param {String} keyLabel - Label associated with the key or address created
    * @param {Bool} isPublic - Determines if it is wanted to generate a public key or a public address
-   * @returns {Bool} Acknowledge
+   * @returns {String} New key generated
    */
   createKey(keyContainer, keyLabel, isPublic = false) {
     const stringKey = this.prefix + CONSTANTS.KEYPREFIX + this.id;
