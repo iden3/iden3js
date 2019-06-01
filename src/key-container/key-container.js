@@ -434,13 +434,14 @@ class KeyContainer {
     this.db.delete(`${this.prefix}/${key}`);
   }
 
-  // DANGER: this funciton deletes the entire db!
   /**
-   * Deletes the whole database
+   * Deletes all key-container keys
    */
   deleteAll() {
-    // localStorage.clear();
-    this.db.deleteAll();
+    const allKeys = this._listKeys('');
+    allKeys.forEach((key) => {
+      this.deleteKey(key.replace(`${this.prefix}/`, ''));
+    });
   }
 
   /**
