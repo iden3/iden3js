@@ -429,7 +429,7 @@ class KeyContainer {
    * Deletes a key that matches the input parameter
    * @param {String} key - key to delete
    */
-  deleteKey(key: string) {
+  _deleteKey(key: string) {
     // localStorage.removeItem(this.prefix + addressHex);
     this.db.delete(`${this.prefix}/${key}`);
   }
@@ -440,7 +440,7 @@ class KeyContainer {
   deleteAll() {
     const allKeys = this._listKeys('');
     allKeys.forEach((key) => {
-      this.deleteKey(key.replace(`${this.prefix}/`, ''));
+      this._deleteKey(key.replace(`${this.prefix}/`, ''));
     });
   }
 
