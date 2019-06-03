@@ -1,9 +1,9 @@
 // @flow
 import { Entry } from '../entry/entry';
 
+const snarkjs = require('snarkjs');
 const utils = require('../../utils');
 const CONSTANTS = require('../../constants');
-const snarkjs = require('snarkjs');
 
 const { bigInt } = snarkjs;
 
@@ -24,6 +24,7 @@ export class AuthorizeEthKey {
     this.ethKey = ethKey;
     this.ethKeyType = ethKeyType;
   }
+
   /**
    * Initialize claim data structure from fields
    */
@@ -48,7 +49,6 @@ export class AuthorizeEthKey {
     // Parse element 3
     const versionBuff = entry.elements[3].slice(20, 24);
     // Parse element 2
-    console.log(entry.elements[2]);
     const ethKeyBuff = entry.elements[2].slice(12, 32); // 32-20= 12
     const ethKeyTypeBuff = entry.elements[2].slice(8, 12); // 32-24= 8
     return new AuthorizeEthKey(versionBuff, ethKeyBuff, ethKeyTypeBuff);

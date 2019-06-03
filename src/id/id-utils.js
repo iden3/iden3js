@@ -2,9 +2,11 @@ const bs58 = require('bs58');
 const utils = require('../utils');
 const Db = require('../db/db');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
-const authorizeKSignSecp256k1 = require('../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1');
+const authorizeKSignBabyJub = require('../claim/authorize-ksign-babyjub/authorize-ksign-babyjub');
+const authorizeEthKey = require('../claim/authorize-eth-key/authorize-eth-key');
 
-const TypeS2M7 = Buffer.from([0x00, 0x04]);
+const TypeBJM7 = Buffer.from([0x00, 0x00]);
+// const TypeS2M7 = Buffer.from([0x00, 0x04]);
 
 /**
  * from a given id (Buffer), returns an object containing:
@@ -91,39 +93,30 @@ function newID(typ, genesis) {
 }
 
 /**
- * given 3 hex string compressed public keys, returns an array of 3 AuthorizeKSignSecp256k1 claims for each one of the input keys
- * @param {String} kopComp - compressed public key in hex string representation
- * @param {String} krecComp - compressed public key in hex string representation
- * @param {String} krevComp - compressed public key in hex string representation
- * @returns {Array} claims - array of ClaimAuthorizeKSignSecp256K1
- */
-function generateInitialClaimsAuthorizeKSign(kopComp, krecComp, krevComp) {
-  const claims = [];
-  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, kopComp));
-  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, krecComp));
-  claims.push(authorizeKSignSecp256k1.AuthorizeKSignSecp256k1.new(0, krevComp));
-  return claims;
-}
-
-/**
  * calculates the Id Genesis, from given public keys
- * @param {String} kopComp - compressed public key in hex string representation
- * @param {String} krecComp - compressed public key in hex string representation
- * @param {String} krevComp - compressed public key in hex string representation
+ * @param {String} kop - compressed babyjub public key in hex string representation
+ * @param {String} kdis - eth addr in hex string
+ * @param {String} kreen - eth addr in hex string
  * @returns {String} idGenesis - hex representation of the IdGenesis
  */
-function calculateIdGenesis(kopComp, krecComp, krevComp) {
+function calculateIdGenesis(kop, kdis, kreen) {
   const db = new Db.Memory(false);
   const mt = new smt.SparseMerkleTree(db, '');
 
-  const claims = generateInitialClaimsAuthorizeKSign(kopComp, krecComp, krevComp);
+  const claimKOp = authorizeKSignBabyJub.AuthorizeKSignBabyJub.new(0, kop);
+  const c0 = utils.getArrayBigIntFromBuffArrayBE(claimKOp.toEntry().elements);
+  mt.addClaim(c0);
 
-  for (let i = 0; i < claims.length; i++) {
-    const c = utils.getArrayBigIntFromBuffArrayBE(claims[i].toEntry().elements);
-    mt.addClaim(c);
-  }
+  const claimKDis = authorizeEthKey.AuthorizeEthKey.new(0, kdis, 0);
+  const c1 = utils.getArrayBigIntFromBuffArrayBE(claimKDis.toEntry().elements);
+  mt.addClaim(c1);
+
+  const claimKReen = authorizeEthKey.AuthorizeEthKey.new(0, kreen, 1);
+  const c2 = utils.getArrayBigIntFromBuffArrayBE(claimKReen.toEntry().elements);
+  mt.addClaim(c2);
+
   const idGenesisBuffer = mt.root.slice(0, 27);
-  const id = newID(TypeS2M7, idGenesisBuffer);
+  const id = newID(TypeBJM7, idGenesisBuffer);
   return bs58.encode(id);
 }
 
@@ -135,6 +128,5 @@ module.exports = {
   decomposeID,
   calculateChecksum,
   checkChecksum,
-  generateInitialClaimsAuthorizeKSign,
   calculateIdGenesis,
 };

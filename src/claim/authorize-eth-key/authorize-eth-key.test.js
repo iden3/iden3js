@@ -2,7 +2,6 @@
 import { describe, it, before } from 'mocha';
 
 const chai = require('chai');
-const ethUtil = require('ethereumjs-util');
 const authorizeEthKey = require('./authorize-eth-key');
 const utils = require('../../utils');
 
