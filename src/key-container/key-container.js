@@ -429,18 +429,19 @@ class KeyContainer {
    * Deletes a key that matches the input parameter
    * @param {String} key - key to delete
    */
-  deleteKey(key: string) {
+  _deleteKey(key: string) {
     // localStorage.removeItem(this.prefix + addressHex);
     this.db.delete(`${this.prefix}/${key}`);
   }
 
-  // DANGER: this funciton deletes the entire db!
   /**
-   * Deletes the whole database
+   * Deletes all key-container keys
    */
   deleteAll() {
-    // localStorage.clear();
-    this.db.deleteAll();
+    const allKeys = this._listKeys('');
+    allKeys.forEach((key) => {
+      this._deleteKey(key.replace(`${this.prefix}/`, ''));
+    });
   }
 
   /**

@@ -8,12 +8,31 @@ const { errorFailDecryptMsg } = kcUtils;
 
 const { expect } = chai;
 
-describe('[Local-storage-container] Test single functions', () => {
+describe('[Key-container] Test single functions', () => {
   let dataBase;
   let keyContainer;
-  before('Create local storage container', () => {
+  before('Create key container with local storage as database', () => {
     dataBase = new Db.LocalStorage();
     keyContainer = new KeyContainer(dataBase);
+  });
+
+  it('Delete all functionality', () => {
+    const PrivKey1 = '0x53c2e48632c87932663beff7a1f6deb692cc61b041262ae8f310203d0f5ff578';
+
+    dataBase.insert('key0', 'value0');
+    keyContainer.unlock('pass');
+    const keysAdded = keyContainer.importKey(PrivKey1);
+
+    // Check all keys are in database
+    expect(dataBase.get('key0')).to.be.not.equal(null);
+    expect(dataBase.get(`i3kc/eth-addr/${keysAdded.address}`)).to.be.not.equal(null);
+    expect(dataBase.get(`i3kc/eth-pk/${keysAdded.publicKey}`)).to.be.not.equal(null);
+
+    keyContainer.deleteAll();
+    // Check only key container keys have been removed
+    expect(dataBase.get('key0')).to.be.not.equal(null);
+    expect(dataBase.get(`i3kc/eth-addr/${keysAdded.address}`)).to.be.equal(null);
+    expect(dataBase.get(`i3kc/eth-pk/${keysAdded.publicKey}`)).to.be.equal(null);
   });
 
   it('Get master seed without generate it one', () => {
@@ -23,7 +42,7 @@ describe('[Local-storage-container] Test single functions', () => {
     keyContainer.lock('pass');
   });
 
-  it('Generate random master seed and retrieve it from local storage', () => {
+  it('Generate random master seed and retrieve it from key container', () => {
     keyContainer.unlock('pass');
     keyContainer.setMasterSeed();
     const mnemonic = keyContainer.getMasterSeed();
@@ -43,7 +62,7 @@ describe('[Local-storage-container] Test single functions', () => {
     keyContainer.lock();
   });
 
-  it('Save a known master seed and retrieve it from local storage', () => {
+  it('Save a known master seed and retrieve it from key container', () => {
     const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
     keyContainer.unlock('pass');
     keyContainer.setMasterSeed(mnemonic);
@@ -52,7 +71,7 @@ describe('[Local-storage-container] Test single functions', () => {
     expect(mnemonic).to.be.equal(seedDb);
   });
 
-  it('Generate recovery adress and retrieve it from database', () => {
+  it('Generate recovery adress and retrieve it from key container', () => {
     keyContainer.unlock('pass');
     const seedDb = keyContainer.getMasterSeed();
     const recoveryAddr = keyContainer.generateRecoveryAddr(seedDb);
@@ -118,10 +137,10 @@ describe('[Local-storage-container] Test single functions', () => {
   });
 });
 
-describe('[Local-storage-container] Test identity flow', () => {
+describe('[Key-container] Test identity flow', () => {
   let dataBase;
   let keyContainer;
-  before('Create local storage container', () => {
+  before('Create key container with local storage as database', () => {
     dataBase = new Db.LocalStorage();
     keyContainer = new KeyContainer(dataBase);
     keyContainer.deleteAll();
