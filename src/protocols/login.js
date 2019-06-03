@@ -24,7 +24,7 @@ export const MSGV01 = 'iden3.msg.v0_1';
 export const MSGPROOFCLAIMV01 = 'iden3.proofclaim.v0_1';
 export const MSGTXT = 'txt';
 export const SIGALGV01 = 'EK256K1';
-export const SIGALGV02 = 'EK256K1';
+export const SIGALGV02 = 'ED256BJ';
 
 type RequestIdenAssert = {
   header: {
@@ -306,6 +306,7 @@ export class SignedPacketVerifier {
     }
     const nameServerId = this.nameResolver.resolve(domain);
     if (nameServerId == null) {
+      // console.log('domain', domain);
       throw new Error('Can\'t resolve domain');
     }
     const signerId = jwsPayload.form.proofAssignName.signer;
@@ -365,6 +366,8 @@ export class SignedPacketVerifier {
     }
     const publicKeyHex = utils.swapEndianness(publicKeyComp).toString('hex');
     if (publicKeyHex !== jwsPayload.ksign) {
+      // console.log('payload.proofksign pk', publicKeyHex);
+      // console.log('payload.ksign', jwsPayload.ksign);
       throw new Error('Pub key in payload.proofksign doesn\'t match payload.ksign');
     }
 
@@ -427,6 +430,7 @@ export class SignedPacketVerifier {
 
     // 7b. VerifyProofClaim(jwsPayload.proofOfKSign, signerOperational)
     if (!proofs.verifyProofClaim(jwsPayload.proofKSign, signer.kOpPub)) {
+      // console.log('signer.kOpPub', signer.kOpPub);
       throw new Error('Invalid proofKSign');
     }
 

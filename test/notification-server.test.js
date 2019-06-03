@@ -35,11 +35,8 @@ describe('[notification-server] Notification server Http communications', () => 
     const mnemonic = 'clog brass lonely material arrest nominee flight try arrive water life cruise';
     keyContainer.setMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
-    const keyPublicOp = keys[0];
-    const keyRecover = keys[1];
-    const keyRevoke = keys[2];
     // Create identity object
-    id = new iden3.Id(keyPublicOp, keyRecover, keyRevoke, relay, 0);
+    id = new iden3.Id(keys.kOp, keys.kRev, keys.kRec, relay, 0);
   });
 
   it('Load servers', () => {

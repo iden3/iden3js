@@ -99,13 +99,17 @@ function verifyProofClaim(proof: ProofClaim, publicKey: string): boolean {
   // sig[64] += 27;
   // const signatureHex = utils.bytesToHex(sig);
   if (!utils.verifyBabySignature(publicKey, msgBuffer, proof.signature)) { // mHex, sigHex, addressHex
-    // if (!utils.verifySignature(msg, proof.rootSig, relayAddr)) {  mHex, sigHex, addressHex
+    // console.log('publicKey', publicKey);
+    // console.log('signature', proof.signature);
+    // console.log('msg', msgBuffer.toString('hex'));
+    // console.log('verify sig fail');
     return false;
   }
 
   // For now we only allow proof verification of Nameserver (one level) and
   // Relay (two levels: relay + user)
   if (proof.proofs.length > 2 || proof.proofs.length < 1) {
+    // console.log('Invalid proof.proofs.length');
     return false;
   }
 

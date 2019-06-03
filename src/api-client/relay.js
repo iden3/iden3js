@@ -82,19 +82,19 @@ class Relay {
   /**
    * Retrieve information about identity
    * Information returned is the one necessary to create the counterfactoual
-   * @param  {String} idAddr
+   * @param  {String} ethAddr
    * @returns {Object} Http response
    */
-  getId(idAddr) {
-    return this.getFn(`${this.url}/ids/${idAddr}`);
+  getId(ethAddr) {
+    return this.getFn(`${this.url}/counterfactuals/${ethAddr}`);
   }
 
   /**
    * Deploy smart contract of the given idenity on the blockchain
-   * @param  {String} idAddr - Identity address
+   * @param  {String} ethAddr - Identity address
    */
-  deployId(idAddr) {
-    return this.postFn(`${this.url}/ids/${idAddr}/deploy`);
+  deployId(ethAddr) {
+    return this.postFn(`${this.url}/counterfactuals/${ethAddr}/deploy`);
   }
 }
 
