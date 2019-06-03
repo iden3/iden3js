@@ -13,17 +13,13 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
   const privKey = '0x28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f';
   const privKeyBuff = utils.hexToBytes(privKey);
   const pubKeyBuff = utilsBabyJub.privToPub(privKeyBuff, true);
-  let sign = false;
-  if (pubKeyBuff[0] & 0x80) {
-    sign = true;
-  }
-  pubKeyBuff[0] &= 0x7F;
+
   let AuthorizeKSignBabyJub;
   let entryClaim;
   let parsedClaim;
 
   before('Create new authorizeKSign claim', () => {
-    AuthorizeKSignBabyJub = authorizeKSignBabyJub.AuthorizeKSignBabyJub.new(versionExample, sign, utils.bytesToHex(pubKeyBuff));
+    AuthorizeKSignBabyJub = authorizeKSignBabyJub.AuthorizeKSignBabyJub.new(versionExample, utils.bytesToHex(pubKeyBuff));
     expect(AuthorizeKSignBabyJub).to.not.be.equal(null);
     entryClaim = AuthorizeKSignBabyJub.toEntry();
     parsedClaim = authorizeKSignBabyJub.AuthorizeKSignBabyJub.newFromEntry(entryClaim);

@@ -29,6 +29,7 @@ export class AuthorizeKSignBabyJub {
    * Claim type is used to define this concrete claim. This parameter takes 8 bytes.
    */
   constructor(version: Buffer, sign: Buffer, ay: Buffer) {
+
     this.claimType = utils.bigIntToBufferBE(bigInt(CONSTANTS.CLAIMS.AUTHORIZE_KSIGN_BABYJUB.TYPE)).slice(24, 32);
     this.version = version;
     this.sign = sign;
@@ -38,12 +39,19 @@ export class AuthorizeKSignBabyJub {
   /**
    * Initialize claim data structure from fields
    */
-  static new(version: number, sign: boolean, ay: string): AuthorizeKSignBabyJub {
+  static new(version: number, pubKcomp: string): AuthorizeKSignBabyJub {
+    const pubKcompBuff = utils.hexToBytes(pubKcomp);
+    let sign = false;
+    if (pubKcompBuff[0] & 0x80) {
+      sign = true;
+    }
+    pubKcompBuff[0] &= 0x7F;
+    const ayBuff = pubKcompBuff;
+
     const versionBuff = Buffer.alloc(4);
     versionBuff.writeUInt32BE(version, 0);
     const signBuff = Buffer.alloc(1);
     signBuff.writeUInt8(sign ? 1 : 0, 0);
-    const ayBuff = utils.hexToBytes(ay);
     return new AuthorizeKSignBabyJub(versionBuff, signBuff, ayBuff);
   }
 
