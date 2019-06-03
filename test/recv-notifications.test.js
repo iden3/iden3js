@@ -42,6 +42,7 @@ describe('[notification-server] Notification server Http communications', () => 
     keyContainer.setMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
     // Create identity object
+    // console.log('kOp', keys.kOp);
     id = new iden3.Id(keys.kOp, keys.kRev, keys.kRec, relay, 0);
   });
 
@@ -64,6 +65,7 @@ describe('[notification-server] Notification server Http communications', () => 
   it('Create identity, bind name and get proofClaim of operational key', async () => {
     // Create identity
     const createIdRes = await id.createId();
+    // console.log('id', id.id);
     expect(createIdRes.id).to.be.equal(id.id);
     expect(createIdRes.id).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
