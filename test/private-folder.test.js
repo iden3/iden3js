@@ -42,7 +42,7 @@ describe('private-folder backup', () => {
   });
 
   before('create backup service and register', async () => {
-    backupService = new iden3.Backup(backupUrl, username, password, true);
+    backupService = new iden3.Backup(backupUrl, username, password);
     const resp = await backupService.register();
     expect(resp.status).to.be.equal(200);
   });

@@ -98,8 +98,8 @@ describe('[Key-container] Test single functions', () => {
     const pathKey1 = (keyContainer.getKeySeed()).pathKey;
     expect(pathKey1).to.be.equal(1);
     expect(keys.kOp).to.be.not.equal(undefined);
-    expect(keys.kRec).to.be.not.equal(undefined);
-    expect(keys.kRev).to.be.not.equal(undefined);
+    expect(keys.kDis).to.be.not.equal(undefined);
+    expect(keys.kReen).to.be.not.equal(undefined);
     keyContainer.lock();
   });
 

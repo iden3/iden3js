@@ -7,6 +7,7 @@ const protocols = require('../protocols/protocols');
 const not = require('../manager/manager-notification.js');
 const sign = require('../protocols/login');
 const notServer = require('../api-client/notification-server');
+const idUtils = require('./id-utils.js');
 
 /**
  * Class representing a user identity
@@ -15,19 +16,19 @@ const notServer = require('../api-client/notification-server');
 class Id {
   /**
    * @param {eddsa.PublicKey} keyOpPub - Operational public key
-   * @param {String} keyRevokePub - Revoke public key
-   * @param {String} keyRecoverPub - Recovery public key
+   * @param {String} keyDisablePub - Disable public key
+   * @param {String} keyReenablePub - Reenable public key
    * @param {Object} relay - Relay associated with the identity
    * @param {Number} keyProfilePath - Path derivation related to key chain derivation for this identity
    */
-  constructor(keyOpPub, keyRevokePub, keyRecoverPub, relay, keyProfilePath = 0) {
+  constructor(keyOpPub, keyDisablePub, keyReenablePub, relay, keyProfilePath = 0) {
     const db = new Db.LocalStorage();
     this.db = db;
 
-    this.keyRecoverPub = keyRecoverPub;
-    this.keyRecover = ethUtil.pubToAddress(keyRecoverPub, true).toString('hex');
-    this.keyRevokePub = keyRevokePub;
-    this.keyRevoke = ethUtil.pubToAddress(keyRevokePub, true).toString('hex');
+    this.keyReenablePub = keyReenablePub;
+    this.keyReenable = `0x${ethUtil.pubToAddress(keyReenablePub, true).toString('hex')}`;
+    this.keyDisablePub = keyDisablePub;
+    this.keyDisable = `0x${ethUtil.pubToAddress(keyDisablePub, true).toString('hex')}`;
     this.keyOperationalPub = keyOpPub;
     this.relay = relay;
 
@@ -117,10 +118,10 @@ class Id {
       keyPath: 4,
       keys: {
         operationalPub: this.keyOperationalPub,
-        recoverPub: this.keyRecoverPub,
-        recover: this.keyRecover,
-        revokePub: this.keyRevokePub,
-        revoke: this.keyRevoke,
+        reenablePub: this.keyReenablePub,
+        reenable: this.keyReenable,
+        disablePub: this.keyDisablePub,
+        disable: this.keyDisable,
       },
     };
 
@@ -170,12 +171,17 @@ class Id {
    * @returns {Object} - Http response
    */
   createId() {
-    return this.relay.createId(this.keyOperationalPub, this.keyRecoverPub, this.keyRevokePub)
+    return this.relay.createId(this.keyOperationalPub, this.keyReenable, this.keyDisable)
       .then((res) => {
         this.id = res.data.id;
         this.saveKeys();
         return { id: this.id, proofClaim: res.data.proofClaim };
       });
+  }
+
+  calculateId() {
+    const idGenesis = idUtils.calculateIdGenesis(this.keyOperationalPub, this.keyReenable, this.keyDisable);
+    this.id = idGenesis;
   }
 
   /**

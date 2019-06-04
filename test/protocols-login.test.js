@@ -11,7 +11,7 @@ const relayKSignPk = '117f0a278b32db7380b078cdb451b509a2ed591664d1bac464e8c35a90
 const name = 'protocols-login-test-user';
 const mnemonic = 'adjust toy select soon nest caught resource rally side wheat traffic amount';
 
-const db = new iden3.Db.LocalStorage();
+const db = new iden3.Db.LocalStorage('protocoldbtest');
 const kc = new iden3.KeyContainer(db);
 kc.unlock('pass');
 const relay = new iden3.Relay('http://127.0.0.1:8000/api/unstable');
@@ -20,7 +20,7 @@ const nameServer = new iden3.NameServer(nameServerUrl);
 
 kc.setMasterSeed(mnemonic);
 const keys = kc.createKeys();
-const id = new iden3.Id(keys.kOp, keys.kRev, keys.kRec, relay, 0);
+const id = new iden3.Id(keys.kOp, keys.kDis, keys.kReen, relay, 0);
 id.addNameServer(nameServer);
 const ksign = keys.kOp; // public key in hex format
 

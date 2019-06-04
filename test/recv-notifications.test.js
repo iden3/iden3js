@@ -22,7 +22,7 @@ describe('[notification-server] Notification server Http communications', () => 
   let nameServer;
 
   before('Create servers object', () => {
-    dataBase = new iden3.Db.LocalStorage();
+    dataBase = new iden3.Db.LocalStorage('recvnottest');
     keyContainer = new iden3.KeyContainer(dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
@@ -43,7 +43,7 @@ describe('[notification-server] Notification server Http communications', () => 
     const keys = keyContainer.createKeys();
     // Create identity object
     // console.log('kOp', keys.kOp);
-    id = new iden3.Id(keys.kOp, keys.kRev, keys.kRec, relay, 0);
+    id = new iden3.Id(keys.kOp, keys.kDis, keys.kReen, relay, 0);
   });
 
   it('Load servers', () => {
