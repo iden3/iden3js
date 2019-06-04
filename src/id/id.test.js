@@ -21,13 +21,13 @@ describe('[Identity management]', () => {
     keyContainer.setMasterSeed(mnemonic);
     // Generate keys for first identity
     const keys = keyContainer.createKeys();
-    const identity = new Id(keys.kOp, keys.kRev, keys.kRec, 'relay test', 0);
+    const identity = new Id(keys.kOp, keys.kDis, keys.kReen, 'relay test', 0);
     // Save keys and retrieve it
     identity.saveKeys();
     const keysDb = identity.getKeys();
     expect(keys.kOp.toString()).to.be.equal(keysDb.operationalPub);
-    expect(keys.kRev).to.be.equal(keysDb.revokePub);
-    expect(keys.kRec).to.be.equal(keysDb.recoverPub);
+    expect(keys.kDis).to.be.equal(keysDb.disablePub);
+    expect(keys.kReen).to.be.equal(keysDb.reenablePub);
     // Create new key for the identity
     const loginKey = identity.createKey(keyContainer, 'login Key');
     // Retrieve keys

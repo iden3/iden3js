@@ -5,8 +5,12 @@ const CONSTANTS = require('../constants');
  * @param {String} url - url of the backup system backend
  */
 class Db {
-  constructor() {
-    this.prefix = CONSTANTS.DBPREFIX;
+  constructor(subprefix) {
+    if (subprefix !== undefined) {
+      this.prefix = CONSTANTS.DBPREFIX + subprefix;
+    } else {
+      this.prefix = CONSTANTS.DBPREFIX;
+    }
   }
 
   /**

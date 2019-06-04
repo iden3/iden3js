@@ -35,6 +35,10 @@ const CLAIMS = {
     ID: 'linkObjectIdentity',
     TYPE: 5,
   },
+  AUTHORIZE_ETH_KEY: {
+    ID: 'authorizeEthKey',
+    TYPE: 9,
+  },
 };
 
 module.exports = {

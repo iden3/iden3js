@@ -5,13 +5,18 @@ const { expect } = chai;
 
 describe('[id utils] calculateIdGenesis()', () => {
   it('check calculateIdGenesis()', () => {
+    // const privKey = '0x4be5471a938bdf3606888472878baace4a6a64e14a153adf9a1333969e4e573c';
+    // const privKeyBuff = iden3.utils.hexToBytes(privKey);
+    // const pubKeyBuff = utilsBabyJub.privToPub(privKeyBuff, true);
+    // console.log("pbstr", iden3.utils.bytesToHex(pubKeyBuff));
+
     // public keys
-    const kopStr = '037e211781efef4687e78be4fb008768acca8101b6f1f7ea099599f02a8813f386';
-    const krecStr = '03f9737be33b5829e3da80160464b2891277dae7d7c23609f9bb34bd4ede397bbf';
-    const krevStr = '02d2da59d3022b4c1589e4910baa6cbaddd01f95ed198fdc3068d9dc1fb784a9a4';
+    const kopStr = '0x966764905ac3e864c4bad1641659eda209b551b4cd78b08073db328b270a7f11'; // getted from the last 5 lines
+    const kdisStr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+    const kreenStr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
     // check that with same keys that in go-iden3 test, gives the same idAddr than in go-iden3
-    const idAddr = iden3.idUtils.calculateIdGenesis(kopStr, krecStr, krevStr);
-    expect(idAddr).to.be.equal('1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z');
+    const idAddr = iden3.idUtils.calculateIdGenesis(kopStr, kdisStr, kreenStr);
+    expect(idAddr).to.be.equal('11B5vT7X3sQBrPX6F5tEXMb7yMGHQ3UwbHPTHaXLx'); // same result as in go-iden3
   });
 });

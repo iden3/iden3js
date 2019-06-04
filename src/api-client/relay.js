@@ -66,14 +66,14 @@ class Relay {
    * Creates identity address from given keys through counterfactoual
    * It adds automatically the operational key to the identity merkle tree
    * @param  {String} op - Operation key
-   * @param  {String} rec - Recovery key
-   * @param  {String} rev - Revoke key
+   * @param  {String} dis - Disable key
+   * @param  {String} reen - Reenable key
    */
-  createId(op, rec, rev) {
+  createId(op, dis, reen) {
     const keys = {
       operationalPk: op,
-      recoveryPk: rec,
-      revokePk: rev,
+      kdisable: dis,
+      kreenable: reen,
     };
 
     return this.postFn(`${this.url}/ids`, keys);

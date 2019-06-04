@@ -19,7 +19,7 @@ describe('[notification-server] Notification server Http communications', () => 
   let nameServer;
 
   before('Create servers object', () => {
-    dataBase = new iden3.Db.LocalStorage();
+    dataBase = new iden3.Db.LocalStorage('notifdbtest');
     keyContainer = new iden3.KeyContainer(dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
@@ -36,7 +36,7 @@ describe('[notification-server] Notification server Http communications', () => 
     keyContainer.setMasterSeed(mnemonic);
     const keys = keyContainer.createKeys();
     // Create identity object
-    id = new iden3.Id(keys.kOp, keys.kRev, keys.kRec, relay, 0);
+    id = new iden3.Id(keys.kOp, keys.kDis, keys.kReen, relay, 0);
   });
 
   it('Load servers', () => {

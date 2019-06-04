@@ -6,6 +6,7 @@ import { SetRootKey } from './set-root-key/set-root-key';
 import { AssignName } from './assign-name/assign-name';
 import { AuthorizeKSignSecp256k1 } from './authorize-ksign-secp256k1/authorize-ksign-secp256k1';
 import { LinkObjectIdentity } from './link-object-identity/link-object-identity';
+import { AuthorizeEthKey } from './authorize-eth-key/authorize-eth-key';
 
 const CONSTANTS = require('../constants');
 const TYPE_OBJECT = require('./link-object-identity/object-types.js');
@@ -18,7 +19,7 @@ const i3utils = require('../utils');
  * @returns {Object} Claim raw data
  */
 // eslint-disable-next-line max-len
-function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSignBabyJub | SetRootKey | AssignName | AuthorizeKSignSecp256k1 | LinkObjectIdentity {
+function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSignBabyJub | SetRootKey | AssignName | AuthorizeKSignSecp256k1 | LinkObjectIdentity | AuthorizeEthKey {
   // Decode claim type from Entry class
   const claimType = Number(i3utils.bufferToBigIntBE(entry.elements[3].slice(24, 32)));
   // Parse elements and return the proper claim structure
@@ -35,6 +36,8 @@ function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSignBabyJub |
       return AuthorizeKSignSecp256k1.newFromEntry(entry);
     case CONSTANTS.CLAIMS.LINK_OBJECT_IDENTITY.TYPE:
       return LinkObjectIdentity.newFromEntry(entry);
+    case CONSTANTS.CLAIMS.AUTHORIZE_ETH_KEY.TYPE:
+      return AuthorizeEthKey.newFromEntry(entry);
     default:
       throw new Error(`Unknown claim type ${claimType}`);
   }
@@ -48,6 +51,7 @@ module.exports = {
   AssignName,
   AuthorizeKSignSecp256k1,
   LinkObjectIdentity,
+  AuthorizeEthKey,
   newClaimFromEntry,
   utils,
   TYPE_OBJECT,

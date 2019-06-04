@@ -15,7 +15,7 @@ describe('[id] new Id()', () => {
   let proofClaimKeyOperational;
 
   before('Create local storage container and relay object', () => {
-    dataBase = new iden3.Db.LocalStorage();
+    dataBase = new iden3.Db.LocalStorage('iddbtest');
     keyContainer = new iden3.KeyContainer(dataBase);
     relay = new iden3.Relay(relayUrl);
     nameServer = new iden3.NameServer(nameServerUrl);
@@ -31,7 +31,7 @@ describe('[id] new Id()', () => {
     expect(mnemonic).to.be.equal(mnemonicDb);
     // Generate Key seed
     keys = keyContainer.createKeys();
-    id = new iden3.Id(keys.kOp, keys.kRev, keys.kRec, relay, 0);
+    id = new iden3.Id(keys.kOp, keys.kDis, keys.kReen, relay, 0);
     keyContainer.lock();
   });
 
@@ -42,8 +42,8 @@ describe('[id] new Id()', () => {
 
   it('Check identity keys', () => {
     expect(id.keyOperationalPub).to.be.equal(keys.kOp);
-    expect(id.keyRevokePub).to.be.equal(keys.kRev);
-    expect(id.keyRecoverPub).to.be.equal(keys.kRec);
+    expect(id.keyDisablePub).to.be.equal(keys.kDis);
+    expect(id.keyReenablePub).to.be.equal(keys.kReen);
     expect(id.relay).to.be.equal(relay);
   });
 
@@ -56,6 +56,12 @@ describe('[id] new Id()', () => {
     expect(createIdRes.id).to.be.not.equal(undefined);
     expect(createIdRes.proofClaim).to.be.not.equal(undefined);
     proofClaimKeyOperational = createIdRes.proofClaim;
+    
+
+    // TODO for the moment the babyjub pubK expected in go and in js are different (compression)
+    // const idCalculated = iden3.idUtils.calculateIdGenesis(id.keyOperationalPub, id.keyDisable, id.keyReenable);
+    // expect(id.id).to.be.equal(idCalculated); 
+  
     // TODO: Update when the counterfactual is updated with the Genesis ID
     // try {
     //   const deployIdres = await id.deployId();
