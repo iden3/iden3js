@@ -2,7 +2,7 @@
 import {
   describe, it, before, after,
 } from 'mocha';
-import { Entry } from '../claim/entry/entry';
+import { Entry } from '../claim/entry';
 import { NameResolver, testNamesJSON } from '../api-client/name-resolver';
 import { Discovery, testEntitiesJSON } from '../api-client/discovery';
 import { SignedPacketVerifier } from './login';
@@ -106,8 +106,8 @@ describe('[protocol]', () => {
     const mt = new smt.SparseMerkleTree(db, id, 140);
     // Add 10 test entries to sparse merkle tree
     for (let i = 0; i < 8; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const entry = Entry.newFromBigInts(bigInt(0), bigInt(0), bigInt(0), bigInt(i));
+      mt.addEntry(entry);
     }
     const leaf = '0x'
     + '0000000000000000000000000000000000000000000000000000000000000000'
@@ -116,9 +116,9 @@ describe('[protocol]', () => {
     + '0000000000000000000000000000000000000000000000010000000000000003';
     // Add leaf to sparse merkle tree
     const entry = Entry.newFromHex(leaf);
-    mt.addClaim(iden3.utils.getArrayBigIntFromBuffArrayBE(entry.elements));
+    mt.addEntry(entry);
     // generate proof
-    const proofBuff = mt.generateProof(iden3.utils.getArrayBigIntFromBuffArrayBE([entry.elements[2], entry.elements[3]]));
+    const proofBuff = mt.generateProof(new Entry(Buffer.alloc(32), Buffer.alloc(32), entry.elements[2], entry.elements[3]).hiBigInt());
     const proof = iden3.utils.bytesToHex(proofBuff);
     const root = iden3.utils.bytesToHex(mt.root);
     const verified = smt.checkProof(root, proof, iden3.utils.bytesToHex(entry.hi()), iden3.utils.bytesToHex(entry.hv()));

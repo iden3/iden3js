@@ -1,9 +1,10 @@
 // @flow
 import { describe, it, before } from 'mocha';
+import { Entry } from './entry';
 
 const chai = require('chai');
-const assignName = require('./assign-name');
-const utils = require('../../utils');
+const claim = require('./claim');
+const utils = require('../utils');
 
 const { expect } = chai;
 
@@ -16,23 +17,21 @@ describe('[Claim Assign Name]', () => {
   let parsedClaim;
 
   before('Create new assign name claim', () => {
-    claimAssignName = assignName.AssignName.new(versionExample, nameExample, idExample);
+    claimAssignName = new claim.AssignName(nameExample, idExample);
+    claimAssignName.version = versionExample;
     expect(claimAssignName).to.not.be.equal(null);
     entryClaim = claimAssignName.toEntry();
-    parsedClaim = assignName.AssignName.newFromEntry(entryClaim);
+    parsedClaim = claim.AssignName.newFromEntry(entryClaim);
   });
 
-  it('Parse claim type', () => {
-    expect(utils.bytesToHex(claimAssignName.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
-  });
   it('Parse version', () => {
-    expect(utils.bytesToHex(claimAssignName.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
+    expect(claimAssignName.version).to.be.equal(parsedClaim.version);
   });
   it('Parse hash name', () => {
-    expect(utils.bytesToHex(claimAssignName.hashName.slice(1, 32))).to.be.equal(utils.bytesToHex(parsedClaim.hashName));
+    expect(claimAssignName.hashName.toString('hex')).to.be.equal(parsedClaim.hashName.toString('hex'));
   });
   it('Parse id address', () => {
-    expect(utils.bytesToHex(claimAssignName.id)).to.be.equal(utils.bytesToHex(parsedClaim.id));
+    expect(claimAssignName.id).to.be.equal(parsedClaim.id);
   });
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHex();
@@ -50,5 +49,16 @@ describe('[Claim Assign Name]', () => {
     const hv = entryClaim.hv();
     const hvResult = '0x25867e06233f276f39e298775245bad077eb0852b4eaac8dbf646a95bd3f8625';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
+  });
+
+  it('Parse entry into claim assign name', () => {
+    const hashNameExample = utils.hashBytes(Buffer.from(nameExample, 'utf8')).slice(1, 32);
+    const entryHex = entryClaim.toHex();
+
+    const entry = Entry.newFromHex(entryHex);
+    const c0 = (claim.newClaimFromEntry(entry): any);
+    expect(c0.version).to.be.equal(1);
+    expect(c0.id).to.be.equal(idExample);
+    expect(c0.hashName.toString('hex')).to.be.equal(hashNameExample.toString('hex'));
   });
 });

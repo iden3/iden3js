@@ -1,9 +1,10 @@
 // @flow
 import { describe, it, before } from 'mocha';
+import { Entry } from './entry';
 
 const chai = require('chai');
-const basic = require('./basic');
-const utils = require('../../utils');
+const claim = require('./claim');
+const utils = require('../utils');
 
 const { expect } = chai;
 
@@ -22,17 +23,15 @@ describe('[Claim Basic]', () => {
   let parsedClaim;
 
   before('Create new basic claim', () => {
-    claimBasic = basic.Basic.new(versionExample, utils.bytesToHex(indexExample), utils.bytesToHex(dataExample));
+    claimBasic = new claim.Basic(indexExample, dataExample);
+    claimBasic.version = versionExample;
     expect(claimBasic).to.not.be.equal(null);
-    entryClaim = claimBasic.createEntry();
-    parsedClaim = basic.Basic.newFromEntry(entryClaim);
+    entryClaim = claimBasic.toEntry();
+    parsedClaim = claim.Basic.newFromEntry(entryClaim);
   });
 
-  it('Parse claim type', () => {
-    expect(utils.bytesToHex(claimBasic.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
-  });
   it('Parse version', () => {
-    expect(utils.bytesToHex(claimBasic.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
+    expect(claimBasic.version).to.be.equal(parsedClaim.version);
   });
   it('Parse index slot', () => {
     expect(utils.bytesToHex(claimBasic.index)).to.be.equal(utils.bytesToHex(parsedClaim.index));
@@ -56,5 +55,13 @@ describe('[Claim Basic]', () => {
     const hv = entryClaim.hv();
     const hvResult = '0x03c4686d099ffd137b83ba22b57dc954ac1e6c0e2b1e0ef972a936992b8788ff';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
+  });
+  it('Parse entry into basic claim', () => {
+    const entryHex = entryClaim.toHex();
+    const entry = Entry.newFromHex(entryHex);
+    const c0 = (claim.newClaimFromEntry(entry): any);
+    expect(c0.version).to.be.equal(1);
+    expect(utils.bytesToHex(c0.index)).to.be.equal(utils.bytesToHex(indexExample));
+    expect(utils.bytesToHex(c0.extraData)).to.be.equal(utils.bytesToHex(dataExample));
   });
 });

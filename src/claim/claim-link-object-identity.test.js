@@ -2,8 +2,8 @@
 import { describe, it, before } from 'mocha';
 
 const chai = require('chai');
-const linkObjectIdentity = require('./link-object-identity');
-const utils = require('../../utils');
+const claim = require('./claim');
+const utils = require('../utils');
 
 const { expect } = chai;
 
@@ -11,39 +11,37 @@ describe('[Claim link object identity Id]', () => {
   const versionExample = 1;
   const objectTypeExample = 1;
   const objectIndexExample = 0;
-  const hashObjectExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
+  const hashObjectExample = utils.hexToBytes('0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c');
   const idExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
-  const auxDataExample = '0x000102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102';
+  const auxDataExample = utils.hexToBytes('0x0102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102');
   let claimLinkObject;
   let entryClaim;
   let parsedClaim;
 
   before('Create new unique id claim', () => {
-    claimLinkObject = linkObjectIdentity.LinkObjectIdentity.new(
-      versionExample, objectTypeExample, objectIndexExample, idExample, hashObjectExample, auxDataExample,
+    claimLinkObject = new claim.LinkObjectIdentity(
+      objectTypeExample, objectIndexExample, idExample, hashObjectExample, auxDataExample,
     );
+    claimLinkObject.version = versionExample;
     expect(claimLinkObject).to.not.be.equal(null);
     entryClaim = claimLinkObject.toEntry();
-    parsedClaim = linkObjectIdentity.LinkObjectIdentity.newFromEntry(entryClaim);
+    parsedClaim = claim.LinkObjectIdentity.newFromEntry(entryClaim);
   });
 
-  it('Parse claim type', () => {
-    expect(utils.bytesToHex(claimLinkObject.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
-  });
   it('Parse version', () => {
-    expect(utils.bytesToHex(claimLinkObject.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
+    expect(claimLinkObject.version).to.be.equal(parsedClaim.version);
   });
   it('Parse object type', () => {
-    expect(utils.bytesToHex(claimLinkObject.objectType)).to.be.equal(utils.bytesToHex(parsedClaim.objectType));
+    expect(claimLinkObject.objectType).to.be.equal(parsedClaim.objectType);
   });
   it('Parse object index', () => {
-    expect(utils.bytesToHex(claimLinkObject.objectIndex)).to.be.equal(utils.bytesToHex(parsedClaim.objectIndex));
+    expect(claimLinkObject.objectIndex).to.be.equal(parsedClaim.objectIndex);
+  });
+  it('Parse identity address', () => {
+    expect(claimLinkObject.id).to.be.equal(parsedClaim.id);
   });
   it('Parse object hash identifier', () => {
     expect(utils.bytesToHex(claimLinkObject.objectHash)).to.be.equal(utils.bytesToHex(parsedClaim.objectHash));
-  });
-  it('Parse identity address', () => {
-    expect(utils.bytesToHex(claimLinkObject.id)).to.be.equal(utils.bytesToHex(parsedClaim.id));
   });
   it('Parse auxiliary data', () => {
     expect(utils.bytesToHex(claimLinkObject.auxData)).to.be.equal(utils.bytesToHex(parsedClaim.auxData));

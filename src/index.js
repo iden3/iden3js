@@ -1,4 +1,3 @@
-const merkleTree = require('./merkle-tree/merkle-tree');
 const sparseMerkleTree = require('./sparse-merkle-tree/sparse-merkle-tree');
 const smtUtils = require('./sparse-merkle-tree/sparse-merkle-tree-utils');
 const Relay = require('./api-client/relay');
@@ -27,7 +26,6 @@ const { Auth } = auth;
 module.exports = {
   notifications,
   constants,
-  merkleTree,
   sparseMerkleTree,
   smtUtils,
   Backup,

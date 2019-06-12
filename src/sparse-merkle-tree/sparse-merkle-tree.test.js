@@ -1,7 +1,9 @@
+import { Entry } from '../claim/entry';
+
 const chai = require('chai');
 const snarkjs = require('snarkjs');
 const iden3 = require('../index');
-const helpers = require('./sparse-merkle-tree-utils');
+// const helpers = require('./sparse-merkle-tree-utils');
 const mimc7 = require('./mimc7');
 
 const { bigInt } = snarkjs;
@@ -9,6 +11,10 @@ const { expect } = chai;
 
 const db = new iden3.Db.Memory();
 const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
+
+function entryFromInts(e0, e1, e2, e3) {
+  return Entry.newFromBigInts(bigInt(e0), bigInt(e1), bigInt(e2), bigInt(e3));
+}
 
 describe('[sparse-merkle-tree] Empty tree', () => {
   it('should be empty', () => {
@@ -19,31 +25,30 @@ describe('[sparse-merkle-tree] Empty tree', () => {
 
 describe('[sparse-merkle-tree] Mimc7 hash function', () => {
   it('hash array 2 bigInts', () => {
-    const claim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-    const hi = mimc7.multiHash(claim.slice(2));
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hi));
+    const claim = entryFromInts(12, 45, 78, 41);
+    const hi = claim.hi();
+    const hiHex = iden3.utils.bytesToHex(hi);
     expect(hiHex).to.be.equal('0x067f3202335ea256ae6e6aadcd2d5f7f4b06a00b2d1e0de903980d5ab552dc70');
-    const hv = mimc7.multiHash(claim.slice(0, 2));
-    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hv));
+    const hv = claim.hv();
+    const hvHex = iden3.utils.bytesToHex(hv);
     expect(hvHex).to.be.equal('0x15ff7fe9793346a17c3150804bcb36d161c8662b110c50f55ccb7113948d8879');
   });
 });
 
 describe('[sparse-merkle-tree] Mimc7 hash function', () => {
   it('hash array 4 bigInts', () => {
-    const claim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-    const hi = mimc7.multiHash(claim);
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hi));
-    expect(hiHex).to.be.equal('0x284bc1f34f335933a23a433b6ff3ee179d682cd5e5e2fcdd2d964afa85104beb');
+    const claim = entryFromInts(12, 45, 78, 41);
+    const h = mimc7.multiHash(iden3.utils.getArrayBigIntFromBuffArrayBE(claim.elements));
+    const hHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(h));
+    expect(hHex).to.be.equal('0x284bc1f34f335933a23a433b6ff3ee179d682cd5e5e2fcdd2d964afa85104beb');
   });
 });
-
 
 describe('[sparse-merkle-tree] Add Claim', () => {
   it('add one claim', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
-    const claim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-    mt.addClaim(claim);
+    const claim = entryFromInts(12, 45, 78, 41);
+    mt.addEntry(claim);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2bf39430aa2482fc1e2f170179c8cab126b0f55f71edc8d333f4c80cb4e798f5');
   });
 });
@@ -51,10 +56,10 @@ describe('[sparse-merkle-tree] Add Claim', () => {
 describe('[sparse-merkle-tree] Add two claims', () => {
   it('adding two claims', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
-    const firstClaim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-    mt.addClaim(firstClaim);
-    const secondClaim = [bigInt(33), bigInt(44), bigInt(55), bigInt(66)];
-    mt.addClaim(secondClaim);
+    const firstClaim = entryFromInts(12, 45, 78, 41);
+    mt.addEntry(firstClaim);
+    const secondClaim = entryFromInts(33, 44, 55, 66);
+    mt.addEntry(secondClaim);
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x18cbbb4a507b66fb20c7f7548629e38ceba0d4feb61c709d3655128fd2cb86c1');
   });
 });
@@ -63,14 +68,14 @@ describe('[sparse-merkle-tree] Add claims in different orders into two different
   it('add claims in different orders into two trees', () => {
     const mt1 = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 16; i++) {
-      const claim = [bigInt(0), bigInt(i), bigInt(0), bigInt(i)];
-      mt1.addClaim(claim);
+      const claim = entryFromInts(0, i, 0, i);
+      mt1.addEntry(claim);
     }
 
     const mt2 = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 15; i >= 0; i--) {
-      const claim = [bigInt(0), bigInt(i), bigInt(0), bigInt(i)];
-      mt2.addClaim(claim);
+      const claim = entryFromInts(0, i, 0, i);
+      mt2.addEntry(claim);
     }
     expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal(iden3.utils.bytesToHex(mt2.root));
     expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal('0x2f398ded371e7ecd5b1728ce86aba7398272728c2a6d685ae37df0f7645bf254');
@@ -79,9 +84,9 @@ describe('[sparse-merkle-tree] Add claims in different orders into two different
 
 describe('[sparse-merkle-tree] Add claims in different orders into six different trees', () => {
   it('add claims in differnet orders into six trees', () => {
-    const claim1 = [bigInt(33), bigInt(44), bigInt(55), bigInt(66)];
-    const claim2 = [bigInt(1111), bigInt(2222), bigInt(3333), bigInt(4444)];
-    const claim3 = [bigInt(5555), bigInt(6666), bigInt(7777), bigInt(8888)];
+    const claim1 = entryFromInts(33, 44, 55, 66);
+    const claim2 = entryFromInts(1111, 2222, 3333, 4444);
+    const claim3 = entryFromInts(5555, 6666, 7777, 8888);
 
     const mt1 = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     const mt2 = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
@@ -90,29 +95,29 @@ describe('[sparse-merkle-tree] Add claims in different orders into six different
     const mt5 = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     const mt6 = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
 
-    mt1.addClaim(claim1);
-    mt1.addClaim(claim2);
-    mt1.addClaim(claim3);
+    mt1.addEntry(claim1);
+    mt1.addEntry(claim2);
+    mt1.addEntry(claim3);
 
-    mt2.addClaim(claim1);
-    mt2.addClaim(claim3);
-    mt2.addClaim(claim2);
+    mt2.addEntry(claim1);
+    mt2.addEntry(claim3);
+    mt2.addEntry(claim2);
 
-    mt3.addClaim(claim2);
-    mt3.addClaim(claim1);
-    mt3.addClaim(claim3);
+    mt3.addEntry(claim2);
+    mt3.addEntry(claim1);
+    mt3.addEntry(claim3);
 
-    mt4.addClaim(claim2);
-    mt4.addClaim(claim3);
-    mt4.addClaim(claim1);
+    mt4.addEntry(claim2);
+    mt4.addEntry(claim3);
+    mt4.addEntry(claim1);
 
-    mt5.addClaim(claim3);
-    mt5.addClaim(claim1);
-    mt5.addClaim(claim2);
+    mt5.addEntry(claim3);
+    mt5.addEntry(claim1);
+    mt5.addEntry(claim2);
 
-    mt6.addClaim(claim3);
-    mt6.addClaim(claim2);
-    mt6.addClaim(claim1);
+    mt6.addEntry(claim3);
+    mt6.addEntry(claim2);
+    mt6.addEntry(claim1);
 
     expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal(iden3.utils.bytesToHex(mt2.root));
     expect(iden3.utils.bytesToHex(mt2.root)).to.be.equal(iden3.utils.bytesToHex(mt3.root));
@@ -126,43 +131,43 @@ describe('[sparse-merkle-tree] Add claims in different orders into six different
 
 
 describe('[sparse-merkle-tree] Get claim by its index', () => {
-  it('getClaimByHi', () => {
+  it('getEntryByHi', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
-    const firstClaim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-    mt.addClaim(firstClaim);
-    const secondClaim = [bigInt(33), bigInt(44), bigInt(55), bigInt(66)];
-    mt.addClaim(secondClaim);
-    const totalClaim = mt.getClaimByHi(secondClaim.slice(2));
+    const firstClaim = entryFromInts(12, 45, 78, 41);
+    mt.addEntry(firstClaim);
+    const secondClaim = entryFromInts(33, 44, 55, 66);
+    mt.addEntry(secondClaim);
+    const totalClaim = mt.getEntryByHi(secondClaim.hiBigInt());
     // Compare claim fields
-    expect(totalClaim[0].value).to.be.equal(secondClaim[0].value);
-    expect(totalClaim[1].value).to.be.equal(secondClaim[1].value);
-    expect(totalClaim[2].value).to.be.equal(secondClaim[2].value);
-    expect(totalClaim[3].value).to.be.equal(secondClaim[3].value);
+    expect(totalClaim.elements[0].toString('hex')).to.be.equal(secondClaim.elements[0].toString('hex'));
+    expect(totalClaim.elements[1].toString('hex')).to.be.equal(secondClaim.elements[1].toString('hex'));
+    expect(totalClaim.elements[2].toString('hex')).to.be.equal(secondClaim.elements[2].toString('hex'));
+    expect(totalClaim.elements[3].toString('hex')).to.be.equal(secondClaim.elements[3].toString('hex'));
   });
 });
 
 describe('[sparse-merkle-tree] Generate proof', () => {
-  it('with 1 caim', () => {
+  it('with 1 claim', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
-    const firstClaim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-    mt.addClaim(firstClaim);
-    const proof = mt.generateProof(firstClaim.slice(2));
+    const firstClaim = entryFromInts(12, 45, 78, 41);
+    mt.addEntry(firstClaim);
+    const proof = mt.generateProof(firstClaim.hiBigInt());
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
   });
   it('with 4 claims', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 4; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const claim = entryFromInts(0, 0, 0, i);
+      mt.addEntry(claim);
     }
-    const proofClaim = [bigInt(0), bigInt(0), bigInt(0), bigInt(2)];
-    const totalClaim = mt.getClaimByHi(proofClaim.slice(2));
-    expect(totalClaim[0].value).to.be.equal(proofClaim[0].value);
-    expect(totalClaim[1].value).to.be.equal(proofClaim[1].value);
-    expect(totalClaim[2].value).to.be.equal(proofClaim[2].value);
-    expect(totalClaim[3].value).to.be.equal(proofClaim[3].value);
+    const proofClaim = entryFromInts(0, 0, 0, 2);
+    const totalClaim = mt.getEntryByHi(proofClaim.hiBigInt());
+    expect(totalClaim.elements[0].toString('hex')).to.be.equal(proofClaim.elements[0].toString('hex'));
+    expect(totalClaim.elements[1].toString('hex')).to.be.equal(proofClaim.elements[1].toString('hex'));
+    expect(totalClaim.elements[2].toString('hex')).to.be.equal(proofClaim.elements[2].toString('hex'));
+    expect(totalClaim.elements[3].toString('hex')).to.be.equal(proofClaim.elements[3].toString('hex'));
 
-    const proof = mt.generateProof(proofClaim.slice(2));
+    const proof = mt.generateProof(proofClaim.hiBigInt());
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0005000000000000000000000000000000000000000000000000000000000011'
                                                       + '19b861dd1137c0355e2387a4485c5be6fb6e96b58bbbd6ec3dc0685aac6ab21b'
                                                       + '1db94892d26681f45bd59a26d9b63b4a3b72e49426cc99413de511ce936d0ea2');
@@ -170,17 +175,17 @@ describe('[sparse-merkle-tree] Generate proof', () => {
   it('with 64 claims', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 64; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const claim = entryFromInts(0, 0, 0, i);
+      mt.addEntry(claim);
     }
-    const proofClaim = [bigInt(0), bigInt(0), bigInt(0), bigInt(4)];
-    const totalClaim = mt.getClaimByHi(proofClaim.slice(2));
-    expect(totalClaim[0].value).to.be.equal(proofClaim[0].value);
-    expect(totalClaim[1].value).to.be.equal(proofClaim[1].value);
-    expect(totalClaim[2].value).to.be.equal(proofClaim[2].value);
-    expect(totalClaim[3].value).to.be.equal(proofClaim[3].value);
+    const proofClaim = entryFromInts(0, 0, 0, 4);
+    const totalClaim = mt.getEntryByHi(proofClaim.hiBigInt());
+    expect(totalClaim.elements[0].toString('hex')).to.be.equal(proofClaim.elements[0].toString('hex'));
+    expect(totalClaim.elements[1].toString('hex')).to.be.equal(proofClaim.elements[1].toString('hex'));
+    expect(totalClaim.elements[2].toString('hex')).to.be.equal(proofClaim.elements[2].toString('hex'));
+    expect(totalClaim.elements[3].toString('hex')).to.be.equal(proofClaim.elements[3].toString('hex'));
 
-    const proof = mt.generateProof(proofClaim.slice(2));
+    const proof = mt.generateProof(proofClaim.hiBigInt());
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x00080000000000000000000000000000000000000000000000000000000000ff'
                                                       + '27d4dd8a257bfdf256f2228d5d0efe1e76f122724d6b758fcb955e29eca181b5'
                                                       + '19ef7310fb6f536f3bae38426596bafe09565f6a5e10a6a00b15b6ea2a358dcb'
@@ -197,15 +202,14 @@ describe('[sparse-merkle-tree] Verify proof', () => {
   it('proof-of-existence', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 8; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const claim = entryFromInts(0, 0, 0, i);
+      mt.addEntry(claim);
     }
-    const proofClaim = [bigInt(0), bigInt(0), bigInt(0), bigInt(4)];
-    const proof = mt.generateProof(proofClaim.slice(2));
+    const proofClaim = entryFromInts(0, 0, 0, 4);
+    const proof = mt.generateProof(proofClaim.hiBigInt());
 
-    const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(proofClaim.hi());
+    const hvHex = iden3.utils.bytesToHex(proofClaim.hv());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     expect(proofHex).to.be.equal('0x0007000000000000000000000000000000000000000000000000000000000043'
@@ -218,15 +222,14 @@ describe('[sparse-merkle-tree] Verify proof', () => {
   it('proof-of-non-existence non empty node value', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 8; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const claim = entryFromInts(0, 0, 0, i);
+      mt.addEntry(claim);
     }
-    const proofClaim = [bigInt(0), bigInt(0), bigInt(0), bigInt(10)];
-    const proof = mt.generateProof(proofClaim.slice(2));
+    const proofClaim = entryFromInts(0, 0, 0, 10);
+    const proof = mt.generateProof(proofClaim.hiBigInt());
 
-    const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(proofClaim.hi());
+    const hvHex = iden3.utils.bytesToHex(proofClaim.hv());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     expect(proofHex).to.be.equal('0x0103000000000000000000000000000000000000000000000000000000000007'
@@ -240,15 +243,14 @@ describe('[sparse-merkle-tree] Verify proof', () => {
   it('proof-of-non-existence empty node value', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 8; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const claim = entryFromInts(0, 0, 0, i);
+      mt.addEntry(claim);
     }
-    const proofClaim = [bigInt(0), bigInt(0), bigInt(0), bigInt(12)];
-    const proof = mt.generateProof(proofClaim.slice(2));
+    const proofClaim = entryFromInts(0, 0, 0, 12);
+    const proof = mt.generateProof(proofClaim.hiBigInt());
 
-    const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(proofClaim.hi());
+    const hvHex = iden3.utils.bytesToHex(proofClaim.hv());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     expect(proofHex).to.be.equal('0x0307000000000000000000000000000000000000000000000000000000000043'
@@ -267,41 +269,39 @@ describe('[sparse-merkle-tree] Verify trick proofs', () => {
   it('invalid claim argument', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 8; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const claim = entryFromInts(0, 0, 0, i);
+      mt.addEntry(claim);
     }
-    const proofClaim = [bigInt(0), bigInt(0), bigInt(0), bigInt(4)];
+    const proofClaim = entryFromInts(0, 0, 0, 4);
     // Generate proof of an existing node
-    const proof = mt.generateProof(proofClaim.slice(2));
+    const proof = mt.generateProof(proofClaim.hiBigInt());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     // Verify proof with node mismatch between generated proof and  node used for verification
-    const proofClaimFalse = [bigInt(0), bigInt(5), bigInt(0), bigInt(5)];
-    const hashes = iden3.sparseMerkleTree.getHiHv(proofClaimFalse);
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[1]));
+    const proofClaimFalse = entryFromInts(0, 5, 0, 5);
+    const hiHex = iden3.utils.bytesToHex(proofClaimFalse.hi());
+    const hvHex = iden3.utils.bytesToHex(proofClaimFalse.hv());
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
     expect(check).to.be.equal(false);
   });
   it('invalid non-existence proof', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     for (let i = 0; i < 8; i++) {
-      const claim = [bigInt(0), bigInt(0), bigInt(0), bigInt(i)];
-      mt.addClaim(claim);
+      const claim = entryFromInts(0, 0, 0, i);
+      mt.addEntry(claim);
     }
-    const proofClaim = [bigInt(0), bigInt(4), bigInt(0), bigInt(4)];
-    const proof = mt.generateProof(proofClaim.slice(2));
+    const proofClaim = entryFromInts(0, 4, 0, 4);
+    const proof = mt.generateProof(proofClaim.hiBigInt());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
-    const objectProof = helpers.parseProof(proofHex);
+    // const objectProof = helpers.parseProof(proofHex);
     // Manipulate proof from existence to non-existence
     // and adding node metadata as auxiliary node
-    objectProof.flagExistence = true;
-    const hashes = iden3.sparseMerkleTree.getHiHv(proofClaim);
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[1]));
-    const hashesBuff = Buffer.concat(iden3.utils.getArrayBuffFromArrayBigIntBE(hashes));
-    objectProof.metaData = hashesBuff;
+    // objectProof.flagExistence = true;
+    const hiHex = iden3.utils.bytesToHex(proofClaim.hi());
+    const hvHex = iden3.utils.bytesToHex(proofClaim.hv());
+    // const hashesBuff = Buffer.concat(iden3.utils.getArrayBuffFromArrayBigIntBE(hashes));
+    // objectProof.metaData = hashesBuff;
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
     expect(check).to.be.equal(false);
   });
@@ -310,19 +310,18 @@ describe('[sparse-merkle-tree] Verify trick proofs', () => {
 describe('[sparse-merkle-tree] Add Claim Repeated', () => {
   it('add one claim multiple times', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
-    const claim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
-    mt.addClaim(claim);
+    const claim = entryFromInts(12, 45, 78, 41);
+    mt.addEntry(claim);
 
-    expect(() => { mt.addClaim(claim); }).to.throw('maxLevels reached');
-    expect(() => { mt.addClaim(claim); }).to.throw('maxLevels reached');
+    expect(() => { mt.addEntry(claim); }).to.throw('maxLevels reached');
+    expect(() => { mt.addEntry(claim); }).to.throw('maxLevels reached');
     expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2bf39430aa2482fc1e2f170179c8cab126b0f55f71edc8d333f4c80cb4e798f5');
 
-    const proof = mt.generateProof(claim.slice(2));
+    const proof = mt.generateProof(claim.hiBigInt());
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');
 
-    const hashes = iden3.sparseMerkleTree.getHiHv(claim);
-    const hiHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[0]));
-    const hvHex = iden3.utils.bytesToHex(iden3.utils.bigIntToBufferBE(hashes[1]));
+    const hiHex = iden3.utils.bytesToHex(claim.hi());
+    const hvHex = iden3.utils.bytesToHex(claim.hv());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
