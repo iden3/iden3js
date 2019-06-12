@@ -1,5 +1,5 @@
 // @flow
-import { Entry } from './entry/entry';
+import { Entry } from './entry';
 
 /**
 * Increase `version` data field by 1

@@ -1,8 +1,8 @@
 // @flow
-import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../../utils';
+import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../utils';
 
-const utils = require('../../utils');
-const mimc7 = require('../../sparse-merkle-tree/mimc7');
+const utils = require('../utils');
+const mimc7 = require('../sparse-merkle-tree/mimc7');
 
 const entryElemsLen = 4;
 

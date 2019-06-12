@@ -1,9 +1,9 @@
+import { AuthorizeKSignBabyJub, AuthorizeEthKey } from '../claim/claim';
+
 const bs58 = require('bs58');
 const utils = require('../utils');
 const Db = require('../db/db');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
-const authorizeKSignBabyJub = require('../claim/authorize-ksign-babyjub/authorize-ksign-babyjub');
-const authorizeEthKey = require('../claim/authorize-eth-key/authorize-eth-key');
 
 const TypeBJM7 = Buffer.from([0x00, 0x00]);
 // const TypeS2M7 = Buffer.from([0x00, 0x04]);
@@ -103,15 +103,15 @@ function calculateIdGenesis(kop, kdis, kreen) {
   const db = new Db.Memory(false);
   const mt = new smt.SparseMerkleTree(db, '');
 
-  const claimKOp = authorizeKSignBabyJub.AuthorizeKSignBabyJub.new(0, kop);
+  const claimKOp = new AuthorizeKSignBabyJub(kop);
   const c0 = utils.getArrayBigIntFromBuffArrayBE(claimKOp.toEntry().elements);
   mt.addClaim(c0);
 
-  const claimKDis = authorizeEthKey.AuthorizeEthKey.new(0, kdis, 0);
+  const claimKDis = new AuthorizeEthKey(kdis, 0);
   const c1 = utils.getArrayBigIntFromBuffArrayBE(claimKDis.toEntry().elements);
   mt.addClaim(c1);
 
-  const claimKReen = authorizeEthKey.AuthorizeEthKey.new(0, kreen, 1);
+  const claimKReen = new AuthorizeEthKey(kreen, 1);
   const c2 = utils.getArrayBigIntFromBuffArrayBE(claimKReen.toEntry().elements);
   mt.addClaim(c2);
 

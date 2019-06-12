@@ -1,4 +1,4 @@
-import { AuthorizeKSignSecp256k1 } from '../claim/authorize-ksign-secp256k1/authorize-ksign-secp256k1';
+import { AuthorizeKSignSecp256k1 } from '../claim/claim';
 
 const ethUtil = require('ethereumjs-util');
 const Db = require('../db/db');

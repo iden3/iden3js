@@ -1,4 +1,4 @@
-import { Entry } from '../claim/entry/entry';
+import { Entry } from '../claim/entry';
 
 const { bigInt } = require('snarkjs');
 

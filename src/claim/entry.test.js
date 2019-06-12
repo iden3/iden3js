@@ -3,7 +3,7 @@ import { describe, it, before } from 'mocha';
 import { Entry } from './entry';
 
 const chai = require('chai');
-const utils = require('../../utils');
+const utils = require('../utils');
 
 const { expect } = chai;
 

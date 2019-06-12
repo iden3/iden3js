@@ -1,6 +1,6 @@
 // @flow
 import { describe, it } from 'mocha';
-import { Entry } from './entry/entry';
+import { Entry } from './entry';
 
 const chai = require('chai');
 const claimUtils = require('./claim-utils');
@@ -23,6 +23,6 @@ describe('[claim-utils]', () => {
     expect(claimExample).to.be.not.equal(undefined);
     if (claimExample == null) { return; }
     const versionInc = claimExample.version;
-    expect((versionInc).readUInt32BE(0)).to.be.equal(versionHardcoded + 1);
+    expect(versionInc).to.be.equal(versionHardcoded + 1);
   });
 });

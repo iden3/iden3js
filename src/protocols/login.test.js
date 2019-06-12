@@ -2,7 +2,7 @@
 import {
   describe, it, before, after,
 } from 'mocha';
-import { Entry } from '../claim/entry/entry';
+import { Entry } from '../claim/entry';
 import { NameResolver, testNamesJSON } from '../api-client/name-resolver';
 import { Discovery, testEntitiesJSON } from '../api-client/discovery';
 import { SignedPacketVerifier } from './login';
