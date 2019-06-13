@@ -1,10 +1,10 @@
 import * as helpers from './sparse-merkle-tree-utils';
+import { Entry } from '../claim/claim';
 
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
 const mimc7 = require('./mimc7');
-const Entry = require('../claim/claim').Entry;
 
 const { bigInt } = snarkjs;
 
@@ -242,8 +242,7 @@ class SparseMerkleTree {
     flagExist.writeUInt8(exist);
     const flagLevel = Buffer.alloc(1);
     flagLevel.writeUInt8(claimIndex);
-    let concat = [flagExist, flagLevel, indicatorSibling];
-    let buffTmp = Buffer.concat(concat);
+    let buffTmp = Buffer.concat([flagExist, flagLevel, indicatorSibling]);
     for (let i = 0; i < arraySiblings.length; i++) {
       buffTmp = Buffer.concat([buffTmp, arraySiblings[i]]);
     }

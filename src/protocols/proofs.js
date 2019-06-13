@@ -6,7 +6,7 @@ const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
-const claimUtils = require('../claim/claim-utils.js');
+const claimUtils = require('../claim/claim');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 /**
