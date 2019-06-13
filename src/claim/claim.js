@@ -38,48 +38,83 @@ export const CLAIMTYPES = {
   },
 };
 
-/* decode a buffer as number in big endian */
+/**
+ * Decode a buffer as number in big endian
+  * @param {Buffer} Buffer
+  * @returns {number}
+ */
 function buf2num(buf: Buffer): number {
   return Number(utils.bufferToBigIntBE(buf));
 }
 
-/* encode a number as a 4 byte buffer in big endian */
+/**
+ * Encode a number as a 4 byte buffer in big endian
+  * @param {number} num
+  * @returns {Buffer}
+ */
 function num2buf(num: number): Buffer {
   const buf = Buffer.alloc(4);
   buf.writeUInt32BE(num, 0);
   return buf;
 }
 
-/* encode a number as a 2 byte buffer in big endian */
+/**
+ * Encode a number as a 2 byte buffer in big endian
+  * @param {number} num
+  * @returns {Buffer}
+ */
 function num2buf2(num: number): Buffer {
   const buf = Buffer.alloc(2);
   buf.writeUInt16BE(num, 0);
   return buf;
 }
 
-/* hash a string for a claim */
+/**
+ * Hash a string for a claim
+  * @param {string} elem
+  * @returns {Buffer} hash
+ */
 function hashString(s: string): Buffer {
   return utils.hashBytes(Buffer.from(s, 'utf8')).slice(1);
 }
 
-/* copy a buffer to an entry element ending at position start */
+/**
+ * Copy a buffer to an entry element ending at position start
+  * @param {Buffer} elem
+  * @param {number} start
+  * @param {Buffer} src
+ */
 function copyToElemBuf(elem: Buffer, start: number, src: Buffer) {
   elem.fill(src, 32 - start - src.length, 32 - start);
 }
 
-/* get a buffer from an entry element ending at position start */
+/**
+ * Get a buffer from an entry element ending at position start
+  * @param {Buffer} elem
+  * @param {number} start
+  * @param {number} length
+ */
 function getElemBuf(elem: Buffer, start: number, length: number): Buffer {
   return elem.slice(32 - start - length, 32 - start);
 }
 
-/* set the claim type and version of an entry */
+/**
+ * Set the claim type and version of an entry
+  * @param {Object} entry - Entry of the claim
+  * @param {number} claimType
+  * @param {number} version
+ */
 function setClaimTypeVersion(entry: Entry, claimType: number, version: number) {
   const claimTypeBuf = utils.bigIntToBufferBE(bigInt(claimType)).slice(24, 32);
   copyToElemBuf(entry.elements[3], 0, claimTypeBuf);
   copyToElemBuf(entry.elements[3], 8, num2buf(version));
 }
 
-/* get the claim type and version of an entry */
+/**
+ * get the claim type and version of an entry
+  * @param {Object} entry - Entry of the claim
+  * @returns {Object} type and version
+ */
 function getClaimTypeVersion(entry: Entry): { claimType: number, version: number } {
   return {
     claimType: buf2num(getElemBuf(entry.elements[3], 0, 8)),
@@ -104,9 +139,9 @@ export class AssignName {
   /**
    * Initialize claim data structure from fields
    */
-  constructor(name: string | Buffer, id: string) {
+  constructor(name: string, id: string) {
     this.version = 0;
-    this.hashName = name instanceof Buffer ? name : hashString(name);
+    this.hashName = hashString(name);
     this.id = id;
   }
 
@@ -122,7 +157,8 @@ export class AssignName {
     const hashName = getElemBuf(entry.elements[2], 0, 31);
     // Parse element 1
     const id = bs58.encode(getElemBuf(entry.elements[1], 0, 31));
-    const claim = new AssignName(hashName, id);
+    const claim = new AssignName('', id);
+    claim.hashName = hashName;
     claim.version = version;
     return claim;
   }
@@ -209,16 +245,11 @@ export class AuthorizeKSignBabyJub {
   /**
    * Initialize claim data structure from fields
    */
-  constructor(pubKComp: string | Buffer, sign: ?boolean) {
-    if (sign != null && pubKComp instanceof Buffer) {
-      this.ay = pubKComp;
-      this.sign = sign;
-    } else if (typeof pubKComp === 'string') {
-      const pubKCompBuf = utils.hexToBytes(pubKComp);
-      this.sign = (pubKCompBuf[0] & 0x80) !== 0;
-      pubKCompBuf[0] &= 0x7F;
-      this.ay = pubKCompBuf;
-    }
+  constructor(pubKComp: string) {
+    const pubKCompBuf = utils.hexToBytes(pubKComp);
+    this.sign = (pubKCompBuf[0] & 0x80) !== 0;
+    pubKCompBuf[0] &= 0x7F;
+    this.ay = pubKCompBuf;
     this.version = 0;
   }
 
@@ -233,7 +264,8 @@ export class AuthorizeKSignBabyJub {
     // Parse element 2
     const ay = getElemBuf(entry.elements[2], 0, 32);
     const sign = getElemBuf(entry.elements[3], 8 + 4, 1)[0] !== 0;
-    const claim = new AuthorizeKSignBabyJub(ay, sign);
+    ay[0] |= sign ? 0x80 : 0x00;
+    const claim = new AuthorizeKSignBabyJub(ay.toString('hex'));
     claim.version = version;
     return claim;
   }
@@ -272,8 +304,8 @@ export class AuthorizeKSignSecp256k1 {
   /**
    * Initialize claim data structure from fields
    */
-  constructor(pubKeyCompHex: string | Buffer) {
-    this.pubKeyComp = pubKeyCompHex instanceof Buffer ? pubKeyCompHex : utils.hexToBytes(pubKeyCompHex);
+  constructor(pubKeyCompHex: string) {
+    this.pubKeyComp = utils.hexToBytes(pubKeyCompHex);
     this.version = 0;
   }
 
@@ -289,7 +321,7 @@ export class AuthorizeKSignSecp256k1 {
     const pubKeyCompBuf = Buffer.concat(
       [getElemBuf(entry.elements[2], 0, 31), getElemBuf(entry.elements[3], 8 + 4, 2)],
     );
-    const claim = new AuthorizeKSignSecp256k1(pubKeyCompBuf);
+    const claim = new AuthorizeKSignSecp256k1(pubKeyCompBuf.toString('hex'));
     claim.version = version;
     return claim;
   }
