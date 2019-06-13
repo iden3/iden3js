@@ -4,6 +4,7 @@ const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
 const mimc7 = require('./mimc7');
+const Entry = require('../claim/claim').Entry;
 
 const { bigInt } = snarkjs;
 
@@ -84,14 +85,12 @@ class SparseMerkleTree {
 
   /**
   * Adds new data to a leaf
-  * @param {Array(bigInt)} claim - Claim data object to be added to the merkle tree
+  * @param {Entry} claim - Claim data object to be added to the merkle tree
   */
-  addClaim(claim) {
-    const currentClaim = claim;
-    const hashes = getHiHv(claim);
-    const hi = hashes[0];
-    const hv = hashes[1];
-    const hiBinay = helpers.getIndexArray(hi);
+  addEntry(entry) {
+    const hi = entry.hiBigInt();
+    const hv = entry.hvBigInt();
+    const hiBinary = helpers.getIndexArray(hi);
 
     // Find last node written
     let key = this.root;
@@ -99,7 +98,7 @@ class SparseMerkleTree {
     let claimIndex = 0;
     const arraySiblings = [];
     while (nodeValue.length === 2) {
-      const bitLeaf = (claimIndex > (hiBinay.length - 1)) ? 0 : hiBinay[claimIndex];
+      const bitLeaf = (claimIndex > (hiBinary.length - 1)) ? 0 : hiBinary[claimIndex];
       arraySiblings.push(bitLeaf ? nodeValue[0] : nodeValue[1]);
       key = bitLeaf ? nodeValue[1] : nodeValue[0];
       nodeValue = getNodeValue(this.db, key, this.prefix);
@@ -108,11 +107,11 @@ class SparseMerkleTree {
 
     if (nodeValue === emptyNodeValue) {
       let nextHash = getHashFinalNode(hi, hv);
-      setNodeValue(this.db, nextHash, utils.getArrayBuffFromArrayBigIntBE(currentClaim), this.prefix);
+      setNodeValue(this.db, nextHash, entry.elements, this.prefix);
       let concat = 0;
       const level = arraySiblings.length - 1;
       for (let i = level; i >= 0; i--) {
-        const bitLeaf = (i > (hiBinay.length - 1)) ? 0 : hiBinay[i];
+        const bitLeaf = (i > (hiBinary.length - 1)) ? 0 : hiBinary[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
         nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
@@ -132,7 +131,7 @@ class SparseMerkleTree {
       let compare = false;
       let pos = claimIndex;
       while (!compare) {
-        const bitLeaf = (pos > (hiBinay.length - 1)) ? 0 : hiBinay[pos];
+        const bitLeaf = (pos > (hiBinary.length - 1)) ? 0 : hiBinary[pos];
         const bitLeafTmp = (pos > (hiTmp.length - 1)) ? 0 : hiTmp[pos];
         compare = bitLeaf ^ bitLeafTmp;
         if (!compare) {
@@ -148,13 +147,13 @@ class SparseMerkleTree {
       arraySiblings.push(key);
       // Write current branch with new claim added
       const newHash = getHashFinalNode(hi, hv);
-      setNodeValue(this.db, newHash, utils.getArrayBuffFromArrayBigIntBE(currentClaim), this.prefix);
+      setNodeValue(this.db, newHash, entry.elements, this.prefix);
       // Recalculate nodes until the root
       let concat = 0;
       const level = arraySiblings.length - 1;
       let nextHash = newHash;
       for (let i = level; i >= 0; i--) {
-        const bitLeaf = (i > (hiBinay.length - 1)) ? 0 : hiBinay[i];
+        const bitLeaf = (i > (hiBinary.length - 1)) ? 0 : hiBinary[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
         nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
@@ -166,33 +165,40 @@ class SparseMerkleTree {
 
   /**
   * Retrieve data for a given leaf position
-  * @param {Array(bigInt)} indexHi - Claim slice representing the index leaf generator
-  * @returns {Array(bigInt)} - Data of the leaf given as a claim object
+  * @param {bigInt} hi - Hash of the index leaf generator
+  * @returns {Entry} - Data of the leaf given as a claim object
   */
-  getClaimByHi(indexHi) {
+  getEntryByHi(hi) {
     // Compute hi of the claim
-    const hi = helpers.getIndexArray(mimc7.multiHash(indexHi));
+    const hiBinary = helpers.getIndexArray(hi);
     // Find last node written
     let key = this.root;
     let nodeValue = getNodeValue(this.db, key, this.prefix);
     let claimIndex = 0;
     while (nodeValue.length === 2) {
-      const bitLeaf = (claimIndex > (hi.length - 1)) ? 0 : hi[claimIndex];
+      const bitLeaf = (claimIndex > (hiBinary.length - 1)) ? 0 : hiBinary[claimIndex];
       key = bitLeaf ? nodeValue[1] : nodeValue[0];
       nodeValue = getNodeValue(this.db, key, this.prefix);
+      if (nodeValue === emptyNodeValue) {
+        throw new Error('Entry not found');
+      }
       claimIndex += 1;
     }
-    return utils.getArrayBigIntFromBuffArrayBE(nodeValue);
+    const entry = new Entry(nodeValue[0], nodeValue[1], nodeValue[2], nodeValue[3]);
+    if (entry.hiBigInt() !== hi) {
+      throw new Error('Found a different entry in the hi path');
+    }
+    return entry;
   }
 
   /**
   * Generates the merkle proof of the leaf at a given position
-  * @param {Array[bigInt]} indexHi - Claim slice representing the index leaf generator
+  * @param {bigInt} hi - Hash of the index leaf generator
   * @returns {Buffer} - Data containing merkle tree proof of existence or non-existence
   */
-  generateProof(indexHi) {
+  generateProof(hi) {
     // Compute hi of the claim
-    const hi = helpers.getIndexArray(mimc7.multiHash(indexHi));
+    const hiBinary = helpers.getIndexArray(hi);
     // Find last node written
     let key = this.root;
     let claimIndex = 0;
@@ -203,7 +209,7 @@ class SparseMerkleTree {
     let numByte;
     let nodeValue = getNodeValue(this.db, key, this.prefix);
     while (nodeValue.length === 2) {
-      const bitLeaf = (claimIndex > (hi.length - 1)) ? 0 : hi[claimIndex];
+      const bitLeaf = (claimIndex > (hiBinary.length - 1)) ? 0 : hiBinary[claimIndex];
       nextSibling = bitLeaf ? nodeValue[0] : nodeValue[1];
       key = bitLeaf ? nodeValue[1] : nodeValue[0];
       nodeValue = getNodeValue(this.db, key, this.prefix);
@@ -216,20 +222,20 @@ class SparseMerkleTree {
     }
 
     let checkIndex = false;
-    let exist = true;
+    let exist = 0x01;
     let totalTmp;
     // Claim search could be there or not
     if (nodeValue.length === 4) {
       // set exist to 0
-      exist = false;
+      exist = 0x00;
       // get current node value and its hIndex
       totalTmp = utils.getArrayBigIntFromBuffArrayBE(nodeValue);
       let hiTmp = totalTmp.slice(2);
       hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
       // Check input index and node index
       let pos = claimIndex;
-      while (!checkIndex && !((pos > hi.length - 1) && (pos > hiTmp.length - 1))) {
-        const bitLeaf = (pos > (hi.length - 1)) ? 0 : hi[pos];
+      while (!checkIndex && !((pos > hiBinary.length - 1) && (pos > hiTmp.length - 1))) {
+        const bitLeaf = (pos > (hiBinary.length - 1)) ? 0 : hiBinary[pos];
         const bitLeafTmp = (pos > (hiTmp.length - 1)) ? 0 : hiTmp[pos];
         checkIndex = bitLeaf ^ bitLeafTmp;
         pos += 1;
@@ -239,8 +245,7 @@ class SparseMerkleTree {
     // Generate proof structure
     // Set bit non-existence empty or non-existence diff
     if (checkIndex) {
-      exist = helpers.setBit(exist, 0);
-      exist = helpers.setBit(exist, 1);
+      exist = 0x03;
     }
 
     const flagExist = Buffer.alloc(1);
@@ -250,8 +255,7 @@ class SparseMerkleTree {
     let concat = [flagExist, flagLevel, indicatorSibling];
     let buffTmp = Buffer.concat(concat);
     for (let i = 0; i < arraySiblings.length; i++) {
-      concat = [buffTmp, arraySiblings[i]];
-      buffTmp = Buffer.concat(concat);
+      buffTmp = Buffer.concat([buffTmp, arraySiblings[i]]);
     }
     if (checkIndex) {
       const hashes = getHiHv(totalTmp);
@@ -277,7 +281,7 @@ function checkProof(rootHex, proofHex, hiHex, hvHex) {
   const hi = utils.bufferToBigIntBE(utils.hexToBytes(hiHex));
   const hv = utils.bufferToBigIntBE(utils.hexToBytes(hvHex));
   const hvBuff = getHashFinalNode(hi, hv);
-  const hiBinay = helpers.getIndexArray(hi);
+  const hiBinary = helpers.getIndexArray(hi);
   const { siblings } = proofBuff;
   const arrayFullSiblings = [];
   const siblingsIndex = proofBuff.siblingsBitIndex;
@@ -291,8 +295,8 @@ function checkProof(rootHex, proofHex, hiHex, hvHex) {
     const hiTmp = utils.bufferToBigIntBE(proofBuff.metaData.slice(0, 32));
     const hvTmp = utils.bufferToBigIntBE(proofBuff.metaData.slice(32, proofBuff.metaData.length));
     const hiTmpBinary = helpers.getIndexArray(hiTmp);
-    while (!exist && !((pos > hiBinay.length - 1) && (pos > hiTmpBinary.length - 1))) {
-      const bitLeaf = (pos > (hiBinay.length - 1)) ? 0 : hiBinay[pos];
+    while (!exist && !((pos > hiBinary.length - 1) && (pos > hiTmpBinary.length - 1))) {
+      const bitLeaf = (pos > (hiBinary.length - 1)) ? 0 : hiBinary[pos];
       const bitLeafTmp = (pos > (hiTmpBinary.length - 1)) ? 0 : hiTmpBinary[pos];
       exist = bitLeaf ^ bitLeafTmp;
       pos += 1;
@@ -322,7 +326,7 @@ function checkProof(rootHex, proofHex, hiHex, hvHex) {
   let nextHash = flagNonExistence ? newHash : hvBuff;
   for (let i = arrayFullSiblings.length - 1; i >= 0; i--) {
     const siblingTmp = arrayFullSiblings[i];
-    concat = hiBinay[i] ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
+    concat = hiBinary[i] ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
     nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
   }
   return Buffer.compare(nextHash, root) === 0;

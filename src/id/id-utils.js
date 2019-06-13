@@ -104,16 +104,13 @@ function calculateIdGenesis(kop, kdis, kreen) {
   const mt = new smt.SparseMerkleTree(db, '');
 
   const claimKOp = new AuthorizeKSignBabyJub(kop);
-  const c0 = utils.getArrayBigIntFromBuffArrayBE(claimKOp.toEntry().elements);
-  mt.addClaim(c0);
+  mt.addClaim(claimKOp);
 
   const claimKDis = new AuthorizeEthKey(kdis, 0);
-  const c1 = utils.getArrayBigIntFromBuffArrayBE(claimKDis.toEntry().elements);
-  mt.addClaim(c1);
+  mt.addClaim(claimKDis);
 
   const claimKReen = new AuthorizeEthKey(kreen, 1);
-  const c2 = utils.getArrayBigIntFromBuffArrayBE(claimKReen.toEntry().elements);
-  mt.addClaim(c2);
+  mt.addClaim(claimKReen);
 
   const idGenesisBuffer = mt.root.slice(0, 27);
   const id = newID(TypeBJM7, idGenesisBuffer);

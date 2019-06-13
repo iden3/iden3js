@@ -1,8 +1,11 @@
 // @flow
 import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../utils';
 
+const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const mimc7 = require('../sparse-merkle-tree/mimc7');
+
+const { bigInt } = snarkjs;
 
 const entryElemsLen = 4;
 
@@ -26,6 +29,18 @@ export class Entry {
   }
 
   /**
+   * Initialize claim elements from big ints
+   */
+  static newFromBigInts(e0: bigInt, e1: bigInt, e2: bigInt, e3: bigInt): Entry {
+    return new Entry(
+      utils.bigIntToBufferBE(e0),
+      utils.bigIntToBufferBE(e1),
+      utils.bigIntToBufferBE(e2),
+      utils.bigIntToBufferBE(e3),
+    );
+  }
+
+  /**
    * String deserialization into entry element structure
    * @param {String} Hexadecimal string representation of element claim structure
    */
@@ -42,12 +57,30 @@ export class Entry {
   /**
    * Hash index calculation using mimc7 hash
    * Hash index is calculated from: |element 1|element 0|
+   * @returns {bigInt} Hash index of the claim element structure
+   */
+  hiBigInt(): bigInt {
+    const hashArray = [this.elements[2], this.elements[3]];
+    return mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
+  }
+
+  /**
+   * Hash index calculation using mimc7 hash
+   * Hash index is calculated from: |element 1|element 0|
    * @returns {Buffer} Hash index of the claim element structure
    */
   hi(): Buffer {
-    const hashArray = [this.elements[2], this.elements[3]];
-    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
-    return bigIntToBufferBE(hashKey);
+    return bigIntToBufferBE(this.hiBigInt());
+  }
+
+  /**
+   * Hash value calculation using mimc7 hash
+   * Hash value is calculated from: |element 3|element 2|
+   * @returns {bigInt} Hash value of the claim element structure
+   */
+  hvBigInt(): bigInt {
+    const hashArray = [this.elements[0], this.elements[1]];
+    return mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
   }
 
   /**
@@ -56,9 +89,7 @@ export class Entry {
    * @returns {Buffer} Hash value of the claim element structure
    */
   hv(): Buffer {
-    const hashArray = [this.elements[0], this.elements[1]];
-    const hashKey = mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
-    return bigIntToBufferBE(hashKey);
+    return bigIntToBufferBE(this.hvBigInt());
   }
 
   /**

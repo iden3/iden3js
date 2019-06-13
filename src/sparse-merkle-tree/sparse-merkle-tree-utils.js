@@ -10,12 +10,7 @@ const utils = require('../utils');
 * @returns {Uint8} pos - Position of the bit to set
 */
 export function setBit(byte, pos) {
-  let mask = 1;
-  while (pos) {
-    mask <<= 1;
-    pos -= 1;
-  }
-  return byte | mask;
+  return byte | (0x01 << pos);
 }
 
 /**
@@ -101,9 +96,7 @@ export function genProofStruct(buffHex) {
  */
 export function importClaimsDump(mt, claimsDump) {
   for (let i = 0; i < claimsDump.length; i++) {
-    const e = Entry.newFromHex(claimsDump[i]);
-    const t = utils.getArrayBigIntFromBuffArrayBE(e.elements);
-    mt.addClaim(t);
+    mt.addEntry(Entry.newFromHex(claimsDump[i]));
   }
 }
 
