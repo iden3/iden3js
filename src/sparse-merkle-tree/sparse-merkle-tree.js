@@ -10,6 +10,9 @@ const { bigInt } = snarkjs;
 
 const emptyNodeValue = Buffer.alloc(32);
 
+const errorEntryNotFound = 'Entry not found';
+const errorFoundDiffEntry = 'Found a different entry in the hi path';
+
 /**
 * Retrieve node value from merkle tree
 * @param {Object} db - Data base object representation
@@ -47,18 +50,6 @@ function getHashFinalNode(hi, hv) {
   const hashArray = [hi, hv];
   const hashKey = mimc7.multiHash(hashArray, bigInt(1));
   return utils.bigIntToBufferBE(hashKey);
-}
-
-/**
-* Retrieve Hash index and Hash value from claim object
-* @param {Array(bigInt)} claim - Array of bigInt representing claim object
-*/
-function getHiHv(claim) {
-  const indexGen = claim.slice(2);
-  const valueGen = claim.slice(0, 2);
-  const hi = mimc7.multiHash(indexGen);
-  const hv = mimc7.multiHash(valueGen);
-  return [hi, hv];
 }
 
 class SparseMerkleTree {
@@ -180,13 +171,13 @@ class SparseMerkleTree {
       key = bitLeaf ? nodeValue[1] : nodeValue[0];
       nodeValue = getNodeValue(this.db, key, this.prefix);
       if (nodeValue === emptyNodeValue) {
-        throw new Error('Entry not found');
+        throw new Error(errorEntryNotFound);
       }
       claimIndex += 1;
     }
     const entry = new Entry(nodeValue[0], nodeValue[1], nodeValue[2], nodeValue[3]);
     if (entry.hiBigInt() !== hi) {
-      throw new Error('Found a different entry in the hi path');
+      throw new Error(errorFoundDiffEntry);
     }
     return entry;
   }
@@ -213,7 +204,7 @@ class SparseMerkleTree {
       nextSibling = bitLeaf ? nodeValue[0] : nodeValue[1];
       key = bitLeaf ? nodeValue[1] : nodeValue[0];
       nodeValue = getNodeValue(this.db, key, this.prefix);
-      if (Buffer.compare(nextSibling, emptyNodeValue)) {
+      if (Buffer.compare(nextSibling, emptyNodeValue) !== 0) {
         arraySiblings.push(nextSibling);
         numByte = Math.floor((claimIndex) / 8);
         indicatorSibling[startIndex - numByte] = helpers.setBit(indicatorSibling[startIndex - numByte], claimIndex % 8);
@@ -229,9 +220,8 @@ class SparseMerkleTree {
       // set exist to 0
       exist = 0x00;
       // get current node value and its hIndex
-      totalTmp = utils.getArrayBigIntFromBuffArrayBE(nodeValue);
-      let hiTmp = totalTmp.slice(2);
-      hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
+      totalTmp = new Entry(nodeValue[0], nodeValue[1], nodeValue[2], nodeValue[3]);
+      const hiTmp = helpers.getIndexArray(totalTmp.hiBigInt());
       // Check input index and node index
       let pos = claimIndex;
       while (!checkIndex && !((pos > hiBinary.length - 1) && (pos > hiTmp.length - 1))) {
@@ -258,10 +248,7 @@ class SparseMerkleTree {
       buffTmp = Buffer.concat([buffTmp, arraySiblings[i]]);
     }
     if (checkIndex) {
-      const hashes = getHiHv(totalTmp);
-      const hiFinal = utils.bigIntToBufferBE(hashes[0]);
-      const hvFinal = utils.bigIntToBufferBE(hashes[1]);
-      buffTmp = Buffer.concat([buffTmp, hiFinal, hvFinal]);
+      buffTmp = Buffer.concat([buffTmp, totalTmp.hi(), totalTmp.hv()]);
     }
     return buffTmp;
   }
@@ -336,5 +323,4 @@ module.exports = {
   checkProof,
   SparseMerkleTree,
   emptyNodeValue,
-  getHiHv,
 };

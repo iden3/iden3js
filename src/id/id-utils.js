@@ -104,13 +104,13 @@ function calculateIdGenesis(kop, kdis, kreen) {
   const mt = new smt.SparseMerkleTree(db, '');
 
   const claimKOp = new AuthorizeKSignBabyJub(kop);
-  mt.addClaim(claimKOp);
+  mt.addEntry(claimKOp.toEntry());
 
   const claimKDis = new AuthorizeEthKey(kdis, 0);
-  mt.addClaim(claimKDis);
+  mt.addEntry(claimKDis.toEntry());
 
   const claimKReen = new AuthorizeEthKey(kreen, 1);
-  mt.addClaim(claimKReen);
+  mt.addEntry(claimKReen.toEntry());
 
   const idGenesisBuffer = mt.root.slice(0, 27);
   const id = newID(TypeBJM7, idGenesisBuffer);
