@@ -262,7 +262,7 @@ export class AuthorizeKSignBabyJub {
     // Parse element 3
     const { version } = getClaimTypeVersion(entry);
     // Parse element 2
-    const ay = getElemBuf(entry.elements[2], 0, 32);
+    const ay = Buffer.from(getElemBuf(entry.elements[2], 0, 32));
     const sign = getElemBuf(entry.elements[3], 8 + 4, 1)[0] !== 0;
     ay[0] |= sign ? 0x80 : 0x00;
     const claim = new AuthorizeKSignBabyJub(ay.toString('hex'));
@@ -304,8 +304,8 @@ export class AuthorizeKSignSecp256k1 {
   /**
    * Initialize claim data structure from fields
    */
-  constructor(pubKeyCompHex: string) {
-    this.pubKeyComp = utils.hexToBytes(pubKeyCompHex);
+  constructor(pubKeyCompHex: string | Buffer) {
+    this.pubKeyComp = pubKeyCompHex instanceof Buffer ? pubKeyCompHex : utils.hexToBytes(pubKeyCompHex);
     this.version = 0;
   }
 
@@ -321,7 +321,7 @@ export class AuthorizeKSignSecp256k1 {
     const pubKeyCompBuf = Buffer.concat(
       [getElemBuf(entry.elements[2], 0, 31), getElemBuf(entry.elements[3], 8 + 4, 2)],
     );
-    const claim = new AuthorizeKSignSecp256k1(pubKeyCompBuf.toString('hex'));
+    const claim = new AuthorizeKSignSecp256k1(pubKeyCompBuf);
     claim.version = version;
     return claim;
   }
