@@ -9,6 +9,8 @@ const nameResolver = require('./api-client/name-resolver');
 const discovery = require('./api-client/discovery');
 const KeyContainer = require('./key-container/key-container');
 const Id = require('./id/id');
+const Identity = require('./identity/identity');
+const identityUtils = require('./identity/identity-utils');
 const idUtils = require('./id/id-utils');
 // const dapp = require('./auth/dapp');
 const utils = require('./utils');
@@ -32,6 +34,8 @@ module.exports = {
   KeyContainer,
   Id,
   idUtils,
+  Identity,
+  identityUtils,
   Relay,
   NameServer,
   auth,
