@@ -3,9 +3,8 @@
 import { type NonceObj, NonceDB } from './nonceDB';
 import { NameResolver } from '../api-client/name-resolver';
 import { Discovery } from '../api-client/discovery';
-import { Entry } from '../claim/entry/entry';
+import { Entry } from '../claim/entry';
 
-const bs58 = require('bs58');
 const crypto = require('crypto');
 const ethUtil = require('ethereumjs-util');
 
@@ -285,7 +284,7 @@ export class SignedPacketVerifier {
       throw new Error('hash(payload.form.ethName) != payload.form.proofAssignName.structure.hashName');
     }
     // check claimAssignName.structure.id = jwsHeader.iss
-    if (bs58.encode(claimAssignName.id) !== jwsHeader.iss) {
+    if (claimAssignName.id !== jwsHeader.iss) {
       throw new Error('claimAssignName.structure.id != header.iss');
     }
 
@@ -361,7 +360,7 @@ export class SignedPacketVerifier {
       throw new Error('jwsPayload.proofKSign.leaf is not a claim.AuthorizeKSignBabyJub');
     }
     const publicKeyComp = claimAuthorizeKSign.ay;
-    if (claimAuthorizeKSign.sign[0] === 1) {
+    if (claimAuthorizeKSign.sign) {
       publicKeyComp[0] |= 0x80;
     }
     const publicKeyHex = utils.swapEndianness(publicKeyComp).toString('hex');

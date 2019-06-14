@@ -1,10 +1,11 @@
 // @flow
 import { describe, it, before } from 'mocha';
+import { Entry } from './entry';
 
 const chai = require('chai');
-const authorizeKSignBabyJub = require('./authorize-ksign-babyjub');
-const utils = require('../../utils');
-const { utilsBabyJub } = require('../../crypto/crypto');
+const claim = require('./claim');
+const utils = require('../utils');
+const { utilsBabyJub } = require('../crypto/crypto');
 
 const { expect } = chai;
 
@@ -14,28 +15,26 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
   const privKeyBuff = utils.hexToBytes(privKey);
   const pubKeyBuff = utilsBabyJub.privToPub(privKeyBuff, true);
 
-  let AuthorizeKSignBabyJub;
+  let claimAuthKSignBabyJub;
   let entryClaim;
   let parsedClaim;
 
   before('Create new authorizeKSign claim', () => {
-    AuthorizeKSignBabyJub = authorizeKSignBabyJub.AuthorizeKSignBabyJub.new(versionExample, utils.bytesToHex(pubKeyBuff));
-    expect(AuthorizeKSignBabyJub).to.not.be.equal(null);
-    entryClaim = AuthorizeKSignBabyJub.toEntry();
-    parsedClaim = authorizeKSignBabyJub.AuthorizeKSignBabyJub.newFromEntry(entryClaim);
+    claimAuthKSignBabyJub = new claim.AuthorizeKSignBabyJub(utils.bytesToHex(pubKeyBuff));
+    claimAuthKSignBabyJub.version = versionExample;
+    expect(claimAuthKSignBabyJub).to.not.be.equal(null);
+    entryClaim = claimAuthKSignBabyJub.toEntry();
+    parsedClaim = claim.AuthorizeKSignBabyJub.newFromEntry(entryClaim);
   });
 
-  it('Parse claim type', () => {
-    expect(utils.bytesToHex(AuthorizeKSignBabyJub.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
-  });
   it('Parse version', () => {
-    expect(utils.bytesToHex(AuthorizeKSignBabyJub.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
+    expect(claimAuthKSignBabyJub.version).to.be.equal(parsedClaim.version);
   });
   it('Parse sign', () => {
-    expect(utils.bytesToHex(AuthorizeKSignBabyJub.sign)).to.be.equal(utils.bytesToHex(parsedClaim.sign));
+    expect(claimAuthKSignBabyJub.sign).to.be.equal(parsedClaim.sign);
   });
   it('Parse Ay', () => {
-    expect(utils.bytesToHex(AuthorizeKSignBabyJub.ay)).to.be.equal(utils.bytesToHex(parsedClaim.ay));
+    expect(claimAuthKSignBabyJub.ay.toString('hex')).to.be.equal(parsedClaim.ay.toString('hex'));
   });
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHex();
@@ -53,5 +52,13 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
     const hv = entryClaim.hv();
     const hvResult = '0x06d4571fb9634e4bed32e265f91a373a852c476656c5c13b09bc133ac61bc5a6';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
+  });
+  it('Parse entry into claim authorize key sign babyjub', () => {
+    const entryHex = entryClaim.toHex();
+    const entry = Entry.newFromHex(entryHex);
+    const c0 = (claim.newClaimFromEntry(entry): any);
+    expect(c0.version).to.be.equal(1);
+    expect(c0.sign).to.be.equal(true);
+    expect(c0.ay.toString('hex')).to.be.equal('2b05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c');
   });
 });

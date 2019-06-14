@@ -1,12 +1,12 @@
 // @flow
-import { Entry } from '../claim/entry/entry';
-import { SetRootKey } from '../claim/set-root-key/set-root-key';
+import { Entry } from '../claim/entry';
+import { SetRootKey } from '../claim/claim';
 
 const ethUtil = require('ethereumjs-util');
 
 const utils = require('../utils');
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
-const claimUtils = require('../claim/claim-utils.js');
+const claimUtils = require('../claim/claim');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 /**
@@ -145,7 +145,10 @@ function verifyProofClaim(proof: ProofClaim, publicKey: string): boolean {
       return false;
     }
     const { ver, era, id } = proof.proofs[i].aux;
-    leaf = SetRootKey.new(ver, era, id, rootKey).toEntry();
+    const leafClaim = new SetRootKey(id, utils.hexToBytes(rootKey));
+    leafClaim.version = ver;
+    leafClaim.era = era;
+    leaf = leafClaim.toEntry();
   }
 
   return true;

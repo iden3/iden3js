@@ -1,9 +1,10 @@
 // @flow
 import { describe, it, before } from 'mocha';
+import { Entry } from './entry';
 
 const chai = require('chai');
-const setRootKey = require('./set-root-key');
-const utils = require('../../utils');
+const claim = require('./claim');
+const utils = require('../utils');
 
 const { expect } = chai;
 
@@ -11,29 +12,28 @@ describe('[Claim Set root key]', () => {
   const versionExample = 1;
   const eraExample = 1;
   const idExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
-  const rootKeyExample = '0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c';
+  const rootKeyExample = utils.hexToBytes('0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c');
   let claimSetRootKey;
   let entryClaim;
   let parsedClaim;
 
   before('Create new set root claim', () => {
-    claimSetRootKey = setRootKey.SetRootKey.new(versionExample, eraExample, idExample, rootKeyExample);
+    claimSetRootKey = new claim.SetRootKey(idExample, rootKeyExample);
+    claimSetRootKey.version = versionExample;
+    claimSetRootKey.era = eraExample;
     expect(claimSetRootKey).to.not.be.equal(null);
     entryClaim = claimSetRootKey.toEntry();
-    parsedClaim = setRootKey.SetRootKey.newFromEntry(entryClaim);
+    parsedClaim = claim.SetRootKey.newFromEntry(entryClaim);
   });
 
-  it('Parse claim type', () => {
-    expect(utils.bytesToHex(claimSetRootKey.claimType)).to.be.equal(utils.bytesToHex(parsedClaim.claimType));
-  });
   it('Parse version', () => {
-    expect(utils.bytesToHex(claimSetRootKey.version)).to.be.equal(utils.bytesToHex(parsedClaim.version));
+    expect(claimSetRootKey.version).to.be.equal(parsedClaim.version);
   });
   it('Parse era', () => {
-    expect(utils.bytesToHex(claimSetRootKey.era)).to.be.equal(utils.bytesToHex(parsedClaim.era));
+    expect(claimSetRootKey.era).to.be.equal(parsedClaim.era);
   });
   it('Parse id address', () => {
-    expect(utils.bytesToHex(claimSetRootKey.id)).to.be.equal(utils.bytesToHex(parsedClaim.id));
+    expect(claimSetRootKey.id).to.be.equal(parsedClaim.id);
   });
   it('Parse rootKey', () => {
     expect(utils.bytesToHex(claimSetRootKey.rootKey)).to.be.equal(utils.bytesToHex(parsedClaim.rootKey));
@@ -54,5 +54,14 @@ describe('[Claim Set root key]', () => {
     const hv = entryClaim.hv();
     const hvResult = '0x01705b25f2cf7cda34d836f09e9b0dd1777bdc16752657cd9d1ae5f6286525ba';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
+  });
+  it('Parse entry into claim set root key', () => {
+    const entryHex = entryClaim.toHex();
+    const entry = Entry.newFromHex(entryHex);
+    const c0 = (claim.newClaimFromEntry(entry): any);
+    expect(c0.version).to.be.equal(1);
+    expect(c0.era).to.be.equal(1);
+    expect(c0.id).to.be.equal('1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z');
+    expect(utils.bytesToHex(c0.rootKey)).to.be.equal('0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c');
   });
 });
