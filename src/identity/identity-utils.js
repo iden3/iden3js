@@ -35,9 +35,14 @@ function decomposeID(id) {
  * @returns {Buffer} checksum
  */
 function calculateChecksum(typ, genesis) {
-  const toHash = Buffer.concat([typ, genesis]);
-  const h = utils.hashBytes(toHash);
-  const checksum = h.slice(h.length - 2, h.length);
+  const toChecksum = Buffer.concat([typ, genesis]);
+  let s = 0;
+  for (let i = 0; i < toChecksum.length; i++) {
+    s += toChecksum[i];
+  }
+  const checksum = Buffer.alloc(2);
+  checksum[0] = s >> 8;
+  checksum[1] = s & 0xff;
   return checksum;
 }
 
@@ -116,20 +121,21 @@ function calculateIdGenesis(kop, kdis, kreen) {
 
   const claimKOp = new claim.AuthorizeKSignBabyJub(kop);
   mt.addEntry(claimKOp.toEntry());
-  const proofBuffKOp = mt.generateProof(claimKOp.toEntry().hiBigInt());
-  const proofKOp = utils.bytesToHex(proofBuffKOp);
 
   const claimKDis = new claim.AuthorizeEthKey(kdis, 0);
   mt.addEntry(claimKDis.toEntry());
-  const proofBuffKDis = mt.generateProof(claimKDis.toEntry().hiBigInt());
-  const proofKDis = utils.bytesToHex(proofBuffKDis);
 
   const claimKReen = new claim.AuthorizeEthKey(kreen, 1);
   mt.addEntry(claimKReen.toEntry());
+
+  const proofBuffKOp = mt.generateProof(claimKOp.toEntry().hiBigInt());
+  const proofKOp = utils.bytesToHex(proofBuffKOp);
+  const proofBuffKDis = mt.generateProof(claimKDis.toEntry().hiBigInt());
+  const proofKDis = utils.bytesToHex(proofBuffKDis);
   const proofBuffKReen = mt.generateProof(claimKReen.toEntry().hiBigInt());
   const proofKReen = utils.bytesToHex(proofBuffKReen);
 
-  const idGenesisBuffer = mt.root.slice(0, 27);
+  const idGenesisBuffer = mt.root.slice(mt.root.length - 27, mt.root.lenth);
   const id = newID(TypeBJM7, idGenesisBuffer);
 
   return {
