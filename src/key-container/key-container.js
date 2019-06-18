@@ -320,6 +320,7 @@ class KeyContainer {
    * @returns {Object} - It contains all the keys generated, undefined otherwise
    */
   createKeys(): { kOp: string, kDis: string, kReen: string } {
+    // TODO createKeys should create fresh keys, if the masterseed is different
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     let objectKeySeed;
     // Get key seed and generate if it is not already created

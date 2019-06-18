@@ -22,19 +22,19 @@ describe('[identity]', () => {
   it('Generate identity', () => {
     const seed = 'walk gravity scout labor eight usual blame warm unlock crane private rival';
     const identity = iden3.Identity.create(db1, passphrase, seed);
-    expect(identity.id).to.be.equal('11eEdfGdcw6CuSEaF5StaZPP6iEA9DoqXdbhh6wAo');
+    expect(identity.id).to.be.equal('11B3qZMKa2j6e4Up6XzfpTZ4RNuaPWQu2vA98goBjp');
     expect(identity.keyOperationalPub).to.be.equal('d2b4b4fd17a23d6ba02bcf5f4c6003ac3e2dfe9e9b7af71d6ffeb88f700c372a');
     expect(identity.keyDisable).to.be.equal('0x6a5bf2b3fe6fff9ec56eba2873a42dea037b5595');
     expect(identity.keyReenable).to.be.equal('0xf2996bf50d4bda42c966d51118bd01cab655a0a1');
 
-    expect(iden3.identityUtils.checkChecksum(iden3.identityUtils.idFromString('11eEdfGdcw6CuSEaF5StaZPP6iEA9DoqXdbhh6wAo'))).to.be.equal(true);
+    expect(iden3.identityUtils.checkChecksum(iden3.identityUtils.idFromString('11B3qZMKa2j6e4Up6XzfpTZ4RNuaPWQu2vA98goBjp'))).to.be.equal(true);
     const idBuff = iden3.identityUtils.idFromString(identity.id);
     expect(iden3.identityUtils.checkChecksum(idBuff)).to.be.equal(true);
   });
   it('Load identity', () => {
-    const identity = iden3.Identity.load(db1, '11eEdfGdcw6CuSEaF5StaZPP6iEA9DoqXdbhh6wAo');
+    const identity = iden3.Identity.load(db1, '11B3qZMKa2j6e4Up6XzfpTZ4RNuaPWQu2vA98goBjp');
 
-    expect(identity.id).to.be.equal('11eEdfGdcw6CuSEaF5StaZPP6iEA9DoqXdbhh6wAo');
+    expect(identity.id).to.be.equal('11B3qZMKa2j6e4Up6XzfpTZ4RNuaPWQu2vA98goBjp');
     expect(identity.keyOperationalPub).to.be.equal('d2b4b4fd17a23d6ba02bcf5f4c6003ac3e2dfe9e9b7af71d6ffeb88f700c372a');
     expect(identity.keyDisable).to.be.equal('0x6a5bf2b3fe6fff9ec56eba2873a42dea037b5595');
     expect(identity.keyReenable).to.be.equal('0xf2996bf50d4bda42c966d51118bd01cab655a0a1');
