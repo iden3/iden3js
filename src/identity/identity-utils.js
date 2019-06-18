@@ -113,20 +113,24 @@ function newID(typ, genesis) {
  * @param {String} kop - compressed babyjub public key in hex string representation
  * @param {String} kdis - eth addr in hex string
  * @param {String} kreen - eth addr in hex string
+ * @param {String} kupdateRoot - eth addr in hex string
  * @returns {String} idGenesis - hex representation of the IdGenesis
  */
-function calculateIdGenesis(kop, kdis, kreen) {
+function calculateIdGenesis(kop, kdis, kreen, kupdateRoot) {
   const db = new Db.Memory(false);
   const mt = new smt.SparseMerkleTree(db, '');
 
   const claimKOp = new claim.AuthorizeKSignBabyJub(kop);
   mt.addEntry(claimKOp.toEntry());
 
-  const claimKDis = new claim.AuthorizeEthKey(kdis, 0);
+  const claimKDis = new claim.AuthorizeEthKey(kdis, claim.ETH_KEY_TYPE.DISABLE);
   mt.addEntry(claimKDis.toEntry());
 
-  const claimKReen = new claim.AuthorizeEthKey(kreen, 1);
+  const claimKReen = new claim.AuthorizeEthKey(kreen, claim.ETH_KEY_TYPE.REENABLE);
   mt.addEntry(claimKReen.toEntry());
+
+  const claimKUpdateRoot = new claim.AuthorizeEthKey(kupdateRoot, claim.ETH_KEY_TYPE.UPDATE_ROOT);
+  mt.addEntry(claimKUpdateRoot.toEntry());
 
   const proofBuffKOp = mt.generateProof(claimKOp.toEntry().hiBigInt());
   const proofKOp = utils.bytesToHex(proofBuffKOp);
@@ -134,6 +138,8 @@ function calculateIdGenesis(kop, kdis, kreen) {
   const proofKDis = utils.bytesToHex(proofBuffKDis);
   const proofBuffKReen = mt.generateProof(claimKReen.toEntry().hiBigInt());
   const proofKReen = utils.bytesToHex(proofBuffKReen);
+  const proofBuffKUpdateRoot = mt.generateProof(claimKUpdateRoot.toEntry().hiBigInt());
+  const proofKUpdateRoot = utils.bytesToHex(proofBuffKUpdateRoot);
 
   const idGenesisBuffer = mt.root.slice(mt.root.length - 27, mt.root.lenth);
   const id = newID(TypeBJM7, idGenesisBuffer);
@@ -143,6 +149,7 @@ function calculateIdGenesis(kop, kdis, kreen) {
     proofKeyOperationalPub: proofKOp,
     proofKeyDisable: proofKDis,
     proofKeyReenable: proofKReen,
+    proofKeyUpdateRoot: proofKUpdateRoot,
   };
 }
 

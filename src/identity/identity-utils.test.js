@@ -13,9 +13,10 @@ describe('[identity-utils] calculateIdGenesis()', () => {
     // public keys
     const kdisStr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
     const kreenStr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
+    const kupdateRoot = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
 
     // check that with same keys that in go-iden3 test, gives the same idAddr than in go-iden3
-    const idAddr = iden3.identityUtils.calculateIdGenesis(kopStr, kdisStr, kreenStr);
-    expect(idAddr.id).to.be.equal('118x3ctowfRqF9jqoBZzyjjBVbpXZr6zsYqQ5SdgzX'); // same result as in go-iden3
+    const idAddr = iden3.identityUtils.calculateIdGenesis(kopStr, kdisStr, kreenStr, kupdateRoot);
+    expect(idAddr.id).to.be.equal('1172NXRBLZAfdKm8eGeoppUZ4vohBa8a3xXKTub9xQ'); // same result as in go-iden3
   });
 });

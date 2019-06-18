@@ -4,6 +4,13 @@ import { Entry } from './entry';
 const utils = require('../utils');
 const claimUtils = require('./claim');
 
+export const ETH_KEY_TYPE = {
+  DISABLE: 0,
+  REENABLE: 1,
+  UPGRADE: 2,
+  UPDATE_ROOT: 3,
+};
+
 export class AuthorizeEthKey {
   version: number;
   ethKey: string;
