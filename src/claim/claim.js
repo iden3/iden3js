@@ -4,19 +4,21 @@ import { Entry } from './entry';
 import { AssignName } from './claim-assign-name';
 import { AuthorizeKSignSecp256k1 } from './claim-authorize-ksign-secp256k1';
 import { AuthorizeKSignBabyJub } from './claim-authorize-ksign-babyjub';
-import { LinkObjectIdentity } from './claim-link-object-identity';
+import { LinkObjectIdentity, TYPE_OBJECT } from './claim-link-object-identity';
 import { Basic } from './claim-basic';
 import { SetRootKey } from './claim-set-root-key';
-import { AuthorizeEthKey } from './claim-authorize-eth-key';
+import { AuthorizeEthKey, ETH_KEY_TYPE } from './claim-authorize-eth-key';
 
 export {
   AssignName,
   AuthorizeKSignSecp256k1,
   AuthorizeKSignBabyJub,
   LinkObjectIdentity,
+  TYPE_OBJECT,
   Basic,
   SetRootKey,
   AuthorizeEthKey,
+  ETH_KEY_TYPE,
 };
 
 const snarkjs = require('snarkjs');

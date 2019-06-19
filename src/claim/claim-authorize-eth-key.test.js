@@ -16,7 +16,7 @@ describe('[Claim Authorize Ethereum Key]', () => {
   let claimAuthEthKey;
 
   before('Create new authorizeEthKey claim', () => {
-    claimAuthEthKey = new claim.AuthorizeEthKey(ethKey, 2);
+    claimAuthEthKey = new claim.AuthorizeEthKey(ethKey, claim.ETH_KEY_TYPE.UPGRADE);
     expect(claimAuthEthKey).to.not.be.equal(null);
     entryClaim = claimAuthEthKey.toEntry();
     parsedClaim = claim.AuthorizeEthKey.newFromEntry(entryClaim);

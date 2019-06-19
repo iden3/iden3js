@@ -292,7 +292,7 @@ class KeyContainer {
    * @returns {Object} It contains all the keys generated
    */
   _generateKeysFromKeyPath(mnemonic: string = bip39.generateMnemonic(),
-    pathProfile: number = 0): { kOp: string, kDis: string, kReen: string } {
+    pathProfile: number = 0): { kOp: string, kDis: string, kReen: string, kUpdateRoot: string } {
     if (!bip39.validateMnemonic(mnemonic)) { throw new Error('Mnemonic validation failed'); }
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const root = hdkey.fromMasterSeed(mnemonic);
@@ -304,22 +304,24 @@ class KeyContainer {
     let addrNode = root.derive(`${path}/${i}`); // "m/44'/60'/0'/pathProfile/i"
     const kOp = this.importBabyKey(addrNode._privateKey.toString('hex'));
 
-    // kDisable, kReenable Ethereum
+    // kDisable, kReenable, kUpdateRoot Ethereum
     const ethKeys = [];
-    for (i = 1; i < 3; i++) {
+    for (i = 1; i < 4; i++) {
       addrNode = root.derive(`${path}/${i}`); // "m/44'/60'/0'/pathProfile/i"
       const { publicKey } = this.importKey(addrNode._privateKey.toString('hex'));
       ethKeys.push(`0x${publicKey}`);
     }
 
-    return { kOp, kDis: ethKeys[0], kReen: ethKeys[1] };
+    return {
+      kOp, kDis: ethKeys[0], kReen: ethKeys[1], kUpdateRoot: ethKeys[2],
+    };
   }
 
   /**
    * Creates all the keys needed to create an identity afterwards
    * @returns {Object} - It contains all the keys generated, undefined otherwise
    */
-  createKeys(): { kOp: string, kDis: string, kReen: string } {
+  createKeys(): { kOp: string, kDis: string, kReen: string, kUpdateRoot: string } {
     // TODO createKeys should create fresh keys, if the masterseed is different
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     let objectKeySeed;
