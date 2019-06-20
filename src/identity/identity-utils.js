@@ -1,8 +1,8 @@
 const bs58 = require('bs58');
-const utils = require('../utils');
 const Db = require('../db/db');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 const claim = require('../claim/claim');
+const proofs = require('../protocols/proofs.js');
 
 const TypeBJM7 = Buffer.from([0x00, 0x00]);
 // const TypeS2M7 = Buffer.from([0x00, 0x04]);
@@ -132,24 +132,20 @@ function calculateIdGenesis(kop, kdis, kreen, kupdateRoot) {
   const claimKUpdateRoot = new claim.AuthorizeEthKey(kupdateRoot, claim.ETH_KEY_TYPE.UPDATE_ROOT);
   mt.addEntry(claimKUpdateRoot.toEntry());
 
-  const proofBuffKOp = mt.generateProof(claimKOp.toEntry().hiBigInt());
-  const proofKOp = utils.bytesToHex(proofBuffKOp);
-  const proofBuffKDis = mt.generateProof(claimKDis.toEntry().hiBigInt());
-  const proofKDis = utils.bytesToHex(proofBuffKDis);
-  const proofBuffKReen = mt.generateProof(claimKReen.toEntry().hiBigInt());
-  const proofKReen = utils.bytesToHex(proofBuffKReen);
-  const proofBuffKUpdateRoot = mt.generateProof(claimKUpdateRoot.toEntry().hiBigInt());
-  const proofKUpdateRoot = utils.bytesToHex(proofBuffKUpdateRoot);
+  const proofClaimKOp = proofs.getProofClaimByHi(mt, claimKOp.toEntry().hiBigInt());
+  const proofClaimKDis = proofs.getProofClaimByHi(mt, claimKDis.toEntry().hiBigInt());
+  const proofClaimKReen = proofs.getProofClaimByHi(mt, claimKReen.toEntry().hiBigInt());
+  const proofClaimKeyUpdateRoot = proofs.getProofClaimByHi(mt, claimKUpdateRoot.toEntry().hiBigInt());
 
   const idGenesisBuffer = mt.root.slice(mt.root.length - 27, mt.root.lenth);
   const id = newID(TypeBJM7, idGenesisBuffer);
 
   return {
     id: bs58.encode(id),
-    proofKeyOperationalPub: proofKOp,
-    proofKeyDisable: proofKDis,
-    proofKeyReenable: proofKReen,
-    proofKeyUpdateRoot: proofKUpdateRoot,
+    proofClaimKeyOperationalPub: proofClaimKOp,
+    proofClaimKeyDisable: proofClaimKDis,
+    proofClaimKeyReenable: proofClaimKReen,
+    proofClaimKeyUpdateRoot,
   };
 }
 

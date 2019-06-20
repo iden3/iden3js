@@ -7,4 +7,5 @@ module.exports = {
   nonceDB,
   login,
   verifyProofClaimFull: proofs.verifyProofClaim,
+  getProofClaimByHi: proofs.getProofClaimByHi,
 };

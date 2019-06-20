@@ -18,6 +18,7 @@ describe('[identity]', () => {
     const idBuff = iden3.identityUtils.idFromString(identity.id);
     expect(iden3.identityUtils.checkChecksum(idBuff)).to.be.equal(true);
     expect(iden3.identityUtils.stringFromBufferId(idBuff)).to.be.equal(identity.id);
+    identity.keyContainer.lock();
   });
   it('Generate identity', () => {
     const seed = 'walk gravity scout labor eight usual blame warm unlock crane private rival';
@@ -30,6 +31,7 @@ describe('[identity]', () => {
     expect(iden3.identityUtils.checkChecksum(iden3.identityUtils.idFromString('119RZPuT7uWDs6u7ZhzxkHBnuKimY7ABCYGuobcZTj'))).to.be.equal(true);
     const idBuff = iden3.identityUtils.idFromString(identity.id);
     expect(iden3.identityUtils.checkChecksum(idBuff)).to.be.equal(true);
+    identity.keyContainer.lock();
   });
   it('Load identity', () => {
     const identity = iden3.Identity.load(db1, '119RZPuT7uWDs6u7ZhzxkHBnuKimY7ABCYGuobcZTj');
@@ -39,7 +41,7 @@ describe('[identity]', () => {
     expect(identity.keyDisable).to.be.equal('0x6a5bf2b3fe6fff9ec56eba2873a42dea037b5595');
     expect(identity.keyReenable).to.be.equal('0xf2996bf50d4bda42c966d51118bd01cab655a0a1');
 
-    expect(identity);
+    identity.keyContainer.lock();
   });
   it('Load non existing identity in db', () => {
     // as we are trying to get an id that is not in the db0, should return an error

@@ -19,7 +19,7 @@ class Identity {
    * @param {String} keyUpdateRoot - string ethereum key
    */
   constructor(db, keyContainer, id, keyOperationalPub, keyDisable, keyReenable, keyUpdateRoot,
-    proofKeyOperationalPub, proofKeyDisable, proofKeyReenable, proofKeyUpdateRoot) {
+    proofClaimKeyOperationalPub, proofClaimKeyDisable, proofClaimKeyReenable, proofClaimKeyUpdateRoot) {
     this.db = db;
     this.keyContainer = keyContainer;
 
@@ -28,10 +28,10 @@ class Identity {
     this.keyReenable = keyReenable;
     this.keyUpdateRoot = keyUpdateRoot;
 
-    this.proofKeyOperationalPub = proofKeyOperationalPub;
-    this.proofKeyDisable = proofKeyDisable;
-    this.proofKeyReenable = proofKeyReenable;
-    this.proofKeyUpdateRoot = proofKeyUpdateRoot;
+    this.proofClaimKeyOperationalPub = proofClaimKeyOperationalPub;
+    this.proofClaimKeyDisable = proofClaimKeyDisable;
+    this.proofClaimKeyReenable = proofClaimKeyReenable;
+    this.proofClaimKeyUpdateRoot = proofClaimKeyUpdateRoot;
 
     this.id = id;
   }
@@ -66,20 +66,20 @@ class Identity {
     db.insert('keyUpdateRoot', keyUpdateRoot);
 
     const {
-      id, proofKeyOperationalPub, proofKeyDisable, proofKeyReenable, proofKeyUpdateRoot,
+      id, proofClaimKeyOperationalPub, proofClaimKeyDisable, proofClaimKeyReenable, proofClaimKeyUpdateRoot,
     } = identityUtils.calculateIdGenesis(keyOperationalPub, keyReenable, keyDisable, keyUpdateRoot);
     db.insert('id', id);
     db.insert(id, true);
 
-    db.insert('proofKeyOperationalPub', proofKeyOperationalPub);
-    db.insert('proofKeyDisable', proofKeyDisable);
-    db.insert('proofKeyReenable', proofKeyReenable);
-    db.insert('proofKeyUpdateRoot', proofKeyUpdateRoot);
+    db.insert('proofClaimKeyOperationalPub', JSON.stringify(proofClaimKeyOperationalPub));
+    db.insert('proofClaimKeyDisable', JSON.stringify(proofClaimKeyDisable));
+    db.insert('proofClaimKeyReenable', JSON.stringify(proofClaimKeyReenable));
+    db.insert('proofClaimKeyUpdateRoot', JSON.stringify(proofClaimKeyUpdateRoot));
 
     return new Identity(
       db, keyContainer, id,
-      keyOperationalPub, keyDisable, keyReenable,
-      proofKeyOperationalPub, proofKeyDisable, proofKeyReenable, proofKeyUpdateRoot,
+      keyOperationalPub, keyDisable, keyReenable, keyUpdateRoot,
+      proofClaimKeyOperationalPub, proofClaimKeyDisable, proofClaimKeyReenable, proofClaimKeyUpdateRoot,
     );
   }
 
@@ -95,15 +95,16 @@ class Identity {
     const keyDisable = db.get('keyDisable');
     const keyReenable = db.get('keyReenable');
     const keyUpdateRoot = db.get('keyUpdateRoot');
-    const proofKeyOperationalPub = db.get('proofKeyOperationalPub');
-    const proofKeyDisable = db.get('proofKeyDisable');
-    const proofKeyReenable = db.get('proofKeyReenable');
-    const proofKeyUpdateRoot = db.get('proofKeyUpdateRoot');
+
+    const proofClaimKeyOperationalPub = JSON.parse(db.get('proofClaimKeyOperationalPub'));
+    const proofClaimKeyDisable = JSON.parse(db.get('proofClaimKeyDisable'));
+    const proofClaimKeyReenable = JSON.parse(db.get('proofClaimKeyReenable'));
+    const proofClaimKeyUpdateRoot = JSON.parse(db.get('proofClaimKeyUpdateRoot'));
     const keyContainer = new KeyContainer(db);
     return new Identity(
       db, keyContainer, id,
       keyOperationalPub, keyDisable, keyReenable, keyUpdateRoot,
-      proofKeyOperationalPub, proofKeyDisable, proofKeyReenable, proofKeyUpdateRoot,
+      proofClaimKeyOperationalPub, proofClaimKeyDisable, proofClaimKeyReenable, proofClaimKeyUpdateRoot,
     );
   }
 }
