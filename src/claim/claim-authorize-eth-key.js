@@ -4,6 +4,9 @@ import { Entry } from './entry';
 const utils = require('../utils');
 const claimUtils = require('./claim');
 
+/**
+ * Ethereum key Types
+ */
 export const ETH_KEY_TYPE = {
   DISABLE: 0,
   REENABLE: 1,
@@ -11,6 +14,15 @@ export const ETH_KEY_TYPE = {
   UPDATE_ROOT: 3,
 };
 
+/**
+ * Class representing an authorized ethereum key claim
+ * Ethereum key is defined by: Ethereum key vlue and its type
+ * Authorized ethereum key  elements representation is as follows:
+ * |element 3|: |empty|version|claim type| - |20 bytes|4 bytes|8 bytes|
+ * |element 2|: |eth key type|eth key - |4 bytes|20 bytes|
+ * |element 1|: |empty| - |32 bytes|
+ * |element 0|: |empty| - |32 bytes|
+ */
 export class AuthorizeEthKey {
   version: number;
   ethKey: string;
@@ -26,10 +38,10 @@ export class AuthorizeEthKey {
   }
 
   /**
-  * Decode field claim structure into raw data claim structure
-  * @param {Object} entry - Element representation of the claim
-  * @returns {Object} AuthorizeEthKey class object
-  */
+   * Decode field claim structure into raw data claim structure
+   * @param {Object} entry - Element representation of the claim
+   * @returns {Object} AuthorizeEthKey class object
+   */
   static newFromEntry(entry: Entry): AuthorizeEthKey {
     // Parse element 3
     const { version } = claimUtils.getClaimTypeVersion(entry);
