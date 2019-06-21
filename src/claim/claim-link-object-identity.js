@@ -45,7 +45,7 @@ export class LinkObjectIdentity {
     this.objectType = objectType;
     this.objectIndex = objectIndex;
     this.id = id;
-    claimUtils.checkHashFitsClaim(objectHash);
+    claimUtils.checkElemFitsClaim(objectHash);
     this.objectHash = objectHash;
     this.auxData = auxData;
     this.version = 0;

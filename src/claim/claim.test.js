@@ -29,14 +29,14 @@ describe('[claim-utils]', () => {
     expect(versionInc).to.be.equal(versionHardcoded + 1);
   });
 
-  it('Clear high order byte', () => {
+  it('Clear most significant byte', () => {
     const testIn = '0xf6f36d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd';
-    const testOutBuff = claim.clearHighOrderByte(utils.hexToBytes(testIn));
+    const testOutBuff = claim.clearElemMostSignificantByte(utils.hexToBytes(testIn));
     const testInSim = '0x00f36d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd';
     expect(testInSim).to.be.equal(utils.bytesToHex(testOutBuff));
 
     const testIn2 = '0x00f36d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd';
-    const testOutBuff2 = claim.clearHighOrderByte(utils.hexToBytes(testIn2));
+    const testOutBuff2 = claim.clearElemMostSignificantByte(utils.hexToBytes(testIn2));
     expect(testIn2).to.be.equal(utils.bytesToHex(testOutBuff2));
   });
 
@@ -44,17 +44,17 @@ describe('[claim-utils]', () => {
     // Check hash is more than 32 bytes
     const hash0 = '0xf6a4f36d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd';
     expect(() => {
-      claim.checkHashFitsClaim(utils.hexToBytes(hash0));
-    }).to.throw('Hash is not 32 bytes length');
+      claim.checkElemFitsClaim(utils.hexToBytes(hash0));
+    }).to.throw('Element is not 32 bytes length');
     // Check hash is not valid for claim field
     const hash1 = '0xf6f36d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd';
     expect(() => {
-      claim.checkHashFitsClaim(utils.hexToBytes(hash1));
-    }).to.throw('Hash is not valid for claim element');
+      claim.checkElemFitsClaim(utils.hexToBytes(hash1));
+    }).to.throw('Element does not fit on claim element size');
     // Check hash is valid
     const hash2 = '0x06f36d94c84a7096c572b83d44df576e1ffb3573123f62099f8d4fa19de806bd';
     expect(() => {
-      claim.checkHashFitsClaim(utils.hexToBytes(hash2));
+      claim.checkElemFitsClaim(utils.hexToBytes(hash2));
     }).not.to.throw();
   });
 

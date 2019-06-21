@@ -119,33 +119,23 @@ export function getElemBuf(elem: Buffer, start: number, length: number): Buffer 
 }
 
 /**
- * Set the most significant byte to 0
+ * Set the most significant byte to 0 (in big endian)
  * @param {Buffer} elem - elem in big endian
  * @returns {Buffer} hash with the first byte set to 0
  */
-export function clearHighOrderByte(elem: Buffer): Buffer {
+export function clearElemMostSignificantByte(elem: Buffer): Buffer {
   return elem.fill(0, 0, 1);
 }
 
 /**
- * Check the 3 most significant bits are 0
- * @param {Buffer} hash - hash in big endian
- * @returns {void | Error} throws an error, void otherwise
- */
-export function checkHashFitsClaim(hash: Buffer): void | Error {
-  if (hash.length !== 32) {
-    throw new Error('Hash is not 32 bytes length');
-  } else if ((hash[0] & 0xE0) !== 0x00) {
-    throw new Error('Hash is not valid for claim element');
-  }
-}
-
-/**
- * Check element must be less than claim element field
+ * Check element in big endian must be less than claim element field
  * @param {Buffer} elem - elem in big endian
- * @returns {void | Error} throws an error, void otherwise
+ * @throws {Error} throws an error when the check fails
  */
-export function checkElemFitsClaim(elem: Buffer): void | Error {
+export function checkElemFitsClaim(elem: Buffer) {
+  if (elem.length !== 32) {
+    throw new Error('Element is not 32 bytes length');
+  }
   const elemBigInt = utils.bufferToBigIntBE(elem);
   if (elemBigInt.greater(babyJub.p)) {
     throw new Error('Element does not fit on claim element size');
