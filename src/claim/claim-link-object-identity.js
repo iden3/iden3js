@@ -45,6 +45,7 @@ export class LinkObjectIdentity {
     this.objectType = objectType;
     this.objectIndex = objectIndex;
     this.id = id;
+    claimUtils.checkElemFitsClaim(objectHash);
     this.objectHash = objectHash;
     this.auxData = auxData;
     this.version = 0;
@@ -63,7 +64,7 @@ export class LinkObjectIdentity {
     // Parse element 2
     const id = bs58.encode(claimUtils.getElemBuf(entry.elements[2], 0, 31));
     // Parse element 1
-    const objectHash = claimUtils.getElemBuf(entry.elements[1], 0, 31);
+    const objectHash = claimUtils.getElemBuf(entry.elements[1], 0, 32);
     // Parse element 0
     const auxData = claimUtils.getElemBuf(entry.elements[0], 0, 31);
     const claim = new LinkObjectIdentity(objectType, objectIndex, id, objectHash, auxData);

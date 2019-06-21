@@ -24,6 +24,7 @@ export class SetRootKey {
    */
   constructor(id: string, rootKey: Buffer) {
     this.id = id;
+    claimUtils.checkElemFitsClaim(rootKey);
     this.rootKey = rootKey;
     this.version = 0;
     this.era = 0;

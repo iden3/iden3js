@@ -21,6 +21,7 @@ export {
   ETH_KEY_TYPE,
 };
 
+const { babyJub } = require('circomlib');
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
 
@@ -59,8 +60,8 @@ export const CLAIMTYPES = {
 
 /**
  * Decode a buffer as number in big endian
-  * @param {Buffer} Buffer
-  * @returns {number}
+ * @param {Buffer} Buffer
+ * @returns {number}
  */
 export function buf2num(buf: Buffer): number {
   return Number(utils.bufferToBigIntBE(buf));
@@ -68,8 +69,8 @@ export function buf2num(buf: Buffer): number {
 
 /**
  * Encode a number as a 4 byte buffer in big endian
-  * @param {number} num
-  * @returns {Buffer}
+ * @param {number} num
+ * @returns {Buffer}
  */
 export function num2buf(num: number): Buffer {
   const buf = Buffer.alloc(4);
@@ -79,8 +80,8 @@ export function num2buf(num: number): Buffer {
 
 /**
  * Encode a number as a 2 byte buffer in big endian
-  * @param {number} num
-  * @returns {Buffer}
+ * @param {number} num
+ * @returns {Buffer}
  */
 export function num2buf2(num: number): Buffer {
   const buf = Buffer.alloc(2);
@@ -90,8 +91,8 @@ export function num2buf2(num: number): Buffer {
 
 /**
  * Hash a string for a claim
-  * @param {string} elem
-  * @returns {Buffer} hash
+ * @param {string} elem
+ * @returns {Buffer} hash
  */
 export function hashString(s: string): Buffer {
   return utils.hashBytes(Buffer.from(s, 'utf8')).slice(1);
@@ -99,9 +100,9 @@ export function hashString(s: string): Buffer {
 
 /**
  * Copy a buffer to an entry element ending at position start
-  * @param {Buffer} elem
-  * @param {number} start
-  * @param {Buffer} src
+ * @param {Buffer} elem
+ * @param {number} start
+ * @param {Buffer} src
  */
 export function copyToElemBuf(elem: Buffer, start: number, src: Buffer) {
   elem.fill(src, 32 - start - src.length, 32 - start);
@@ -109,19 +110,43 @@ export function copyToElemBuf(elem: Buffer, start: number, src: Buffer) {
 
 /**
  * Get a buffer from an entry element ending at position start
-  * @param {Buffer} elem
-  * @param {number} start
-  * @param {number} length
+ * @param {Buffer} elem
+ * @param {number} start
+ * @param {number} length
  */
 export function getElemBuf(elem: Buffer, start: number, length: number): Buffer {
   return elem.slice(32 - start - length, 32 - start);
 }
 
 /**
+ * Set the most significant byte to 0 (in big endian)
+ * @param {Buffer} elem - elem in big endian
+ * @returns {Buffer} hash with the first byte set to 0
+ */
+export function clearElemMostSignificantByte(elem: Buffer): Buffer {
+  return elem.fill(0, 0, 1);
+}
+
+/**
+ * Check element in big endian must be less than claim element field
+ * @param {Buffer} elem - elem in big endian
+ * @throws {Error} throws an error when the check fails
+ */
+export function checkElemFitsClaim(elem: Buffer) {
+  if (elem.length !== 32) {
+    throw new Error('Element is not 32 bytes length');
+  }
+  const elemBigInt = utils.bufferToBigIntBE(elem);
+  if (elemBigInt.greater(babyJub.p)) {
+    throw new Error('Element does not fit on claim element size');
+  }
+}
+
+/**
  * Set the claim type and version of an entry
-  * @param {Object} entry - Entry of the claim
-  * @param {number} claimType
-  * @param {number} version
+ * @param {Object} entry - Entry of the claim
+ * @param {number} claimType
+ * @param {number} version
  */
 export function setClaimTypeVersion(entry: Entry, claimType: number, version: number) {
   const claimTypeBuf = utils.bigIntToBufferBE(bigInt(claimType)).slice(24, 32);
@@ -131,8 +156,8 @@ export function setClaimTypeVersion(entry: Entry, claimType: number, version: nu
 
 /**
  * get the claim type and version of an entry
-  * @param {Object} entry - Entry of the claim
-  * @returns {Object} type and version
+ * @param {Object} entry - Entry of the claim
+ * @returns {Object} type and version
  */
 export function getClaimTypeVersion(entry: Entry): { claimType: number, version: number } {
   return {
@@ -172,9 +197,9 @@ export function newClaimFromEntry(entry: Entry): void | Basic | AuthorizeKSignBa
 }
 
 /**
-* Increase `version` data field by 1
-* @param {Entry} claim - Claim to increase its version value
-*/
+ * Increase `version` data field by 1
+ * @param {Entry} claim - Claim to increase its version value
+ */
 export function incClaimVersion(claim: Entry) {
   const version = claim.elements[3].slice(20, 24).readUInt32BE(0);
   claim.elements[3].writeUInt32BE(version + 1, claim.elements[3].length - 64 / 8 - 32 / 8);
