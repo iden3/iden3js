@@ -1,13 +1,19 @@
 // @flow
 import { Entry } from '../claim/entry';
 import { SetRootKey } from '../claim/claim';
+// import { SparseMerkleTree } from '../sparse-merkle-tree/sparse-merkle-tree';
 
 const ethUtil = require('ethereumjs-util');
+const snarkjs = require('snarkjs');
 
 const utils = require('../utils');
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
+const sparsemerkletree = require('../sparse-merkle-tree/sparse-merkle-tree');
 const claimUtils = require('../claim/claim');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
+
+const { SparseMerkleTree } = sparsemerkletree;
+const { bigInt } = snarkjs;
 
 /**
  * Auxiliary data required to build a set root claim
@@ -73,6 +79,29 @@ class ProofClaim {
     this.leaf = leaf;
     this.proofs = proofs;
   }
+}
+
+function getNonRevocationMTProof(mt: SparseMerkleTree, entry: Entry) {
+  const { claimType, version } = claimUtils.getClaimTypeVersion(entry);
+  const entryCopy = Entry.newEmpty();
+  entry.elements.forEach((elem, i) => elem.copy(entry.elements[i]));
+  claimUtils.setClaimTypeVersion(entryCopy, claimType, version + 1);
+  return mt.generateProof(entryCopy.hiBigInt());
+}
+
+function getProofClaimByHi(mt: SparseMerkleTree, hi: bigInt): ProofClaim {
+  // Get the value in the hi position
+  const entry = mt.getEntryByHi(hi);
+
+  // get the mtp of existence of the claim and the non-existence of the claim's
+  // next version in the tree.
+  const mtpExist = mt.generateProof(hi);
+  const mtpNonExist = getNonRevocationMTProof(mt, entry);
+
+  const root = mt.getRoot();
+  const proofClaimPartial = new ProofClaimPartial(`0x${mtpExist.toString('hex')}`,
+    `0x${mtpNonExist.toString('hex')}`, `0x${root.toString('hex')}`, null);
+  return new ProofClaim('', '', 0, entry.toHex(), [proofClaimPartial]);
 }
 
 /**
@@ -156,6 +185,7 @@ function verifyProofClaim(proof: ProofClaim, publicKey: string): boolean {
 
 module.exports = {
   verifyProofClaim,
+  getProofClaimByHi,
   ProofClaim,
   ProofClaimPartial,
   SetRootAux,
