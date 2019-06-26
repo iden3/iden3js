@@ -1,14 +1,30 @@
 // @flow
 import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../utils';
 
+const { babyJub } = require('circomlib');
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const mimc7 = require('../sparse-merkle-tree/mimc7');
-const claimUtils = require('./claim');
 
 const { bigInt } = snarkjs;
 
 const entryElemsLen = 4;
+
+// TODO: Reorganize claim-utils to avoid cycle dependencies
+/**
+ * Check element in big endian must be less than claim element field
+ * @param {Buffer} elem - elem in big endian
+ * @throws {Error} throws an error when the check fails
+ */
+function checkElemFitsClaim(elem: Buffer) {
+  if (elem.length !== 32) {
+    throw new Error('Element is not 32 bytes length');
+  }
+  const elemBigInt = utils.bufferToBigIntBE(elem);
+  if (elemBigInt.greater(babyJub.p)) {
+    throw new Error('Element does not fit on claim element size');
+  }
+}
 
 /**
  * Generic representation of claim elements
@@ -19,10 +35,10 @@ export class Entry {
   elements: Array<Buffer>;
 
   constructor(e0: Buffer, e1: Buffer, e2: Buffer, e3: Buffer) {
-    claimUtils.checkElemFitsClaim(e0);
-    claimUtils.checkElemFitsClaim(e1);
-    claimUtils.checkElemFitsClaim(e2);
-    claimUtils.checkElemFitsClaim(e3);
+    checkElemFitsClaim(e0);
+    checkElemFitsClaim(e1);
+    checkElemFitsClaim(e2);
+    checkElemFitsClaim(e3);
     this.elements = [e0, e1, e2, e3];
   }
 

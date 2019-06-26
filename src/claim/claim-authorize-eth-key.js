@@ -2,7 +2,7 @@
 import { Entry } from './entry';
 
 const utils = require('../utils');
-const claimUtils = require('./claim');
+const claimUtils = require('./claim-utils');
 
 /**
  * Ethereum key Types

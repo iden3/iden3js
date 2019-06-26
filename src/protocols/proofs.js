@@ -9,7 +9,7 @@ const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const mtHelpers = require('../sparse-merkle-tree/sparse-merkle-tree-utils');
 const sparsemerkletree = require('../sparse-merkle-tree/sparse-merkle-tree');
-const claimUtils = require('../claim/claim');
+const claimUtils = require('../claim/claim-utils');
 const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 
 const { SparseMerkleTree } = sparsemerkletree;
