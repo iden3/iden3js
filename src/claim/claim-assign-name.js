@@ -24,6 +24,7 @@ export class AssignName {
   constructor(name: string, id: string) {
     this.version = 0;
     this.hashName = claimUtils.hashString(name);
+    claimUtils.checkByteLen(bs58.decode(id), 31);
     this.id = id;
   }
 

@@ -5,22 +5,23 @@ import { Entry } from './entry';
 const chai = require('chai');
 const claim = require('./claim');
 const utils = require('../utils');
-const { utilsBabyJub } = require('../crypto/crypto');
+const eddsa = require('../crypto/eddsa-babyjub.js');
 
 const { expect } = chai;
 
 describe('[Claim Authorize KSign Babyjubjub]', () => {
   const versionExample = 1;
   const privKey = '0x28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f';
-  const privKeyBuff = utils.hexToBytes(privKey);
-  const pubKeyBuff = utilsBabyJub.privToPub(privKeyBuff, true);
+  const sk = new eddsa.PrivateKey(utils.hexToBytes(privKey));
+  const pk = sk.public();
 
+  const pubKey = pk.toString();
   let claimAuthKSignBabyJub;
   let entryClaim;
   let parsedClaim;
 
   before('Create new authorizeKSign claim', () => {
-    claimAuthKSignBabyJub = new claim.AuthorizeKSignBabyJub(utils.bytesToHex(pubKeyBuff));
+    claimAuthKSignBabyJub = new claim.AuthorizeKSignBabyJub(pubKey);
     claimAuthKSignBabyJub.version = versionExample;
     expect(claimAuthKSignBabyJub).to.not.be.equal(null);
     entryClaim = claimAuthKSignBabyJub.toEntry();

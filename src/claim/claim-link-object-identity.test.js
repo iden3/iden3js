@@ -13,7 +13,7 @@ describe('[Claim link object identity Id]', () => {
   const objectIndexExample = 0;
   const hashObjectExample = utils.hexToBytes('0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c');
   const idExample = '1pnWU7Jdr4yLxp1azs1r1PpvfErxKGRQdcLBZuq3Z';
-  const auxDataExample = utils.hexToBytes('0x0102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102');
+  const auxDataExample = utils.hexToBytes('0x0f0102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102');
   let claimLinkObject;
   let entryClaim;
   let parsedClaim;
@@ -48,7 +48,7 @@ describe('[Claim link object identity Id]', () => {
   });
   it('Extract bytes from full element', () => {
     const hexFromElement = entryClaim.toHex();
-    expect(hexFromElement).to.be.equal('0x000102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102'
+    expect(hexFromElement).to.be.equal('0x0f0102030405060708090a0b0c0d0e0f01020304050607090a0b0c0d0e0f0102'
                                        + '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c'
                                        + '0000041c980d8faa54be797337fa55dbe62a7675e0c83ce5383b78a04b26b9f4'
                                        + '0000000000000000000000000000000000000001000000010000000000000005');
@@ -60,7 +60,7 @@ describe('[Claim link object identity Id]', () => {
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x297689656773c61c35ae21263292890c77030cf3c86554a6bb7e8d884a82e6af';
+    const hvResult = '0x28f5f03a1dbeeca984ed4c7d369f601a96e0f33e37985604a9cc2a81b22c19c0';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

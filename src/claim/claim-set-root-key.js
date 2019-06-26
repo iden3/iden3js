@@ -23,6 +23,7 @@ export class SetRootKey {
    * Initialize claim data structure from fields
    */
   constructor(id: string, rootKey: Buffer) {
+    claimUtils.checkByteLen(bs58.decode(id), 31);
     this.id = id;
     claimUtils.checkElemFitsClaim(rootKey);
     this.rootKey = rootKey;

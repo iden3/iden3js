@@ -4,6 +4,7 @@ import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../utils';
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const mimc7 = require('../sparse-merkle-tree/mimc7');
+const claimUtils = require('./claim');
 
 const { bigInt } = snarkjs;
 
@@ -18,6 +19,10 @@ export class Entry {
   elements: Array<Buffer>;
 
   constructor(e0: Buffer, e1: Buffer, e2: Buffer, e3: Buffer) {
+    claimUtils.checkElemFitsClaim(e0);
+    claimUtils.checkElemFitsClaim(e1);
+    claimUtils.checkElemFitsClaim(e2);
+    claimUtils.checkElemFitsClaim(e3);
     this.elements = [e0, e1, e2, e3];
   }
 

@@ -1,15 +1,17 @@
 const chai = require('chai');
 const iden3 = require('../index');
+const eddsa = require('../crypto/eddsa-babyjub.js');
 
 const { expect } = chai;
 
 describe('[identity-utils] calculateIdGenesis()', () => {
   it('check calculateIdGenesis()', () => {
     const privKey = '0x28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f';
-    const privKeyBuff = iden3.utils.hexToBytes(privKey);
-    const pubKeyBuff = iden3.crypto.utilsBabyJub.privToPub(privKeyBuff, true);
+    const sk = new eddsa.PrivateKey(iden3.utils.hexToBytes(privKey));
+    const pk = sk.public();
+
+    const kopStr = pk.toString();
     // kopStr: 0xab05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c
-    const kopStr = iden3.utils.bytesToHex(pubKeyBuff);
     // public keys
     const kdisStr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';
     const kreenStr = '0xe0fbce58cfaa72812103f003adce3f284fe5fc7c';

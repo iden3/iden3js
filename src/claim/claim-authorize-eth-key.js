@@ -33,6 +33,7 @@ export class AuthorizeEthKey {
    */
   constructor(ethKey: string, ethKeyType: number) {
     this.version = 0;
+    claimUtils.checkByteLen(utils.hexToBytes(ethKey), 20);
     this.ethKey = ethKey;
     this.ethKeyType = ethKeyType;
   }
