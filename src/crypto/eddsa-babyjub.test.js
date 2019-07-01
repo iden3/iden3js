@@ -6,6 +6,7 @@ const chai = require('chai');
 const { bigInt } = require('snarkjs');
 const eddsa = require('./eddsa-babyjub.js');
 const utils = require('../utils');
+const utilsBabyJub = require('./babyjub-utils.js');
 
 const { expect } = chai;
 
@@ -47,5 +48,12 @@ describe('[eddsa babyjyb]', () => {
       + '0dab19c5a0a75973cd75a54780de0c3a41ede6f57396fe99b5307fff3ce7cc04');
     const sig2 = eddsa.Signature.newFromCompressed(sigComp);
     expect(pk.verifyMimc7(msg, sig2)).to.be.equal(true);
+  });
+
+  it('scalar', () => {
+    const privKeyBuff = utils.hexToBytes(skHex);
+    const scalarPriv1 = utilsBabyJub.privToScalar(privKeyBuff);
+    const scalarPriv2 = sk.toPrivScalar();
+    expect(scalarPriv1.toString()).to.be.equal(scalarPriv2.toString());
   });
 });

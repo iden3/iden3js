@@ -21,9 +21,11 @@ export class AuthorizeKSignBabyJub {
 
   /**
    * Initialize claim data structure from fields
+   * pubKComp is in little endian
    */
   constructor(pubKComp: string) {
-    const pubKCompBuf = utils.hexToBytes(pubKComp);
+    const pubKCompBuf = utils.swapEndianness(utils.hexToBytes(pubKComp));
+    claimUtils.checkByteLen(pubKCompBuf, 32);
     this.sign = (pubKCompBuf[0] & 0x80) !== 0;
     pubKCompBuf[0] &= 0x7F;
     this.ay = pubKCompBuf;
@@ -39,9 +41,10 @@ export class AuthorizeKSignBabyJub {
     // Parse element 3
     const { version } = claimUtils.getClaimTypeVersion(entry);
     // Parse element 2
-    const ay = Buffer.from(claimUtils.getElemBuf(entry.elements[2], 0, 32));
+    let ay = Buffer.from(claimUtils.getElemBuf(entry.elements[2], 0, 32));
     const sign = claimUtils.getElemBuf(entry.elements[3], 8 + 4, 1)[0] !== 0;
     ay[0] |= sign ? 0x80 : 0x00;
+    ay = utils.swapEndianness(ay);
     const claim = new AuthorizeKSignBabyJub(ay.toString('hex'));
     claim.version = version;
     return claim;

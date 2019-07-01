@@ -1,6 +1,5 @@
 // @flow
 import { Entry } from './entry';
-
 import { AssignName } from './claim-assign-name';
 import { AuthorizeKSignSecp256k1 } from './claim-authorize-ksign-secp256k1';
 import { AuthorizeKSignBabyJub } from './claim-authorize-ksign-babyjub';
@@ -10,6 +9,7 @@ import { SetRootKey } from './claim-set-root-key';
 import { AuthorizeEthKey, ETH_KEY_TYPE } from './claim-authorize-eth-key';
 
 export {
+  Entry,
   AssignName,
   AuthorizeKSignSecp256k1,
   AuthorizeKSignBabyJub,
@@ -143,6 +143,18 @@ export function checkElemFitsClaim(elem: Buffer) {
 }
 
 /**
+ * Check element in big endian must be length size specified
+ * @param {Buffer} elem - elem in big endian
+ * @param {Number} len - length that elem should be
+ * @throws {Error} throws an error when the check fails
+ */
+export function checkByteLen(elem: Buffer, len: number) {
+  if (elem.length !== len) {
+    throw new Error(`Element is not ${len} bytes length`);
+  }
+}
+
+/**
  * Set the claim type and version of an entry
  * @param {Object} entry - Entry of the claim
  * @param {number} claimType
@@ -204,5 +216,3 @@ export function incClaimVersion(claim: Entry) {
   const version = claim.elements[3].slice(20, 24).readUInt32BE(0);
   claim.elements[3].writeUInt32BE(version + 1, claim.elements[3].length - 64 / 8 - 32 / 8);
 }
-
-export { Entry };

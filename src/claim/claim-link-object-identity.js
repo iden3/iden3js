@@ -44,9 +44,11 @@ export class LinkObjectIdentity {
   constructor(objectType: number, objectIndex: number, id: string, objectHash: Buffer, auxData: Buffer) {
     this.objectType = objectType;
     this.objectIndex = objectIndex;
+    claimUtils.checkByteLen(bs58.decode(id), 31);
     this.id = id;
     claimUtils.checkElemFitsClaim(objectHash);
     this.objectHash = objectHash;
+    claimUtils.checkElemFitsClaim(auxData);
     this.auxData = auxData;
     this.version = 0;
   }
@@ -66,7 +68,7 @@ export class LinkObjectIdentity {
     // Parse element 1
     const objectHash = claimUtils.getElemBuf(entry.elements[1], 0, 32);
     // Parse element 0
-    const auxData = claimUtils.getElemBuf(entry.elements[0], 0, 31);
+    const auxData = claimUtils.getElemBuf(entry.elements[0], 0, 32);
     const claim = new LinkObjectIdentity(objectType, objectIndex, id, objectHash, auxData);
     claim.version = version;
     return claim;

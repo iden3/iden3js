@@ -1,6 +1,7 @@
 // @flow
 
 const crypto = require('crypto');
+const createBlakeHash = require('blake-hash');
 const { babyJub, eddsa } = require('circomlib');
 const { bigInt } = require('snarkjs');
 
@@ -154,6 +155,16 @@ export class PrivateKey {
    */
   public(): PublicKey {
     return new PublicKey(eddsa.prv2pub(this.sk));
+  }
+
+  /**
+   * Retrieve private scalar of the PrivateKey
+   * @returns {bigInt} Prvate scalar derived from PrivateKey
+   */
+  toPrivScalar(): bigInt {
+    const h1 = createBlakeHash('blake512').update(this.sk).digest();
+    const sBuff = eddsa.pruneBuffer(h1.slice(0, 32));
+    return (bigInt.leBuff2int(sBuff)).shr(3);
   }
 
   /**

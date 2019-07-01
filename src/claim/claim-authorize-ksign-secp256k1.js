@@ -22,7 +22,14 @@ export class AuthorizeKSignSecp256k1 {
    * Initialize claim data structure from fields
    */
   constructor(pubKeyCompHex: string | Buffer) {
-    this.pubKeyComp = pubKeyCompHex instanceof Buffer ? pubKeyCompHex : utils.hexToBytes(pubKeyCompHex);
+    if (pubKeyCompHex instanceof Buffer) {
+      claimUtils.checkByteLen(pubKeyCompHex, 33);
+      this.pubKeyComp = pubKeyCompHex;
+    } else {
+      const pubKeyCompBuff = utils.hexToBytes(pubKeyCompHex);
+      claimUtils.checkByteLen(pubKeyCompBuff, 33);
+      this.pubKeyComp = pubKeyCompBuff;
+    }
     this.version = 0;
   }
 

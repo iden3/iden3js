@@ -22,7 +22,9 @@ export class Basic {
    * Initialize claim data structure from fields
    */
   constructor(index: Buffer, extraData: Buffer) {
+    claimUtils.checkByteLen(index, 50);
     this.index = index;
+    claimUtils.checkByteLen(extraData, 62);
     this.extraData = extraData;
     this.version = 0;
   }
