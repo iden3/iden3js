@@ -1,7 +1,7 @@
 // @flow
 import { Entry } from './entry';
 
-const claimUtils = require('./claim');
+const claimUtils = require('./claim-utils');
 
 /**
  * Class representing a basic claim

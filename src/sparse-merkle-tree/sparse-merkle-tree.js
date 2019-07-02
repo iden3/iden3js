@@ -1,5 +1,5 @@
 import * as helpers from './sparse-merkle-tree-utils';
-import { Entry } from '../claim/entry';
+import { Entry } from '../claim/claim';
 
 const snarkjs = require('snarkjs');
 const utils = require('../utils');

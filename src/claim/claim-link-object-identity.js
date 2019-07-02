@@ -2,7 +2,7 @@
 import { Entry } from './entry';
 
 const bs58 = require('bs58');
-const claimUtils = require('./claim');
+const claimUtils = require('./claim-utils');
 
 export const TYPE_OBJECT = {
   passport: 0,
