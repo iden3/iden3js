@@ -17,7 +17,7 @@ const db = new iden3.Db.Memory();
 const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
 
 describe('[proofs] ProofClaim', () => {
-  it('nonce', () => {
+  it('proof', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
 
     const claim1 = entryFromInts(33, 44, 55, 66);
@@ -30,5 +30,21 @@ describe('[proofs] ProofClaim', () => {
 
     const proofClaim = iden3.protocols.getProofClaimByHi(mt, claim1.hiBigInt());
     expect(proofClaim).to.be.not.equal(undefined);
+
+    // Verify
+    const entry = Entry.newFromHex(proofClaim.leaf);
+    const hiHex = iden3.utils.bytesToHex(entry.hi());
+    const hvHex = iden3.utils.bytesToHex(entry.hv());
+    const resCheck = iden3.sparseMerkleTree.checkProof(proofClaim.proofs[0].root, proofClaim.proofs[0].mtp0,
+      hiHex, hvHex);
+    expect(resCheck).to.be.equal(true);
+    // non-existence
+    iden3.claim.claimUtils.incClaimVersion(entry);
+    const hiHex2 = iden3.utils.bytesToHex(entry.hi());
+    const hvHex2 = iden3.utils.bytesToHex(entry.hv());
+    const resCheck2 = iden3.sparseMerkleTree.checkProof(proofClaim.proofs[0].root, proofClaim.proofs[0].mtp1,
+      hiHex2, hvHex2);
+    // check
+    expect(resCheck2).to.be.equal(true);
   });
 });
