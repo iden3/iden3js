@@ -84,7 +84,7 @@ class ProofClaim {
 function getNonRevocationMTProof(mt: SparseMerkleTree, entry: Entry) {
   const { claimType, version } = claimUtils.getClaimTypeVersion(entry);
   const entryCopy = Entry.newEmpty();
-  entry.elements.forEach((elem, i) => elem.copy(entry.elements[i]));
+  entry.elements.forEach((elem, i) => elem.copy(entryCopy.elements[i]));
   claimUtils.setClaimTypeVersion(entryCopy, claimType, version + 1);
   return mt.generateProof(entryCopy.hiBigInt());
 }
