@@ -1,16 +1,65 @@
 const chai = require('chai');
 const Db = require('./db');
-const KeyContainer = require('../key-container/key-container');
+const CONSTANTS = require('../constants');
 
 const { expect } = chai;
 
-describe('[Database] export and import database', () => {
-  const mnemonic = 'enjoy alter satoshi squirrel special spend crop link race rally two eye';
+describe('[localStorage database]', () => {
   let dataBase;
-  let keyContainer;
+
+  it('Check subprefix', () => {
+    const dbNoSubprefix = new Db.LocalStorage('');
+    expect(dbNoSubprefix.prefix).to.be.equal(CONSTANTS.DBPREFIX);
+    const dbSubprefix = new Db.LocalStorage('subprefix');
+    expect(dbSubprefix.prefix).to.be.equal(`${CONSTANTS.DBPREFIX}subprefix`);
+  });
+
+  it('Create database and fill it', () => {
+    dataBase = new Db.LocalStorage();
+    for (let i = 0; i < 10; i++) {
+      const key = `key-${i}`;
+      const value = `value-${i}`;
+      dataBase.insert(key, value);
+    }
+  });
+
+  it('Get database values', () => {
+    for (let i = 0; i < 10; i++) {
+      const key = `key-${i}`;
+      const value = dataBase.get(key);
+      expect(value).to.be.equal(`value-${i}`);
+    }
+  });
+
+  it('List keys', () => {
+    const keysList = dataBase.listKeys('');
+    for (let i = 0; i < 10; i++) {
+      const key = `key-${i}`;
+      expect(keysList[i]).to.be.equal(key);
+    }
+  });
+
+  it('Clear single key', () => {
+    const singleKey = 'key-3';
+    dataBase.delete(singleKey);
+    const value = dataBase.get(singleKey);
+    expect(value).to.be.equal(null);
+  });
+
+  it('Clear full database', () => {
+    dataBase.deleteAll();
+    for (let i = 0; i < 10; i++) {
+      const key = `key-${i}`;
+      const value = dataBase.get(key);
+      expect(value).to.be.equal(null);
+    }
+  });
+});
+
+describe('[Database] export and import database', () => {
+  let dataBase;
   before('Create database and fill it', () => {
     dataBase = new Db.LocalStorage();
-    keyContainer = new KeyContainer(dataBase);
     for (let i = 0; i < 10; i++) {
       const key = `key-${i}`;
       const value = `value-${i}`;
@@ -19,26 +68,14 @@ describe('[Database] export and import database', () => {
     }
   });
 
-  before('Generate public key backup', () => {
-    keyContainer.unlock('pass');
-    const publicBackupKey = keyContainer.generateKeyBackUp(mnemonic);
-    expect(publicBackupKey).to.be.not.equal(undefined);
-    keyContainer.lock();
-  });
-
-  after('lock', () => {
-    keyContainer.lock();
-  });
-
   it('Export and import database', () => {
-    keyContainer.unlock('pass');
     // Export wallet
-    const lsEncrypted = dataBase.exportWallet(keyContainer);
-    expect(lsEncrypted).to.be.not.equal(undefined);
+    const ls = dataBase.export();
+    expect(ls).to.be.not.equal(undefined);
     // Import wallet
     // Delete LocalStorage
     dataBase.deleteAll();
-    const ack = dataBase.importWallet(mnemonic, keyContainer, lsEncrypted);
+    const ack = dataBase.import(ls);
     if (!ack) {
       throw new Error('Error importing database');
     }

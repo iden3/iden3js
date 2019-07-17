@@ -1,4 +1,3 @@
-const kcUtils = require('../key-container/kc-utils');
 const CONSTANTS = require('../constants');
 
 /**
@@ -14,6 +13,7 @@ class Db {
   }
 
   /**
+   * Method to store [key - value] on database
    * @param {String} key
    * @param {String} value
    */
@@ -22,6 +22,7 @@ class Db {
   }
 
   /**
+   * Method to retrieve a value given a key
    * @param {String} key
    * @returns {String}
    */
@@ -30,12 +31,16 @@ class Db {
   }
 
   /**
+   * Method to delete a value given a key
    * @param {String} key
    */
   delete(key) {
     localStorage.removeItem(this.prefix + key);
   }
 
+  /**
+   * Method to delete all the [key - value] items
+   */
   deleteAll() {
     localStorage.clear();
   }
@@ -48,8 +53,10 @@ class Db {
   listKeys(prefix) {
     const keyList = [];
     const localStorageLength = localStorage.length;
+
     for (let i = 0, len = localStorageLength; i < len; i++) {
       // get only the stored data related to identities (that have the prefix)
+
       if (localStorage.key(i).indexOf(this.prefix + prefix) !== -1) {
         const key = localStorage.key(i);
         keyList.push(key.replace(this.prefix, ''));
@@ -59,75 +66,36 @@ class Db {
   }
 
   /**
-   * Gets all the localStorage data related with the iden3js library, and packs it into an encrpyted string
-   * @param {Object} kc - KeyContainer
-   * @returns {Object} - encrypted packed data
+   * Gets all the localStorage data related with the iden3js library and packs it into a string
+   * @returns {String} - packed data
    */
-  exportLocalStorage(kc) {
-    if (!kc.encryptionKey) {
-      // KeyContainer not unlocked
-      console.error('Error: KeyContainer not unlocked');
-      return undefined;
-    }
+
+  export() {
     const dbExp = {};
 
     for (let i = 0; i < localStorage.length; i++) {
       // get only the stored data related to db (that have the prefix)
       if (localStorage.key(i).indexOf(this.prefix) !== -1) {
-        dbExp[localStorage.key(i)] = localStorage.getItem(localStorage.key(i));
+        dbExp[localStorage.key(i).replace(this.prefix, '')] = localStorage.getItem(localStorage.key(i));
       }
     }
+
     const dbExpStr = JSON.stringify(dbExp);
-    return kcUtils.encrypt(kc.encryptionKey, dbExpStr); // encrypted database
+    return dbExpStr;
   }
 
   /**
-   * Decrypts the encrypted packed data and saves it into localStorage
-   * @param {Object} kc - KeyContainer
-   * @param {String} Database encrypted
+   * Saves packed data into localStorage
+   * @param {String} dbExpStr - packed data
    */
-  importLocalStorage(kc, dbEncrypted) {
-    const dbExpStr = kcUtils.decrypt(kc.encryptionKey, dbEncrypted);
-    const dbExp = JSON.parse(dbExpStr);
 
-    Object.keys(dbExp).forEach((key) => {
-      localStorage.setItem(key, dbExp[key]);
-    });
-  }
-
-  /**
-   * Gets all the localStorage data and packs it into an encrpyted string
-   * @param {Object} kc - KeyContainer
-   * @returns {String} - Encrypted packed data
-   */
-  exportWallet(kc) {
+  import(dbExpStr) {
     try {
-      const lsStr = JSON.stringify(localStorage);
-      const pubBackupKey = kc.getBackupPubKey();
-
-      return kcUtils.encryptBox(pubBackupKey, lsStr);
-    } catch (error) {
-      return undefined;
-    }
-  }
-
-  /**
-   * Decrypts the encrypted database packed data and saves it into localStorage
-   * @param {String} masterSeed - Mnemonic representing the master seed
-   * @param {Object} kc - KeyContainer
-   * @param {String} Database encrypted
-   * @returns {Bool} - True if database is imported correctly, otherwise False
-   */
-  importWallet(masterSeed, kc, dbEncrypted) {
-    try {
-      const keyPair = kc.getPrivKeyBackUpFromSeed(masterSeed);
-      const dbExpStr = kcUtils.decryptBox(keyPair.privateKey, keyPair.publicKey, dbEncrypted);
       const dbExp = JSON.parse(dbExpStr);
-
-      this.deleteAll();
       Object.keys(dbExp).forEach((key) => {
-        localStorage.setItem(key, dbExp[key]);
+        localStorage.setItem(this.prefix + key, dbExp[key]);
       });
+
       return true;
     } catch (error) {
       return false;
