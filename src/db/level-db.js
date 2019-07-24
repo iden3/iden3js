@@ -1,12 +1,7 @@
 const level = require('level');
 const CONSTANTS = require('../constants');
-/**
- * Database interface for level db file
- */
+
 class LeveldB {
-  /**
-   * @param {Bool} prefix - Database prefix 'i3db-' added to key values
-   */
   constructor(prefix = true, pathDb = `${__dirname}/leveldir`) {
     this.prefix = prefix ? CONSTANTS.DBPREFIX : '';
     this.pathDb = pathDb;
@@ -17,72 +12,71 @@ class LeveldB {
     this.db.put(this.prefix + key, value);
   }
 
-  get(key) {
-    const self = this;
-    return new Promise((resolve) => {
-      self.db.get(self.prefix + key, (err, value) => {
-        if (err) return resolve(null);
-        resolve(value);
-        return value;
-      });
+  get(key, cb) {
+    this.db.get(this.prefix + key, (err, value) => {
+      if (err) return cb(null);
+      return cb(value);
     });
   }
 
-  delete(key) {
-    this.db.del(this.prefix + key);
+  delete(key, cb) {
+    this.db.del(this.prefix + key, (err) => {
+      if (err) return cb(false);
+      return cb(true);
+    });
   }
 
   close() {
     this.db.close();
   }
 
-  async deleteAll() {
-    const keysList = await this.listKeys();
-    for (let i = 0; i < keysList.length; i++) {
-      this.db.del(this.prefix + keysList[i]);
-    }
-  }
-
-  listKeys(/* prefix */) {
-    const keysList = [];
-    const self = this;
-    // let subprefix = prefix;
-    return new Promise((resolve, reject) => {
-      self.db.createKeyStream()
-        .on('data', (data) => {
-          if (data.indexOf(self.prefix /* + subprefix */) !== -1) {
-            keysList.push(data.replace(self.prefix, ''));
-          }
-        })
-        .on('error', (err) => {
-          reject(err);
-        })
-        .on('close', () => {
-          resolve(keysList);
-        });
+  deleteAll(cb) {
+    this.listKeys((listKeys) => {
+      const op = [];
+      for (let i = 0; i < listKeys.length; i++) {
+        op.push({ type: 'del', key: this.prefix + listKeys[i] });
+      }
+      this.db.batch(op, (err) => {
+        if (err) return cb(false);
+        return cb(true);
+      });
     });
   }
 
-  async export() {
-    const dbExp = {};
-    const keysList = await this.listKeys();
-    for (let i = 0; i < keysList.length; i++) {
-      dbExp[keysList[i]] = await this.get(keysList[i]);
-    }
-    const dbExpStr = JSON.stringify(dbExp);
-    return dbExpStr;
+  listKeys(cb) {
+    const keysList = [];
+    this.db.createKeyStream()
+      .on('data', (data) => {
+        if (data.indexOf(this.prefix) !== -1) {
+          keysList.push(data.replace(this.prefix, ''));
+        }
+      })
+      .on('close', () => {
+        cb(keysList);
+      });
   }
 
-  import(dbExpStr) {
+  export(cb) {
+    const dbExp = {};
+    this.db.createReadStream()
+      .on('data', (data) => {
+        dbExp[data.key] = data.value;
+      })
+      .on('close', () => {
+        const dbExpStr = JSON.stringify(dbExp);
+        return cb(dbExpStr);
+      });
+  }
+
+  import(dbExpStr, cb) {
     try {
       const dbExp = JSON.parse(dbExpStr);
-      Object.keys(dbExp).forEach(async (key) => {
-        await this.insert(key, dbExp[key]);
+      Object.keys(dbExp).forEach((key) => {
+        this.db.put(key, dbExp[key]);
       });
-
-      return true;
+      return cb(true);
     } catch (error) {
-      return false;
+      return cb(false);
     }
   }
 }

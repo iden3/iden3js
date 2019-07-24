@@ -15,41 +15,53 @@ describe('[level database]', () => {
     }
   });
 
-  it('Get database values', async () => {
-    for (let i = 0; i < 10; i++) {
-      const key = `key-${i}`;
-      const value = await dataBase.get(key);
-      expect(value).to.be.equal(`value-${i}`);
-    }
+  it('Get database value', (done) => {
+    const key = `key-${3}`;
+    dataBase.get(key, (value) => {
+      expect(value).to.be.equal(`value-${3}`);
+      done();
+    });
   });
 
-  it('List keys', async () => {
-    const keysList = await dataBase.listKeys();
-    for (let i = 0; i < 10; i++) {
-      const key = `key-${i}`;
-      expect(keysList[i]).to.be.equal(key);
-    }
+  it('List keys', (done) => {
+    dataBase.listKeys((keysList) => {
+      const keys = [];
+      for (let i = 0; i < 10; i++) {
+        const key = `key-${i}`;
+        keys.push(key);
+      }
+      expect(keysList).eql(keys);
+      done();
+    });
   });
 
-  it('Clear single key', async () => {
+  it('Clear single key', (done) => {
     const singleKey = 'key-3';
-    await dataBase.delete(singleKey);
-    const value = await dataBase.get(singleKey);
-    expect(value).to.be.equal(null);
+    dataBase.delete(singleKey, (del) => {
+      if (del) {
+        dataBase.get(singleKey, (value) => {
+          expect(value).to.be.equal(null);
+          done();
+        });
+      }
+    });
   });
 
-  it('Clear full database', async () => {
-    await dataBase.deleteAll();
-    for (let i = 0; i < 10; i++) {
-      const key = `key-${i}`;
-      const value = await dataBase.get(key);
-      expect(value).to.be.equal(null);
-    }
+  it('Clear full database', (done) => {
+    dataBase.deleteAll((del) => {
+      if (del) {
+        const key = `key-${6}`;
+        dataBase.get(key, (value) => {
+          expect(value).to.be.equal(null);
+          done();
+        });
+      }
+    });
   });
 
-  after('Close database', async () => {
-    await dataBase.close();
-    expect(dataBase.db._db.db.status).to.be.equal('closing');
+  after('Close', () => {
+    dataBase.close();
+    expect(dataBase.db._db.db.status).to.be.equal('closing' || 'closed');
   });
 });
 
@@ -65,28 +77,38 @@ describe('[Database] export and import database', () => {
     }
   });
 
-  it('Export and import database', async () => {
-    // Export wallet
-    const ls = await dataBase.export();
-    expect(ls).to.be.not.equal(undefined);
-    // Import wallet
-    // Delete LocalStorage
-    await dataBase.deleteAll();
-    const ack = await dataBase.import(ls);
-    if (!ack) {
-      throw new Error('Error importing database');
-    }
-    for (let i = 0; i < 10; i++) {
-      const key = `key-${i}`;
-      const value = `value-${i}`;
-      const importValue = await dataBase.get(key);
-      expect(importValue).to.be.equal(value);
-    }
+  it('Export and import database', (done) => {
+    dataBase.export((dbExpStr) => {
+      expect(dbExpStr).to.be.not.equal(undefined);
+      dataBase.deleteAll((del) => {
+        if (del) {
+          dataBase.import(dbExpStr, (imp) => {
+            if (imp) {
+              const key = `key-${6}`;
+              dataBase.get(key, (value) => {
+                expect(value).to.be.equal(`value-${6}`);
+                done();
+              });
+            } else {
+              expect(imp).to.be.equal(true);
+              done();
+            }
+          });
+        } else {
+          expect(del).to.be.equal(true);
+          done();
+        }
+      });
+    });
   });
 
-  after('Close database', async () => {
-    await dataBase.deleteAll();
-    await dataBase.close();
-    expect(dataBase.db._db.db.status).to.be.equal('closing');
+  after('Close', (done) => {
+    dataBase.deleteAll((del) => {
+      if (del) {
+        dataBase.close();
+        expect(dataBase.db._db.db.status).to.be.equal('closing' || 'closed');
+        done();
+      }
+    });
   });
 });
