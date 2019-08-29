@@ -176,6 +176,7 @@ class SparseMerkleTree {
       claimIndex += 1;
     }
     const entry = new Entry(nodeValue[0], nodeValue[1], nodeValue[2], nodeValue[3]);
+    console.log('>>>>>> getEntryByHi entry:', entry);
     if (entry.hiBigInt() !== hi) {
       throw new Error(errorFoundDiffEntry);
     }
