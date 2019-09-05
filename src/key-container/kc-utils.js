@@ -7,7 +7,7 @@ const sealedBox = require('tweetnacl-sealedbox-js');
 const { bigInt } = require('snarkjs');
 nacl.util = require('tweetnacl-util');
 const utils = require('../utils');
-const mimc7 = require('../sparse-merkle-tree/mimc7');
+const { mimc7, poseidon } = require('circomlib');
 
 const errorLockedMsg = 'Key Container is locked';
 const errorKeySeedNoExistMsg = 'key seed doesn\'t exists';
@@ -120,20 +120,6 @@ function decryptBox(privKey: string, pubKey: string, dataEncrypted: string) {
   return nacl.util.encodeUTF8(data);
 }
 
-function mimc7HashBuffer(msg: Buffer): bigInt {
-  const n = 31;
-  const msgArray = [];
-  const fullParts = Math.floor(msg.length / n);
-  for (let i = 0; i < fullParts; i++) {
-    const v = bigInt.leBuff2int(msg.slice(n * i, n * (i + 1)));
-    msgArray.push(v);
-  }
-  if (msg.length % n !== 0) {
-    const v = bigInt.leBuff2int(msg.slice(fullParts * n));
-    msgArray.push(v);
-  }
-  return mimc7.multiHash(msgArray);
-}
 
 module.exports = {
   concatSignature,
@@ -146,5 +132,4 @@ module.exports = {
   errorKeySeedNoExistMsg,
   errorFailDecryptMsg,
   errorDbKeyNoExistMsg,
-  mimc7HashBuffer,
 };

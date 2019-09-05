@@ -4,7 +4,7 @@ import { Entry } from '../claim/claim';
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
-const mimc7 = require('./mimc7');
+const { mimc7 } = require('circomlib');
 
 const { bigInt } = snarkjs;
 

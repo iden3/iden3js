@@ -23,18 +23,18 @@ describe('[eddsa babyjyb]', () => {
   const sig = sk.signMimc7(msg);
 
   it('pk.x', () => {
-    expect(pk.p[0].toString()).to.be.equal('2610057752638682202795145288373380503107623443963127956230801721756904484787');
+    expect(pk.p[0].toString()).to.be.equal('13277427435165878497778222415993513565335242147425444199013288855685581939618');
   });
 
   it('pk.y', () => {
-    expect(pk.p[1].toString()).to.be.equal('16617171478497210597712478520507818259149717466230047843969353176573634386897');
+    expect(pk.p[1].toString()).to.be.equal('13622229784656158136036771217484571176836296686641868549125388198837476602820');
   });
 
   it('sign', () => {
     // expect(.toString()).to.be.equal('');
-    expect(sig.r8[0].toString()).to.be.equal('4974729414807584049518234760796200867685098748448054182902488636762478901554');
-    expect(sig.r8[1].toString()).to.be.equal('18714049394522540751536514815950425694461287643205706667341348804546050128733');
-    expect(sig.s.toString()).to.be.equal('2171284143457722024136077617757713039502332290425057126942676527240038689549');
+    expect(sig.r8[0].toString()).to.be.equal('11384336176656855268977457483345535180380036354188103142384839473266348197733');
+    expect(sig.r8[1].toString()).to.be.equal('15383486972088797283337779941324724402501462225528836549661220478783371668959');
+    expect(sig.s.toString()).to.be.equal('2523202440825208709475937830811065542425109372212752003460238913256192595070');
   });
 
   it('verify', () => {
@@ -44,8 +44,8 @@ describe('[eddsa babyjyb]', () => {
   it('compress & decompress', () => {
     const sigComp = sig.compress();
     expect(sigComp.toString('hex')).to.be.equal(''
-      + '5dfb6f843c023fe3e52548ccf22e55c81b426f7af81b4f51f7152f2fcfc65f29'
-      + '0dab19c5a0a75973cd75a54780de0c3a41ede6f57396fe99b5307fff3ce7cc04');
+      + 'dfedb4315d3f2eb4de2d3c510d7a987dcab67089c8ace06308827bf5bcbe02a2'
+      + '7ed40dab29bf993c928e789d007387998901a24913d44fddb64b1f21fc149405');
     const sig2 = eddsa.Signature.newFromCompressed(sigComp);
     expect(pk.verifyMimc7(msg, sig2)).to.be.equal(true);
   });

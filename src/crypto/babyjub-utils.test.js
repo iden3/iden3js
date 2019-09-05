@@ -13,13 +13,13 @@ describe('[bayjub utils]', () => {
 
   it('Generate public key uncompressed', () => {
     const pubKey = babyUtils.privToPub(privKeyBuff, false);
-    expect(utils.bytesToHex(pubKey)).to.be.equal('0x1fbd916441cc6f6299b3078dcbc00c476a520db3619f8eb58e41b27baed97e4d'
-                                                 + '2b05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c');
+    expect(utils.bytesToHex(pubKey)).to.be.equal('0x270000b73fba5f79c0491a32d4e64f69813db369ea106c09bc5ca4ae220cbb81'
+                                                  + '2d9e82263b94a343ee95d56c810a5a0adb63a439cd5b4944dfb56f09e28c6f04');
   });
 
   it('Generate public key compressed', () => {
     const pubKeyCompressed = babyUtils.privToPub(privKeyBuff, true);
-    expect(utils.bytesToHex(pubKeyCompressed)).to.be.equal('0xab05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c');
+    expect(utils.bytesToHex(pubKeyCompressed)).to.be.equal('0xad9e82263b94a343ee95d56c810a5a0adb63a439cd5b4944dfb56f09e28c6f04');
   });
 
   it('Generate public key from private key different than 32 bytes', () => {

@@ -41,12 +41,12 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
     const hexFromElement = entryClaim.toHex();
     expect(hexFromElement).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000'
                                        + '0000000000000000000000000000000000000000000000000000000000000000'
-                                       + '2b05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c'
+                                       + '2d9e82263b94a343ee95d56c810a5a0adb63a439cd5b4944dfb56f09e28c6f04'
                                        + '0000000000000000000000000000000000000001000000010000000000000001');
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x04f41fdac3240e7b68905df19a2394e4a4f1fb7eaeb310e39e1bb0b225b7763f';
+    const hiResult = '0x2e962176e9f24e72f689da23361ad939f04417932fb0cb3d973f2cad04fe5048';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
@@ -60,6 +60,6 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
     const c0 = (claim.newClaimFromEntry(entry): any);
     expect(c0.version).to.be.equal(1);
     expect(c0.sign).to.be.equal(true);
-    expect(c0.ay.toString('hex')).to.be.equal('2b05184c7195b259c95169348434f3a7228fbcfb187d3b07649f3791330cf05c');
+    expect(c0.ay.toString('hex')).to.be.equal('2d9e82263b94a343ee95d56c810a5a0adb63a439cd5b4944dfb56f09e28c6f04');
   });
 });

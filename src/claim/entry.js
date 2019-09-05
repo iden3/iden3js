@@ -1,10 +1,9 @@
 // @flow
 import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../utils';
 
-const { babyJub } = require('circomlib');
+const { babyJub, mimc7, poseidon } = require('circomlib');
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
-const mimc7 = require('../sparse-merkle-tree/mimc7');
 
 const { bigInt } = snarkjs;
 
