@@ -4,7 +4,7 @@ const chai = require('chai');
 const snarkjs = require('snarkjs');
 const iden3 = require('../index');
 // const helpers = require('./sparse-merkle-tree-utils');
-const mimc7 = require('./mimc7');
+const { mimc7 } = require('circomlib');
 
 const { bigInt } = snarkjs;
 const { expect } = chai;
