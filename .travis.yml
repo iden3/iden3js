@@ -3,7 +3,11 @@ sudo: required
 language: node_js
 node_js:
   - "10"
-script: 
+install:
+  - npm install || true
+  - rm -rf /home/travis/build/iden3/iden3js/node_modules/web3/node_modules/websocket/.git/
+  - npm install
+script:
   - npm run flow check
   - npm run lint
   - npm run test:unit
