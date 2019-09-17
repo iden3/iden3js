@@ -9,8 +9,8 @@ const CONSTANTS = require('../constants');
 const utils = require('../utils');
 const kcUtils = require('./kc-utils');
 const eddsa = require('../crypto/eddsa-babyjub');
+const { poseidon } = require('../crypto/crypto.js');
 
-const { mimc7 } = require('../crypto/crypto.js');
 const { errorLockedMsg, errorDbKeyNoExistMsg } = kcUtils;
 
 nacl.util = require('tweetnacl-util');
@@ -417,7 +417,8 @@ class KeyContainer {
     if (!this.isUnlock()) { throw new Error(errorLockedMsg); }
     const privateKeyHex = this._getKeyDecrypt(`bj/${publicKeyHex}`);
     const privateKey = new eddsa.PrivateKey(Buffer.from(privateKeyHex, 'hex'));
-    return privateKey.signMimc7(mimc7.hashBuffer(message));
+    // return privateKey.signMimc7(mimc7.hashBuffer(message));
+    return privateKey.signMimc7(poseidon.hashBuffer(message));
   }
 
   /**

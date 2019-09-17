@@ -4,7 +4,7 @@ import { Entry } from '../claim/claim';
 const snarkjs = require('snarkjs');
 const utils = require('../utils');
 const CONSTANTS = require('../constants');
-const { mimc7 } = require('circomlib');
+const { poseidon } = require('../crypto/crypto.js');
 
 const { bigInt } = snarkjs;
 
@@ -48,7 +48,8 @@ function setNodeValue(db, key, value, prefix) {
 */
 function getHashFinalNode(hi, hv) {
   const hashArray = [hi, hv];
-  const hashKey = mimc7.multiHash(hashArray, bigInt(1));
+  // const hashKey = mimc7.multiHash(hashArray, bigInt(1));
+  const hashKey = poseidon.multiHash(hashArray, bigInt(1));
   return utils.bigIntToBufferBE(hashKey);
 }
 
@@ -105,7 +106,8 @@ class SparseMerkleTree {
         const bitLeaf = (i > (hiBinary.length - 1)) ? 0 : hiBinary[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-        nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
+        // nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
+        nextHash = utils.bigIntToBufferBE(poseidon.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
         setNodeValue(this.db, nextHash, concat, this.prefix);
       }
       this.root = nextHash;
@@ -117,7 +119,8 @@ class SparseMerkleTree {
       // get current node value and its hIndex
       const totalTmp = utils.getArrayBigIntFromBuffArrayBE(nodeValue);
       let hiTmp = totalTmp.slice(2);
-      hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
+      // hiTmp = helpers.getIndexArray(mimc7.multiHash(hiTmp));
+      hiTmp = helpers.getIndexArray(poseidon.multiHash(hiTmp));
       // compare position index until find a split
       let compare = false;
       let pos = claimIndex;
@@ -147,7 +150,8 @@ class SparseMerkleTree {
         const bitLeaf = (i > (hiBinary.length - 1)) ? 0 : hiBinary[i];
         const siblingTmp = arraySiblings[i];
         concat = bitLeaf ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-        nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
+        // nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
+        nextHash = utils.bigIntToBufferBE(poseidon.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
         setNodeValue(this.db, nextHash, concat, this.prefix);
       }
       this.root = nextHash;
@@ -313,7 +317,8 @@ function checkProof(rootHex, proofHex, hiHex, hvHex) {
   for (let i = arrayFullSiblings.length - 1; i >= 0; i--) {
     const siblingTmp = arrayFullSiblings[i];
     concat = hiBinary[i] ? [siblingTmp, nextHash] : [nextHash, siblingTmp];
-    nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
+    // nextHash = utils.bigIntToBufferBE(mimc7.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
+    nextHash = utils.bigIntToBufferBE(poseidon.multiHash(utils.getArrayBigIntFromBuffArrayBE(concat)));
   }
   return Buffer.compare(nextHash, root) === 0;
 }

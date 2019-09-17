@@ -46,12 +46,12 @@ describe('[Claim Authorize KSign Babyjubjub]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x2e962176e9f24e72f689da23361ad939f04417932fb0cb3d973f2cad04fe5048';
+    const hiResult = '0x1da8cb501998d7cdeb95ab0c65afc0277632ac87d2d74e7a68a0cdca4287649d';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x06d4571fb9634e4bed32e265f91a373a852c476656c5c13b09bc133ac61bc5a6';
+    const hvResult = '0x021a76d5f2cdcf354ab66eff7b4dee40f02501545def7bb66b3502ae68e1b781';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
   it('Parse entry into claim authorize key sign babyjub', () => {

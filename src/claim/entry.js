@@ -1,8 +1,9 @@
 // @flow
 import { getArrayBigIntFromBuffArrayBE, bigIntToBufferBE } from '../utils';
 
-const { babyJub, mimc7, poseidon } = require('circomlib');
+const { babyJub } = require('circomlib');
 const snarkjs = require('snarkjs');
+const { poseidon } = require('../crypto/crypto.js');
 const utils = require('../utils');
 
 const { bigInt } = snarkjs;
@@ -75,17 +76,18 @@ export class Entry {
   }
 
   /**
-   * Hash index calculation using mimc7 hash
+   * Hash index calculation using poseidon hash
    * Hash index is calculated from: |element 1|element 0|
    * @returns {bigInt} Hash index of the claim element structure
    */
   hiBigInt(): bigInt {
     const hashArray = [this.elements[2], this.elements[3]];
-    return mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
+    // return mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
+    return poseidon.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
   }
 
   /**
-   * Hash index calculation using mimc7 hash
+   * Hash index calculation using poseidon hash
    * Hash index is calculated from: |element 1|element 0|
    * @returns {Buffer} Hash index of the claim element structure
    */
@@ -94,17 +96,18 @@ export class Entry {
   }
 
   /**
-   * Hash value calculation using mimc7 hash
+   * Hash value calculation using poseidon hash
    * Hash value is calculated from: |element 3|element 2|
    * @returns {bigInt} Hash value of the claim element structure
    */
   hvBigInt(): bigInt {
     const hashArray = [this.elements[0], this.elements[1]];
-    return mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
+    // return mimc7.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
+    return poseidon.multiHash(getArrayBigIntFromBuffArrayBE(hashArray));
   }
 
   /**
-   * Hash value calculation using mimc7 hash
+   * Hash value calculation using poseidon hash
    * Hash value is calculated from: |element 3|element 2|
    * @returns {Buffer} Hash value of the claim element structure
    */

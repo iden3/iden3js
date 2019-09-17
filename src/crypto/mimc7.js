@@ -3,14 +3,14 @@ const { mimc7 } = require('circomlib');
 
 function hash(arr) {
   return mimc7.hash(arr[0], arr[1]);
-};
+}
 
-function multiHash (arr) {
+function multiHash(arr) {
   // TODO check bigints inside finite field
   return mimc7.multiHash(arr);
-};
+}
 
-function hashBuffer (msg) { // msg is a Buffer
+function hashBuffer(msg) { // msg is a Buffer
   const n = 31;
   const msgArray = [];
   const fullParts = Math.floor(msg.length / n);
@@ -29,4 +29,4 @@ module.exports = {
   hash,
   multiHash,
   hashBuffer,
-}
+};

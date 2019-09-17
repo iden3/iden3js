@@ -23,7 +23,7 @@ describe('[identity]', () => {
   it('Generate identity', () => {
     const seed = 'walk gravity scout labor eight usual blame warm unlock crane private rival';
     const identity = iden3.Identity.create(db1, passphrase, seed);
-    expect(identity.id).to.be.equal('117shcRAjEuXFamUuYbw5SCSUmNk3j1mR4GS3Dvo71');
+    expect(identity.id).to.be.equal('11AvvvgbQKc6JsD2SECaJi4Ln4hwtF6aa7GKksVX5u');
     expect(identity.keyOperationalPub).to.be.equal('76dc2c5998d0f604b21c79c5db79eea984b71412846a100296e22295b70f11aa');
     expect(identity.keyDisable).to.be.equal('0x6a5bf2b3fe6fff9ec56eba2873a42dea037b5595');
     expect(identity.keyReenable).to.be.equal('0xf2996bf50d4bda42c966d51118bd01cab655a0a1');
@@ -34,9 +34,9 @@ describe('[identity]', () => {
     identity.keyContainer.lock();
   });
   it('Load identity', () => {
-    const identity = iden3.Identity.load(db1, '117shcRAjEuXFamUuYbw5SCSUmNk3j1mR4GS3Dvo71');
+    const identity = iden3.Identity.load(db1, '11AvvvgbQKc6JsD2SECaJi4Ln4hwtF6aa7GKksVX5u');
 
-    expect(identity.id).to.be.equal('117shcRAjEuXFamUuYbw5SCSUmNk3j1mR4GS3Dvo71');
+    expect(identity.id).to.be.equal('11AvvvgbQKc6JsD2SECaJi4Ln4hwtF6aa7GKksVX5u');
     expect(identity.keyOperationalPub).to.be.equal('76dc2c5998d0f604b21c79c5db79eea984b71412846a100296e22295b70f11aa');
     expect(identity.keyDisable).to.be.equal('0x6a5bf2b3fe6fff9ec56eba2873a42dea037b5595');
     expect(identity.keyReenable).to.be.equal('0xf2996bf50d4bda42c966d51118bd01cab655a0a1');

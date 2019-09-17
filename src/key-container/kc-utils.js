@@ -4,10 +4,8 @@ const ethUtil = require('ethereumjs-util');
 const pbkdf2 = require('pbkdf2-sha256');
 const nacl = require('tweetnacl');
 const sealedBox = require('tweetnacl-sealedbox-js');
-const { bigInt } = require('snarkjs');
 nacl.util = require('tweetnacl-util');
 const utils = require('../utils');
-const { mimc7, poseidon } = require('circomlib');
 
 const errorLockedMsg = 'Key Container is locked';
 const errorKeySeedNoExistMsg = 'key seed doesn\'t exists';

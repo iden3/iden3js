@@ -5,7 +5,7 @@ const createKeccakHash = require('keccak');
 const snarkjs = require('snarkjs');
 
 const eddsa = require('./crypto/eddsa-babyjub');
-const mimc7 = require('./crypto/mimc7');
+const poseidon = require('./crypto/poseidon');
 
 const { bigInt } = snarkjs;
 
@@ -191,7 +191,8 @@ export function verifySignature(mHex: string, signatureHex: string, addressHex: 
 export function verifyBabySignature(publicKeyHex: string, msg: Buffer, signatureHex: string): boolean {
   const pk = eddsa.PublicKey.newFromCompressed(Buffer.from(publicKeyHex, 'hex'));
   const signature = eddsa.Signature.newFromCompressed(Buffer.from(signatureHex, 'hex'));
-  const h = mimc7.hashBuffer(msg);
+  // const h = mimc7.hashBuffer(msg);
+  const h = poseidon.hashBuffer(msg);
   return pk.verifyMimc7(h, signature);
 }
 
