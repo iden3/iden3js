@@ -46,12 +46,12 @@ describe('[Claim Authorize KSignSecp256k1]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x25aacb66cedd3be6248f68d61e8648ba163333070a4da17d35c424b798248440';
+    const hiResult = '0x2a65c16ad6d4333877bb94e1753ef79f54b694771a8e46e3c67c1cc59e76985e';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x06d4571fb9634e4bed32e265f91a373a852c476656c5c13b09bc133ac61bc5a6';
+    const hvResult = '0x021a76d5f2cdcf354ab66eff7b4dee40f02501545def7bb66b3502ae68e1b781';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
   it('Parse entry into claim authorize key sign secp256k1', () => {

@@ -34,6 +34,6 @@ describe('[merkle-tree] Import claims', () => {
     smtUtils.importClaimsDump(mt, claimsDump);
 
     // check that the mt.root is equal to the RootKey of a MerkleTree in go-iden3 containing the same claims
-    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1b24021a44f994a4441a55dbdc6858adf5fc21a4c5194b24d0b1e26d85386d68');
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2a861a7c923d9c24234834a353bc3fd78f90773f680fef51a052bc5f71a0fe5a');
   });
 });

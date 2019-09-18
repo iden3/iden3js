@@ -4,7 +4,6 @@
 const { expect } = require('chai');
 
 const { bigInt } = require('snarkjs');
-const { babyJub } = require('../node_modules/circomlib');
 const Poseidon = require('../node_modules/circomlib/src/poseidon.js');
 const { mimc7, poseidon } = require('./crypto/crypto.js');
 const utils = require('./utils');
@@ -33,7 +32,7 @@ describe('mimc7 primitives', () => {
   it('mimc7 hash buffer', () => {
     const msg = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
     const msgBuff = Buffer.from(msg, 'utf-8');
-    let h = mimc7.hashBuffer(msgBuff);
+    const h = mimc7.hashBuffer(msgBuff);
     expect(h.toString()).to.be.equal('16855787120419064316734350414336285711017110414939748784029922801367685456065');
   });
 });
@@ -62,14 +61,13 @@ describe('poseidon primitives', () => {
       const v = bigInt.leBuff2int(msgBuff.slice(fullParts * n));
       msgArray.push(v);
     }
-    let h = poseidon.multiHash(msgArray);
+    const h = poseidon.multiHash(msgArray);
     expect(h.toString()).to.be.equal('11821124228916291136371255062457365369197326845706357273715164664419275913793');
-
   });
   it('poseidon hash buffer', () => {
     const msg = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
     const msgBuff = Buffer.from(msg, 'utf-8');
-    let h = poseidon.hashBuffer(msgBuff);
+    const h = poseidon.hashBuffer(msgBuff);
     expect(h.toString()).to.be.equal('11821124228916291136371255062457365369197326845706357273715164664419275913793');
   });
 });
@@ -108,4 +106,3 @@ describe('babyjubjub sign & verify with Poseidon', () => {
     expect(pk.verifyMimc7(msg, sig2)).to.be.equal(true);
   });
 });
-

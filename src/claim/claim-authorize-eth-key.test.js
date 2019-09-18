@@ -37,12 +37,12 @@ describe('[Claim Authorize Ethereum Key]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x0718f79acd724288c56a0b7c7de9c61ad235245c64b9fb02e9de9e0a4d5d648b';
+    const hiResult = '0x0ce27cf2190dfa6ee36276e79335942c28a08dbc5ef8c564ed2f337d5c85b666';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x06d4571fb9634e4bed32e265f91a373a852c476656c5c13b09bc133ac61bc5a6';
+    const hvResult = '0x021a76d5f2cdcf354ab66eff7b4dee40f02501545def7bb66b3502ae68e1b781';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });

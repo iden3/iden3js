@@ -48,12 +48,12 @@ describe('[Claim Basic]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x1d4d6c81f3cd8bd286affa0d5ac3b677d86fea34ba88d450081d703bcf712e6a';
+    const hiResult = '0x0f6cde1ae964e8a0ab0bbc869ee28c7543853b36b952d2b411300d281686ccdd';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x03c4686d099ffd137b83ba22b57dc954ac1e6c0e2b1e0ef972a936992b8788ff';
+    const hvResult = '0x04ded2a4d7ae573c9db6686796e3a9f03a5142a684fccfc38f59fedee611c07d';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
   it('Parse entry into basic claim', () => {

@@ -55,12 +55,12 @@ describe('[Claim link object identity Id]', () => {
   });
   it('Calculate Hi', () => {
     const hi = entryClaim.hi();
-    const hiResult = '0x2dc73c37e603a15f8f028aa5c3f668d1210c86008577188ce279ead60a9afec4';
+    const hiResult = '0x212ccd565460d55b41c570b54fd0015f71729cb96e2db08120559a279c188012';
     expect(utils.bytesToHex(hi)).to.be.equal(hiResult);
   });
   it('Calculate Hv', () => {
     const hv = entryClaim.hv();
-    const hvResult = '0x28f5f03a1dbeeca984ed4c7d369f601a96e0f33e37985604a9cc2a81b22c19c0';
+    const hvResult = '0x056fd73d70b5ece7889ceda6a161fb26f9cb33fc3cd1f9ca252a7665a43be70b';
     expect(utils.bytesToHex(hv)).to.be.equal(hvResult);
   });
 });
