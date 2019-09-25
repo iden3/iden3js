@@ -19,6 +19,6 @@ describe('[identity-utils] calculateIdGenesis()', () => {
 
     // check that with same keys that in go-iden3 test, gives the same idAddr than in go-iden3
     const idAddr = iden3.identityUtils.calculateIdGenesis(kopStr, kdisStr, kreenStr, kupdateRoot);
-    expect(idAddr.id).to.be.equal('11BFH4TUCsKLhGH6JdjP2kQMaJhgQdV18vGdTdj9be'); // same result as in go-iden3
+    expect(idAddr.id).to.be.equal('1LzwQet8DMLnYKBz2WgUvL3WDfjbbPrkAmcekMSUP'); // same result as in go-iden3-core/core/id_test.go:135
   });
 });

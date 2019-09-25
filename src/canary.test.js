@@ -1,13 +1,21 @@
 // canary to check that we are using the expected versions of external libraries, hash functions, elliptic curves, etc
+// Checks the outputs of the iden3js crypto primitives with the circomlib outputs
 // the test vectors are the same as in https://github.com/iden3/go-iden3-crypto
+// Currently checks:
+// - MiMC
+// - Poseidon
+// - BabyJubJub
+// - SparseMerkleTree
 
 const { expect } = require('chai');
 
 const { bigInt } = require('snarkjs');
 const Poseidon = require('../node_modules/circomlib/src/poseidon.js');
+const smt = require('../node_modules/circomlib/src/smt.js');
 const { mimc7, poseidon } = require('./crypto/crypto.js');
 const utils = require('./utils');
 const eddsa = require('./crypto/eddsa-babyjub.js');
+const iden3 = require('../index');
 
 
 describe('mimc7 primitives', () => {
@@ -104,5 +112,60 @@ describe('babyjubjub sign & verify with Poseidon', () => {
       + '7ed40dab29bf993c928e789d007387998901a24913d44fddb64b1f21fc149405');
     const sig2 = eddsa.Signature.newFromCompressed(sigComp);
     expect(pk.verifyMimc7(msg, sig2)).to.be.equal(true);
+  });
+});
+
+function newEntry(arr) {
+  return {
+    hi: poseidon.multiHash(arr.slice(2)),
+    hv: poseidon.multiHash(arr.slice(0, 2)),
+  };
+}
+function entryFromInts(e0, e1, e2, e3) {
+  return iden3.claim.Entry.newFromBigInts(bigInt(e0), bigInt(e1), bigInt(e2), bigInt(e3));
+}
+
+const db = new iden3.Db.Memory();
+const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
+
+describe('sparse-merkle-tree Add Claim', () => {
+  it('add one claim', async () => {
+    const tree = await smt.newMemEmptyTrie();
+    const claim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
+    const entries = newEntry(claim);
+    const key1 = entries.hi;
+    const value1 = entries.hv;
+
+    await tree.insert(key1, value1);
+    expect(tree.root.toString(16)).to.be.equal('2ab68ca530d96aa00eafb1b1f40aa2ed0c8ce6e7aec8bed48b7efd52e919f91b');
+
+    // check same output with iden3js version
+    const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
+    const claim1 = entryFromInts(12, 45, 78, 41);
+    mt.addEntry(claim1);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal(`0x${tree.root.toString(16)}`);
+  });
+  it('add two claims', async () => {
+    const firstClaim = [bigInt(12), bigInt(45), bigInt(78), bigInt(41)];
+    const firstEntries = newEntry(firstClaim);
+    const secondClaim = [bigInt(33), bigInt(44), bigInt(55), bigInt(66)];
+    const secondEntries = newEntry(secondClaim);
+    const tree = await smt.newMemEmptyTrie();
+    const key1 = firstEntries.hi;
+    const value1 = firstEntries.hv;
+    const key2 = secondEntries.hi;
+    const value2 = secondEntries.hv;
+
+    await tree.insert(key1, value1);
+    await tree.insert(key2, value2);
+    expect(tree.root.toString(16)).to.be.equal('f42da5cbc007dcf89c72ba7212e078c00aba09e9b8d6114515b56daacca95dd');
+
+    // check same output with iden3js version
+    const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
+    const firstClaim1 = entryFromInts(12, 45, 78, 41);
+    mt.addEntry(firstClaim1);
+    const secondClaim1 = entryFromInts(33, 44, 55, 66);
+    mt.addEntry(secondClaim1);
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal(`0x0${tree.root.toString(16)}`);
   });
 });
