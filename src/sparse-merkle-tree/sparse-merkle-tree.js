@@ -47,9 +47,11 @@ function setNodeValue(db, key, value, prefix) {
 * @returns {Buffer} - Key node value
 */
 function getHashFinalNode(hi, hv) {
-  const hashArray = [hi, hv];
+  // const hashArray = [hi, hv];
   // const hashKey = mimc7.multiHash(hashArray, bigInt(1));
-  const hashKey = poseidon.multiHash(hashArray, bigInt(1));
+  // const hashArray = [bigInt(1), hi, hv];
+  const hashArray = [hi, hv, bigInt(1)];
+  const hashKey = poseidon.multiHash(hashArray);
   return utils.bigIntToBufferBE(hashKey);
 }
 

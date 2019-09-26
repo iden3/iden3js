@@ -1,5 +1,3 @@
-import { Entry } from '../claim/entry';
-
 const chai = require('chai');
 const snarkjs = require('snarkjs');
 const iden3 = require('../index');
@@ -12,7 +10,7 @@ const db = new iden3.Db.Memory();
 const idAddr = '0xq5soghj264eax651ghq1651485ccaxas98461251d5f1sdf6c51c5d1c6sd1c651';
 
 function entryFromInts(e0, e1, e2, e3) {
-  return Entry.newFromBigInts(bigInt(e0), bigInt(e1), bigInt(e2), bigInt(e3));
+  return iden3.claim.Entry.newFromBigInts(bigInt(e0), bigInt(e1), bigInt(e2), bigInt(e3));
 }
 
 describe('[sparse-merkle-tree] Empty tree', () => {
@@ -49,7 +47,7 @@ describe('[sparse-merkle-tree] Add Claim', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
     const claim = entryFromInts(12, 45, 78, 41);
     mt.addEntry(claim);
-    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x110f16ef0b11d0aa41ae0bd0eec2627f12f33d4a8cf606e2b657e36fe5c515b4');
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2ab68ca530d96aa00eafb1b1f40aa2ed0c8ce6e7aec8bed48b7efd52e919f91b');
   });
 });
 
@@ -60,7 +58,7 @@ describe('[sparse-merkle-tree] Add two claims', () => {
     mt.addEntry(firstClaim);
     const secondClaim = entryFromInts(33, 44, 55, 66);
     mt.addEntry(secondClaim);
-    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x1e8fcfb4603380099b1f8fc56907ccf9f49d8ab2a517ced79c6ee06b70a97282');
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x0f42da5cbc007dcf89c72ba7212e078c00aba09e9b8d6114515b56daacca95dd');
   });
 });
 
@@ -78,7 +76,7 @@ describe('[sparse-merkle-tree] Add claims in different orders into two different
       mt2.addEntry(claim);
     }
     expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal(iden3.utils.bytesToHex(mt2.root));
-    expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal('0x1c153a4bf4148db686bc2b46026ea0928bb9cd2ae825670b34025e560996b1a7');
+    expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal('0x27de12d35c012988b4fcc275829217c79ae1a2322634ebead16afccd95ffd6fc');
   });
 });
 
@@ -125,7 +123,7 @@ describe('[sparse-merkle-tree] Add claims in different orders into six different
     expect(iden3.utils.bytesToHex(mt4.root)).to.be.equal(iden3.utils.bytesToHex(mt5.root));
     expect(iden3.utils.bytesToHex(mt5.root)).to.be.equal(iden3.utils.bytesToHex(mt6.root));
 
-    expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal('0x107f52fc0aa955dfcec2c23d38ca75f8ccbb339e4f5d56e384f13e3fc7f38a29');
+    expect(iden3.utils.bytesToHex(mt1.root)).to.be.equal('0x182cc2d953d6376ffdf2c0ed65f306c95ebc61c2358dacc94e85ceabde9dde7e');
   });
 });
 
@@ -168,9 +166,8 @@ describe('[sparse-merkle-tree] Generate proof', () => {
     expect(totalClaim.elements[3].toString('hex')).to.be.equal(proofClaim.elements[3].toString('hex'));
 
     const proof = mt.generateProof(proofClaim.hiBigInt());
-    expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x000100000000000000000000000000000000000000000000000000'
-                                                      + '0000000001221b00f66ba364db27c73ec49e0e7d82967377ccffc88'
-                                                      + '34b1918cf771dc1be70');
+    expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x000100000000000000000000000000000000000000000000000000000000000'
+                                                      + '1255b46f58791e3d5220cc9fecfaf2750a02fb8f6135b4561af541dc0ebfe080d');
   });
   it('with 64 claims', () => {
     const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, idAddr, 140);
@@ -187,12 +184,12 @@ describe('[sparse-merkle-tree] Generate proof', () => {
 
     const proof = mt.generateProof(proofClaim.hiBigInt());
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x000a00000000000000000000000000000000000000000000000000000000022f'
-                                                      + '2f09940bfa44f80581f9c0838237d1e0d77f7c814aab1877820924a6eb094f2b'
-                                                      + '20a07c3217c7866e5411fc4ffd3bd12835b5f2fc67637deb8b5f02f041723ba4'
-                                                      + '244235812394c4141384b5c673d23396997a2652ef6892629237ca7270828ad2'
-                                                      + '1993e3f5b654a9d6994bfed9c31bed120ae4d6a71d2f503b5d806098996af182'
-                                                      + '2b61f62e9de34c8f1e04680546b9a1654a928d2e014db3ea9326999cf7815c3c'
-                                                      + '183a9ab8eed2c36a38830b6fb950472dc7c25db4b72607fc874246fbac45a3fe');
+                                                      + '0a5fbf7d26e753c9fff385ff56484d19f526e770f653653a76f44f0f9d282178'
+                                                      + '21eeecff4ffeee35051fb5d7aded04885cbd9a1b7de89a384543cb2e076a7968'
+                                                      + '255ef74595c3c548c7a31520e90e7978a059fce4914cbee071262731aa6ba9ea'
+                                                      + '1e3fe0e032a292052a300ac3012c4053aadb5c6122d953834e3eb23580bd4565'
+                                                      + '12c1f7e29dfedf21d5acd1e01f86d9bfaaaa2657b25bacbab3fc3899e43bf372'
+                                                      + '08e3ecd1496bd3a4b74babe63a81032898c46b8145ebfe0176de4ede8e868069');
   });
 });
 
@@ -210,7 +207,7 @@ describe('[sparse-merkle-tree] Verify proof', () => {
     const hvHex = iden3.utils.bytesToHex(proofClaim.hv());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
-    expect(proofHex).to.be.equal('0x000400000000000000000000000000000000000000000000000000000000000f2d8cfb5725122e6bd73dd2723d58d906808159c0ceba88299f7000551b1d4491261eadbb3ad609b5fc596d2f084f2ea23d27c18b12b20504c12018c35d9832fa2d97d5a2f16807fb8373da7c0f6b2f7faecd98de94dfb405f7eaca2288d62b6a2ef5dbb583c90dbc637684def62522fcef265f949dfc5e06d438f5cf72b1de46');
+    expect(proofHex).to.be.equal('0x000400000000000000000000000000000000000000000000000000000000000f12a103b79aa775d294a27c32dbbee228f04f0dde5f8f39a8bdea0ac99623eb9d1e38815ed13fa58751bb8d6474e554a59f9f89a8046f085e257379871a65138c1f735fbdc197cc1b1a3aee2f96eb6cb11f37cafd253811e6ca8a0464744394a907ee92c7377df5e038dc2092eb643820c50e98a6f2f6f2ea285d4a84d29c1718');
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
     expect(check).to.be.equal(true);
   });
@@ -227,12 +224,12 @@ describe('[sparse-merkle-tree] Verify proof', () => {
     const hvHex = iden3.utils.bytesToHex(proofClaim.hv());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
-    expect(proofHex).to.be.equal('0x030400000000000000000000000000000000000000000000000000000000000b'
-                                  + '2d8cfb5725122e6bd73dd2723d58d906808159c0ceba88299f7000551b1d449'
-                                  + '12de3d12de54d01da2297df060dc9b91709855e1051a8e75e54cb9549b3c112'
-                                  + '4a1daa108eb11f735360058608ab8f5f05603d569a5dbe5e19243ceb47f99e0'
-                                  + '96a17ddf6f66c73719745eeca828537ee30394123a28d16eb51cf51f3bcc0bd'
-                                  + '03a3021a76d5f2cdcf354ab66eff7b4dee40f02501545def7bb66b3502ae68e1b781');
+    expect(proofHex).to.be.equal('0x030400000000000000000000000000000000000000000000000000000000000b1'
+                                  + '2a103b79aa775d294a27c32dbbee228f04f0dde5f8f39a8bdea0ac99623eb9d2'
+                                  + '1505710a088ff53242477c909cbdf0bb7753eb15c76fb3862ab6b3da80dfb672'
+                                  + '65d97df25853b130e1769fb421277c93a286487a0876b29db6e87d344e5b2711'
+                                  + '7ddf6f66c73719745eeca828537ee30394123a28d16eb51cf51f3bcc0bd03a30'
+                                  + '21a76d5f2cdcf354ab66eff7b4dee40f02501545def7bb66b3502ae68e1b781');
 
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
     expect(check).to.be.equal(true);
@@ -250,12 +247,12 @@ describe('[sparse-merkle-tree] Verify proof', () => {
     const hvHex = iden3.utils.bytesToHex(proofClaim.hv());
     const rootHex = iden3.utils.bytesToHex(mt.root);
     const proofHex = iden3.utils.bytesToHex(proof);
-    expect(proofHex).to.be.equal('0x010500000000000000000000000000000000000000000000000000000000001'
-                                + 'f2d8cfb5725122e6bd73dd2723d58d906808159c0ceba88299f7000551b1d449'
-                                + '1261eadbb3ad609b5fc596d2f084f2ea23d27c18b12b20504c12018c35d9832f'
-                                + 'a2d97d5a2f16807fb8373da7c0f6b2f7faecd98de94dfb405f7eaca2288d62b6'
-                                + 'a2522302b07cf9f12426558f1882e41a0bf4e86b281680442a13600528f8880f'
-                                + 'f1c938504f6e27838cac27ef3b4c16c5d8ba0b86523bf83142edbbe18693691d2');
+    expect(proofHex).to.be.equal('0x010500000000000000000000000000000000000000000000000000000000001f'
+                                  + '12a103b79aa775d294a27c32dbbee228f04f0dde5f8f39a8bdea0ac99623eb9'
+                                  + 'd1e38815ed13fa58751bb8d6474e554a59f9f89a8046f085e257379871a6513'
+                                  + '8c1f735fbdc197cc1b1a3aee2f96eb6cb11f37cafd253811e6ca8a046474439'
+                                  + '4a91e031226a2e76231b4c29a182a0083c495b7fdf712ee6df9f030b7212abb'
+                                  + '925d2b2e10bd6e4ba7b655949bca7da3b36e751f0e989c495cb9f9d2c8f884b3e73f');
 
     const check = iden3.sparseMerkleTree.checkProof(rootHex, proofHex, hiHex, hvHex);
     expect(check).to.be.equal(true);
@@ -312,7 +309,7 @@ describe('[sparse-merkle-tree] Add Claim Repeated', () => {
 
     expect(() => { mt.addEntry(claim); }).to.throw('maxLevels reached');
     expect(() => { mt.addEntry(claim); }).to.throw('maxLevels reached');
-    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x110f16ef0b11d0aa41ae0bd0eec2627f12f33d4a8cf606e2b657e36fe5c515b4');
+    expect(iden3.utils.bytesToHex(mt.root)).to.be.equal('0x2ab68ca530d96aa00eafb1b1f40aa2ed0c8ce6e7aec8bed48b7efd52e919f91b');
 
     const proof = mt.generateProof(claim.hiBigInt());
     expect(iden3.utils.bytesToHex(proof)).to.be.equal('0x0000000000000000000000000000000000000000000000000000000000000000');

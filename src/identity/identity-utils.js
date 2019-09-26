@@ -4,7 +4,8 @@ const smt = require('../sparse-merkle-tree/sparse-merkle-tree');
 const claim = require('../claim/claim');
 const proofs = require('../protocols/proofs.js');
 
-const TypeBJM7 = Buffer.from([0x00, 0x00]);
+// const TypeBJM7 = Buffer.from([0x00, 0x00]);
+const TypeBJP0 = Buffer.from([0x00, 0x01]);
 // const TypeS2M7 = Buffer.from([0x00, 0x04]);
 
 /**
@@ -138,7 +139,7 @@ function calculateIdGenesis(kop, kdis, kreen, kupdateRoot) {
   const proofClaimKeyUpdateRoot = proofs.getProofClaimByHi(mt, claimKUpdateRoot.toEntry().hiBigInt());
 
   const idGenesisBuffer = mt.root.slice(mt.root.length - 27, mt.root.lenth);
-  const id = newID(TypeBJM7, idGenesisBuffer);
+  const id = newID(TypeBJP0, idGenesisBuffer);
 
   return {
     id: bs58.encode(id),
