@@ -322,3 +322,23 @@ describe('[sparse-merkle-tree] Add Claim Repeated', () => {
     expect(check).to.be.equal(true);
   });
 });
+
+describe('[sparse-merkle-tree] Max levels reached', () => {
+  it('find collision before max levels are reached', () => {
+    const maxLevels = 3;
+    const maxLeafs = 2 ** maxLevels;
+    let i;
+    for (let n = 0; n < 25; n++) {
+      const mt = new iden3.sparseMerkleTree.SparseMerkleTree(db, 'idAddr', maxLevels);
+      try {
+        for (i = 0; i < maxLeafs + 1; i++) {
+          const entry = entryFromInts(0, i, 0, Math.floor((Math.random() * 100) + 1));
+          mt.addEntry(entry);
+        }
+      } catch (err) {
+        expect((err.message).includes('maxLevels reached')).to.be.equal(true);
+      }
+      expect(i).to.be.below(maxLeafs);
+    }
+  });
+});

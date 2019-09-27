@@ -116,7 +116,6 @@ class SparseMerkleTree {
       return;
     }
 
-    let lvlCounter = 0;
     if (nodeValue.length === 4) {
       // get current node value and its hIndex
       const totalTmp = utils.getArrayBigIntFromBuffArrayBE(nodeValue);
@@ -134,8 +133,7 @@ class SparseMerkleTree {
           arraySiblings.push(emptyNodeValue);
         }
         pos += 1;
-        lvlCounter += 1;
-        if (lvlCounter > this.maxLevels) {
+        if (pos > this.maxLevels) {
           // exit function in case that the maxLevels is reached
           throw new Error('maxLevels reached');
         }
