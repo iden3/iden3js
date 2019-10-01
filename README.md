@@ -3,6 +3,7 @@
 Javascript client library of the iden3 system.
 
 [![Build Status](https://travis-ci.org/iden3/iden3js.svg?branch=master)](https://travis-ci.org/iden3/iden3js)
+[![npm](https://img.shields.io/npm/v/@iden3/iden3)](https://img.shields.io/npm/v/@iden3/iden3)
 
 ## Install
 ```
