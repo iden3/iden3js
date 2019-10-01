@@ -1,6 +1,6 @@
 {
   "name": "@iden3/iden3",
-  "version": "0.0.22",
+  "version": "0.0.25",
   "engines": {
     "node": "^8"
   },
@@ -46,7 +46,8 @@
     "tweetnacl-sealedbox-js": "^1.1.0",
     "tweetnacl-util": "^0.15.0",
     "web3": "1.0.0-beta.33",
-    "ws": "^5.2.2"
+    "ws": "^5.2.2",
+    "babel-runtime": "6.26.0"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
