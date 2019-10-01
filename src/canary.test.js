@@ -10,9 +10,11 @@
 const { expect } = require('chai');
 
 const { bigInt } = require('snarkjs');
-const Poseidon = require('../node_modules/circomlib/src/poseidon.js');
-const smt = require('../node_modules/circomlib/src/smt.js');
-const { mimc7, poseidon } = require('./crypto/crypto.js');
+const circomlib = require('circomlib');
+const poseidonCircomlib = circomlib.poseidon;
+const smt = circomlib.smt;
+const crypto = require('./crypto/crypto.js');
+const {mimc7, poseidon} = crypto;
 const utils = require('./utils');
 const eddsa = require('./crypto/eddsa-babyjub.js');
 const iden3 = require('../index');
@@ -47,7 +49,7 @@ describe('mimc7 primitives', () => {
 
 describe('poseidon primitives', () => {
   it('poseidon two bigInt', () => {
-    const poseidonHash = Poseidon.createHash();
+    const poseidonHash = poseidonCircomlib.createHash();
     const h1 = poseidonHash([bigInt(1), bigInt(2)]);
     expect(h1.toString()).to.be.equal('12242166908188651009877250812424843524687801523336557272219921456462821518061');
 
@@ -80,7 +82,7 @@ describe('poseidon primitives', () => {
   });
 });
 
-describe('babyjubjub sign & verify with Poseidon', () => {
+describe('babyjubjub sign & verify with poseidonCircomlib', () => {
   const skHex = '0001020304050607080900010203040506070809000102030405060708090001';
   const sk = new eddsa.PrivateKey(utils.hexToBytes(skHex));
 

@@ -1,6 +1,6 @@
 {
   "name": "@iden3/iden3",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "engines": {
     "node": "^8"
   },
@@ -31,7 +31,7 @@
     "bs58": "^4.0.1",
     "blake-hash": "^1.1.0",
     "chai": "^4.1.2",
-    "circomlib": "0.0.14",
+    "circomlib": "0.0.18",
     "ethereumjs-util": "^5.2.0",
     "ethereumjs-wallet": "^0.6.2",
     "ethjs-util": "^0.1.6",
